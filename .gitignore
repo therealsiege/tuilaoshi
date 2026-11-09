@@ -1,0 +1,11 @@
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Go
+mandarin
+cmd/mandarin/mandarin
+
+# Environment
+.env
