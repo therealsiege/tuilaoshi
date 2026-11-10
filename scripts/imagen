@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# imagen — Generate images using Google Gemini API
+# Usage: imagen "prompt" [options]
+#
+# Options:
+#   -o, --output FILE      Output file path (default: auto-generated in current dir)
+#   -m, --model MODEL      Model name (default: gemini-2.5-flash-image)
+#   -s, --size SIZE        Image size hint in prompt (e.g., 1024x1024)
+#   -a, --aspect RATIO     Aspect ratio: 1:1, 16:9, 9:16, 4:3, 3:4 (default: 1:1)
+#   -n, --count N          Number of images to generate (default: 1)
+#   -q, --quiet            Suppress progress messages
+#   --open                 Open image after generation (macOS)
+#   --list-models          List available image models
+#   -h, --help             Show this help
+#
+# Environment:
+#   GOOGLE_API_KEY         Required. Google AI API key.
+#   IMAGEN_MODEL           Override default model.
+#   IMAGEN_OUTPUT_DIR      Default output directory (default: current dir).
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+API_BASE="https://generativelanguage.googleapis.com/v1beta"
+
+# Defaults
+MODEL="${IMAGEN_MODEL:-gemini-2.5-flash-image}"
+OUTPUT=""
+OUTPUT_DIR="${IMAGEN_OUTPUT_DIR:-.}"
+ASPECT="1:1"
+COUNT=1
+QUIET=false
+OPEN=false
+PROMPT=""
+
+# Load .env if GOOGLE_API_KEY not set
+if [[ -z "${GOOGLE_API_KEY:-}" ]]; then
+    for envfile in "$SCRIPT_DIR/../.env" "$HOME/Workspace/clint-johnson.com/.env" "$HOME/.env"; do
+        if [[ -f "$envfile" ]]; then
+            val=$(grep '^GOOGLE_API_KEY=' "$envfile" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'")
+            if [[ -n "$val" ]]; then
+                export GOOGLE_API_KEY="$val"
+                break
+            fi
+        fi
+    done
+fi
+
+if [[ -z "${GOOGLE_API_KEY:-}" ]]; then
+    echo "Error: GOOGLE_API_KEY not set. Export it or add to .env" >&2
+    exit 1
+fi
+
+usage() {
+    sed -n '3,/^$/s/^# \?//p' "$0"
+    exit 0
+}
+
+list_models() {
+    curl -s "${API_BASE}/models?key=${GOOGLE_API_KEY}" | python3 -c "
+import sys, json
+resp = json.load(sys.stdin)
+if 'models' not in resp:
+    print('Error:', json.dumps(resp.get('error', resp), indent=2))
+    sys.exit(1)
+for m in resp['models']:
+    name = m.get('name', '')
+    if 'image' in name.lower():
+        desc = m.get('description', '')[:80]
+        print(f'  {name:<45} {desc}')
+"
+    exit 0
+}
+
+# Parse args
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -o|--output)   OUTPUT="$2"; shift 2 ;;
+        -m|--model)    MODEL="$2"; shift 2 ;;
+        -a|--aspect)   ASPECT="$2"; shift 2 ;;
+        -n|--count)    COUNT="$2"; shift 2 ;;
+        -q|--quiet)    QUIET=true; shift ;;
+        --open)        OPEN=true; shift ;;
+        --list-models) list_models ;;
+        -h|--help)     usage ;;
+        -*)            echo "Unknown option: $1" >&2; exit 1 ;;
+        *)
+            if [[ -z "$PROMPT" ]]; then
+                PROMPT="$1"
+            else
+                PROMPT="$PROMPT $1"
+            fi
+            shift
+            ;;
+    esac
+done
+
+if [[ -z "$PROMPT" ]]; then
+    echo "Error: No prompt provided." >&2
+    echo "Usage: imagen \"your prompt here\" [options]" >&2
+    exit 1
+fi
+
+# Generate a filename from prompt if not specified
+if [[ -z "$OUTPUT" ]]; then
+    slug=$(echo "$PROMPT" | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]' '-' | sed 's/^-//;s/-$//' | cut -c1-50)
+    timestamp=$(date +%Y%m%d-%H%M%S)
+    OUTPUT="${OUTPUT_DIR}/${slug}-${timestamp}.png"
+fi
+
+# Ensure output directory exists
+mkdir -p "$(dirname "$OUTPUT")"
+
+$QUIET || echo "Generating image with ${MODEL}..."
+$QUIET || echo "Prompt: ${PROMPT}"
+$QUIET || echo "Output: ${OUTPUT}"
+
+TMPFILE=$(mktemp)
+trap 'rm -f "$TMPFILE"' EXIT
+
+for i in $(seq 1 "$COUNT"); do
+    if [[ "$COUNT" -gt 1 ]]; then
+        ext="${OUTPUT##*.}"
+        base="${OUTPUT%.*}"
+        OUTFILE="${base}-${i}.${ext}"
+    else
+        OUTFILE="$OUTPUT"
+    fi
+
+    # Build JSON payload safely via environment variable
+    PAYLOAD=$(PROMPT_TEXT="$PROMPT" python3 -c "
+import json, os
+print(json.dumps({
+    'contents': [{'parts': [{'text': os.environ['PROMPT_TEXT']}]}],
+    'generationConfig': {
+        'responseModalities': ['IMAGE', 'TEXT']
+    }
+}))
+")
+
+    curl -s -X POST \
+        "${API_BASE}/models/${MODEL}:generateContent" \
+        -H "Content-Type: application/json" \
+        -H "x-goog-api-key: ${GOOGLE_API_KEY}" \
+        -d "$PAYLOAD" > "$TMPFILE" 2>&1
+
+    python3 - "$TMPFILE" "$OUTFILE" <<'PYEOF'
+import sys, json, base64, os
+
+resp_path = sys.argv[1]
+out_path = sys.argv[2]
+
+with open(resp_path) as f:
+    resp = json.load(f)
+
+if 'error' in resp:
+    print(f"API Error: {resp['error'].get('message', resp['error'])}", file=sys.stderr)
+    sys.exit(1)
+
+if 'candidates' not in resp:
+    print(f"Unexpected response: {json.dumps(resp)[:300]}", file=sys.stderr)
+    sys.exit(1)
+
+saved = False
+for c in resp['candidates']:
+    for p in c.get('content', {}).get('parts', []):
+        if 'inlineData' in p:
+            data = p['inlineData']['data']
+            mime = p['inlineData']['mimeType']
+            if 'png' in mime:
+                ext = '.png'
+            elif 'jpeg' in mime or 'jpg' in mime:
+                ext = '.jpg'
+            elif 'webp' in mime:
+                ext = '.webp'
+            else:
+                ext = '.png'
+
+            # Fix extension if needed
+            if not out_path.endswith(ext):
+                base = os.path.splitext(out_path)[0]
+                out_path = base + ext
+
+            with open(out_path, 'wb') as f:
+                f.write(base64.b64decode(data))
+            size = os.path.getsize(out_path)
+            print(f"Saved: {out_path} ({size:,} bytes, {mime})")
+            saved = True
+        elif 'text' in p:
+            text = p['text'].strip()
+            if text:
+                print(f"Model: {text[:200]}")
+
+if not saved:
+    print("No image data in response", file=sys.stderr)
+    sys.exit(1)
+PYEOF
+
+    if $OPEN && [[ -f "$OUTFILE" ]]; then
+        open "$OUTFILE" 2>/dev/null || true
+    fi
+done
+
+$QUIET || echo "Done."
