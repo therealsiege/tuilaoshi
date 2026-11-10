@@ -1,4 +1,4 @@
-# mandarin-wiki
+# TUI LaoShi (推老师）
 
 A terminal UI for Mandarin Chinese study, built for reactivating rusty university-level Mandarin. Combines a local markdown wiki of characters, vocabulary, grammar, and readings with spaced-repetition drills, Claude-powered answer evaluation, and text-to-speech.
 
