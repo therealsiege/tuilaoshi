@@ -9,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cj/mandarin-wiki/internal/audio"
+	"github.com/cj/mandarin-wiki/internal/imagen"
 	"github.com/cj/mandarin-wiki/internal/ui"
 	"github.com/cj/mandarin-wiki/internal/wiki"
 )
@@ -17,6 +18,7 @@ import (
 type Model struct {
 	store  *wiki.Store
 	tts    *audio.Client
+	imagen *imagen.Client
 	keys   ui.DashboardKeys
 	gkeys  ui.GlobalKeys
 	stats  wiki.ContentStats
@@ -28,12 +30,13 @@ type Model struct {
 }
 
 // New creates a new dashboard model.
-func New(store *wiki.Store, tts *audio.Client) Model {
+func New(store *wiki.Store, tts *audio.Client, img *imagen.Client) Model {
 	return Model{
-		store: store,
-		tts:   tts,
-		keys:  ui.DefaultDashboardKeys(),
-		gkeys: ui.DefaultGlobalKeys(),
+		store:  store,
+		tts:    tts,
+		imagen: img,
+		keys:   ui.DefaultDashboardKeys(),
+		gkeys:  ui.DefaultGlobalKeys(),
 	}
 }
 
@@ -67,6 +70,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, ui.SwitchTo(ui.ViewReview)
 		case key.Matches(msg, m.keys.Voice):
 			return m, ui.SwitchTo(ui.ViewVoicePicker)
+		case key.Matches(msg, m.keys.Imagen):
+			return m, ui.SwitchTo(ui.ViewImagen)
 		}
 	}
 	return m, nil
@@ -128,6 +133,7 @@ func (m Model) View() string {
 		fmt.Sprintf("  %s  Browse wiki pages", ui.ChineseStyle.Render("[b]")),
 		fmt.Sprintf("  %s  Chat with tutor", ui.ChineseStyle.Render("[c]")),
 		fmt.Sprintf("  %s  Review due items", ui.ChineseStyle.Render("[r]")),
+		fmt.Sprintf("  %s  Generate images", ui.ChineseStyle.Render("[i]")),
 		fmt.Sprintf("  %s  Change voice", ui.ChineseStyle.Render("[v]")),
 		fmt.Sprintf("  %s  Quit", ui.ChineseStyle.Render("[q]")),
 	)
@@ -139,6 +145,9 @@ func (m Model) View() string {
 	if m.tts != nil && m.tts.Available() {
 		footer += " • " + ui.SuccessStyle.Render("audio on") +
 			" (" + m.tts.ChineseVoice().Name + "/" + m.tts.EnglishVoice().Name + ")"
+	}
+	if m.imagen != nil && m.imagen.Available() {
+		footer += " • " + ui.SuccessStyle.Render("imagen on")
 	}
 	b.WriteString(ui.MutedStyle.Render(footer))
 

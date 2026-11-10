@@ -136,6 +136,14 @@ var (
 
 	ProgressEmptyStyle = lipgloss.NewStyle().
 				Foreground(ColorMuted)
+
+	// Imagen styles
+	ImagenPromptStyle = lipgloss.NewStyle().
+				Foreground(ColorAccent).
+				Bold(true)
+
+	ImagenPathStyle = lipgloss.NewStyle().
+			Foreground(ColorSuccess)
 )
 
 // ProgressBar renders a text-based progress bar.

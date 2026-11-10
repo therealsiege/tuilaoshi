@@ -9,3 +9,6 @@ cmd/mandarin/mandarin
 
 # Environment
 .env
+
+# Generated images
+wiki/images/

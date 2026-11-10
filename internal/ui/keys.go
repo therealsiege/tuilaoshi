@@ -75,6 +75,7 @@ const (
 	ViewChat
 	ViewReview
 	ViewVoicePicker
+	ViewImagen
 )
 
 // SwitchViewMsg tells the app to change views.
@@ -94,6 +95,7 @@ type DashboardKeys struct {
 	Chat   key.Binding
 	Review key.Binding
 	Voice  key.Binding
+	Imagen key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -119,6 +121,10 @@ func DefaultDashboardKeys() DashboardKeys {
 			key.WithKeys("v"),
 			key.WithHelp("v", "voice"),
 		),
+		Imagen: key.NewBinding(
+			key.WithKeys("i"),
+			key.WithHelp("i", "imagen"),
+		),
 	}
 }
 
@@ -131,6 +137,7 @@ func HelpText(v View) string {
 			"  b  Browse wiki\n" +
 			"  c  Chat with tutor\n" +
 			"  r  Review due items\n" +
+			"  i  Generate images\n" +
 			"  v  Change voice\n" +
 			"  ?  Toggle help\n" +
 			"  q  Quit"
@@ -159,6 +166,12 @@ func HelpText(v View) string {
 			"  enter  Start drill / submit\n" +
 			"  1-4    Rate difficulty\n" +
 			"  esc    Back to dashboard"
+	case ViewImagen:
+		return "Image Studio Keys\n\n" +
+			"  enter     Generate image\n" +
+			"  o         Open last image\n" +
+			"  pgup/dn   Scroll history\n" +
+			"  esc       Back to dashboard"
 	default:
 		return "  ?  Toggle help\n  esc  Back"
 	}
