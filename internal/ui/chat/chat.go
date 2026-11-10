@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -12,6 +13,7 @@ import (
 	"github.com/cj/mandarin-wiki/internal/audio"
 	"github.com/cj/mandarin-wiki/internal/claude"
 	"github.com/cj/mandarin-wiki/internal/ui"
+	"github.com/cj/mandarin-wiki/internal/ui/input"
 )
 
 type chatState int
@@ -35,7 +37,7 @@ type Model struct {
 	claude   *claude.Client
 	tts      *audio.Client
 	messages []Message
-	input    textinput.Model
+	input    input.Model
 	viewport viewport.Model
 	state    chatState
 	width    int
@@ -44,11 +46,11 @@ type Model struct {
 }
 
 // New creates a new chat model.
-func New(claudeClient *claude.Client, tts *audio.Client) Model {
-	ti := textinput.New()
-	ti.Placeholder = "Type a message in Chinese or English..."
-	ti.CharLimit = 500
-	ti.Width = 60
+func New(claudeClient *claude.Client, tts *audio.Client, dict *input.Dict) Model {
+	ti := input.NewWithDict(dict)
+	ti.SetPlaceholder("Type a message in Chinese or English...")
+	ti.SetCharLimit(500)
+	ti.SetWidth(60)
 
 	vp := viewport.New(80, 20)
 
@@ -75,8 +77,8 @@ type chatResponseMsg struct {
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case initChatMsg:
-		m.input.Focus()
-		return m, textinput.Blink
+		cmd := m.input.Focus()
+		return m, tea.Batch(cmd, textinput.Blink)
 
 	case chatResponseMsg:
 		m.state = stateReady
@@ -96,15 +98,18 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			spokenText = msg.content
 		}
 		m.refreshViewport()
-		m.input.Focus()
+		focusCmd := m.input.Focus()
 
 		var cmds []tea.Cmd
-		cmds = append(cmds, textinput.Blink)
+		cmds = append(cmds, focusCmd, textinput.Blink)
 		if m.tts != nil && m.tts.Available() && spokenText != "" {
-			cmds = append(cmds, func() tea.Msg {
-				_ = m.tts.Speak(spokenText, "zh")
-				return ttsFinishedMsg{}
-			})
+			chinese := extractChinese(spokenText)
+			if chinese != "" {
+				cmds = append(cmds, func() tea.Msg {
+					_ = m.tts.Speak(chinese, "zh")
+					return ttsFinishedMsg{}
+				})
+			}
 		}
 		return m, tea.Batch(cmds...)
 
@@ -112,6 +117,13 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
+		// Let input handle Ctrl+Space for mode toggle
+		if msg.Type == tea.KeyCtrlAt {
+			var cmd tea.Cmd
+			m.input, cmd = m.input.Update(msg)
+			return m, cmd
+		}
+
 		switch msg.Type {
 		case tea.KeyEnter:
 			if m.state == stateWaiting {
@@ -189,11 +201,11 @@ func (m Model) View() string {
 	if m.state == stateWaiting {
 		b.WriteString(ui.MutedStyle.Render("  Claude is thinking..."))
 	} else {
-		m.input.Width = contentWidth - 4
+		m.input.SetWidth(contentWidth - 8)
 		b.WriteString("  " + m.input.View())
 	}
 	b.WriteString("\n")
-	b.WriteString(ui.HelpStyle.Render("  enter send • pgup/pgdn scroll • esc back"))
+	b.WriteString(ui.HelpStyle.Render("  enter send • ctrl+space toggle input • pgup/pgdn scroll • esc back"))
 
 	return b.String()
 }
@@ -242,9 +254,48 @@ func (m *Model) refreshViewport() {
 	m.viewport.GotoBottom()
 }
 
+// InputComposing reports whether the input is in Chinese composition mode.
+func (m Model) InputComposing() bool {
+	return m.state == stateReady && m.input.Composing()
+}
+
 // SetSize updates terminal dimensions.
 func (m Model) SetSize(w, h int) Model {
 	m.width = w
 	m.height = h
 	return m
+}
+
+// extractChinese pulls out Chinese character runs from mixed text for TTS.
+// Returns only the CJK portions joined by pauses, so the Chinese voice
+// doesn't attempt to read English words.
+func extractChinese(text string) string {
+	var segments []string
+	var current strings.Builder
+	inChinese := false
+
+	for _, r := range text {
+		isCJK := unicode.Is(unicode.Han, r) ||
+			unicode.Is(unicode.P, r) && inChinese // keep Chinese punctuation
+		if isCJK {
+			current.WriteRune(r)
+			inChinese = true
+		} else {
+			if inChinese && current.Len() > 0 {
+				seg := strings.TrimSpace(current.String())
+				if len([]rune(seg)) >= 2 { // skip single-char fragments
+					segments = append(segments, seg)
+				}
+				current.Reset()
+			}
+			inChinese = false
+		}
+	}
+	if current.Len() > 0 {
+		seg := strings.TrimSpace(current.String())
+		if len([]rune(seg)) >= 2 {
+			segments = append(segments, seg)
+		}
+	}
+	return strings.Join(segments, "。")
 }

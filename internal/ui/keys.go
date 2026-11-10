@@ -147,6 +147,7 @@ func HelpText(v View) string {
 			"  enter  Submit answer / select\n" +
 			"  space  Next card (after feedback)\n" +
 			"  1-4    Rate difficulty\n" +
+			"  ctrl+space  Toggle input mode\n" +
 			"  esc    Back to dashboard"
 	case ViewBrowser:
 		return "Browser Keys\n\n" +
@@ -157,21 +158,24 @@ func HelpText(v View) string {
 			"  esc    Back to dashboard"
 	case ViewChat:
 		return "Chat Keys\n\n" +
-			"  enter     Send message\n" +
-			"  pgup/dn   Scroll history\n" +
-			"  esc       Back to dashboard"
+			"  enter       Send message\n" +
+			"  ctrl+space  Toggle input mode\n" +
+			"  pgup/dn     Scroll history\n" +
+			"  esc         Back to dashboard"
 	case ViewReview:
 		return "Review Keys\n\n" +
 			"  ↑↓     Navigate items\n" +
 			"  enter  Start drill / submit\n" +
 			"  1-4    Rate difficulty\n" +
+			"  ctrl+space  Toggle input mode\n" +
 			"  esc    Back to dashboard"
 	case ViewImagen:
 		return "Image Studio Keys\n\n" +
-			"  enter     Generate image\n" +
-			"  o         Open last image\n" +
-			"  pgup/dn   Scroll history\n" +
-			"  esc       Back to dashboard"
+			"  enter       Generate image\n" +
+			"  o           Open last image\n" +
+			"  ctrl+space  Toggle input mode\n" +
+			"  pgup/dn     Scroll history\n" +
+			"  esc         Back to dashboard"
 	default:
 		return "  ?  Toggle help\n  esc  Back"
 	}

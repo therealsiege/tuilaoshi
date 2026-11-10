@@ -14,6 +14,7 @@ import (
 	"github.com/cj/mandarin-wiki/internal/claude"
 	"github.com/cj/mandarin-wiki/internal/model"
 	"github.com/cj/mandarin-wiki/internal/ui"
+	"github.com/cj/mandarin-wiki/internal/ui/input"
 	"github.com/cj/mandarin-wiki/internal/wiki"
 )
 
@@ -58,7 +59,7 @@ type Model struct {
 	// Mode picker
 	modeCursor int
 
-	input    textinput.Model
+	input    input.Model
 	feedback string
 	result   model.DrillResult
 
@@ -74,10 +75,10 @@ type Model struct {
 }
 
 // New creates a new drill model.
-func New(store *wiki.Store, claudeClient *claude.Client, tts *audio.Client) Model {
-	ti := textinput.New()
-	ti.Placeholder = "Type your answer..."
-	ti.CharLimit = 200
+func New(store *wiki.Store, claudeClient *claude.Client, tts *audio.Client, dict *input.Dict) Model {
+	ti := input.NewWithDict(dict)
+	ti.SetPlaceholder("Type your answer...")
+	ti.SetCharLimit(200)
 
 	return Model{
 		store:  store,
@@ -211,6 +212,13 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, nil
 
 		case statePrompt:
+			// Let the input handle Ctrl+Space for mode toggle
+			if msg.Type == tea.KeyCtrlAt {
+				var cmd tea.Cmd
+				m.input, cmd = m.input.Update(msg)
+				return m, cmd
+			}
+
 			if key.Matches(msg, m.gkeys.Enter) {
 				answer := m.input.Value()
 				if answer == "" {
@@ -327,7 +335,7 @@ func (m Model) View() string {
 			b.WriteString("\n\n")
 			b.WriteString("  " + m.input.View())
 			b.WriteString("\n\n")
-			b.WriteString(ui.HelpStyle.Render("  enter submit • esc back"))
+			b.WriteString(ui.HelpStyle.Render("  enter submit • ctrl+space toggle input • esc back"))
 		}
 
 	case stateEval:
@@ -451,6 +459,11 @@ func blankOut(sentence, word string) string {
 		return sentence[:idx] + ui.ChineseStyle.Render("_____") + sentence[idx+len(word):]
 	}
 	return sentence + " " + ui.ChineseStyle.Render("_____")
+}
+
+// InputComposing reports whether the input is in Chinese composition mode.
+func (m Model) InputComposing() bool {
+	return m.state == statePrompt && m.input.Composing()
 }
 
 // SetSize updates terminal dimensions.

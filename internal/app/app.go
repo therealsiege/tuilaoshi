@@ -11,12 +11,14 @@ import (
 	"github.com/cj/mandarin-wiki/internal/audio"
 	"github.com/cj/mandarin-wiki/internal/claude"
 	imagenClient "github.com/cj/mandarin-wiki/internal/imagen"
+	"github.com/cj/mandarin-wiki/internal/model"
 	"github.com/cj/mandarin-wiki/internal/ui"
 	"github.com/cj/mandarin-wiki/internal/ui/browser"
 	"github.com/cj/mandarin-wiki/internal/ui/chat"
 	"github.com/cj/mandarin-wiki/internal/ui/dashboard"
 	"github.com/cj/mandarin-wiki/internal/ui/drill"
 	imagenView "github.com/cj/mandarin-wiki/internal/ui/imagen"
+	"github.com/cj/mandarin-wiki/internal/ui/input"
 	"github.com/cj/mandarin-wiki/internal/ui/review"
 	"github.com/cj/mandarin-wiki/internal/wiki"
 )
@@ -53,6 +55,9 @@ func New(wikiDir string) Model {
 	ttsClient := audio.New()
 	imagenCl := imagenClient.New(filepath.Join(wikiDir, "images"))
 
+	// Build pinyin/character dictionary from wiki pages
+	dict := buildDict(store)
+
 	return Model{
 		store:       store,
 		claude:      claudeClient,
@@ -61,12 +66,29 @@ func New(wikiDir string) Model {
 		keys:        ui.DefaultGlobalKeys(),
 		currentView: ui.ViewDashboard,
 		dashboard:   dashboard.New(store, ttsClient, imagenCl),
-		drill:       drill.New(store, claudeClient, ttsClient),
+		drill:       drill.New(store, claudeClient, ttsClient, dict),
 		browser:     browser.New(store),
-		chat:        chat.New(claudeClient, ttsClient),
-		review:      review.New(store, claudeClient, ttsClient),
-		imagenUI:    imagenView.New(imagenCl),
+		chat:        chat.New(claudeClient, ttsClient, dict),
+		review:      review.New(store, claudeClient, ttsClient, dict),
+		imagenUI:    imagenView.New(imagenCl, dict),
 	}
+}
+
+// buildDict constructs a pinyin-to-character dictionary from all wiki pages.
+func buildDict(store *wiki.Store) *input.Dict {
+	pages, err := store.ListPages()
+	if err != nil {
+		return input.NewDict()
+	}
+	var drillable []model.Page
+	for _, p := range pages {
+		switch p.Type {
+		case "character", "vocabulary", "grammar":
+			drillable = append(drillable, p)
+		}
+	}
+	cards := wiki.CardsFromPages(drillable)
+	return input.NewFromCards(cards)
 }
 
 func (m Model) Init() tea.Cmd {
@@ -139,11 +161,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if key.Matches(msg, m.keys.Quit) && m.currentView == ui.ViewDashboard {
 			return m, tea.Quit
 		}
-		// Global back to dashboard
+		// Global back to dashboard (unless input is composing in Chinese mode)
 		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard {
-			m.currentView = ui.ViewDashboard
-			m.dashboard = m.dashboard.Refresh()
-			return m, m.dashboard.Init()
+			if !m.isInputComposing() {
+				m.currentView = ui.ViewDashboard
+				m.dashboard = m.dashboard.Refresh()
+				return m, m.dashboard.Init()
+			}
 		}
 	}
 
@@ -235,6 +259,21 @@ func (m Model) View() string {
 	}
 
 	return content
+}
+
+// isInputComposing checks if the current view's input is in Chinese composition mode.
+func (m Model) isInputComposing() bool {
+	switch m.currentView {
+	case ui.ViewDrill:
+		return m.drill.InputComposing()
+	case ui.ViewChat:
+		return m.chat.InputComposing()
+	case ui.ViewReview:
+		return m.review.InputComposing()
+	case ui.ViewImagen:
+		return m.imagenUI.InputComposing()
+	}
+	return false
 }
 
 func (m Model) voicePickerView() string {

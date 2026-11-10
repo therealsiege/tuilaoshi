@@ -13,6 +13,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	imagenClient "github.com/cj/mandarin-wiki/internal/imagen"
 	"github.com/cj/mandarin-wiki/internal/ui"
+	"github.com/cj/mandarin-wiki/internal/ui/input"
 )
 
 type imagenState int
@@ -43,7 +44,7 @@ type openDoneMsg struct{}
 type Model struct {
 	client   *imagenClient.Client
 	history  []HistoryItem
-	input    textinput.Model
+	input    input.Model
 	viewport viewport.Model
 	state    imagenState
 	width    int
@@ -52,11 +53,11 @@ type Model struct {
 }
 
 // New creates a new imagen view model.
-func New(client *imagenClient.Client) Model {
-	ti := textinput.New()
-	ti.Placeholder = "Describe an image to generate..."
-	ti.CharLimit = 500
-	ti.Width = 60
+func New(client *imagenClient.Client, dict *input.Dict) Model {
+	ti := input.NewWithDict(dict)
+	ti.SetPlaceholder("Describe an image to generate...")
+	ti.SetCharLimit(500)
+	ti.SetWidth(60)
 
 	vp := viewport.New(80, 20)
 
@@ -75,8 +76,8 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case initMsg:
-		m.input.Focus()
-		return m, textinput.Blink
+		cmd := m.input.Focus()
+		return m, tea.Batch(cmd, textinput.Blink)
 
 	case imagenResultMsg:
 		m.state = stateReady
@@ -90,13 +91,20 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			}
 		}
 		m.refreshViewport()
-		m.input.Focus()
-		return m, textinput.Blink
+		focusCmd := m.input.Focus()
+		return m, tea.Batch(focusCmd, textinput.Blink)
 
 	case openDoneMsg:
 		return m, nil
 
 	case tea.KeyMsg:
+		// Let input handle Ctrl+Space for mode toggle
+		if msg.Type == tea.KeyCtrlAt {
+			var cmd tea.Cmd
+			m.input, cmd = m.input.Update(msg)
+			return m, cmd
+		}
+
 		switch {
 		case msg.Type == tea.KeyEnter:
 			if m.state == stateGenerating {
@@ -180,11 +188,11 @@ func (m Model) View() string {
 	} else if m.client == nil || !m.client.Available() {
 		b.WriteString(ui.ErrorStyle.Render("  GOOGLE_API_KEY not set"))
 	} else {
-		m.input.Width = contentWidth - 4
+		m.input.SetWidth(contentWidth - 8)
 		b.WriteString("  " + m.input.View())
 	}
 	b.WriteString("\n")
-	b.WriteString(ui.HelpStyle.Render("  enter generate • o open image • pgup/pgdn scroll • esc back"))
+	b.WriteString(ui.HelpStyle.Render("  enter generate • ctrl+space toggle input • o open image • pgup/pgdn scroll • esc back"))
 
 	return b.String()
 }
@@ -233,6 +241,11 @@ func (m *Model) refreshViewport() {
 
 	m.viewport.SetContent(strings.Join(lines, "\n"))
 	m.viewport.GotoBottom()
+}
+
+// InputComposing reports whether the input is in Chinese composition mode.
+func (m Model) InputComposing() bool {
+	return m.state == stateReady && m.input.Composing()
 }
 
 // SetSize updates terminal dimensions.

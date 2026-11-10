@@ -144,6 +144,25 @@ var (
 
 	ImagenPathStyle = lipgloss.NewStyle().
 			Foreground(ColorSuccess)
+
+	// Input mode badge styles
+	InputModeNormalStyle = lipgloss.NewStyle().
+				Padding(0, 1).
+				Bold(true).
+				Foreground(ColorText).
+				Background(lipgloss.Color("#3E4451"))
+
+	InputModePinyinStyle = lipgloss.NewStyle().
+				Padding(0, 1).
+				Bold(true).
+				Foreground(lipgloss.Color("#FFFFFF")).
+				Background(ColorAccent)
+
+	InputModeChineseStyle = lipgloss.NewStyle().
+				Padding(0, 1).
+				Bold(true).
+				Foreground(lipgloss.Color("#FFFFFF")).
+				Background(ColorPrimary)
 )
 
 // ProgressBar renders a text-based progress bar.
