@@ -249,6 +249,13 @@ func (m Model) renderParty() string {
 			b.WriteString(" · " + companion.English)
 			b.WriteString("\n")
 			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     %s", companion.Role)))
+			if companion.Ability != "" {
+				b.WriteString("\n")
+				b.WriteString(fmt.Sprintf("     %s %s: %s",
+					companion.AbilityIcon,
+					ui.SuccessStyle.Render(companion.Ability),
+					companion.AbilityDesc))
+			}
 		} else {
 			// Locked companion
 			b.WriteString(ui.MutedStyle.Render("○ "))
@@ -256,6 +263,11 @@ func (m Model) renderParty() string {
 			b.WriteString(ui.MutedStyle.Render(companion.Name + " · " + companion.English))
 			b.WriteString("\n")
 			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     Unlock at %d characters", companion.UnlockAt)))
+			if companion.Ability != "" {
+				b.WriteString("\n")
+				b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     %s %s: %s",
+					companion.AbilityIcon, companion.Ability, companion.AbilityDesc)))
+			}
 		}
 		b.WriteString("\n")
 	}
@@ -478,6 +490,9 @@ func (m Model) renderAchievements() string {
 				b.WriteString(" · " + a.Name)
 				b.WriteString("\n")
 				b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     %s", a.Desc)))
+			} else if a.Hidden {
+				b.WriteString(ui.MutedStyle.Render("? "))
+				b.WriteString(ui.MutedStyle.Render("??? — ???"))
 			} else {
 				b.WriteString(ui.MutedStyle.Render("· "))
 				b.WriteString(ui.MutedStyle.Render(a.Chinese + " · " + a.Name))
@@ -487,6 +502,13 @@ func (m Model) renderAchievements() string {
 			b.WriteString("\n")
 		}
 		b.WriteString("\n")
+	}
+
+	// Hidden achievements remaining count
+	hiddenRemaining := journey.HiddenUnearnedCount(achievements)
+	if hiddenRemaining > 0 {
+		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("  %d hidden achievements remaining", hiddenRemaining)))
+		b.WriteString("\n\n")
 	}
 
 	b.WriteString(m.tabFooter())

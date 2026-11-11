@@ -29,12 +29,15 @@ type Progress struct {
 
 // Companion is a party member from Journey to the West.
 type Companion struct {
-	Name     string // Chinese name
-	English  string
-	Emoji    string // Simple ASCII representation
-	Role     string // What they help with in the app
-	Unlocked bool
-	UnlockAt int // Characters needed to unlock
+	Name        string // Chinese name
+	English     string
+	Emoji       string // Simple ASCII representation
+	Role        string // What they help with in the app
+	Unlocked    bool
+	UnlockAt    int    // Characters needed to unlock
+	Ability     string // ability name
+	AbilityDesc string // what the ability does
+	AbilityIcon string // single ASCII char
 }
 
 // Boss is a demon king encounter.
@@ -241,36 +244,48 @@ func buildCompanions(mastered int) []Companion {
 			Unlocked: mastered >= 0,
 		},
 		{
-			Name:     "孙悟空",
-			English:  "Sun Wukong",
-			Emoji:    "M",
-			Role:     "Battles difficult characters",
-			UnlockAt: 50,
-			Unlocked: mastered >= 50,
+			Name:        "孙悟空",
+			English:     "Sun Wukong",
+			Emoji:       "M",
+			Role:        "Battles difficult characters",
+			UnlockAt:    50,
+			Unlocked:    mastered >= 50,
+			Ability:     "火眼金睛",
+			AbilityDesc: "Reveals mnemonic decompositions for difficult characters",
+			AbilityIcon: "◎",
 		},
 		{
-			Name:     "猪八戒",
-			English:  "Zhu Bajie",
-			Emoji:    "P",
-			Role:     "Helps with radicals",
-			UnlockAt: 200,
-			Unlocked: mastered >= 200,
+			Name:        "猪八戒",
+			English:     "Zhu Bajie",
+			Emoji:       "P",
+			Role:        "Helps with radicals",
+			UnlockAt:    200,
+			Unlocked:    mastered >= 200,
+			Ability:     "懒人有懒福",
+			AbilityDesc: "Reduces streak penalty: mistakes only reset half the streak",
+			AbilityIcon: "~",
 		},
 		{
-			Name:     "沙悟净",
-			English:  "Sha Wujing",
-			Emoji:    "S",
-			Role:     "Organizes reviews",
-			UnlockAt: 500,
-			Unlocked: mastered >= 500,
+			Name:        "沙悟净",
+			English:     "Sha Wujing",
+			Emoji:       "S",
+			Role:        "Organizes reviews",
+			UnlockAt:    500,
+			Unlocked:    mastered >= 500,
+			Ability:     "勤勤恳恳",
+			AbilityDesc: "Marks items for review: highlights characters due for review",
+			AbilityIcon: "·",
 		},
 		{
-			Name:     "白龙马",
-			English:  "Bai Longma",
-			Emoji:    "H",
-			Role:     "Speeds up learning",
-			UnlockAt: 1000,
-			Unlocked: mastered >= 1000,
+			Name:        "白龙马",
+			English:     "Bai Longma",
+			Emoji:       "H",
+			Role:        "Speeds up learning",
+			UnlockAt:    1000,
+			Unlocked:    mastered >= 1000,
+			Ability:     "日行千里",
+			AbilityDesc: "Speeds up journey: progress counts double on review days",
+			AbilityIcon: "»",
 		},
 	}
 

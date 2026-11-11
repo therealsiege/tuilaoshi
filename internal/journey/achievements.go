@@ -7,6 +7,7 @@ type Achievement struct {
 	Desc     string // What this means for your ability
 	Icon     string // ASCII icon
 	Earned   bool
+	Hidden   bool   // Hidden achievements show as "???" until earned
 	Category string // "literacy", "dedication", "mastery", "journey"
 }
 
@@ -250,6 +251,154 @@ func buildAchievements(mastered, totalReviewed, streak, daysStudied int) []Achie
 			Earned:   mastered >= 4000,
 			Category: "journey",
 		},
+
+		// ── Hidden achievements ─────────────────────────────────────
+		// Surprises that reveal themselves only when earned.
+
+		// Study habits (need future time-of-day tracking)
+		{
+			Name:     "Night Owl",
+			Chinese:  "夜猫子",
+			Desc:     "Study after midnight -- the quiet hours belong to scholars",
+			Icon:     "N",
+			Earned:   false,
+			Hidden:   true,
+			Category: "dedication",
+		},
+		{
+			Name:     "Early Bird",
+			Chinese:  "早起鸟",
+			Desc:     "Study before 6am -- catch the worm of knowledge",
+			Icon:     "E",
+			Earned:   false,
+			Hidden:   true,
+			Category: "dedication",
+		},
+		{
+			Name:     "Weekend Warrior",
+			Chinese:  "周末勇士",
+			Desc:     "Study every day of a weekend -- no rest for the devoted",
+			Icon:     "W",
+			Earned:   false,
+			Hidden:   true,
+			Category: "dedication",
+		},
+
+		// Milestone surprises
+		{
+			Name:     "108",
+			Chinese:  "一百零八",
+			Desc:     "Master exactly 108 characters -- the 108 heroes of Water Margin",
+			Icon:     "!",
+			Earned:   mastered == 108,
+			Hidden:   true,
+			Category: "literacy",
+		},
+		{
+			Name:     "Three Hundred Thousand",
+			Chinese:  "三百千",
+			Desc:     "A nod to the Three Character Classic -- 300 characters mastered",
+			Icon:     "3",
+			Earned:   mastered >= 300,
+			Hidden:   true,
+			Category: "literacy",
+		},
+		{
+			Name:     "Never Quit Halfway",
+			Chinese:  "半途不废",
+			Desc:     "Past the halfway point of 81 tribulations -- no turning back",
+			Icon:     "H",
+			Earned:   tribulation >= 41,
+			Hidden:   true,
+			Category: "journey",
+		},
+
+		// Character discoveries (need character-specific tracking)
+		{
+			Name:     "Four Great Novels",
+			Chinese:  "四大名著",
+			Desc:     "Master the characters for all four classic novels",
+			Icon:     "4",
+			Earned:   false,
+			Hidden:   true,
+			Category: "mastery",
+		},
+		{
+			Name:     "Five Elements Complete",
+			Chinese:  "五行齐全",
+			Desc:     "Master the five elements: metal, wood, water, fire, earth",
+			Icon:     "5",
+			Earned:   false,
+			Hidden:   true,
+			Category: "mastery",
+		},
+		{
+			Name:     "Twelve Zodiac Animals",
+			Chinese:  "十二生肖",
+			Desc:     "Master all twelve zodiac animal characters",
+			Icon:     "Z",
+			Earned:   false,
+			Hidden:   true,
+			Category: "mastery",
+		},
+
+		// Journey milestones
+		{
+			Name:     "Sutra Seeker",
+			Chinese:  "取经人",
+			Desc:     "Reach the final tribulation -- the end is in sight",
+			Icon:     "S",
+			Earned:   tribulation >= 81,
+			Hidden:   true,
+			Category: "journey",
+		},
+		{
+			Name:     "Great Sage Equal to Heaven",
+			Chinese:  "齐天大圣",
+			Desc:     "Reach the highest cultivation rank -- equal to the heavens",
+			Icon:     "G",
+			Earned:   mastered >= 5000,
+			Hidden:   true,
+			Category: "journey",
+		},
+		{
+			Name:     "81 Tribulations",
+			Chinese:  "八十一难",
+			Desc:     "Complete all 81 tribulations -- the full ordeal endured",
+			Icon:     "8",
+			Earned:   tribulation >= 81,
+			Hidden:   true,
+			Category: "journey",
+		},
+
+		// Dedication secrets
+		{
+			Name:     "Iron Rod to Needle",
+			Chinese:  "铁杵磨针",
+			Desc:     "Review the same character 50 times -- persistence grinds iron to a needle",
+			Icon:     "I",
+			Earned:   false,
+			Hidden:   true,
+			Category: "dedication",
+		},
+		{
+			Name:     "Water Drills Stone",
+			Chinese:  "水滴石穿",
+			Desc:     "365-day streak -- dripping water bores through stone",
+			Icon:     "D",
+			Earned:   streak >= 365,
+			Hidden:   true,
+			Category: "dedication",
+		},
+		{
+			Name:     "Foolish Old Man Moves Mountains",
+			Chinese:  "愚公移山",
+			Desc:     "Master 5000 characters -- move mountains with stubbornness",
+			Icon:     "F",
+			Earned:   mastered >= 5000,
+			Hidden:   true,
+			Category: "literacy",
+		},
 	}
 
 	return achievements
@@ -260,6 +409,17 @@ func EarnedCount(achievements []Achievement) int {
 	n := 0
 	for _, a := range achievements {
 		if a.Earned {
+			n++
+		}
+	}
+	return n
+}
+
+// HiddenUnearnedCount returns how many hidden achievements have not yet been earned.
+func HiddenUnearnedCount(achievements []Achievement) int {
+	n := 0
+	for _, a := range achievements {
+		if a.Hidden && !a.Earned {
 			n++
 		}
 	}

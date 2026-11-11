@@ -131,23 +131,9 @@ func (m Model) View() string {
 	}
 	b.WriteString("\n")
 
-	// Journey summary
+	// Cultivation XP meter
 	b.WriteString("\n")
-	rank := m.journeyState.Rank
-	journeySummary := lipgloss.JoinVertical(lipgloss.Left,
-		ui.SubtitleStyle.Render("  游 Journey to the West"),
-		"",
-		fmt.Sprintf("  Rank: %s · %s", ui.ChineseStyle.Render(rank.Name), rank.English),
-		"  "+ui.ProgressBar(rank.Current, rank.Required, 25)+ui.MutedStyle.Render(fmt.Sprintf(" %d/%d", rank.Current, rank.Required)),
-	)
-	if m.journeyState.NextBoss != nil {
-		boss := m.journeyState.NextBoss
-		journeySummary = lipgloss.JoinVertical(lipgloss.Left,
-			journeySummary,
-			fmt.Sprintf("  Next: %s %s", ui.ChineseStyle.Render(boss.Name), ui.MutedStyle.Render(boss.English)),
-		)
-	}
-	b.WriteString(ui.BorderStyle.Width(66).Render(journeySummary))
+	b.WriteString(m.renderCultivationMeter())
 	b.WriteString("\n")
 
 	b.WriteString("\n")
@@ -205,6 +191,55 @@ func (m Model) streakLine() string {
 		return ui.SuccessStyle.Render(text + " 🔥")
 	}
 	return text
+}
+
+// renderCultivationMeter renders the XP cultivation meter widget.
+func (m Model) renderCultivationMeter() string {
+	rank := m.journeyState.Rank
+	progress := m.journeyState.Progress
+
+	// Line 1: Rank name in Chinese + English
+	rankLine := fmt.Sprintf("  %s %s", ui.ChineseStyle.Render(rank.Name), rank.English)
+
+	// Line 2: Progress bar with percentage toward next rank
+	pct := 0
+	if rank.Required > 0 {
+		pct = rank.Current * 100 / rank.Required
+	}
+	barLine := fmt.Sprintf("  %s %s",
+		ui.ProgressBar(rank.Current, rank.Required, 20),
+		ui.MutedStyle.Render(fmt.Sprintf("%d%%", pct)))
+
+	// Line 3: Characters mastered / next rank threshold
+	charsLine := ui.MutedStyle.Render(fmt.Sprintf("  %d / %d chars", rank.Current, rank.Required))
+
+	// Line 4: Current tribulation and location
+	tribLine := ui.MutedStyle.Render(fmt.Sprintf("  Tribulation %d: %s",
+		progress.Tribulation, progress.Location))
+
+	// Line 5: Next boss encounter (if any)
+	bossLine := ""
+	if m.journeyState.NextBoss != nil {
+		boss := m.journeyState.NextBoss
+		bossLine = fmt.Sprintf("  Next boss: %s %s",
+			ui.ChineseStyle.Render(boss.Name),
+			ui.MutedStyle.Render(boss.English))
+	}
+
+	lines := []string{
+		ui.SubtitleStyle.Render("  修 Cultivation"),
+		"",
+		rankLine,
+		barLine,
+		charsLine,
+		tribLine,
+	}
+	if bossLine != "" {
+		lines = append(lines, bossLine)
+	}
+
+	meter := lipgloss.JoinVertical(lipgloss.Left, lines...)
+	return ui.BorderStyle.Width(66).Render(meter)
 }
 
 // SetSize updates the terminal dimensions.
