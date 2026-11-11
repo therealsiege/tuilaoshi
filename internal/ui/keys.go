@@ -78,6 +78,7 @@ const (
 	ViewStats
 	ViewJourney
 	ViewRadicals
+	ViewBattle
 )
 
 // SwitchViewMsg tells the app to change views.
@@ -101,6 +102,7 @@ type DashboardKeys struct {
 	Search   key.Binding
 	Journey  key.Binding
 	Radicals key.Binding
+	Battle   key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -142,6 +144,10 @@ func DefaultDashboardKeys() DashboardKeys {
 			key.WithKeys("x"),
 			key.WithHelp("x", "radicals"),
 		),
+		Battle: key.NewBinding(
+			key.WithKeys("f"),
+			key.WithHelp("f", "fight"),
+		),
 	}
 }
 
@@ -151,6 +157,7 @@ func HelpText(v View) string {
 	case ViewDashboard:
 		return "Dashboard Keys\n\n" +
 			"  d  Start drill\n" +
+			"  f  Fight a demon (RPG)\n" +
 			"  b  Browse wiki\n" +
 			"  c  Chat with tutor\n" +
 			"  r  Review due items\n" +
@@ -176,6 +183,13 @@ func HelpText(v View) string {
 			"  ↑↓     Select radical\n" +
 			"  esc    Back to dashboard\n" +
 			"  ?      Toggle help"
+	case ViewBattle:
+		return "Battle Keys\n\n" +
+			"  ↑↓     Navigate choices\n" +
+			"  enter  Select answer\n" +
+			"  1-5    Quick select\n" +
+			"  space  Continue\n" +
+			"  esc    Flee battle"
 	case ViewDrill:
 		return "Drill Keys\n\n" +
 			"  ↑↓     Select mode/navigate\n" +

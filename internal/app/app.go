@@ -21,6 +21,7 @@ import (
 	journeyview "github.com/cj/mandarin-wiki/internal/ui/journey"
 	"github.com/cj/mandarin-wiki/internal/ui/radicals"
 	"github.com/cj/mandarin-wiki/internal/ui/review"
+	rpgview "github.com/cj/mandarin-wiki/internal/ui/rpg"
 	"github.com/cj/mandarin-wiki/internal/ui/stats"
 	"github.com/cj/mandarin-wiki/internal/wiki"
 )
@@ -45,6 +46,7 @@ type Model struct {
 	stats     stats.Model
 	journey   journeyview.Model
 	radicals  radicals.Model
+	battle    rpgview.Model
 
 	// Celebration state
 	celebration    *celebrate.Celebration // active celebration to display
@@ -89,6 +91,7 @@ func New(wikiDir string) Model {
 		stats:         stats.New(store),
 		journey:       journeyview.New(store),
 		radicals:      radicals.New(),
+		battle:        rpgview.New(store),
 		prevRankName:  initialState.Rank.Name,
 		prevBossCount: initialBossCount,
 	}
@@ -131,6 +134,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.stats = m.stats.SetSize(msg.Width, msg.Height)
 		m.journey = m.journey.SetSize(msg.Width, msg.Height)
 		m.radicals = m.radicals.SetSize(msg.Width, msg.Height)
+		m.battle = m.battle.SetSize(msg.Width, msg.Height)
 		return m, nil
 
 	case ui.SwitchViewMsg:
@@ -165,6 +169,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ui.ViewRadicals:
 			m.radicals = m.radicals.Refresh()
 			return m, m.radicals.Init()
+		case ui.ViewBattle:
+			m.battle = m.battle.Refresh()
+			return m, m.battle.Init()
 		}
 		return m, nil
 
@@ -229,6 +236,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.journey, cmd = m.journey.Update(msg)
 	case ui.ViewRadicals:
 		m.radicals, cmd = m.radicals.Update(msg)
+	case ui.ViewBattle:
+		m.battle, cmd = m.battle.Update(msg)
 	}
 	return m, cmd
 }
@@ -297,6 +306,8 @@ func (m Model) View() string {
 		content = m.journey.View()
 	case ui.ViewRadicals:
 		content = m.radicals.View()
+	case ui.ViewBattle:
+		content = m.battle.View()
 	default:
 		content = m.dashboard.View()
 	}

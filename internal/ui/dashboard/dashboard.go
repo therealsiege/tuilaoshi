@@ -76,6 +76,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, ui.SwitchTo(ui.ViewJourney)
 		case key.Matches(msg, m.keys.Radicals):
 			return m, ui.SwitchTo(ui.ViewRadicals)
+		case key.Matches(msg, m.keys.Battle):
+			return m, ui.SwitchTo(ui.ViewBattle)
 		case key.Matches(msg, m.keys.Search):
 			return m, ui.SwitchTo(ui.ViewBrowser)
 		}
@@ -144,6 +146,7 @@ func (m Model) View() string {
 	b.WriteString(ui.SubtitleStyle.Render("  Actions"))
 	b.WriteString("\n\n")
 	b.WriteString(fmt.Sprintf("  %s  练 Start a flashcard drill\n", ui.ChineseStyle.Render("[d]")))
+	b.WriteString(fmt.Sprintf("  %s  战 Fight a demon (RPG)\n", ui.ChineseStyle.Render("[f]")))
 	b.WriteString(fmt.Sprintf("  %s  览 Browse wiki pages\n", ui.ChineseStyle.Render("[b]")))
 	b.WriteString(fmt.Sprintf("  %s  话 Chat with tutor\n", ui.ChineseStyle.Render("[c]")))
 	b.WriteString(fmt.Sprintf("  %s  复 Review due items\n", ui.ChineseStyle.Render("[r]")))
