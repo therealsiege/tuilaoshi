@@ -6,16 +6,16 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Colors — a warm palette for a Mandarin tutor.
+// Colors — a warm Chinese-inspired palette: vermillion, gold, jade, ink.
 var (
-	ColorPrimary   = lipgloss.Color("#E06C75") // red (Chinese aesthetic)
-	ColorSecondary = lipgloss.Color("#61AFEF") // blue
-	ColorAccent    = lipgloss.Color("#C678DD") // purple
-	ColorSuccess   = lipgloss.Color("#98C379") // green
-	ColorWarning   = lipgloss.Color("#E5C07B") // yellow
-	ColorMuted     = lipgloss.Color("#5C6370") // gray
-	ColorText      = lipgloss.Color("#ABB2BF") // light gray
-	ColorBg        = lipgloss.Color("#282C34") // dark background
+	ColorPrimary   = lipgloss.Color("#C54B3C") // vermillion/cinnabar red
+	ColorSecondary = lipgloss.Color("#D4A017") // gold/amber
+	ColorAccent    = lipgloss.Color("#B87333") // copper/bronze
+	ColorSuccess   = lipgloss.Color("#00A86B") // jade green
+	ColorWarning   = lipgloss.Color("#E5C07B") // warm yellow
+	ColorMuted     = lipgloss.Color("#6B7280") // ink gray
+	ColorText      = lipgloss.Color("#D1D5DB") // silk white
+	ColorBg        = lipgloss.Color("#1A1A2E") // ink black
 )
 
 // Styles for reuse across views.
@@ -39,7 +39,7 @@ var (
 			Foreground(ColorWarning)
 
 	ErrorStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#E06C75"))
+			Foreground(lipgloss.Color("#C54B3C"))
 
 	BorderStyle = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
@@ -48,7 +48,7 @@ var (
 
 	ActiveBorderStyle = lipgloss.NewStyle().
 				Border(lipgloss.RoundedBorder()).
-				BorderForeground(ColorPrimary).
+				BorderForeground(ColorSecondary).
 				Padding(1, 2)
 
 	HelpStyle = lipgloss.NewStyle().
@@ -60,13 +60,13 @@ var (
 			Foreground(ColorPrimary)
 
 	PinyinStyle = lipgloss.NewStyle().
-			Foreground(ColorAccent).
+			Foreground(ColorSecondary).
 			Italic(true)
 
 	CardStyle = lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(ColorSecondary).
-			Padding(1, 3).
+			Border(lipgloss.DoubleBorder()).
+			BorderForeground(ColorPrimary).
+			Padding(1, 4).
 			MarginBottom(1)
 
 	SelectedStyle = lipgloss.NewStyle().
@@ -88,18 +88,18 @@ var (
 
 	StatusBarStyle = lipgloss.NewStyle().
 			Foreground(ColorText).
-			Background(lipgloss.Color("#3E4451")).
+			Background(lipgloss.Color("#2A2A3E")).
 			Padding(0, 1)
 
 	// Chat bubble styles
 	ChatBubbleUserStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#2B4570")).
+				Background(lipgloss.Color("#2D1F1F")).
 				Foreground(lipgloss.Color("#FFFFFF")).
 				Padding(0, 2).
 				MarginLeft(4)
 
 	ChatBubbleAssistStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#3E4451")).
+				Background(lipgloss.Color("#1F2D1F")).
 				Foreground(ColorText).
 				Padding(0, 2).
 				MarginRight(4)
@@ -110,19 +110,19 @@ var (
 
 	// Difficulty styles
 	DiffAgainStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#E06C75")).
+			Foreground(lipgloss.Color("#C54B3C")).
 			Bold(true)
 
 	DiffHardStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#D19A66")).
+			Foreground(lipgloss.Color("#D4A017")).
 			Bold(true)
 
 	DiffGoodStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#98C379")).
+			Foreground(lipgloss.Color("#00A86B")).
 			Bold(true)
 
 	DiffEasyStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#61AFEF")).
+			Foreground(lipgloss.Color("#5B9BD5")).
 			Bold(true)
 
 	// Badge style for small labels
@@ -137,20 +137,12 @@ var (
 	ProgressEmptyStyle = lipgloss.NewStyle().
 				Foreground(ColorMuted)
 
-	// Imagen styles
-	ImagenPromptStyle = lipgloss.NewStyle().
-				Foreground(ColorAccent).
-				Bold(true)
-
-	ImagenPathStyle = lipgloss.NewStyle().
-			Foreground(ColorSuccess)
-
 	// Input mode badge styles
 	InputModeNormalStyle = lipgloss.NewStyle().
 				Padding(0, 1).
 				Bold(true).
 				Foreground(ColorText).
-				Background(lipgloss.Color("#3E4451"))
+				Background(lipgloss.Color("#2A2A3E"))
 
 	InputModePinyinStyle = lipgloss.NewStyle().
 				Padding(0, 1).
@@ -178,6 +170,36 @@ func ProgressBar(current, total, width int) string {
 	empty := width - filled
 	return ProgressFilledStyle.Render(strings.Repeat("█", filled)) +
 		ProgressEmptyStyle.Render(strings.Repeat("░", empty))
+}
+
+// Header renders a decorative Chinese-style header with box-drawing borders.
+func Header(title string) string {
+	titleLen := len([]rune(title))
+	padTotal := 30
+	if titleLen+4 > padTotal {
+		padTotal = titleLen + 4
+	}
+	side := (padTotal - titleLen - 2) / 2
+	leftPad := strings.Repeat("═", side)
+	rightPad := strings.Repeat("═", padTotal-titleLen-2-side)
+
+	top := MutedStyle.Render("╔" + strings.Repeat("═", padTotal) + "╗")
+	mid := MutedStyle.Render("║") +
+		MutedStyle.Render(leftPad) + " " +
+		TitleStyle.Render(title) + " " +
+		MutedStyle.Render(rightPad) +
+		MutedStyle.Render("║")
+	bot := MutedStyle.Render("╚" + strings.Repeat("═", padTotal) + "╝")
+
+	return top + "\n" + mid + "\n" + bot
+}
+
+// Divider renders a decorative section divider.
+func Divider(width int) string {
+	if width <= 0 {
+		width = 30
+	}
+	return MutedStyle.Render("  " + strings.Repeat("─", width))
 }
 
 // WrapText wraps text to fit within maxWidth characters.

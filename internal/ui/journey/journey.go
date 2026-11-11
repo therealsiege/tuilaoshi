@@ -1,0 +1,336 @@
+package journey
+
+import (
+	"fmt"
+	"strings"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/cj/mandarin-wiki/internal/journey"
+	"github.com/cj/mandarin-wiki/internal/ui"
+	"github.com/cj/mandarin-wiki/internal/wiki"
+)
+
+// Model is the Journey to the West gamification view.
+type Model struct {
+	store  *wiki.Store
+	state  journey.State
+	tab    int // 0=journey, 1=party, 2=bosses, 3=artifacts
+	width  int
+	height int
+}
+
+// New creates a new journey view model.
+func New(store *wiki.Store) Model {
+	return Model{
+		store: store,
+		state: journey.Calculate(store),
+		tab:   0,
+	}
+}
+
+func (m Model) Init() tea.Cmd {
+	return nil
+}
+
+func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "tab":
+			m.tab = (m.tab + 1) % 4
+			return m, nil
+		case "left", "h":
+			m.tab = (m.tab - 1 + 4) % 4
+			return m, nil
+		case "right", "l":
+			m.tab = (m.tab + 1) % 4
+			return m, nil
+		case "esc":
+			return m, ui.SwitchTo(ui.ViewDashboard)
+		}
+	}
+	return m, nil
+}
+
+func (m Model) View() string {
+	var b strings.Builder
+
+	// Header
+	b.WriteString(ui.Header("西游记 Journey to the West"))
+	b.WriteString("\n\n")
+
+	// Tab bar
+	b.WriteString(m.renderTabBar())
+	b.WriteString("\n\n")
+
+	// Content based on active tab
+	switch m.tab {
+	case 0:
+		b.WriteString(m.renderJourney())
+	case 1:
+		b.WriteString(m.renderParty())
+	case 2:
+		b.WriteString(m.renderBosses())
+	case 3:
+		b.WriteString(m.renderArtifacts())
+	}
+
+	return b.String()
+}
+
+// SetSize updates the terminal dimensions.
+func (m Model) SetSize(w, h int) Model {
+	m.width = w
+	m.height = h
+	return m
+}
+
+// Refresh reloads data from the wiki store.
+func (m Model) Refresh() Model {
+	m.state = journey.Calculate(m.store)
+	return m
+}
+
+// renderTabBar renders the tab navigation bar.
+func (m Model) renderTabBar() string {
+	tabs := []string{"journey", "party", "bosses", "artifacts"}
+	var rendered []string
+
+	for i, tab := range tabs {
+		if i == m.tab {
+			rendered = append(rendered, ui.ActiveTabStyle.Render(tab))
+		} else {
+			rendered = append(rendered, ui.TabStyle.Render(tab))
+		}
+	}
+
+	return "  " + strings.Join(rendered, " | ")
+}
+
+// renderJourney renders the main journey map view (tab 0).
+func (m Model) renderJourney() string {
+	var b strings.Builder
+
+	// Cultivation Rank section
+	b.WriteString(ui.SubtitleStyle.Render("  修为 Cultivation Rank"))
+	b.WriteString("\n")
+
+	rankBox := m.renderRankBox()
+	b.WriteString(ui.BorderStyle.Width(50).Render(rankBox))
+	b.WriteString("\n\n")
+
+	// Pilgrimage progress section
+	b.WriteString(ui.SubtitleStyle.Render("  取经路 The Pilgrimage"))
+	b.WriteString("\n\n")
+
+	// Journey map line
+	journeyMap := m.renderJourneyMap()
+	b.WriteString("  " + journeyMap)
+	b.WriteString("\n")
+
+	// Current tribulation
+	tribText := fmt.Sprintf("           ↑ Tribulation %d: %s %s",
+		m.state.Progress.Tribulation,
+		ui.ChineseStyle.Render(m.state.Progress.Location),
+		ui.MutedStyle.Render(m.state.Progress.LocationEn))
+	b.WriteString(tribText)
+	b.WriteString("\n\n")
+
+	// Progress summary
+	progressText := fmt.Sprintf("  Progress: %d/%d characters mastered (%.0f%%)",
+		m.state.Progress.Mastered,
+		m.state.Progress.TotalChars,
+		m.state.Progress.Percent)
+	b.WriteString(ui.MutedStyle.Render(progressText))
+	b.WriteString("\n\n")
+
+	// Help text
+	b.WriteString(ui.Divider(40))
+	b.WriteString("\n")
+	b.WriteString(ui.HelpStyle.Render("  tab: switch tabs | esc: back to dashboard"))
+
+	return b.String()
+}
+
+// renderRankBox renders the cultivation rank progress box.
+func (m Model) renderRankBox() string {
+	var b strings.Builder
+
+	// Current rank with Chinese and English
+	rankLine := fmt.Sprintf("%s · %s",
+		ui.ChineseStyle.Render(m.state.Rank.Name),
+		m.state.Rank.English)
+	b.WriteString(rankLine)
+	b.WriteString("\n")
+
+	// Progress bar
+	barWidth := 40
+	progressBar := ui.ProgressBar(m.state.Rank.Current, m.state.Rank.Required, barWidth)
+	b.WriteString(progressBar)
+	b.WriteString(ui.MutedStyle.Render(fmt.Sprintf(" %d/%d", m.state.Rank.Current, m.state.Rank.Required)))
+	b.WriteString("\n")
+
+	// Next rank
+	if m.state.Rank.Level < 10 { // Assuming max level is 10
+		nextText := fmt.Sprintf("Next: %s %s",
+			m.state.Rank.Name, // This would be the next rank name in real implementation
+			ui.MutedStyle.Render(m.state.Rank.English))
+		b.WriteString(ui.MutedStyle.Render(nextText))
+	} else {
+		b.WriteString(ui.SuccessStyle.Render("✓ Max cultivation achieved!"))
+	}
+
+	return b.String()
+}
+
+// renderJourneyMap renders the ASCII journey progress line.
+func (m Model) renderJourneyMap() string {
+	const totalStops = 10
+	progress := m.state.Progress.Tribulation
+
+	var dots []string
+	dots = append(dots, ui.ChineseStyle.Render("长安")) // Start: Chang'an
+
+	for i := 1; i <= totalStops; i++ {
+		dots = append(dots, "══")
+		if i < progress {
+			dots = append(dots, ui.SuccessStyle.Render("●"))
+		} else {
+			dots = append(dots, ui.MutedStyle.Render("○"))
+		}
+	}
+
+	dots = append(dots, "══")
+	dots = append(dots, ui.ChineseStyle.Render("天竺")) // End: India (Tianzhu)
+
+	return strings.Join(dots, "")
+}
+
+// renderParty renders the companions/party view (tab 1).
+func (m Model) renderParty() string {
+	var b strings.Builder
+
+	b.WriteString(ui.SubtitleStyle.Render("  同伴 Companions"))
+	b.WriteString("\n\n")
+
+	if len(m.state.Companions) == 0 {
+		b.WriteString(ui.MutedStyle.Render("  No companions yet..."))
+		return b.String()
+	}
+
+	for _, companion := range m.state.Companions {
+		b.WriteString("  ")
+		if companion.Unlocked {
+			// Unlocked companion - show in success color
+			b.WriteString(ui.SuccessStyle.Render("✓ "))
+			b.WriteString(companion.Emoji + " ")
+			b.WriteString(ui.ChineseStyle.Render(companion.Name))
+			b.WriteString(" · " + companion.English)
+			b.WriteString("\n")
+			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     %s", companion.Role)))
+		} else {
+			// Locked companion
+			b.WriteString(ui.MutedStyle.Render("○ "))
+			b.WriteString(ui.MutedStyle.Render(companion.Emoji + " "))
+			b.WriteString(ui.MutedStyle.Render(companion.Name + " · " + companion.English))
+			b.WriteString("\n")
+			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     Unlock at %d characters", companion.UnlockAt)))
+		}
+		b.WriteString("\n")
+	}
+
+	b.WriteString("\n")
+	b.WriteString(ui.Divider(40))
+	b.WriteString("\n")
+	b.WriteString(ui.HelpStyle.Render("  tab: switch tabs | esc: back to dashboard"))
+
+	return b.String()
+}
+
+// renderBosses renders the boss challenges view (tab 2).
+func (m Model) renderBosses() string {
+	var b strings.Builder
+
+	b.WriteString(ui.SubtitleStyle.Render("  妖怪 Boss Challenges"))
+	b.WriteString("\n\n")
+
+	if len(m.state.Bosses) == 0 {
+		b.WriteString(ui.MutedStyle.Render("  No bosses yet..."))
+		return b.String()
+	}
+
+	for _, boss := range m.state.Bosses {
+		b.WriteString("  ")
+		if boss.Defeated {
+			// Defeated boss
+			b.WriteString(ui.SuccessStyle.Render("✓ "))
+			b.WriteString(ui.ChineseStyle.Render(boss.Name))
+			b.WriteString(" · " + boss.English)
+			b.WriteString("\n")
+			b.WriteString(ui.SuccessStyle.Render(fmt.Sprintf("     Defeated! Theme: %s", boss.Theme)))
+		} else {
+			// Upcoming or current boss
+			isNext := m.state.NextBoss != nil && m.state.NextBoss.Name == boss.Name
+			if isNext {
+				b.WriteString(ui.WarningStyle.Render("⚔ "))
+				b.WriteString(ui.WarningStyle.Render(boss.Name + " · " + boss.English))
+				b.WriteString("\n")
+				b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("     NEXT BOSS! Theme: %s", boss.Theme)))
+			} else {
+				b.WriteString(ui.MutedStyle.Render("○ "))
+				b.WriteString(ui.MutedStyle.Render(boss.Name + " · " + boss.English))
+				b.WriteString("\n")
+				b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     Unlock at %d characters · Theme: %s", boss.Required, boss.Theme)))
+			}
+		}
+		b.WriteString("\n")
+	}
+
+	b.WriteString("\n")
+	b.WriteString(ui.Divider(40))
+	b.WriteString("\n")
+	b.WriteString(ui.HelpStyle.Render("  tab: switch tabs | esc: back to dashboard"))
+
+	return b.String()
+}
+
+// renderArtifacts renders the artifacts/achievements view (tab 3).
+func (m Model) renderArtifacts() string {
+	var b strings.Builder
+
+	b.WriteString(ui.SubtitleStyle.Render("  法宝 Sacred Artifacts"))
+	b.WriteString("\n\n")
+
+	if len(m.state.Artifacts) == 0 {
+		b.WriteString(ui.MutedStyle.Render("  No artifacts yet..."))
+		return b.String()
+	}
+
+	for _, artifact := range m.state.Artifacts {
+		b.WriteString("  ")
+		if artifact.Earned {
+			// Earned artifact
+			b.WriteString(ui.SuccessStyle.Render("✓ "))
+			b.WriteString(ui.ChineseStyle.Render(artifact.Chinese))
+			b.WriteString(" · " + artifact.Name)
+			b.WriteString("\n")
+			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     %s", artifact.Desc)))
+		} else {
+			// Not yet earned
+			b.WriteString(ui.MutedStyle.Render("○ "))
+			b.WriteString(ui.MutedStyle.Render(artifact.Chinese + " · " + artifact.Name))
+			b.WriteString("\n")
+			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     %s", artifact.Desc)))
+			b.WriteString("\n")
+			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     Earn at %d characters", artifact.EarnAt)))
+		}
+		b.WriteString("\n")
+	}
+
+	b.WriteString("\n")
+	b.WriteString(ui.Divider(40))
+	b.WriteString("\n")
+	b.WriteString(ui.HelpStyle.Render("  tab: switch tabs | esc: back to dashboard"))
+
+	return b.String()
+}

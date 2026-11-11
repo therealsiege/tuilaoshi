@@ -158,24 +158,32 @@ func (c *Client) synthesize(text string, voice Voice) ([]byte, error) {
 
 // playAudio plays MP3 data through the system's default audio output.
 func playAudio(data []byte) error {
+	// Write to a temp file — afplay (macOS) requires a file path, not stdin.
+	tmpFile, err := os.CreateTemp("", "mandarin-tts-*.mp3")
+	if err != nil {
+		return fmt.Errorf("create temp audio file: %w", err)
+	}
+	defer os.Remove(tmpFile.Name())
+
+	if _, err := tmpFile.Write(data); err != nil {
+		tmpFile.Close()
+		return fmt.Errorf("write temp audio file: %w", err)
+	}
+	tmpFile.Close()
+
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
 	case "darwin":
-		cmd = exec.Command("afplay", "-")
+		cmd = exec.Command("afplay", tmpFile.Name())
 	case "linux":
-		// Try mpv first, fall back to ffplay
 		if _, err := exec.LookPath("mpv"); err == nil {
-			cmd = exec.Command("mpv", "--no-video", "--really-quiet", "-")
+			cmd = exec.Command("mpv", "--no-video", "--really-quiet", tmpFile.Name())
 		} else {
-			cmd = exec.Command("ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", "-")
+			cmd = exec.Command("ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", tmpFile.Name())
 		}
 	default:
 		return fmt.Errorf("audio playback not supported on %s", runtime.GOOS)
 	}
-
-	cmd.Stdin = bytes.NewReader(data)
-	cmd.Stdout = nil
-	cmd.Stderr = nil
 
 	return cmd.Run()
 }

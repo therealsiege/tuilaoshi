@@ -272,7 +272,7 @@ func (m Model) View() string {
 			b.WriteString("\n")
 		}
 		b.WriteString("\n")
-		b.WriteString(ui.HelpStyle.Render("  ↑↓ navigate • enter start drill • esc back"))
+		b.WriteString(ui.HelpStyle.Render("  ↑↓ navigate · enter start drill · esc back"))
 
 	case stateDrill:
 		if m.cursor < len(m.items) {
@@ -286,7 +286,7 @@ func (m Model) View() string {
 			b.WriteString("\n\n")
 			b.WriteString("  " + m.input.View())
 			b.WriteString("\n\n")
-			b.WriteString(ui.HelpStyle.Render("  enter submit • ctrl+space toggle input • esc back"))
+			b.WriteString(ui.HelpStyle.Render("  enter submit · ctrl+space toggle input · esc back"))
 		}
 
 	case stateEval:
@@ -314,7 +314,7 @@ func (m Model) View() string {
 			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("  %d items remaining", remaining)))
 			b.WriteString("\n")
 		}
-		b.WriteString(ui.HelpStyle.Render("  1-4 rate • enter default (Good) • esc back"))
+		b.WriteString(ui.HelpStyle.Render("  1-4 rate · enter default (Good) · esc back"))
 	}
 
 	// Progress

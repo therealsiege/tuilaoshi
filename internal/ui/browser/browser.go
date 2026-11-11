@@ -209,8 +209,8 @@ func (m Model) View() string {
 
 	main := lipgloss.JoinHorizontal(lipgloss.Top, list, content)
 
-	title := ui.TitleStyle.Render("Wiki Browser")
-	help := ui.HelpStyle.Render("tab switch pane • ↑↓ navigate • esc back • type to filter")
+	title := ui.TitleStyle.Render("Wiki Browser 浏览")
+	help := ui.HelpStyle.Render("  tab switch pane · ↑↓ navigate · esc back · type to filter")
 
 	return fmt.Sprintf("%s\n%s\n%s", title, main, help)
 }

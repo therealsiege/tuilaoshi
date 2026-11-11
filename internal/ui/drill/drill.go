@@ -314,16 +314,16 @@ func (m Model) View() string {
 		b.WriteString("\n\n")
 		for i, opt := range modeOptions {
 			label := fmt.Sprintf("  %s", opt.label)
-			desc := ui.MutedStyle.Render("  " + opt.desc)
+			desc := ui.MutedStyle.Render("    " + opt.desc)
 			if i == m.modeCursor {
-				b.WriteString(ui.SelectedStyle.Render("▸ "+label) + "\n")
-				b.WriteString("    " + desc + "\n")
+				b.WriteString(ui.SelectedStyle.Render("  ▸ "+label) + "\n")
+				b.WriteString(desc + "\n")
 			} else {
-				b.WriteString(ui.UnselectedStyle.Render("  "+label) + "\n")
+				b.WriteString(ui.UnselectedStyle.Render("    "+label) + "\n")
 			}
 		}
 		b.WriteString("\n")
-		b.WriteString(ui.HelpStyle.Render("  ↑↓ select • enter confirm • esc back"))
+		b.WriteString(ui.HelpStyle.Render("  ↑↓ select · enter confirm · esc back"))
 
 	case stateLoading:
 		b.WriteString(ui.MutedStyle.Render("Loading cards..."))
@@ -335,7 +335,7 @@ func (m Model) View() string {
 			b.WriteString("\n\n")
 			b.WriteString("  " + m.input.View())
 			b.WriteString("\n\n")
-			b.WriteString(ui.HelpStyle.Render("  enter submit • ctrl+space toggle input • esc back"))
+			b.WriteString(ui.HelpStyle.Render("  enter submit · ctrl+space toggle input · esc back"))
 		}
 
 	case stateEval:
@@ -363,7 +363,7 @@ func (m Model) View() string {
 			ui.DiffEasyStyle.Render("[4] Easy"),
 		))
 		b.WriteString("\n")
-		b.WriteString(ui.HelpStyle.Render("  1-4 rate • enter default (Good) • esc back"))
+		b.WriteString(ui.HelpStyle.Render("  1-4 rate · enter default (Good) · esc back"))
 
 	case stateFeedback:
 		// Transitional state, same as difficulty
@@ -395,6 +395,7 @@ func (m Model) View() string {
 		}
 		b.WriteString("\n\n")
 		b.WriteString(ui.HelpStyle.Render("  esc back to dashboard"))
+
 	}
 
 	// Progress bar
@@ -417,37 +418,36 @@ func (m Model) renderCard(card model.Card) string {
 	switch mode {
 	case model.ModeRecognition:
 		chinese := ui.ChineseStyle.Render(card.Chinese)
-		content = fmt.Sprintf("  What does this mean?\n\n  %s", chinese)
+		content = fmt.Sprintf("  What does this mean?\n\n      %s", chinese)
 		if card.Pinyin != "" {
-			content += "\n  " + ui.PinyinStyle.Render(card.Pinyin)
+			content += "\n      " + ui.PinyinStyle.Render(card.Pinyin)
 		}
 	case model.ModeProduction:
-		content = fmt.Sprintf("  How do you say this in Chinese?\n\n  %s", card.English)
+		content = fmt.Sprintf("  How do you say this in Chinese?\n\n      %s", card.English)
 		if card.Pinyin != "" {
-			content += "\n  " + ui.PinyinStyle.Render("("+card.Pinyin+")")
+			content += "\n      " + ui.PinyinStyle.Render("("+card.Pinyin+")")
 		}
 	case model.ModeListening:
 		content = "  What did you hear? Type it in Chinese.\n\n"
-		content += ui.ChineseStyle.Render("  🔊 [Listen]")
+		content += "      " + ui.ChineseStyle.Render("🔊 [Listen]")
 	case model.ModeSentence:
 		if len(card.Examples) > 0 {
-			// Pick a random example and blank out part of it
 			ex := card.Examples[rand.Intn(len(card.Examples))]
-			// Remove the "- " prefix if present
 			ex = strings.TrimPrefix(ex, "- ")
-			content = fmt.Sprintf("  Fill in the blank:\n\n  %s\n\n  Hint: %s",
+			content = fmt.Sprintf("  Fill in the blank:\n\n      %s\n\n  Hint: %s",
 				blankOut(ex, card.Chinese),
 				ui.PinyinStyle.Render(card.English))
 		} else {
-			// Fallback to recognition
 			chinese := ui.ChineseStyle.Render(card.Chinese)
-			content = fmt.Sprintf("  What does this mean?\n\n  %s", chinese)
+			content = fmt.Sprintf("  What does this mean?\n\n      %s", chinese)
 		}
 	}
 
 	typeLabel := ui.MutedStyle.Render(fmt.Sprintf("[%s]", card.Type))
-	modeLabel := ui.MutedStyle.Render(fmt.Sprintf(" %s", mode))
-	return ui.CardStyle.Render(typeLabel + modeLabel + "\n" + content)
+	modeLabel := ui.MutedStyle.Render(fmt.Sprintf(" · %s", mode))
+	header := typeLabel + modeLabel
+	separator := ui.MutedStyle.Render("  " + strings.Repeat("─", 24))
+	return ui.CardStyle.Render(header + "\n" + separator + "\n" + content)
 }
 
 // blankOut replaces the target word in a sentence with _____.

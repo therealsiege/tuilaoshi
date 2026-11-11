@@ -9,7 +9,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cj/mandarin-wiki/internal/audio"
-	"github.com/cj/mandarin-wiki/internal/imagen"
 	"github.com/cj/mandarin-wiki/internal/ui"
 	"github.com/cj/mandarin-wiki/internal/wiki"
 )
@@ -18,7 +17,6 @@ import (
 type Model struct {
 	store  *wiki.Store
 	tts    *audio.Client
-	imagen *imagen.Client
 	keys   ui.DashboardKeys
 	gkeys  ui.GlobalKeys
 	stats  wiki.ContentStats
@@ -30,13 +28,12 @@ type Model struct {
 }
 
 // New creates a new dashboard model.
-func New(store *wiki.Store, tts *audio.Client, img *imagen.Client) Model {
+func New(store *wiki.Store, tts *audio.Client) Model {
 	return Model{
-		store:  store,
-		tts:    tts,
-		imagen: img,
-		keys:   ui.DefaultDashboardKeys(),
-		gkeys:  ui.DefaultGlobalKeys(),
+		store: store,
+		tts:   tts,
+		keys:  ui.DefaultDashboardKeys(),
+		gkeys: ui.DefaultGlobalKeys(),
 	}
 }
 
@@ -70,8 +67,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, ui.SwitchTo(ui.ViewReview)
 		case key.Matches(msg, m.keys.Voice):
 			return m, ui.SwitchTo(ui.ViewVoicePicker)
-		case key.Matches(msg, m.keys.Imagen):
-			return m, ui.SwitchTo(ui.ViewImagen)
+		case key.Matches(msg, m.keys.Stats):
+			return m, ui.SwitchTo(ui.ViewStats)
+		case key.Matches(msg, m.keys.Journey):
+			return m, ui.SwitchTo(ui.ViewJourney)
+		case key.Matches(msg, m.keys.Search):
+			return m, ui.SwitchTo(ui.ViewBrowser)
 		}
 	}
 	return m, nil
@@ -80,32 +81,32 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 func (m Model) View() string {
 	var b strings.Builder
 
-	// Title
-	title := ui.TitleStyle.Render("中文 Mandarin Tutor")
-	b.WriteString(title)
+	// Decorative header
+	b.WriteString(ui.Header("推老师 TuīLǎoShī"))
 	b.WriteString("\n\n")
 
 	// Two-column layout: stats + today's progress
 	statsBox := lipgloss.JoinVertical(lipgloss.Left,
-		ui.SubtitleStyle.Render("Wiki Content"),
+		ui.SubtitleStyle.Render("  典 Wiki Content"),
 		"",
-		fmt.Sprintf("  Characters: %d", m.stats.CharacterPages),
-		fmt.Sprintf("  Vocabulary: %d", m.stats.VocabPages),
-		fmt.Sprintf("  Grammar:    %d", m.stats.GrammarPages),
-		fmt.Sprintf("  Readings:   %d", m.stats.ReadingPages),
-		fmt.Sprintf("  Total:      %d pages", m.stats.TotalPages),
+		fmt.Sprintf("  字  Characters  %d", m.stats.CharacterPages),
+		fmt.Sprintf("  词  Vocabulary  %d", m.stats.VocabPages),
+		fmt.Sprintf("  文  Grammar     %d", m.stats.GrammarPages),
+		fmt.Sprintf("  读  Readings    %d", m.stats.ReadingPages),
+		"",
+		ui.MutedStyle.Render(fmt.Sprintf("  Total: %d pages", m.stats.TotalPages)),
 	)
 
 	todayBox := lipgloss.JoinVertical(lipgloss.Left,
-		ui.SubtitleStyle.Render("Today's Progress"),
+		ui.SubtitleStyle.Render("  今 Today's Progress"),
 		"",
 		fmt.Sprintf("  Reviewed: %d cards", m.daily.CardsReviewed),
 		m.accuracyLine(),
 		m.streakLine(),
 	)
 
-	leftCol := ui.BorderStyle.Width(30).Render(statsBox)
-	rightCol := ui.BorderStyle.Width(30).Render(todayBox)
+	leftCol := ui.BorderStyle.Width(32).Render(statsBox)
+	rightCol := ui.BorderStyle.Width(32).Render(todayBox)
 
 	b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, leftCol, "  ", rightCol))
 	b.WriteString("\n\n")
@@ -120,34 +121,34 @@ func (m Model) View() string {
 		b.WriteString("  " + ui.ProgressBar(reviewed, total, 25))
 		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf(" %d/%d", reviewed, total)))
 	} else {
-		dueText := ui.SuccessStyle.Render("  All reviews complete!")
+		dueText := ui.SuccessStyle.Render("  ✓ All reviews complete!")
 		b.WriteString(dueText)
 	}
 	b.WriteString("\n\n")
 
 	// Navigation
-	nav := lipgloss.JoinVertical(lipgloss.Left,
-		ui.SubtitleStyle.Render("Actions"),
-		"",
-		fmt.Sprintf("  %s  Start a flashcard drill", ui.ChineseStyle.Render("[d]")),
-		fmt.Sprintf("  %s  Browse wiki pages", ui.ChineseStyle.Render("[b]")),
-		fmt.Sprintf("  %s  Chat with tutor", ui.ChineseStyle.Render("[c]")),
-		fmt.Sprintf("  %s  Review due items", ui.ChineseStyle.Render("[r]")),
-		fmt.Sprintf("  %s  Generate images", ui.ChineseStyle.Render("[i]")),
-		fmt.Sprintf("  %s  Change voice", ui.ChineseStyle.Render("[v]")),
-		fmt.Sprintf("  %s  Quit", ui.ChineseStyle.Render("[q]")),
-	)
-	b.WriteString(nav)
+	b.WriteString(ui.Divider(30))
 	b.WriteString("\n\n")
+	b.WriteString(ui.SubtitleStyle.Render("  Actions"))
+	b.WriteString("\n\n")
+	b.WriteString(fmt.Sprintf("  %s  练 Start a flashcard drill\n", ui.ChineseStyle.Render("[d]")))
+	b.WriteString(fmt.Sprintf("  %s  览 Browse wiki pages\n", ui.ChineseStyle.Render("[b]")))
+	b.WriteString(fmt.Sprintf("  %s  话 Chat with tutor\n", ui.ChineseStyle.Render("[c]")))
+	b.WriteString(fmt.Sprintf("  %s  复 Review due items\n", ui.ChineseStyle.Render("[r]")))
+	b.WriteString(fmt.Sprintf("  %s  统 Study statistics\n", ui.ChineseStyle.Render("[s]")))
+	b.WriteString(fmt.Sprintf("  %s  游 Journey to the West\n", ui.ChineseStyle.Render("[j]")))
+	b.WriteString(fmt.Sprintf("  %s  声 Change voice\n", ui.ChineseStyle.Render("[v]")))
+	b.WriteString(fmt.Sprintf("  %s  找 Search wiki\n", ui.ChineseStyle.Render("[/]")))
+	b.WriteString(fmt.Sprintf("  %s  退 Quit\n", ui.ChineseStyle.Render("[q]")))
+	b.WriteString("\n")
 
 	// Footer
-	footer := "  mandarin-wiki • esc back • ? help"
+	b.WriteString(ui.Divider(30))
+	b.WriteString("\n")
+	footer := "  tuilaoshi · esc back · ? help"
 	if m.tts != nil && m.tts.Available() {
-		footer += " • " + ui.SuccessStyle.Render("audio on") +
+		footer += " · " + ui.SuccessStyle.Render("audio on") +
 			" (" + m.tts.ChineseVoice().Name + "/" + m.tts.EnglishVoice().Name + ")"
-	}
-	if m.imagen != nil && m.imagen.Available() {
-		footer += " • " + ui.SuccessStyle.Render("imagen on")
 	}
 	b.WriteString(ui.MutedStyle.Render(footer))
 

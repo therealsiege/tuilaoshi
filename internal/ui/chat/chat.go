@@ -205,7 +205,7 @@ func (m Model) View() string {
 		b.WriteString("  " + m.input.View())
 	}
 	b.WriteString("\n")
-	b.WriteString(ui.HelpStyle.Render("  enter send • ctrl+space toggle input • pgup/pgdn scroll • esc back"))
+	b.WriteString(ui.HelpStyle.Render("  enter send · ctrl+space toggle input · pgup/pgdn scroll · esc back"))
 
 	return b.String()
 }

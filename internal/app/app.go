@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -10,16 +9,16 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cj/mandarin-wiki/internal/audio"
 	"github.com/cj/mandarin-wiki/internal/claude"
-	imagenClient "github.com/cj/mandarin-wiki/internal/imagen"
 	"github.com/cj/mandarin-wiki/internal/model"
 	"github.com/cj/mandarin-wiki/internal/ui"
 	"github.com/cj/mandarin-wiki/internal/ui/browser"
 	"github.com/cj/mandarin-wiki/internal/ui/chat"
 	"github.com/cj/mandarin-wiki/internal/ui/dashboard"
 	"github.com/cj/mandarin-wiki/internal/ui/drill"
-	imagenView "github.com/cj/mandarin-wiki/internal/ui/imagen"
 	"github.com/cj/mandarin-wiki/internal/ui/input"
+	journeyview "github.com/cj/mandarin-wiki/internal/ui/journey"
 	"github.com/cj/mandarin-wiki/internal/ui/review"
+	"github.com/cj/mandarin-wiki/internal/ui/stats"
 	"github.com/cj/mandarin-wiki/internal/wiki"
 )
 
@@ -28,7 +27,6 @@ type Model struct {
 	store  *wiki.Store
 	claude *claude.Client
 	tts    *audio.Client
-	imagen *imagenClient.Client
 	keys   ui.GlobalKeys
 
 	currentView ui.View
@@ -41,7 +39,8 @@ type Model struct {
 	browser   browser.Model
 	chat      chat.Model
 	review    review.Model
-	imagenUI  imagenView.Model
+	stats     stats.Model
+	journey   journeyview.Model
 
 	// Voice picker state
 	voiceCursor   int
@@ -53,7 +52,6 @@ func New(wikiDir string) Model {
 	store := wiki.NewStore(wikiDir)
 	claudeClient := claude.New()
 	ttsClient := audio.New()
-	imagenCl := imagenClient.New(filepath.Join(wikiDir, "images"))
 
 	// Build pinyin/character dictionary from wiki pages
 	dict := buildDict(store)
@@ -62,15 +60,15 @@ func New(wikiDir string) Model {
 		store:       store,
 		claude:      claudeClient,
 		tts:         ttsClient,
-		imagen:      imagenCl,
 		keys:        ui.DefaultGlobalKeys(),
 		currentView: ui.ViewDashboard,
-		dashboard:   dashboard.New(store, ttsClient, imagenCl),
+		dashboard:   dashboard.New(store, ttsClient),
 		drill:       drill.New(store, claudeClient, ttsClient, dict),
 		browser:     browser.New(store),
 		chat:        chat.New(claudeClient, ttsClient, dict),
 		review:      review.New(store, claudeClient, ttsClient, dict),
-		imagenUI:    imagenView.New(imagenCl, dict),
+		stats:       stats.New(store),
+		journey:     journeyview.New(store),
 	}
 }
 
@@ -108,7 +106,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.browser = m.browser.SetSize(msg.Width, msg.Height)
 		m.chat = m.chat.SetSize(msg.Width, msg.Height)
 		m.review = m.review.SetSize(msg.Width, msg.Height)
-		m.imagenUI = m.imagenUI.SetSize(msg.Width, msg.Height)
+		m.stats = m.stats.SetSize(msg.Width, msg.Height)
+		m.journey = m.journey.SetSize(msg.Width, msg.Height)
 		return m, nil
 
 	case ui.SwitchViewMsg:
@@ -133,9 +132,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.voiceCursor = 0
 			m.voiceCategory = 0
 			return m, nil
-		case ui.ViewImagen:
-			m.imagenUI = m.imagenUI.Refresh()
-			return m, m.imagenUI.Init()
+		case ui.ViewStats:
+			m.stats = m.stats.Refresh()
+			return m, m.stats.Init()
+		case ui.ViewJourney:
+			m.journey = m.journey.Refresh()
+			return m, m.journey.Init()
 		}
 		return m, nil
 
@@ -184,8 +186,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.chat, cmd = m.chat.Update(msg)
 	case ui.ViewReview:
 		m.review, cmd = m.review.Update(msg)
-	case ui.ViewImagen:
-		m.imagenUI, cmd = m.imagenUI.Update(msg)
+	case ui.ViewStats:
+		m.stats, cmd = m.stats.Update(msg)
+	case ui.ViewJourney:
+		m.journey, cmd = m.journey.Update(msg)
 	}
 	return m, cmd
 }
@@ -248,8 +252,10 @@ func (m Model) View() string {
 		content = m.review.View()
 	case ui.ViewVoicePicker:
 		content = m.voicePickerView()
-	case ui.ViewImagen:
-		content = m.imagenUI.View()
+	case ui.ViewStats:
+		content = m.stats.View()
+	case ui.ViewJourney:
+		content = m.journey.View()
 	default:
 		content = m.dashboard.View()
 	}
@@ -270,8 +276,6 @@ func (m Model) isInputComposing() bool {
 		return m.chat.InputComposing()
 	case ui.ViewReview:
 		return m.review.InputComposing()
-	case ui.ViewImagen:
-		return m.imagenUI.InputComposing()
 	}
 	return false
 }
@@ -331,7 +335,7 @@ func (m Model) voicePickerView() string {
 	}
 
 	b.WriteString("\n")
-	b.WriteString(ui.HelpStyle.Render("  ↑↓ select • tab switch category • enter confirm • esc back"))
+	b.WriteString(ui.HelpStyle.Render("  ↑↓ select · tab switch category · enter confirm · esc back"))
 
 	return b.String()
 }

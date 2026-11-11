@@ -1,142 +1,190 @@
-# TUI LaoShi (推老师）
+<p align="center">
+  <h1 align="center">推老师 TuīLǎoShī</h1>
+  <p align="center"><strong>Your Mandarin tutor lives in the terminal.</strong></p>
+</p>
 
-A terminal UI for Mandarin Chinese study, built for reactivating rusty university-level Mandarin. Combines a local markdown wiki of characters, vocabulary, grammar, and readings with spaced-repetition drills, Claude-powered answer evaluation, and text-to-speech.
+<p align="center">
+  <a href="https://go.dev/"><img src="https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go&logoColor=white" alt="Go 1.22+"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
+  <a href="https://github.com/therealsiege/tuilaoshi/stargazers"><img src="https://img.shields.io/github/stars/therealsiege/tuilaoshi?style=flat" alt="GitHub Stars"></a>
+</p>
 
-Built with [Bubble Tea](https://github.com/charmbracelet/bubbletea) and [Lip Gloss](https://github.com/charmbracelet/lipgloss).
+---
 
-## Features
+No apps. No accounts. No distractions. Just you, your terminal, and 5,300+ Chinese characters waiting to be learned.
 
-- **Dashboard** -- daily stats, streak tracking, review progress, wiki content overview
-- **Drill modes** -- recognition (Chinese to English), production (English to Chinese), listening (TTS to Chinese), sentence completion, random mix
-- **Spaced repetition** -- SM-2 inspired scheduler with difficulty grading (Again / Hard / Good / Easy)
-- **Review queue** -- surfaces due items based on SRS intervals
-- **Wiki browser** -- browse and read all character, vocabulary, grammar, and reading pages
-- **Chat** -- conversational Mandarin tutor powered by Claude (styled message bubbles)
-- **Text-to-speech** -- Chinese and English voices via Fish Audio, with a voice picker
-- **Session logging** -- drill results saved to `wiki/sessions/` with per-session stats
+TuīLǎoShī is a terminal-native Mandarin tutor that combines spaced-repetition drilling, AI-powered conversation, text-to-speech, and a Journey to the West-themed progression system — all in a single Go binary you can run anywhere.
 
-## Wiki content
+<!-- ## Screenshots -->
 
-| Category | Pages | Coverage |
-|----------|-------|----------|
-| Characters | 43 | HSK1-2 individual character analysis |
-| Vocabulary | 21 | Topic-grouped tables (family, food, travel, etc.) |
-| Grammar | 21 | Pattern pages with examples and common errors |
-| Readings | 5 | Graded passages HSK2-3 with vocab and comprehension |
+<!-- > _Coming soon._ -->
 
-All content is plain markdown with YAML frontmatter for SRS tracking. Add your own pages and they'll appear in the browser and drill system automatically.
+## What You Get
 
-## Requirements
+### An AI tutor that actually teaches
 
-- Go 1.21+
-- An [Anthropic API key](https://console.anthropic.com/) for drill evaluation and chat
-- (Optional) A [Fish Audio API key](https://fish.audio/) for TTS
+Chat with Claude in Chinese or English. Ask questions about grammar, get corrections on your sentences, or just have a conversation. Every response is spoken aloud with natural Chinese TTS. It's like having a patient language partner available 24/7 — minus the small talk.
 
-## Setup
+### Five ways to drill
+
+- **Recognition** — See the character, type the meaning
+- **Production** — See the English, produce the Chinese
+- **Listening** — Hear the word spoken, type what you heard
+- **Sentence** — Fill in the missing word from context
+- **Random Mix** — All modes shuffled to keep you sharp
+
+Each answer is evaluated by Claude with structured feedback — not just "right" or "wrong," but *why* and *how to remember it*.
+
+### Spaced repetition that sticks
+
+SM-2-inspired scheduling tracks every card's interval, ease factor, and next review date. Rate each answer Again / Hard / Good / Easy, and the algorithm adapts. Your SRS state lives right in the content files — no opaque database, no sync issues, no lock-in.
+
+### 5,300+ characters out of the box
+
+Ships with pre-built wiki pages covering the full HSK1–6 curriculum plus specialized domain packs:
+
+| Pack | Coverage |
+|------|----------|
+| **HSK 1–6** | Core curriculum from beginner to advanced |
+| **Business** | Corporate, finance, marketing, accounting |
+| **Technology** | Computing, AI, cybersecurity, robotics |
+| **Healthcare** | Anatomy, TCM, pharmacy, mental health |
+| **Sports** | Martial arts, athletics, fitness, competition |
+
+Every character page includes pinyin, meaning, radical, stroke count, compound words, and example sentences.
+
+### Journey to the West
+
+Gamification that actually fits. Your study progress maps onto the 81 tribulations of 西游记:
+
+**Cultivation Ranks** — Rise from 凡人 (Mortal) through 练气 (Qi Refining), 筑基 (Foundation Building), 金丹 (Golden Core), all the way to 斗战胜佛 (Victorious Fighting Buddha).
+
+**Companions** — Unlock the classic party as you hit milestones: 唐僧 Tang Sanzang guides your journey from day one. 孙悟空 Sun Wukong joins at 50 characters. 猪八戒 Zhu Bajie, 沙悟净 Sha Wujing, and 白龙马 Bai Longma follow as you grow.
+
+**Boss Encounters** — Face demon kings from the novel: 混世魔王 Havoc Monster, 白骨精 White Bone Demon, 红孩儿 Red Boy, all the way up to 如来佛祖 Buddha himself at 4,000 characters.
+
+**Sacred Artifacts** — Earn 金箍棒 Ruyi Jingu Bang, 芭蕉扇 Banana Leaf Fan, 火眼金睛 Fiery Eyes, and more through mastery and study streaks.
+
+### Pinyin input built in
+
+Three input modes toggled with `ctrl+space`:
+
+- **Normal** — Standard English typing
+- **Pinyin** — Type `ni3 hao3`, get `nǐ hǎo` automatically
+- **Chinese** — Full pinyin composition with dictionary candidate selection
+
+### Text-to-speech
+
+Chinese and English voices via Fish Audio. Cards are spoken aloud during drills. Pick your preferred voice from multiple options per language.
+
+### Everything is a file
+
+Your entire curriculum is plain markdown with YAML frontmatter. Browse it in the TUI, edit it in vim, version it with git, back it up however you want. No database. No migrations. No vendor lock-in.
+
+```
+wiki/
+├── characters/    5,300+ character pages
+├── vocabulary/    Topic-grouped word tables
+├── grammar/       Pattern pages with examples
+├── readings/      Graded passages with annotations
+└── reference/     Quick-reference sheets
+```
+
+## Get Started
+
+### Install
 
 ```bash
-git clone git@github.com:therealsiege/mandarin-wiki.git
-cd mandarin-wiki
-cp .env.example .env   # then add your API keys
+git clone https://github.com/therealsiege/tuilaoshi.git
+cd tuilaoshi
+go build -o tuilaoshi ./cmd/mandarin
+./tuilaoshi
 ```
 
-Create a `.env` file in the repo root:
-
-```
-ANTHROPIC_API_KEY=sk-ant-...
-FISH_AUDIO_API_KEY=...          # optional, for TTS
-```
-
-## Build and run
+Or with `go install`:
 
 ```bash
-make build    # builds to cmd/mandarin/mandarin
-make run      # builds and runs
+go install github.com/therealsiege/tuilaoshi/cmd/mandarin@latest
 ```
 
-Or directly:
+### Configure
 
 ```bash
-go build -o mandarin ./cmd/mandarin
-./mandarin
+# Required — powers drill evaluation and AI chat
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# Optional — enables text-to-speech
+export FISH_AUDIO_API_KEY=...
 ```
 
-The binary looks for `wiki/` relative to the executable or the current working directory. Override with `MANDARIN_WIKI_DIR=/path/to/wiki`.
+### Navigate
 
-## Keybindings
-
-### Dashboard
-
-| Key | Action |
-|-----|--------|
+| Key | What it does |
+|-----|--------------|
 | `d` | Start a drill |
-| `b` | Browse wiki |
-| `c` | Chat with tutor |
-| `r` | Review due items |
-| `v` | Change voice |
+| `c` | Chat with AI tutor |
+| `r` | Review due cards |
+| `b` | Browse the wiki |
+| `j` | Journey to the West |
+| `s` | Study statistics |
+| `v` | Change TTS voice |
+| `/` | Search |
 | `q` | Quit |
-| `?` | Help overlay |
 
-### Drill / Review
+## Why a Terminal?
 
-| Key | Action |
-|-----|--------|
-| `enter` | Submit answer / confirm |
-| `1-4` | Rate difficulty (Again/Hard/Good/Easy) |
-| `esc` | Back |
+Language learning apps are full of notifications, upsells, and gamification dark patterns designed to maximize engagement metrics rather than actual learning.
 
-### Browser
+TuīLǎoShī has none of that.
 
-| Key | Action |
-|-----|--------|
-| `up/down` | Navigate |
-| `enter` | Open page |
-| `/` | Filter |
-| `esc` | Back |
+The terminal is where you already work. There's no context switch, no app store, no account to create. The interaction is fundamentally text in, text out — which turns out to be exactly what character drilling needs. You type an answer, you get feedback. No tap targets, no drag-and-drop, no animations eating your battery.
 
-## Project structure
+Your content is yours. Plain markdown files you can read, edit, grep, and git push. The SRS state lives in the same files as the content. Everything is local, transparent, and under your control.
+
+## Under the Hood
+
+Single-binary Go application. No external runtime dependencies.
+
+| Layer | Tech |
+|-------|------|
+| TUI | [Bubble Tea](https://github.com/charmbracelet/bubbletea) + [Lip Gloss](https://github.com/charmbracelet/lipgloss) + [Glamour](https://github.com/charmbracelet/glamour) |
+| AI | [Anthropic SDK for Go](https://github.com/anthropics/anthropic-sdk-go) (Claude) |
+| SRS | SM-2 algorithm with four difficulty grades |
+| TTS | [Fish Audio](https://fish.audio) streaming API |
+| Content | Markdown + YAML frontmatter, parsed at startup |
 
 ```
-cmd/mandarin/       Entry point
+cmd/mandarin/         Entry point
+cmd/generate/         Character page generator
 internal/
-  app/              Root Bubble Tea model, view routing
-  audio/            Fish Audio TTS client
-  claude/           Anthropic SDK client for evaluation and chat
-  model/            Shared types (Card, Page, Session, DrillMode)
-  ui/               Styles, keys, view components
-    browser/        Wiki page browser
-    chat/           Tutor chat with message bubbles
-    dashboard/      Stats dashboard
-    drill/          Mode picker and drill flow
-    review/         SRS review queue
-  wiki/             Markdown parser, SRS scheduler, store
-wiki/               Markdown content (characters, vocabulary, grammar, readings)
+  app/                Root model, view routing
+  audio/              Fish Audio TTS client
+  claude/             Anthropic API client
+  journey/            Journey to the West engine
+  model/              Shared types
+  ui/
+    browser/          Wiki page browser
+    chat/             AI conversation view
+    dashboard/        Home screen
+    drill/            Drill mode picker and flow
+    input/            Pinyin/Chinese input method
+    journey/          Journey to the West view
+    review/           SRS review queue
+    stats/            Statistics and charts
+  wiki/               Markdown parser, SRS scheduler, store
 ```
 
-## Adding content
+## Contributing
 
-Wiki pages are markdown files with YAML frontmatter:
+Contributions welcome. Some ideas:
 
-```yaml
----
-type: character    # character | vocabulary | grammar | reading
-level: HSK1
-status: active
-last_reviewed: 2026-11-09
-tags: [verb, HSK1]
-introduced: 2026-11-09
-review_interval: 1
-next_review: 2026-11-10
----
-```
+- **Content** — character, vocabulary, grammar, or reading pages at any level
+- **Drill modes** — tone drills, radical decomposition, handwriting recognition
+- **Platform** — testing and fixes for Linux and Windows
+- **Tests** — unit and integration coverage
 
-- **Characters**: one file per character in `wiki/characters/`, named by pinyin+tone number (e.g. `hao3.md`)
-- **Vocabulary**: topic tables in `wiki/vocabulary/` with Word | Pinyin | Meaning | Example columns
-- **Grammar**: pattern pages in `wiki/grammar/` with structure, examples, common errors
-- **Readings**: graded passages in `wiki/readings/` with Chinese text, pinyin, translation, vocab table, and comprehension questions
-
-New pages are automatically discovered by the drill and browser systems.
+Open an issue before starting significant work.
 
 ## License
 
-Private repository.
+[MIT](LICENSE)

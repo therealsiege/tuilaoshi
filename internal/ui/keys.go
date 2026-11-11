@@ -75,7 +75,8 @@ const (
 	ViewChat
 	ViewReview
 	ViewVoicePicker
-	ViewImagen
+	ViewStats
+	ViewJourney
 )
 
 // SwitchViewMsg tells the app to change views.
@@ -90,12 +91,14 @@ func SwitchTo(v View) tea.Cmd {
 
 // DashboardKeys defines keybindings for the dashboard view.
 type DashboardKeys struct {
-	Drill  key.Binding
-	Browse key.Binding
-	Chat   key.Binding
-	Review key.Binding
-	Voice  key.Binding
-	Imagen key.Binding
+	Drill   key.Binding
+	Browse  key.Binding
+	Chat    key.Binding
+	Review  key.Binding
+	Voice   key.Binding
+	Stats   key.Binding
+	Search  key.Binding
+	Journey key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -121,9 +124,17 @@ func DefaultDashboardKeys() DashboardKeys {
 			key.WithKeys("v"),
 			key.WithHelp("v", "voice"),
 		),
-		Imagen: key.NewBinding(
-			key.WithKeys("i"),
-			key.WithHelp("i", "imagen"),
+		Stats: key.NewBinding(
+			key.WithKeys("s"),
+			key.WithHelp("s", "stats"),
+		),
+		Search: key.NewBinding(
+			key.WithKeys("/"),
+			key.WithHelp("/", "search"),
+		),
+		Journey: key.NewBinding(
+			key.WithKeys("j"),
+			key.WithHelp("j", "journey"),
 		),
 	}
 }
@@ -137,10 +148,22 @@ func HelpText(v View) string {
 			"  b  Browse wiki\n" +
 			"  c  Chat with tutor\n" +
 			"  r  Review due items\n" +
-			"  i  Generate images\n" +
+			"  s  Study statistics\n" +
+			"  j  Journey to the West\n" +
 			"  v  Change voice\n" +
+			"  /  Search wiki\n" +
 			"  ?  Toggle help\n" +
 			"  q  Quit"
+	case ViewStats:
+		return "Stats Keys\n\n" +
+			"  esc  Back to dashboard\n" +
+			"  ?    Toggle help"
+	case ViewJourney:
+		return "Journey Keys\n\n" +
+			"  tab    Switch tab\n" +
+			"  ←/→    Switch tab\n" +
+			"  esc    Back to dashboard\n" +
+			"  ?      Toggle help"
 	case ViewDrill:
 		return "Drill Keys\n\n" +
 			"  ↑↓     Select mode/navigate\n" +
@@ -169,13 +192,6 @@ func HelpText(v View) string {
 			"  1-4    Rate difficulty\n" +
 			"  ctrl+space  Toggle input mode\n" +
 			"  esc    Back to dashboard"
-	case ViewImagen:
-		return "Image Studio Keys\n\n" +
-			"  enter       Generate image\n" +
-			"  o           Open last image\n" +
-			"  ctrl+space  Toggle input mode\n" +
-			"  pgup/dn     Scroll history\n" +
-			"  esc         Back to dashboard"
 	default:
 		return "  ?  Toggle help\n  esc  Back"
 	}
