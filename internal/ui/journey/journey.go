@@ -14,7 +14,7 @@ import (
 type Model struct {
 	store  *wiki.Store
 	state  journey.State
-	tab    int // 0=journey, 1=party, 2=bosses, 3=artifacts
+	tab    int // 0=journey, 1=party, 2=bosses, 3=artifacts, 4=quests, 5=achievements, 6=lore
 	width  int
 	height int
 }
@@ -37,13 +37,13 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "tab":
-			m.tab = (m.tab + 1) % 4
+			m.tab = (m.tab + 1) % 7
 			return m, nil
 		case "left", "h":
-			m.tab = (m.tab - 1 + 4) % 4
+			m.tab = (m.tab - 1 + 7) % 7
 			return m, nil
 		case "right", "l":
-			m.tab = (m.tab + 1) % 4
+			m.tab = (m.tab + 1) % 7
 			return m, nil
 		case "esc":
 			return m, ui.SwitchTo(ui.ViewDashboard)
@@ -73,6 +73,12 @@ func (m Model) View() string {
 		b.WriteString(m.renderBosses())
 	case 3:
 		b.WriteString(m.renderArtifacts())
+	case 4:
+		b.WriteString(m.renderQuests())
+	case 5:
+		b.WriteString(m.renderAchievements())
+	case 6:
+		b.WriteString(m.renderLore())
 	}
 
 	return b.String()
@@ -98,7 +104,7 @@ func (m Model) tabFooter() string {
 
 // renderTabBar renders the tab navigation bar.
 func (m Model) renderTabBar() string {
-	tabs := []string{"journey", "party", "bosses", "artifacts"}
+	tabs := []string{"journey", "party", "bosses", "artifacts", "quests", "achievements", "lore"}
 	var rendered []string
 
 	for i, tab := range tabs {
@@ -352,6 +358,199 @@ func (m Model) renderArtifacts() string {
 			}
 		}
 		b.WriteString("\n")
+	}
+
+	b.WriteString(m.tabFooter())
+
+	return b.String()
+}
+
+// renderQuests renders the daily quests view (tab 4).
+func (m Model) renderQuests() string {
+	var b strings.Builder
+
+	b.WriteString(ui.SubtitleStyle.Render("  每日任务 Daily Quests"))
+	b.WriteString("\n\n")
+
+	if len(m.state.Quests) == 0 {
+		b.WriteString(ui.MutedStyle.Render("  No quests available..."))
+		b.WriteString(m.tabFooter())
+		return b.String()
+	}
+
+	barWidth := 40
+	for i, quest := range m.state.Quests {
+		if i > 0 {
+			b.WriteString("\n")
+		}
+		b.WriteString("  ")
+
+		// Determine quest style and icon
+		if quest.Done {
+			b.WriteString(ui.SuccessStyle.Render("✓ " + quest.Desc))
+			b.WriteString("\n")
+			b.WriteString(ui.SuccessStyle.Render(fmt.Sprintf("    %s · %d/%d",
+				quest.Chinese, quest.Current, quest.Target)))
+			b.WriteString("\n")
+			b.WriteString("    " + ui.ProgressBar(quest.Current, quest.Target, barWidth))
+			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf(" %d/%d", quest.Current, quest.Target)))
+		} else if quest.Name == "Demon Slayer" {
+			b.WriteString(ui.WarningStyle.Render("⚔ " + quest.Desc))
+			b.WriteString("\n")
+			b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("    %s · %d/%d characters",
+				quest.Chinese, quest.Current, quest.Target)))
+			b.WriteString("\n")
+			b.WriteString("    " + ui.ProgressBar(quest.Current, quest.Target, barWidth))
+			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf(" %d/%d", quest.Current, quest.Target)))
+		} else {
+			b.WriteString(ui.MutedStyle.Render("○ " + quest.Desc))
+			b.WriteString("\n")
+			unit := "reviews"
+			if quest.Name == "Steady Pilgrim" {
+				unit = "days"
+			}
+			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("    %s · %d/%d %s",
+				quest.Chinese, quest.Current, quest.Target, unit)))
+			b.WriteString("\n")
+			b.WriteString("    " + ui.ProgressBar(quest.Current, quest.Target, barWidth))
+			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf(" %d/%d", quest.Current, quest.Target)))
+		}
+		b.WriteString("\n")
+	}
+
+	b.WriteString(m.tabFooter())
+
+	return b.String()
+}
+
+// renderAchievements renders the achievements view (tab 5).
+func (m Model) renderAchievements() string {
+	var b strings.Builder
+
+	b.WriteString(ui.SubtitleStyle.Render("  成就 Achievements"))
+	b.WriteString("\n\n")
+
+	achievements := m.state.Achievements
+	earned := journey.EarnedCount(achievements)
+	total := len(achievements)
+
+	// Summary line
+	b.WriteString(fmt.Sprintf("  %d / %d earned", earned, total))
+	b.WriteString("\n\n")
+
+	// Group by category and render each group
+	categories := []struct {
+		key   string
+		label string
+	}{
+		{"literacy", "Literacy"},
+		{"dedication", "Dedication"},
+		{"mastery", "Mastery"},
+		{"journey", "Journey"},
+	}
+
+	for _, cat := range categories {
+		var group []journey.Achievement
+		for _, a := range achievements {
+			if a.Category == cat.key {
+				group = append(group, a)
+			}
+		}
+		if len(group) == 0 {
+			continue
+		}
+
+		catEarned := 0
+		for _, a := range group {
+			if a.Earned {
+				catEarned++
+			}
+		}
+		header := fmt.Sprintf("  -- %s (%d/%d) --", cat.label, catEarned, len(group))
+		b.WriteString(ui.SubtitleStyle.Render(header))
+		b.WriteString("\n\n")
+
+		for _, a := range group {
+			b.WriteString("  ")
+			if a.Earned {
+				b.WriteString(ui.SuccessStyle.Render("✓ "))
+				b.WriteString(ui.ChineseStyle.Render(a.Chinese))
+				b.WriteString(" · " + a.Name)
+				b.WriteString("\n")
+				b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     %s", a.Desc)))
+			} else {
+				b.WriteString(ui.MutedStyle.Render("· "))
+				b.WriteString(ui.MutedStyle.Render(a.Chinese + " · " + a.Name))
+				b.WriteString("\n")
+				b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     %s", a.Desc)))
+			}
+			b.WriteString("\n")
+		}
+		b.WriteString("\n")
+	}
+
+	b.WriteString(m.tabFooter())
+
+	return b.String()
+}
+
+// renderLore renders the story passages view (tab 6).
+func (m Model) renderLore() string {
+	var b strings.Builder
+
+	b.WriteString(ui.SubtitleStyle.Render("  西游故事 Story Passages"))
+	b.WriteString("\n\n")
+
+	if len(m.state.Lore) == 0 {
+		b.WriteString(ui.MutedStyle.Render("  No lore entries yet..."))
+		b.WriteString(m.tabFooter())
+		return b.String()
+	}
+
+	unlocked := 0
+	for _, entry := range m.state.Lore {
+		if entry.Unlocked {
+			unlocked++
+		}
+	}
+	summary := fmt.Sprintf("  %d/%d passages unlocked", unlocked, len(m.state.Lore))
+	b.WriteString(ui.MutedStyle.Render(summary))
+	b.WriteString("\n\n")
+
+	for i, entry := range m.state.Lore {
+		if i > 0 {
+			b.WriteString("\n")
+			b.WriteString(ui.Divider(50))
+			b.WriteString("\n\n")
+		}
+
+		if entry.Unlocked {
+			// Title line: Chinese title + English title
+			titleLine := fmt.Sprintf("  %s  %s",
+				ui.ChineseStyle.Render(entry.Chinese),
+				entry.Title)
+			b.WriteString(titleLine)
+			b.WriteString("\n")
+			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("  Tribulation %d", entry.Tribulation)))
+			b.WriteString("\n\n")
+
+			// Chinese passage
+			b.WriteString("  " + ui.ChineseStyle.Render(entry.Passage))
+			b.WriteString("\n\n")
+
+			// Pinyin
+			b.WriteString("  " + ui.PinyinStyle.Render(entry.Pinyin))
+			b.WriteString("\n\n")
+
+			// English translation
+			b.WriteString("  " + ui.MutedStyle.Render(entry.English))
+			b.WriteString("\n")
+		} else {
+			// Locked entry
+			lockText := fmt.Sprintf("  ??? -- Reach tribulation %d to unlock", entry.Tribulation)
+			b.WriteString(ui.MutedStyle.Render(lockText))
+			b.WriteString("\n")
+		}
 	}
 
 	b.WriteString(m.tabFooter())

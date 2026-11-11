@@ -77,6 +77,7 @@ const (
 	ViewVoicePicker
 	ViewStats
 	ViewJourney
+	ViewRadicals
 )
 
 // SwitchViewMsg tells the app to change views.
@@ -97,8 +98,9 @@ type DashboardKeys struct {
 	Review  key.Binding
 	Voice   key.Binding
 	Stats   key.Binding
-	Search  key.Binding
-	Journey key.Binding
+	Search   key.Binding
+	Journey  key.Binding
+	Radicals key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -136,6 +138,10 @@ func DefaultDashboardKeys() DashboardKeys {
 			key.WithKeys("j"),
 			key.WithHelp("j", "journey"),
 		),
+		Radicals: key.NewBinding(
+			key.WithKeys("x"),
+			key.WithHelp("x", "radicals"),
+		),
 	}
 }
 
@@ -150,6 +156,7 @@ func HelpText(v View) string {
 			"  r  Review due items\n" +
 			"  s  Study statistics\n" +
 			"  j  Journey to the West\n" +
+			"  x  Radical explorer\n" +
 			"  v  Change voice\n" +
 			"  /  Search wiki\n" +
 			"  ?  Toggle help\n" +
@@ -162,6 +169,11 @@ func HelpText(v View) string {
 		return "Journey Keys\n\n" +
 			"  tab    Switch tab\n" +
 			"  ←/→    Switch tab\n" +
+			"  esc    Back to dashboard\n" +
+			"  ?      Toggle help"
+	case ViewRadicals:
+		return "Radicals Keys\n\n" +
+			"  ↑↓     Select radical\n" +
 			"  esc    Back to dashboard\n" +
 			"  ?      Toggle help"
 	case ViewDrill:

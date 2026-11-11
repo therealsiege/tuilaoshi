@@ -17,6 +17,7 @@ import (
 	"github.com/cj/mandarin-wiki/internal/ui/drill"
 	"github.com/cj/mandarin-wiki/internal/ui/input"
 	journeyview "github.com/cj/mandarin-wiki/internal/ui/journey"
+	"github.com/cj/mandarin-wiki/internal/ui/radicals"
 	"github.com/cj/mandarin-wiki/internal/ui/review"
 	"github.com/cj/mandarin-wiki/internal/ui/stats"
 	"github.com/cj/mandarin-wiki/internal/wiki"
@@ -41,6 +42,7 @@ type Model struct {
 	review    review.Model
 	stats     stats.Model
 	journey   journeyview.Model
+	radicals  radicals.Model
 
 	// Voice picker state
 	voiceCursor   int
@@ -69,6 +71,7 @@ func New(wikiDir string) Model {
 		review:      review.New(store, claudeClient, ttsClient, dict),
 		stats:       stats.New(store),
 		journey:     journeyview.New(store),
+		radicals:    radicals.New(),
 	}
 }
 
@@ -108,6 +111,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.review = m.review.SetSize(msg.Width, msg.Height)
 		m.stats = m.stats.SetSize(msg.Width, msg.Height)
 		m.journey = m.journey.SetSize(msg.Width, msg.Height)
+		m.radicals = m.radicals.SetSize(msg.Width, msg.Height)
 		return m, nil
 
 	case ui.SwitchViewMsg:
@@ -138,6 +142,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ui.ViewJourney:
 			m.journey = m.journey.Refresh()
 			return m, m.journey.Init()
+		case ui.ViewRadicals:
+			m.radicals = m.radicals.Refresh()
+			return m, m.radicals.Init()
 		}
 		return m, nil
 
@@ -190,6 +197,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.stats, cmd = m.stats.Update(msg)
 	case ui.ViewJourney:
 		m.journey, cmd = m.journey.Update(msg)
+	case ui.ViewRadicals:
+		m.radicals, cmd = m.radicals.Update(msg)
 	}
 	return m, cmd
 }
@@ -256,6 +265,8 @@ func (m Model) View() string {
 		content = m.stats.View()
 	case ui.ViewJourney:
 		content = m.journey.View()
+	case ui.ViewRadicals:
+		content = m.radicals.View()
 	default:
 		content = m.dashboard.View()
 	}

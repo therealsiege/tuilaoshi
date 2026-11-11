@@ -1,6 +1,10 @@
 package journey
 
-import "github.com/cj/mandarin-wiki/internal/wiki"
+import (
+	"fmt"
+
+	"github.com/cj/mandarin-wiki/internal/wiki"
+)
 
 // Rank represents the player's cultivation level, inspired by xianxia novels.
 type Rank struct {
@@ -52,14 +56,27 @@ type Artifact struct {
 	Kind    string // "mastery" or "streak"
 }
 
+// Quest is a daily objective for the player.
+type Quest struct {
+	Name    string // e.g. "Flame Quencher"
+	Chinese string // e.g. "灭火者"
+	Desc    string // e.g. "Master 3 fire-radical characters"
+	Target  int    // number needed
+	Current int    // current progress
+	Done    bool
+}
+
 // State is the complete gamification state.
 type State struct {
-	Rank       Rank
-	Progress   Progress
-	Companions []Companion
-	Bosses     []Boss
-	NextBoss   *Boss
-	Artifacts  []Artifact
+	Rank         Rank
+	Progress     Progress
+	Companions   []Companion
+	Bosses       []Boss
+	NextBoss     *Boss
+	Artifacts    []Artifact
+	Quests       []Quest
+	Achievements []Achievement
+	Lore         []LoreEntry
 }
 
 // Calculate computes the complete gamification state from the wiki store.
@@ -80,13 +97,25 @@ func Calculate(store *wiki.Store) State {
 
 	streak := store.Streak()
 
+	nextBoss := findNextBoss(mastered)
+
+	// totalReviewed and daysStudied are not yet tracked — pass 0 for now.
+	// Achievements depending on those metrics will simply show as unearned.
+	totalReviewed := 0
+	daysStudied := 0
+
+	progress := calculateProgress(mastered, totalChars)
+
 	return State{
-		Rank:       calculateRank(mastered),
-		Progress:   calculateProgress(mastered, totalChars),
-		Companions: buildCompanions(mastered),
-		Bosses:     buildBosses(mastered),
-		NextBoss:   findNextBoss(mastered),
-		Artifacts:  buildArtifacts(mastered, streak),
+		Rank:         calculateRank(mastered),
+		Progress:     progress,
+		Companions:   buildCompanions(mastered),
+		Bosses:       buildBosses(mastered),
+		NextBoss:     nextBoss,
+		Artifacts:    buildArtifacts(mastered, streak),
+		Quests:       buildQuests(mastered, streak, nextBoss),
+		Achievements: buildAchievements(mastered, totalReviewed, streak, daysStudied),
+		Lore:         buildLore(progress.Tribulation),
 	}
 }
 
@@ -374,4 +403,38 @@ func buildArtifacts(mastered, streak int) []Artifact {
 	}
 
 	return artifacts
+}
+
+func buildQuests(mastered, streak int, nextBoss *Boss) []Quest {
+	quests := []Quest{
+		{
+			Name:    "Diligent Scholar",
+			Chinese: "勤学者",
+			Desc:    "Complete 10 reviews today",
+			Target:  10,
+			Current: 0,
+			Done:    false,
+		},
+		{
+			Name:    "Steady Pilgrim",
+			Chinese: "保持连续",
+			Desc:    "Maintain your study streak",
+			Target:  streak + 1,
+			Current: streak,
+			Done:    streak > 0,
+		},
+	}
+
+	if nextBoss != nil {
+		quests = append(quests, Quest{
+			Name:    "Demon Slayer",
+			Chinese: "击败妖怪",
+			Desc:    fmt.Sprintf("Defeat %s %s: master %d characters", nextBoss.Name, nextBoss.English, nextBoss.Required),
+			Target:  nextBoss.Required,
+			Current: mastered,
+			Done:    mastered >= nextBoss.Required,
+		})
+	}
+
+	return quests
 }

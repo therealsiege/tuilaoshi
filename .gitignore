@@ -5,10 +5,15 @@
 
 # Go
 mandarin
+tuilaoshi
 cmd/mandarin/mandarin
+/generate
 
 # Environment
 .env
 
 # Generated images
 wiki/images/
+
+# Claude Flow
+.claude-flow/

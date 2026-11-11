@@ -48,5 +48,6 @@ func AllCharacters() []Char {
 	all = append(all, TechnologyChars()...)
 	all = append(all, HealthcareChars()...)
 	all = append(all, SportsChars()...)
+	all = append(all, ChengyuChars()...)
 	return all
 }

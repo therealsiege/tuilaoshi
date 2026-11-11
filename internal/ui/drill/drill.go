@@ -12,6 +12,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/cj/mandarin-wiki/internal/audio"
 	"github.com/cj/mandarin-wiki/internal/claude"
+	"github.com/cj/mandarin-wiki/internal/mnemonic"
 	"github.com/cj/mandarin-wiki/internal/model"
 	"github.com/cj/mandarin-wiki/internal/ui"
 	"github.com/cj/mandarin-wiki/internal/ui/input"
@@ -354,6 +355,12 @@ func (m Model) View() string {
 		}
 		b.WriteString("\n\n  ")
 		b.WriteString(m.feedback)
+		if m.current < len(m.cards) {
+			if line := formatDecomposition(m.cards[m.current].Chinese); line != "" {
+				b.WriteString("\n\n")
+				b.WriteString(ui.MutedStyle.Render(line))
+			}
+		}
 		b.WriteString("\n\n")
 		b.WriteString("  Rate difficulty:\n")
 		b.WriteString(fmt.Sprintf("  %s  %s  %s  %s\n",
@@ -459,6 +466,22 @@ func blankOut(sentence, word string) string {
 		return sentence[:idx] + ui.ChineseStyle.Render("_____") + sentence[idx+len(word):]
 	}
 	return sentence + " " + ui.ChineseStyle.Render("_____")
+}
+
+// formatDecomposition returns a single mnemonic line for a character, or ""
+// if no decomposition is known. Example output:
+//
+//	部 女 (woman) + 子 (child) → A woman holding her child — that is the definition of GOOD.
+func formatDecomposition(char string) string {
+	d, ok := mnemonic.Lookup(char)
+	if !ok {
+		return ""
+	}
+	var parts []string
+	for _, c := range d.Components {
+		parts = append(parts, fmt.Sprintf("%s (%s)", c.Part, c.Meaning))
+	}
+	return fmt.Sprintf("  部 %s → %s", strings.Join(parts, " + "), d.Story)
 }
 
 // InputComposing reports whether the input is in Chinese composition mode.

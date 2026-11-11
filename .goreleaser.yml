@@ -1,0 +1,65 @@
+version: 2
+
+project_name: tuilaoshi
+
+builds:
+  - id: tuilaoshi
+    main: ./cmd/mandarin
+    binary: tuilaoshi
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+
+archives:
+  - id: default
+    builds:
+      - tuilaoshi
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    format_overrides:
+      - goos: windows
+        format: zip
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+      - "^style:"
+      - Merge pull request
+      - Merge branch
+
+brews:
+  - repository:
+      owner: therealsiege
+      name: homebrew-tap
+    name: tuilaoshi
+    homepage: https://github.com/therealsiege/tuilaoshi
+    description: A TUI app for Mandarin Chinese study and spaced repetition
+    license: MIT
+    install: |
+      bin.install "tuilaoshi"
+    test: |
+      system "#{bin}/tuilaoshi", "--version"
+
+release:
+  github:
+    owner: therealsiege
+    name: tuilaoshi

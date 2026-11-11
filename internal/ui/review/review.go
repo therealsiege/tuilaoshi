@@ -11,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/cj/mandarin-wiki/internal/audio"
 	"github.com/cj/mandarin-wiki/internal/claude"
+	"github.com/cj/mandarin-wiki/internal/mnemonic"
 	"github.com/cj/mandarin-wiki/internal/model"
 	"github.com/cj/mandarin-wiki/internal/ui"
 	"github.com/cj/mandarin-wiki/internal/ui/input"
@@ -300,6 +301,12 @@ func (m Model) View() string {
 		}
 		b.WriteString("\n\n")
 		b.WriteString("  " + m.feedback)
+		if m.cursor < len(m.items) {
+			if line := formatDecomposition(m.items[m.cursor].Chinese); line != "" {
+				b.WriteString("\n\n")
+				b.WriteString(ui.MutedStyle.Render(line))
+			}
+		}
 		b.WriteString("\n\n")
 		b.WriteString("  Rate difficulty:\n")
 		b.WriteString(fmt.Sprintf("  %s  %s  %s  %s\n",
@@ -325,6 +332,20 @@ func (m Model) View() string {
 	}
 
 	return b.String()
+}
+
+// formatDecomposition returns a single mnemonic line for a character, or ""
+// if no decomposition is known.
+func formatDecomposition(char string) string {
+	d, ok := mnemonic.Lookup(char)
+	if !ok {
+		return ""
+	}
+	var parts []string
+	for _, c := range d.Components {
+		parts = append(parts, fmt.Sprintf("%s (%s)", c.Part, c.Meaning))
+	}
+	return fmt.Sprintf("  部 %s → %s", strings.Join(parts, " + "), d.Story)
 }
 
 // InputComposing reports whether the input is in Chinese composition mode.
