@@ -91,6 +91,11 @@ func (m Model) Refresh() Model {
 	return m
 }
 
+// tabFooter returns the shared footer for all tab views.
+func (m Model) tabFooter() string {
+	return "\n" + ui.Divider(40) + "\n" + ui.HelpStyle.Render("  tab/←→: switch tabs | esc: dashboard")
+}
+
 // renderTabBar renders the tab navigation bar.
 func (m Model) renderTabBar() string {
 	tabs := []string{"journey", "party", "bosses", "artifacts"}
@@ -128,12 +133,12 @@ func (m Model) renderJourney() string {
 	b.WriteString("  " + journeyMap)
 	b.WriteString("\n")
 
-	// Current tribulation
-	tribText := fmt.Sprintf("           ↑ Tribulation %d: %s %s",
-		m.state.Progress.Tribulation,
+	// Current position
+	posText := fmt.Sprintf("  You are at %s %s — Tribulation %d of 81",
 		ui.ChineseStyle.Render(m.state.Progress.Location),
-		ui.MutedStyle.Render(m.state.Progress.LocationEn))
-	b.WriteString(tribText)
+		ui.MutedStyle.Render("("+m.state.Progress.LocationEn+")"),
+		m.state.Progress.Tribulation)
+	b.WriteString(posText)
 	b.WriteString("\n\n")
 
 	// Progress summary
@@ -144,10 +149,7 @@ func (m Model) renderJourney() string {
 	b.WriteString(ui.MutedStyle.Render(progressText))
 	b.WriteString("\n\n")
 
-	// Help text
-	b.WriteString(ui.Divider(40))
-	b.WriteString("\n")
-	b.WriteString(ui.HelpStyle.Render("  tab: switch tabs | esc: back to dashboard"))
+	b.WriteString(m.tabFooter())
 
 	return b.String()
 }
@@ -171,10 +173,10 @@ func (m Model) renderRankBox() string {
 	b.WriteString("\n")
 
 	// Next rank
-	if m.state.Rank.Level < 10 { // Assuming max level is 10
+	if m.state.Rank.NextName != "" {
 		nextText := fmt.Sprintf("Next: %s %s",
-			m.state.Rank.Name, // This would be the next rank name in real implementation
-			ui.MutedStyle.Render(m.state.Rank.English))
+			m.state.Rank.NextName,
+			ui.MutedStyle.Render(m.state.Rank.NextEnglish))
 		b.WriteString(ui.MutedStyle.Render(nextText))
 	} else {
 		b.WriteString(ui.SuccessStyle.Render("✓ Max cultivation achieved!"))
@@ -183,27 +185,39 @@ func (m Model) renderRankBox() string {
 	return b.String()
 }
 
-// renderJourneyMap renders the ASCII journey progress line.
+// renderJourneyMap renders the named-location journey progress line.
 func (m Model) renderJourneyMap() string {
-	const totalStops = 10
-	progress := m.state.Progress.Tribulation
-
-	var dots []string
-	dots = append(dots, ui.ChineseStyle.Render("长安")) // Start: Chang'an
-
-	for i := 1; i <= totalStops; i++ {
-		dots = append(dots, "══")
-		if i < progress {
-			dots = append(dots, ui.SuccessStyle.Render("●"))
-		} else {
-			dots = append(dots, ui.MutedStyle.Render("○"))
-		}
+	locations := []struct {
+		name  string
+		start int
+	}{
+		{"长安", 0},
+		{"双叉岭", 10},
+		{"五行山", 20},
+		{"观音院", 30},
+		{"高老庄", 40},
+		{"流沙河", 50},
+		{"火焰山", 60},
+		{"通天河", 70},
+		{"灵山", 80},
+		{"天竺", 81},
 	}
 
-	dots = append(dots, "══")
-	dots = append(dots, ui.ChineseStyle.Render("天竺")) // End: India (Tianzhu)
-
-	return strings.Join(dots, "")
+	trib := m.state.Progress.Tribulation
+	var parts []string
+	for i, loc := range locations {
+		if trib >= loc.start {
+			parts = append(parts, ui.SuccessStyle.Render(loc.name))
+		} else if i > 0 && trib >= locations[i-1].start {
+			parts = append(parts, ui.WarningStyle.Render(loc.name))
+		} else {
+			parts = append(parts, ui.MutedStyle.Render(loc.name))
+		}
+		if i < len(locations)-1 {
+			parts = append(parts, ui.MutedStyle.Render(" → "))
+		}
+	}
+	return strings.Join(parts, "")
 }
 
 // renderParty renders the companions/party view (tab 1).
@@ -215,6 +229,7 @@ func (m Model) renderParty() string {
 
 	if len(m.state.Companions) == 0 {
 		b.WriteString(ui.MutedStyle.Render("  No companions yet..."))
+		b.WriteString(m.tabFooter())
 		return b.String()
 	}
 
@@ -239,10 +254,7 @@ func (m Model) renderParty() string {
 		b.WriteString("\n")
 	}
 
-	b.WriteString("\n")
-	b.WriteString(ui.Divider(40))
-	b.WriteString("\n")
-	b.WriteString(ui.HelpStyle.Render("  tab: switch tabs | esc: back to dashboard"))
+	b.WriteString(m.tabFooter())
 
 	return b.String()
 }
@@ -256,10 +268,15 @@ func (m Model) renderBosses() string {
 
 	if len(m.state.Bosses) == 0 {
 		b.WriteString(ui.MutedStyle.Render("  No bosses yet..."))
+		b.WriteString(m.tabFooter())
 		return b.String()
 	}
 
-	for _, boss := range m.state.Bosses {
+	mastered := m.state.Progress.Mastered
+	for i, boss := range m.state.Bosses {
+		if i > 0 {
+			b.WriteString("\n")
+		}
 		b.WriteString("  ")
 		if boss.Defeated {
 			// Defeated boss
@@ -276,6 +293,14 @@ func (m Model) renderBosses() string {
 				b.WriteString(ui.WarningStyle.Render(boss.Name + " · " + boss.English))
 				b.WriteString("\n")
 				b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("     NEXT BOSS! Theme: %s", boss.Theme)))
+				b.WriteString("\n")
+				b.WriteString("     " + ui.ProgressBar(mastered, boss.Required, 20))
+				b.WriteString(ui.MutedStyle.Render(fmt.Sprintf(" %d/%d", mastered, boss.Required)))
+				remaining := boss.Required - mastered
+				if remaining > 0 {
+					b.WriteString("\n")
+					b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     Need %d more characters", remaining)))
+				}
 			} else {
 				b.WriteString(ui.MutedStyle.Render("○ "))
 				b.WriteString(ui.MutedStyle.Render(boss.Name + " · " + boss.English))
@@ -286,10 +311,7 @@ func (m Model) renderBosses() string {
 		b.WriteString("\n")
 	}
 
-	b.WriteString("\n")
-	b.WriteString(ui.Divider(40))
-	b.WriteString("\n")
-	b.WriteString(ui.HelpStyle.Render("  tab: switch tabs | esc: back to dashboard"))
+	b.WriteString(m.tabFooter())
 
 	return b.String()
 }
@@ -303,6 +325,7 @@ func (m Model) renderArtifacts() string {
 
 	if len(m.state.Artifacts) == 0 {
 		b.WriteString(ui.MutedStyle.Render("  No artifacts yet..."))
+		b.WriteString(m.tabFooter())
 		return b.String()
 	}
 
@@ -322,15 +345,16 @@ func (m Model) renderArtifacts() string {
 			b.WriteString("\n")
 			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     %s", artifact.Desc)))
 			b.WriteString("\n")
-			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     Earn at %d characters", artifact.EarnAt)))
+			if artifact.Kind == "streak" {
+				b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     Earn with %d-day streak", artifact.EarnAt)))
+			} else {
+				b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     Earn at %d characters", artifact.EarnAt)))
+			}
 		}
 		b.WriteString("\n")
 	}
 
-	b.WriteString("\n")
-	b.WriteString(ui.Divider(40))
-	b.WriteString("\n")
-	b.WriteString(ui.HelpStyle.Render("  tab: switch tabs | esc: back to dashboard"))
+	b.WriteString(m.tabFooter())
 
 	return b.String()
 }

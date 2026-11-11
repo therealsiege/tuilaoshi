@@ -4,11 +4,13 @@ import "github.com/cj/mandarin-wiki/internal/wiki"
 
 // Rank represents the player's cultivation level, inspired by xianxia novels.
 type Rank struct {
-	Name     string // Chinese name: 凡人, 练气, 筑基, 金丹, 元婴, 化神, 大乘, 斗战胜佛
-	English  string // English translation
-	Level    int    // 0-7
-	Current  int    // characters mastered at current rank
-	Required int    // total needed for next rank
+	Name        string // Chinese name: 凡人, 练气, 筑基, 金丹, 元婴, 化神, 大乘, 斗战胜佛
+	English     string // English translation
+	Level       int    // 0-7
+	Current     int    // characters mastered at current rank
+	Required    int    // total needed for next rank
+	NextName    string // Chinese name of the next rank (empty at max rank)
+	NextEnglish string // English name of the next rank (empty at max rank)
 }
 
 // Progress tracks position on the Journey to the West pilgrimage.
@@ -46,7 +48,8 @@ type Artifact struct {
 	Chinese string
 	Desc    string
 	Earned  bool
-	EarnAt  int // streak days or chars needed
+	EarnAt  int    // streak days or chars needed
+	Kind    string // "mastery" or "streak"
 }
 
 // State is the complete gamification state.
@@ -113,22 +116,29 @@ func calculateRank(mastered int) Rank {
 				required = ranks[i].threshold
 				current = mastered
 			}
-			return Rank{
+			r := Rank{
 				Name:     ranks[i].name,
 				English:  ranks[i].english,
 				Level:    ranks[i].level,
 				Current:  current,
 				Required: required,
 			}
+			if i+1 < len(ranks) {
+				r.NextName = ranks[i+1].name
+				r.NextEnglish = ranks[i+1].english
+			}
+			return r
 		}
 	}
 
 	return Rank{
-		Name:     "凡人",
-		English:  "Mortal",
-		Level:    0,
-		Current:  mastered,
-		Required: 100,
+		Name:        "凡人",
+		English:     "Mortal",
+		Level:       0,
+		Current:     mastered,
+		Required:    100,
+		NextName:    "练气",
+		NextEnglish: "Qi Refining",
 	}
 }
 
@@ -319,6 +329,7 @@ func buildArtifacts(mastered, streak int) []Artifact {
 			Desc:    "Legendary staff of Sun Wukong",
 			EarnAt:  100,
 			Earned:  mastered >= 100,
+			Kind:    "mastery",
 		},
 		{
 			Name:    "Headband Spell",
@@ -326,6 +337,7 @@ func buildArtifacts(mastered, streak int) []Artifact {
 			Desc:    "Controls the Monkey King",
 			EarnAt:  7,
 			Earned:  streak >= 7,
+			Kind:    "streak",
 		},
 		{
 			Name:    "Banana Leaf Fan",
@@ -333,6 +345,7 @@ func buildArtifacts(mastered, streak int) []Artifact {
 			Desc:    "Extinguishes the Flaming Mountains",
 			EarnAt:  500,
 			Earned:  mastered >= 500,
+			Kind:    "mastery",
 		},
 		{
 			Name:    "Ginseng Fruit",
@@ -340,6 +353,7 @@ func buildArtifacts(mastered, streak int) []Artifact {
 			Desc:    "Grants immortality and wisdom",
 			EarnAt:  1000,
 			Earned:  mastered >= 1000,
+			Kind:    "mastery",
 		},
 		{
 			Name:    "Fiery Eyes",
@@ -347,6 +361,7 @@ func buildArtifacts(mastered, streak int) []Artifact {
 			Desc:    "See through any deception",
 			EarnAt:  2000,
 			Earned:  mastered >= 2000,
+			Kind:    "mastery",
 		},
 		{
 			Name:    "Sea-Calming Needle",
@@ -354,6 +369,7 @@ func buildArtifacts(mastered, streak int) []Artifact {
 			Desc:    "Controls the oceans",
 			EarnAt:  3000,
 			Earned:  mastered >= 3000,
+			Kind:    "mastery",
 		},
 	}
 

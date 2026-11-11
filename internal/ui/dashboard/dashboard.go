@@ -9,22 +9,24 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cj/mandarin-wiki/internal/audio"
+	"github.com/cj/mandarin-wiki/internal/journey"
 	"github.com/cj/mandarin-wiki/internal/ui"
 	"github.com/cj/mandarin-wiki/internal/wiki"
 )
 
 // Model is the dashboard view model.
 type Model struct {
-	store  *wiki.Store
-	tts    *audio.Client
-	keys   ui.DashboardKeys
-	gkeys  ui.GlobalKeys
-	stats  wiki.ContentStats
-	daily  wiki.DailyStats
-	streak int
-	due    int
-	width  int
-	height int
+	store        *wiki.Store
+	tts          *audio.Client
+	keys         ui.DashboardKeys
+	gkeys        ui.GlobalKeys
+	stats        wiki.ContentStats
+	daily        wiki.DailyStats
+	journeyState journey.State
+	streak       int
+	due          int
+	width        int
+	height       int
 }
 
 // New creates a new dashboard model.
@@ -53,6 +55,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.due = len(due)
 		m.daily = m.store.TodayStats()
 		m.streak = m.store.Streak()
+		m.journeyState = journey.Calculate(m.store)
 		return m, nil
 
 	case tea.KeyMsg:
@@ -124,7 +127,28 @@ func (m Model) View() string {
 		dueText := ui.SuccessStyle.Render("  ✓ All reviews complete!")
 		b.WriteString(dueText)
 	}
-	b.WriteString("\n\n")
+	b.WriteString("\n")
+
+	// Journey summary
+	b.WriteString("\n")
+	rank := m.journeyState.Rank
+	journeySummary := lipgloss.JoinVertical(lipgloss.Left,
+		ui.SubtitleStyle.Render("  游 Journey to the West"),
+		"",
+		fmt.Sprintf("  Rank: %s · %s", ui.ChineseStyle.Render(rank.Name), rank.English),
+		"  "+ui.ProgressBar(rank.Current, rank.Required, 25)+ui.MutedStyle.Render(fmt.Sprintf(" %d/%d", rank.Current, rank.Required)),
+	)
+	if m.journeyState.NextBoss != nil {
+		boss := m.journeyState.NextBoss
+		journeySummary = lipgloss.JoinVertical(lipgloss.Left,
+			journeySummary,
+			fmt.Sprintf("  Next: %s %s", ui.ChineseStyle.Render(boss.Name), ui.MutedStyle.Render(boss.English)),
+		)
+	}
+	b.WriteString(ui.BorderStyle.Width(66).Render(journeySummary))
+	b.WriteString("\n")
+
+	b.WriteString("\n")
 
 	// Navigation
 	b.WriteString(ui.Divider(30))
@@ -194,5 +218,6 @@ func (m Model) Refresh() Model {
 	m.due = len(due)
 	m.daily = m.store.TodayStats()
 	m.streak = m.store.Streak()
+	m.journeyState = journey.Calculate(m.store)
 	return m
 }
