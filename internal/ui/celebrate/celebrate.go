@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cj/mandarin-wiki/internal/ui"
+	"github.com/cj/mandarin-wiki/internal/ui/imgview"
 )
 
 // Event types for celebrations.
@@ -22,11 +23,12 @@ const boxWidth = 40
 
 // Celebration holds the data for a celebration display.
 type Celebration struct {
-	Event   string
-	Title   string
-	Chinese string
-	Desc    string
-	Art     string // pre-composed ASCII art lines (no border)
+	Event     string
+	Title     string
+	Chinese   string
+	Desc      string
+	Art       string // pre-composed ASCII art lines (no border)
+	ImagePath string // optional path to a celebration image
 }
 
 // RankUpCelebration creates a rank-up celebration.
@@ -40,11 +42,12 @@ func RankUpCelebration(rankName, rankEnglish string) Celebration {
 	}, "\n")
 
 	return Celebration{
-		Event:   RankUp,
-		Title:   "CULTIVATION BREAKTHROUGH",
-		Chinese: rankName,
-		Desc:    rankName + " * " + rankEnglish,
-		Art:     art,
+		Event:     RankUp,
+		Title:     "CULTIVATION BREAKTHROUGH",
+		Chinese:   rankName,
+		Desc:      rankName + " * " + rankEnglish,
+		Art:       art,
+		ImagePath: "assets/images/celebrations/rank_up.png",
 	}
 }
 
@@ -57,11 +60,12 @@ func BossDefeatCelebration(bossName, bossEnglish string) Celebration {
 	}, "\n")
 
 	return Celebration{
-		Event:   BossDefeated,
-		Title:   "DEMON VANQUISHED",
-		Chinese: bossName,
-		Desc:    bossName + " * " + bossEnglish,
-		Art:     art,
+		Event:     BossDefeated,
+		Title:     "DEMON VANQUISHED",
+		Chinese:   bossName,
+		Desc:      bossName + " * " + bossEnglish,
+		Art:       art,
+		ImagePath: "assets/images/celebrations/boss_defeat.png",
 	}
 }
 
@@ -109,11 +113,12 @@ func StreakCelebration(days int) Celebration {
 	}
 
 	return Celebration{
-		Event:   StreakMile,
-		Title:   "STREAK MILESTONE",
-		Chinese: chinese,
-		Desc:    fmt.Sprintf("%d-day streak!", days),
-		Art:     art,
+		Event:     StreakMile,
+		Title:     "STREAK MILESTONE",
+		Chinese:   chinese,
+		Desc:      fmt.Sprintf("%d-day streak!", days),
+		Art:       art,
+		ImagePath: "assets/images/celebrations/streak.png",
 	}
 }
 
@@ -126,11 +131,12 @@ func CompanionCelebration(name, english string) Celebration {
 	}, "\n")
 
 	return Celebration{
-		Event:   CompanionNew,
-		Title:   "NEW COMPANION",
-		Chinese: name,
-		Desc:    name + " * " + english,
-		Art:     art,
+		Event:     CompanionNew,
+		Title:     "NEW COMPANION",
+		Chinese:   name,
+		Desc:      name + " * " + english,
+		Art:       art,
+		ImagePath: fmt.Sprintf("assets/images/celebrations/companion_%s.png", name),
 	}
 }
 
@@ -145,11 +151,12 @@ func AchievementCelebration(title, chinese, desc string) Celebration {
 	}, "\n")
 
 	return Celebration{
-		Event:   Achievement,
-		Title:   title,
-		Chinese: chinese,
-		Desc:    desc,
-		Art:     art,
+		Event:     Achievement,
+		Title:     title,
+		Chinese:   chinese,
+		Desc:      desc,
+		Art:       art,
+		ImagePath: "assets/images/celebrations/achievement.png",
 	}
 }
 
@@ -210,8 +217,9 @@ func (c Celebration) Render() string {
 	b.WriteString(boxLine(borderStyle, "", boxWidth))
 	b.WriteString("\n")
 
-	// Art lines.
-	for _, line := range strings.Split(c.Art, "\n") {
+	// Art lines — use terminal image if available, fall back to ASCII art.
+	artContent := imgview.RenderWithFallback(c.ImagePath, 30, 12, c.Art)
+	for _, line := range strings.Split(artContent, "\n") {
 		if line == "" {
 			continue
 		}

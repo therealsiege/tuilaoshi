@@ -16,6 +16,7 @@ import (
 	"github.com/cj/mandarin-wiki/internal/mnemonic"
 	"github.com/cj/mandarin-wiki/internal/model"
 	"github.com/cj/mandarin-wiki/internal/ui"
+	"github.com/cj/mandarin-wiki/internal/ui/imgview"
 	"github.com/cj/mandarin-wiki/internal/ui/input"
 	"github.com/cj/mandarin-wiki/internal/wiki"
 )
@@ -516,8 +517,10 @@ func (m Model) renderEncounter() string {
 	enc := m.encounter
 	var b strings.Builder
 
-	// Demon ASCII art
-	for _, line := range strings.Split(enc.Demon.Art, "\n") {
+	// Demon art: prefer terminal image, fall back to ASCII art
+	imgPath := fmt.Sprintf("assets/images/demons/%s.png", enc.Demon.Name)
+	artContent := imgview.RenderWithFallback(imgPath, 40, 15, enc.Demon.Art)
+	for _, line := range strings.Split(artContent, "\n") {
 		b.WriteString(ui.ErrorStyle.Render("      " + line))
 		b.WriteString("\n")
 	}

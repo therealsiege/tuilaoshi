@@ -7,6 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/cj/mandarin-wiki/internal/journey"
 	"github.com/cj/mandarin-wiki/internal/ui"
+	"github.com/cj/mandarin-wiki/internal/ui/imgview"
 	"github.com/cj/mandarin-wiki/internal/wiki"
 )
 
@@ -676,9 +677,10 @@ func (m Model) renderBestiary() string {
 	selected := entries[cursor]
 	var right strings.Builder
 
-	// ASCII art
-	if selected.Art != "" {
-		for _, line := range strings.Split(selected.Art, "\n") {
+	// Demon image: try terminal image first, fall back to ASCII art.
+	rendered := imgview.RenderWithFallback(selected.ImagePath, 30, 15, selected.Art)
+	if rendered != "" {
+		for _, line := range strings.Split(rendered, "\n") {
 			right.WriteString("  " + line + "\n")
 		}
 		right.WriteString("\n")

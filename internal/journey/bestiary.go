@@ -1,16 +1,27 @@
 package journey
 
+import "fmt"
+
 // BestiaryEntry describes a demon from Journey to the West.
 type BestiaryEntry struct {
-	Name     string // Chinese name
-	English  string // English name
-	Title    string // demon's title/epithet in Chinese
-	TitleEng string // English title
-	Origin   string // 1-sentence origin story
-	Powers   string // what the demon can do
-	Weakness string // how they were defeated
-	Chapter  string // approximate chapter reference
-	Art      string // 3-5 line ASCII art of the demon
+	Name      string // Chinese name
+	English   string // English name
+	Title     string // demon's title/epithet in Chinese
+	TitleEng  string // English title
+	Origin    string // 1-sentence origin story
+	Powers    string // what the demon can do
+	Weakness  string // how they were defeated
+	Chapter   string // approximate chapter reference
+	Art       string // 3-5 line ASCII art of the demon
+	ImagePath string // path to a terminal-renderable image (defaults to assets/images/demons/NAME.png)
+}
+
+func init() {
+	for i := range bestiary {
+		if bestiary[i].ImagePath == "" {
+			bestiary[i].ImagePath = fmt.Sprintf("assets/images/demons/%s.png", bestiary[i].Name)
+		}
+	}
 }
 
 // Bestiary returns all demon entries in the catalog.
