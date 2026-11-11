@@ -12,11 +12,12 @@ import (
 
 // Model is the Journey to the West gamification view.
 type Model struct {
-	store  *wiki.Store
-	state  journey.State
-	tab    int // 0=journey, 1=party, 2=bosses, 3=artifacts, 4=quests, 5=achievements, 6=lore
-	width  int
-	height int
+	store          *wiki.Store
+	state          journey.State
+	tab            int // 0=journey, 1=party, 2=bosses, 3=artifacts, 4=quests, 5=achievements, 6=lore, 7=bestiary
+	width          int
+	height         int
+	bestiaryCursor int // selected demon index in the bestiary tab
 }
 
 // New creates a new journey view model.
@@ -37,14 +38,30 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "tab":
-			m.tab = (m.tab + 1) % 7
+			m.tab = (m.tab + 1) % 8
 			return m, nil
 		case "left", "h":
-			m.tab = (m.tab - 1 + 7) % 7
+			m.tab = (m.tab - 1 + 8) % 8
 			return m, nil
 		case "right", "l":
-			m.tab = (m.tab + 1) % 7
+			m.tab = (m.tab + 1) % 8
 			return m, nil
+		case "up", "k":
+			if m.tab == 7 {
+				entries := journey.Bestiary()
+				if len(entries) > 0 {
+					m.bestiaryCursor = (m.bestiaryCursor - 1 + len(entries)) % len(entries)
+				}
+				return m, nil
+			}
+		case "down", "j":
+			if m.tab == 7 {
+				entries := journey.Bestiary()
+				if len(entries) > 0 {
+					m.bestiaryCursor = (m.bestiaryCursor + 1) % len(entries)
+				}
+				return m, nil
+			}
 		case "esc":
 			return m, ui.SwitchTo(ui.ViewDashboard)
 		}
@@ -79,6 +96,8 @@ func (m Model) View() string {
 		b.WriteString(m.renderAchievements())
 	case 6:
 		b.WriteString(m.renderLore())
+	case 7:
+		b.WriteString(m.renderBestiary())
 	}
 
 	return b.String()
@@ -104,7 +123,7 @@ func (m Model) tabFooter() string {
 
 // renderTabBar renders the tab navigation bar.
 func (m Model) renderTabBar() string {
-	tabs := []string{"journey", "party", "bosses", "artifacts", "quests", "achievements", "lore"}
+	tabs := []string{"journey", "party", "bosses", "artifacts", "quests", "achievements", "lore", "bestiary"}
 	var rendered []string
 
 	for i, tab := range tabs {
@@ -122,6 +141,19 @@ func (m Model) renderTabBar() string {
 func (m Model) renderJourney() string {
 	var b strings.Builder
 
+	trib := m.state.Progress.Tribulation
+	current := journey.TribulationAt(trib)
+
+	// Current tribulation name prominently at the top
+	if current != nil {
+		tribTitle := fmt.Sprintf("  第%d难: %s (%s)",
+			current.Number, current.Name, current.English)
+		b.WriteString(ui.ChineseStyle.Render(tribTitle))
+		b.WriteString("\n")
+		b.WriteString(ui.MutedStyle.Render("  " + current.Desc))
+		b.WriteString("\n\n")
+	}
+
 	// Cultivation Rank section
 	b.WriteString(ui.SubtitleStyle.Render("  修为 Cultivation Rank"))
 	b.WriteString("\n")
@@ -130,25 +162,72 @@ func (m Model) renderJourney() string {
 	b.WriteString(ui.BorderStyle.Width(50).Render(rankBox))
 	b.WriteString("\n\n")
 
-	// Pilgrimage progress section
-	b.WriteString(ui.SubtitleStyle.Render("  取经路 The Pilgrimage"))
+	// Pilgrimage progress section — scrollable tribulation list
+	b.WriteString(ui.SubtitleStyle.Render("  八十一难 The 81 Tribulations"))
 	b.WriteString("\n\n")
 
-	// Journey map line
-	journeyMap := m.renderJourneyMap()
-	b.WriteString("  " + journeyMap)
+	all := journey.AllTribulations()
+	windowSize := 10
+
+	// Center the window around the current tribulation (0-indexed)
+	currentIdx := trib - 1
+	if currentIdx < 0 {
+		currentIdx = 0
+	}
+	startIdx := currentIdx - windowSize/2
+	if startIdx < 0 {
+		startIdx = 0
+	}
+	if startIdx+windowSize > len(all) {
+		startIdx = len(all) - windowSize
+	}
+	if startIdx < 0 {
+		startIdx = 0
+	}
+	endIdx := startIdx + windowSize
+	if endIdx > len(all) {
+		endIdx = len(all)
+	}
+
+	// Ellipsis for earlier tribulations
+	if startIdx > 0 {
+		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("       ... %d more above ...", startIdx)))
+		b.WriteString("\n")
+	}
+
+	for i := startIdx; i < endIdx; i++ {
+		t := all[i]
+		line := fmt.Sprintf("%2d. %s — %s", t.Number, t.Name, t.English)
+
+		if t.Number < trib {
+			// Past: completed
+			b.WriteString(ui.SuccessStyle.Render("  \u2713 " + line))
+		} else if t.Number == trib {
+			// Current: highlighted
+			b.WriteString(ui.SelectedStyle.Render("  \u25b8 " + line))
+		} else {
+			// Future: muted
+			b.WriteString(ui.MutedStyle.Render("  \u00b7 " + line))
+		}
+		b.WriteString("\n")
+	}
+
+	// Ellipsis for later tribulations
+	remaining := len(all) - endIdx
+	if remaining > 0 {
+		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("       ... %d more below ...", remaining)))
+		b.WriteString("\n")
+	}
+
 	b.WriteString("\n")
 
-	// Current position
-	posText := fmt.Sprintf("  You are at %s %s — Tribulation %d of 81",
-		ui.ChineseStyle.Render(m.state.Progress.Location),
-		ui.MutedStyle.Render("("+m.state.Progress.LocationEn+")"),
-		m.state.Progress.Tribulation)
-	b.WriteString(posText)
-	b.WriteString("\n\n")
-
 	// Progress summary
-	progressText := fmt.Sprintf("  Progress: %d/%d characters mastered (%.0f%%)",
+	completed := trib - 1
+	if completed < 0 {
+		completed = 0
+	}
+	progressText := fmt.Sprintf("  %d / 81 tribulations completed  \u00b7  %d/%d characters mastered (%.0f%%)",
+		completed,
 		m.state.Progress.Mastered,
 		m.state.Progress.TotalChars,
 		m.state.Progress.Percent)
@@ -165,7 +244,7 @@ func (m Model) renderRankBox() string {
 	var b strings.Builder
 
 	// Current rank with Chinese and English
-	rankLine := fmt.Sprintf("%s · %s",
+	rankLine := fmt.Sprintf("%s \u00b7 %s",
 		ui.ChineseStyle.Render(m.state.Rank.Name),
 		m.state.Rank.English)
 	b.WriteString(rankLine)
@@ -185,45 +264,10 @@ func (m Model) renderRankBox() string {
 			ui.MutedStyle.Render(m.state.Rank.NextEnglish))
 		b.WriteString(ui.MutedStyle.Render(nextText))
 	} else {
-		b.WriteString(ui.SuccessStyle.Render("✓ Max cultivation achieved!"))
+		b.WriteString(ui.SuccessStyle.Render("\u2713 Max cultivation achieved!"))
 	}
 
 	return b.String()
-}
-
-// renderJourneyMap renders the named-location journey progress line.
-func (m Model) renderJourneyMap() string {
-	locations := []struct {
-		name  string
-		start int
-	}{
-		{"长安", 0},
-		{"双叉岭", 10},
-		{"五行山", 20},
-		{"观音院", 30},
-		{"高老庄", 40},
-		{"流沙河", 50},
-		{"火焰山", 60},
-		{"通天河", 70},
-		{"灵山", 80},
-		{"天竺", 81},
-	}
-
-	trib := m.state.Progress.Tribulation
-	var parts []string
-	for i, loc := range locations {
-		if trib >= loc.start {
-			parts = append(parts, ui.SuccessStyle.Render(loc.name))
-		} else if i > 0 && trib >= locations[i-1].start {
-			parts = append(parts, ui.WarningStyle.Render(loc.name))
-		} else {
-			parts = append(parts, ui.MutedStyle.Render(loc.name))
-		}
-		if i < len(locations)-1 {
-			parts = append(parts, ui.MutedStyle.Render(" → "))
-		}
-	}
-	return strings.Join(parts, "")
 }
 
 // renderParty renders the companions/party view (tab 1).
@@ -578,4 +622,141 @@ func (m Model) renderLore() string {
 	b.WriteString(m.tabFooter())
 
 	return b.String()
+}
+
+// renderBestiary renders the demon catalog view (tab 7).
+func (m Model) renderBestiary() string {
+	var b strings.Builder
+
+	b.WriteString(ui.TitleStyle.Render("  妖怪图鉴 Demon Bestiary"))
+	b.WriteString("\n\n")
+
+	entries := journey.Bestiary()
+	if len(entries) == 0 {
+		b.WriteString(ui.MutedStyle.Render("  No demons cataloged..."))
+		b.WriteString(m.tabFooter())
+		return b.String()
+	}
+
+	// Build a set of defeated boss names for quick lookup.
+	defeated := make(map[string]bool)
+	for _, boss := range m.state.Bosses {
+		if boss.Defeated {
+			defeated[boss.Name] = true
+		}
+	}
+
+	// Clamp cursor.
+	cursor := m.bestiaryCursor
+	if cursor >= len(entries) {
+		cursor = len(entries) - 1
+	}
+	if cursor < 0 {
+		cursor = 0
+	}
+
+	// LEFT pane: scrollable demon name list.
+	var left strings.Builder
+	for i, entry := range entries {
+		mark := "·"
+		if defeated[entry.Name] {
+			mark = ui.SuccessStyle.Render("✓")
+		}
+
+		name := fmt.Sprintf("%s %s  %s", mark, entry.Name, entry.English)
+		if i == cursor {
+			left.WriteString(ui.SelectedStyle.Render(" > " + name))
+		} else {
+			left.WriteString("   " + name)
+		}
+		left.WriteString("\n")
+	}
+
+	// RIGHT pane: detail panel for the selected demon.
+	selected := entries[cursor]
+	var right strings.Builder
+
+	// ASCII art
+	if selected.Art != "" {
+		for _, line := range strings.Split(selected.Art, "\n") {
+			right.WriteString("  " + line + "\n")
+		}
+		right.WriteString("\n")
+	}
+
+	// Title / epithet
+	right.WriteString("  ")
+	right.WriteString(ui.ChineseStyle.Render(selected.Title))
+	right.WriteString("  ")
+	right.WriteString(ui.MutedStyle.Render(selected.TitleEng))
+	right.WriteString("\n\n")
+
+	// Origin
+	right.WriteString(ui.SubtitleStyle.Render("  Origin"))
+	right.WriteString("\n")
+	right.WriteString("  " + ui.MutedStyle.Render(ui.WrapText(selected.Origin, 44)))
+	right.WriteString("\n\n")
+
+	// Powers
+	right.WriteString(ui.SubtitleStyle.Render("  Powers"))
+	right.WriteString("\n")
+	right.WriteString("  " + ui.MutedStyle.Render(ui.WrapText(selected.Powers, 44)))
+	right.WriteString("\n\n")
+
+	// Weakness
+	right.WriteString(ui.SubtitleStyle.Render("  Weakness"))
+	right.WriteString("\n")
+	right.WriteString("  " + ui.MutedStyle.Render(ui.WrapText(selected.Weakness, 44)))
+	right.WriteString("\n\n")
+
+	// Chapter
+	right.WriteString(ui.SubtitleStyle.Render("  Chapter"))
+	right.WriteString("\n")
+	right.WriteString("  " + ui.MutedStyle.Render(selected.Chapter))
+	right.WriteString("\n")
+
+	// Compose the two-pane layout side by side.
+	leftLines := strings.Split(strings.TrimRight(left.String(), "\n"), "\n")
+	rightLines := strings.Split(strings.TrimRight(right.String(), "\n"), "\n")
+
+	// Fixed left column width for alignment.
+	leftWidth := 36
+
+	maxLines := len(leftLines)
+	if len(rightLines) > maxLines {
+		maxLines = len(rightLines)
+	}
+
+	sep := ui.MutedStyle.Render(" │ ")
+	for i := 0; i < maxLines; i++ {
+		lc := ""
+		if i < len(leftLines) {
+			lc = leftLines[i]
+		}
+		rc := ""
+		if i < len(rightLines) {
+			rc = rightLines[i]
+		}
+		// Pad the left column to a fixed width (using rune count for CJK).
+		padded := padToWidth(lc, leftWidth)
+		b.WriteString(padded)
+		b.WriteString(sep)
+		b.WriteString(rc)
+		b.WriteString("\n")
+	}
+
+	b.WriteString("\n")
+	b.WriteString(ui.HelpStyle.Render("  ↑↓/jk: scroll demons | tab/←→: switch tabs | esc: dashboard"))
+
+	return b.String()
+}
+
+// padToWidth pads a string with spaces to reach the target visible width.
+// It counts runes rather than bytes so CJK characters are handled reasonably.
+func padToWidth(s string, width int) string {
+	runes := []rune(s)
+	if len(runes) >= width {
+		return s
+	}
+	return s + strings.Repeat(" ", width-len(runes))
 }

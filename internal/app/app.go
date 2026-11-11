@@ -9,9 +9,11 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cj/mandarin-wiki/internal/audio"
 	"github.com/cj/mandarin-wiki/internal/claude"
+	"github.com/cj/mandarin-wiki/internal/journey"
 	"github.com/cj/mandarin-wiki/internal/model"
 	"github.com/cj/mandarin-wiki/internal/ui"
 	"github.com/cj/mandarin-wiki/internal/ui/browser"
+	"github.com/cj/mandarin-wiki/internal/ui/celebrate"
 	"github.com/cj/mandarin-wiki/internal/ui/chat"
 	"github.com/cj/mandarin-wiki/internal/ui/dashboard"
 	"github.com/cj/mandarin-wiki/internal/ui/drill"
@@ -44,6 +46,12 @@ type Model struct {
 	journey   journeyview.Model
 	radicals  radicals.Model
 
+	// Celebration state
+	celebration    *celebrate.Celebration // active celebration to display
+	celebrationTTL int                    // remaining key presses before auto-dismiss
+	prevRankName   string                 // to detect rank changes
+	prevBossCount  int                    // to detect boss defeats
+
 	// Voice picker state
 	voiceCursor   int
 	voiceCategory int // 0 = Chinese, 1 = English
@@ -58,20 +66,31 @@ func New(wikiDir string) Model {
 	// Build pinyin/character dictionary from wiki pages
 	dict := buildDict(store)
 
+	// Snapshot initial journey state to detect future milestones.
+	initialState := journey.Calculate(store)
+	initialBossCount := 0
+	for _, b := range initialState.Bosses {
+		if b.Defeated {
+			initialBossCount++
+		}
+	}
+
 	return Model{
-		store:       store,
-		claude:      claudeClient,
-		tts:         ttsClient,
-		keys:        ui.DefaultGlobalKeys(),
-		currentView: ui.ViewDashboard,
-		dashboard:   dashboard.New(store, ttsClient),
-		drill:       drill.New(store, claudeClient, ttsClient, dict),
-		browser:     browser.New(store),
-		chat:        chat.New(claudeClient, ttsClient, dict),
-		review:      review.New(store, claudeClient, ttsClient, dict),
-		stats:       stats.New(store),
-		journey:     journeyview.New(store),
-		radicals:    radicals.New(),
+		store:         store,
+		claude:        claudeClient,
+		tts:           ttsClient,
+		keys:          ui.DefaultGlobalKeys(),
+		currentView:   ui.ViewDashboard,
+		dashboard:     dashboard.New(store, ttsClient),
+		drill:         drill.New(store, claudeClient, ttsClient, dict),
+		browser:       browser.New(store),
+		chat:          chat.New(claudeClient, ttsClient, dict),
+		review:        review.New(store, claudeClient, ttsClient, dict),
+		stats:         stats.New(store),
+		journey:       journeyview.New(store),
+		radicals:      radicals.New(),
+		prevRankName:  initialState.Rank.Name,
+		prevBossCount: initialBossCount,
 	}
 }
 
@@ -120,6 +139,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.Target {
 		case ui.ViewDashboard:
 			m.dashboard = m.dashboard.Refresh()
+			m.checkCelebrations()
 			return m, m.dashboard.Init()
 		case ui.ViewDrill:
 			m.drill = m.drill.Refresh()
@@ -149,6 +169,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
+		// Dismiss celebration on any keypress
+		if m.celebration != nil {
+			m.celebrationTTL--
+			if m.celebrationTTL <= 0 || msg.String() == "esc" || msg.String() == "enter" {
+				m.celebration = nil
+				m.celebrationTTL = 0
+			}
+			return m, nil
+		}
+
 		// Help toggle from anywhere
 		if key.Matches(msg, m.keys.Help) && m.currentView != ui.ViewChat {
 			m.showHelp = !m.showHelp
@@ -271,6 +301,10 @@ func (m Model) View() string {
 		content = m.dashboard.View()
 	}
 
+	if m.celebration != nil {
+		content = m.renderCelebrationOverlay(content)
+	}
+
 	if m.showHelp {
 		content = m.renderHelpOverlay(content)
 	}
@@ -289,6 +323,50 @@ func (m Model) isInputComposing() bool {
 		return m.review.InputComposing()
 	}
 	return false
+}
+
+// checkCelebrations compares current journey state against previous snapshots
+// and triggers a celebration when a rank-up or boss defeat is detected.
+func (m *Model) checkCelebrations() {
+	state := journey.Calculate(m.store)
+
+	// Count currently defeated bosses.
+	bossCount := 0
+	for _, b := range state.Bosses {
+		if b.Defeated {
+			bossCount++
+		}
+	}
+
+	// Boss defeat takes priority (more dramatic).
+	if bossCount > m.prevBossCount {
+		// Find the most recently defeated boss (highest-index defeated one).
+		for i := len(state.Bosses) - 1; i >= 0; i-- {
+			if state.Bosses[i].Defeated {
+				c := celebrate.BossDefeatCelebration(state.Bosses[i].Name, state.Bosses[i].English)
+				m.celebration = &c
+				m.celebrationTTL = 3
+				break
+			}
+		}
+		m.prevBossCount = bossCount
+		m.prevRankName = state.Rank.Name
+		return
+	}
+
+	// Rank change.
+	if state.Rank.Name != m.prevRankName {
+		c := celebrate.RankUpCelebration(state.Rank.Name, state.Rank.English)
+		m.celebration = &c
+		m.celebrationTTL = 3
+		m.prevRankName = state.Rank.Name
+		m.prevBossCount = bossCount
+		return
+	}
+
+	// Keep snapshots current even when no celebration fires.
+	m.prevRankName = state.Rank.Name
+	m.prevBossCount = bossCount
 }
 
 func (m Model) voicePickerView() string {
@@ -349,6 +427,46 @@ func (m Model) voicePickerView() string {
 	b.WriteString(ui.HelpStyle.Render("  ↑↓ select · tab switch category · enter confirm · esc back"))
 
 	return b.String()
+}
+
+func (m Model) renderCelebrationOverlay(base string) string {
+	celebContent := m.celebration.Render()
+	hint := ui.HelpStyle.Render("  Press any key to continue")
+	celebContent += hint
+
+	overlay := lipgloss.NewStyle().
+		Padding(1, 2).
+		Render(celebContent)
+
+	overlayLines := strings.Split(overlay, "\n")
+	overlayHeight := len(overlayLines)
+	// Estimate overlay width from the longest line.
+	overlayWidth := 0
+	for _, line := range overlayLines {
+		if w := lipgloss.Width(line); w > overlayWidth {
+			overlayWidth = w
+		}
+	}
+
+	baseLines := strings.Split(base, "\n")
+	startY := (m.height - overlayHeight) / 2
+	if startY < 0 {
+		startY = 0
+	}
+	startX := (m.width - overlayWidth) / 2
+	if startX < 0 {
+		startX = 0
+	}
+
+	for i, oLine := range overlayLines {
+		targetLine := startY + i
+		if targetLine < len(baseLines) {
+			padded := strings.Repeat(" ", startX) + oLine
+			baseLines[targetLine] = padded
+		}
+	}
+
+	return strings.Join(baseLines, "\n")
 }
 
 func (m Model) renderHelpOverlay(base string) string {

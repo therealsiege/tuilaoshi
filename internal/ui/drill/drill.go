@@ -12,6 +12,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/cj/mandarin-wiki/internal/audio"
 	"github.com/cj/mandarin-wiki/internal/claude"
+	"github.com/cj/mandarin-wiki/internal/journey"
 	"github.com/cj/mandarin-wiki/internal/mnemonic"
 	"github.com/cj/mandarin-wiki/internal/model"
 	"github.com/cj/mandarin-wiki/internal/ui"
@@ -66,6 +67,19 @@ type Model struct {
 
 	correct int
 	total   int
+
+	// Combo tracking
+	combo    int    // current consecutive correct count
+	maxCombo int    // best combo this session
+	comboMsg string // milestone celebration message (cleared on next card)
+
+	// Companion dialogue rotation
+	dialogueCount int
+
+	// Demon encounter
+	encounter     *journey.Encounter // active demon encounter
+	encounterHits int                // correct answers during encounter (need 3)
+	totalAnswered int                // total cards answered (for trigger calculation)
 
 	// Session tracking
 	session model.Session
@@ -186,6 +200,21 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			}
 		}
 		m.total++
+		m.totalAnswered++
+		m.dialogueCount++
+
+		// Track encounter hits on correct answers
+		if m.encounter != nil && m.result.Correct {
+			m.encounterHits++
+		}
+
+		// Check for new encounter trigger (only when not already in one)
+		if m.encounter == nil {
+			if enc := journey.RandomEncounter(m.totalAnswered); enc != nil {
+				m.encounter = enc
+				m.encounterHits = 0
+			}
+		}
 
 		m.state = stateDifficulty
 		return m, nil
@@ -265,6 +294,25 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m *Model) advanceCard(diff model.DrillDifficulty) tea.Cmd {
+	// Update combo based on difficulty rating
+	if diff == model.DiffAgain {
+		m.combo = 0
+	} else {
+		m.combo++
+		if m.combo > m.maxCombo {
+			m.maxCombo = m.combo
+		}
+	}
+
+	// Set milestone celebration message
+	m.comboMsg = comboMilestone(m.combo)
+
+	// Clear encounter on victory (3 correct hits)
+	if m.encounter != nil && m.encounterHits >= 3 {
+		m.encounter = nil
+		m.encounterHits = 0
+	}
+
 	// Record session item
 	if m.current < len(m.cards) {
 		card := &m.cards[m.current]
@@ -331,6 +379,10 @@ func (m Model) View() string {
 
 	case statePrompt:
 		if m.current < len(m.cards) {
+			if m.encounter != nil {
+				b.WriteString(m.renderEncounter())
+				b.WriteString("\n")
+			}
 			card := m.cards[m.current]
 			b.WriteString(m.renderCard(card))
 			b.WriteString("\n\n")
@@ -340,9 +392,17 @@ func (m Model) View() string {
 		}
 
 	case stateEval:
+		if m.encounter != nil {
+			b.WriteString(m.renderEncounter())
+			b.WriteString("\n")
+		}
 		b.WriteString(ui.MutedStyle.Render("  Evaluating with Claude..."))
 
 	case stateDifficulty:
+		if m.encounter != nil {
+			b.WriteString(m.renderEncounter())
+			b.WriteString("\n")
+		}
 		if m.current < len(m.cards) {
 			card := m.cards[m.current]
 			b.WriteString(m.renderCard(card))
@@ -353,12 +413,30 @@ func (m Model) View() string {
 		} else {
 			b.WriteString(ui.ErrorStyle.Render("  ✗ Incorrect"))
 		}
+		// Show encounter victory message
+		if m.encounter != nil && m.encounterHits >= 3 {
+			b.WriteString("  ")
+			b.WriteString(ui.SuccessStyle.Render(
+				m.encounter.Demon.English + " defeated!"))
+		}
 		b.WriteString("\n\n  ")
 		b.WriteString(m.feedback)
 		if m.current < len(m.cards) {
 			if line := formatDecomposition(m.cards[m.current].Chinese); line != "" {
 				b.WriteString("\n\n")
 				b.WriteString(ui.MutedStyle.Render(line))
+			}
+		}
+		// Companion dialogue
+		if m.result.Correct {
+			if d := journey.RandomDialogue("streak", m.dialogueCount); d != nil {
+				b.WriteString("\n")
+				b.WriteString(ui.MutedStyle.Render("  " + ui.ChineseStyle.Render(d.Speaker) + ": " + d.Line))
+			}
+		} else {
+			if d := journey.RandomDialogue("mistake", m.dialogueCount); d != nil {
+				b.WriteString("\n")
+				b.WriteString(ui.MutedStyle.Render("  " + ui.ChineseStyle.Render(d.Speaker) + ": " + d.Line))
 			}
 		}
 		b.WriteString("\n\n")
@@ -386,8 +464,11 @@ func (m Model) View() string {
 		} else {
 			b.WriteString(ui.SubtitleStyle.Render("  Session Complete 完成"))
 			b.WriteString("\n\n")
-			b.WriteString(fmt.Sprintf("  Cards:   %d\n", m.total))
-			b.WriteString(fmt.Sprintf("  Correct: %d\n", m.correct))
+			b.WriteString(fmt.Sprintf("  Cards:     %d\n", m.total))
+			b.WriteString(fmt.Sprintf("  Correct:   %d\n", m.correct))
+			if m.maxCombo > 0 {
+				b.WriteString(fmt.Sprintf("  Best combo: %d\n", m.maxCombo))
+			}
 			pct := float64(m.correct) / float64(m.total) * 100
 			scoreText := fmt.Sprintf("  Score:   %.0f%%", pct)
 			if pct >= 80 {
@@ -399,21 +480,75 @@ func (m Model) View() string {
 			}
 			b.WriteString("\n\n")
 			b.WriteString("  " + ui.ProgressBar(m.correct, m.total, 30))
+			if d := journey.RandomDialogue("review_complete", m.dialogueCount); d != nil {
+				b.WriteString("\n\n")
+				b.WriteString(ui.MutedStyle.Render("  " + ui.ChineseStyle.Render(d.Speaker) + ": " + d.Line))
+			}
 		}
 		b.WriteString("\n\n")
 		b.WriteString(ui.HelpStyle.Render("  esc back to dashboard"))
 
 	}
 
-	// Progress bar
+	// Progress bar with combo counter
 	if m.state != stateDone && m.state != stateModePick && len(m.cards) > 0 {
+		if m.comboMsg != "" {
+			b.WriteString("\n")
+			b.WriteString(ui.SuccessStyle.Render(m.comboMsg))
+		}
 		b.WriteString("\n\n")
 		progress := fmt.Sprintf("  Card %d/%d", m.current+1, len(m.cards))
 		if m.total > 0 {
 			progress += fmt.Sprintf("  •  %d/%d correct", m.correct, m.total)
 		}
+		progress += "  •  " + comboIndicator(m.combo)
+		if m.maxCombo > 0 {
+			progress += "  •  " + ui.MutedStyle.Render(fmt.Sprintf("Best: %d", m.maxCombo))
+		}
 		b.WriteString(ui.StatusBarStyle.Render(progress))
 	}
+
+	return b.String()
+}
+
+// renderEncounter renders the demon encounter narrative frame.
+func (m Model) renderEncounter() string {
+	enc := m.encounter
+	var b strings.Builder
+
+	// Demon ASCII art
+	for _, line := range strings.Split(enc.Demon.Art, "\n") {
+		b.WriteString(ui.ErrorStyle.Render("      " + line))
+		b.WriteString("\n")
+	}
+	b.WriteString("\n")
+
+	// Demon name and title
+	b.WriteString("      ")
+	b.WriteString(ui.ChineseStyle.Render(enc.Demon.Name))
+	b.WriteString("  ")
+	b.WriteString(ui.MutedStyle.Render(enc.Demon.English))
+	b.WriteString("\n")
+
+	// Narrative intro
+	b.WriteString("  ")
+	b.WriteString(ui.PinyinStyle.Render(enc.IntroEng))
+	b.WriteString("\n")
+
+	// Challenge text and progress
+	b.WriteString("  ")
+	b.WriteString(ui.WarningStyle.Render(enc.Challenge))
+	b.WriteString("\n")
+	hits := m.encounterHits
+	if hits > 3 {
+		hits = 3
+	}
+	swords := strings.Repeat("X", hits) + strings.Repeat("-", 3-hits)
+	b.WriteString(fmt.Sprintf("  %s [%s] %d/3",
+		ui.ErrorStyle.Render("⚔"),
+		swords,
+		hits,
+	))
 
 	return b.String()
 }
@@ -484,6 +619,46 @@ func formatDecomposition(char string) string {
 	return fmt.Sprintf("  部 %s → %s", strings.Join(parts, " + "), d.Story)
 }
 
+// comboIndicator returns the styled combo display string.
+func comboIndicator(combo int) string {
+	if combo == 0 {
+		return ui.MutedStyle.Render("Combo: 0")
+	}
+	switch {
+	case combo >= 20:
+		return ui.SuccessStyle.Bold(true).Render(fmt.Sprintf("****x%d**** UNSTOPPABLE", combo))
+	case combo >= 10:
+		return ui.SuccessStyle.Render(fmt.Sprintf("***x%d***", combo))
+	case combo >= 5:
+		return ui.WarningStyle.Render(fmt.Sprintf("**x%d**", combo))
+	case combo >= 3:
+		return fmt.Sprintf("*x%d*", combo)
+	default:
+		return fmt.Sprintf("Combo: %d", combo)
+	}
+}
+
+// comboMilestone returns a celebration message for milestone combos.
+// Returns empty string for non-milestone values.
+func comboMilestone(combo int) string {
+	switch {
+	case combo >= 30 && combo%5 == 0:
+		return fmt.Sprintf("  连续%d个！齐天大圣！", combo)
+	case combo == 25:
+		return "  连续25个！势不可挡！"
+	case combo == 20:
+		return "  连续20个！势不可挡！"
+	case combo == 15:
+		return "  连续15个！太厉害了！"
+	case combo == 10:
+		return "  连续10个！太厉害了！"
+	case combo == 5:
+		return "  连续5个！不错！"
+	default:
+		return ""
+	}
+}
+
 // InputComposing reports whether the input is in Chinese composition mode.
 func (m Model) InputComposing() bool {
 	return m.state == statePrompt && m.input.Composing()
@@ -501,6 +676,9 @@ func (m Model) Refresh() Model {
 	m.current = 0
 	m.correct = 0
 	m.total = 0
+	m.totalAnswered = 0
+	m.encounter = nil
+	m.encounterHits = 0
 	m.state = stateModePick
 	m.modeCursor = 0
 	m.feedback = ""

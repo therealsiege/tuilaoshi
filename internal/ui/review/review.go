@@ -11,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/cj/mandarin-wiki/internal/audio"
 	"github.com/cj/mandarin-wiki/internal/claude"
+	"github.com/cj/mandarin-wiki/internal/journey"
 	"github.com/cj/mandarin-wiki/internal/mnemonic"
 	"github.com/cj/mandarin-wiki/internal/model"
 	"github.com/cj/mandarin-wiki/internal/ui"
@@ -46,6 +47,9 @@ type Model struct {
 	result   model.DrillResult
 	correct  int
 	total    int
+
+	// Companion dialogue rotation
+	dialogueCount int
 
 	// Session tracking
 	session model.Session
@@ -105,6 +109,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			}
 		}
 		m.total++
+		m.dialogueCount++
 
 		m.state = stateDifficulty
 		return m, nil
@@ -305,6 +310,18 @@ func (m Model) View() string {
 			if line := formatDecomposition(m.items[m.cursor].Chinese); line != "" {
 				b.WriteString("\n\n")
 				b.WriteString(ui.MutedStyle.Render(line))
+			}
+		}
+		// Companion dialogue
+		if m.result.Correct {
+			if d := journey.RandomDialogue("streak", m.dialogueCount); d != nil {
+				b.WriteString("\n")
+				b.WriteString(ui.MutedStyle.Render("  " + ui.ChineseStyle.Render(d.Speaker) + ": " + d.Line))
+			}
+		} else {
+			if d := journey.RandomDialogue("mistake", m.dialogueCount); d != nil {
+				b.WriteString("\n")
+				b.WriteString(ui.MutedStyle.Render("  " + ui.ChineseStyle.Render(d.Speaker) + ": " + d.Line))
 			}
 		}
 		b.WriteString("\n\n")

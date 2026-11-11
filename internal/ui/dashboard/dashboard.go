@@ -238,6 +238,12 @@ func (m Model) renderCultivationMeter() string {
 		lines = append(lines, bossLine)
 	}
 
+	// Companion idle dialogue, rotated by mastered character count
+	if d := journey.RandomDialogue("idle", rank.Current); d != nil {
+		lines = append(lines, "")
+		lines = append(lines, ui.MutedStyle.Render("  "+ui.ChineseStyle.Render(d.Speaker)+": "+d.Line))
+	}
+
 	meter := lipgloss.JoinVertical(lipgloss.Left, lines...)
 	return ui.BorderStyle.Width(66).Render(meter)
 }
