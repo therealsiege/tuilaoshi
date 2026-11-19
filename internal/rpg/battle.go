@@ -3,6 +3,7 @@ package rpg
 import (
 	"fmt"
 	"math/rand"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -19,7 +20,23 @@ type CombatQuestion struct {
 	Damage   int      // damage dealt on correct answer
 	Chinese  string   // the Chinese text being tested
 	Pinyin   string   // pinyin of the tested item
+	English  string   // meaning of the tested item
 }
+
+// CorrectAnswer returns the text of the correct choice.
+func (q *CombatQuestion) CorrectAnswer() string {
+	return q.Choices[q.Correct]
+}
+
+const (
+	// distractorCount is how many wrong choices a full question offers.
+	distractorCount = 3
+	// questionAttempts limits how many cards are tried to build a full question.
+	questionAttempts = 12
+)
+
+// parenthetical matches glosses like "(to) look" so they compare as "look".
+var parenthetical = regexp.MustCompile(`\([^)]*\)`)
 
 // Fighter represents a combatant (player or enemy).
 type Fighter struct {
@@ -38,9 +55,9 @@ type BattleState int
 
 const (
 	BattleIntro        BattleState = iota
-	BattlePlayerTurn                      // showing question
-	BattlePlayerAttack                    // correct answer animation
-	BattleEnemyAttack                     // wrong answer, enemy hits back
+	BattlePlayerTurn               // showing question
+	BattlePlayerAttack             // correct answer animation
+	BattleEnemyAttack              // wrong answer, enemy hits back
 	BattleVictory
 	BattleDefeat
 )
@@ -59,6 +76,26 @@ type Battle struct {
 	XPEarned    int
 	DamageDealt int // last damage dealt
 	DamageTaken int // last damage taken
+	TotalDealt  int // damage dealt across the whole battle
+	Answered    int // questions answered
+	CorrectHits int // questions answered correctly
+}
+
+// Accuracy returns the percentage of questions answered correctly.
+func (b *Battle) Accuracy() int {
+	if b.Answered == 0 {
+		return 0
+	}
+	return b.CorrectHits * 100 / b.Answered
+}
+
+// Rematch returns a fresh battle against the same enemy.
+func (b *Battle) Rematch(cards []model.Card) *Battle {
+	r := &Battle{Player: b.Player, Enemy: b.Enemy, State: BattleIntro}
+	r.Player.HP = r.Player.MaxHP
+	r.Enemy.HP = r.Enemy.MaxHP
+	r.Question = r.GenerateQuestion(cards)
+	return r
 }
 
 // NewBattle creates a battle against a specific demon.
@@ -113,15 +150,34 @@ func NewRandomBattle(cards []model.Card, masteredCount int) *Battle {
 	return NewBattle(cards, demon, "", masteredCount)
 }
 
-// GenerateQuestion creates a new combat question from the available cards.
+// GenerateQuestion creates a new combat question from the available cards. It
+// prefers a question with a full set of choices, and returns nil when no card
+// has an unambiguous wrong answer.
 func (b *Battle) GenerateQuestion(cards []model.Card) *CombatQuestion {
 	usable := filterUsableCards(cards)
 	if len(usable) == 0 {
 		return nil
 	}
 
-	card := usable[rand.Intn(len(usable))]
+	var best *CombatQuestion
+	for i := 0; i < questionAttempts; i++ {
+		q := b.buildQuestion(usable[rand.Intn(len(usable))], usable)
+		if q == nil {
+			continue
+		}
+		if best == nil || len(q.Choices) > len(best.Choices) {
+			best = q
+		}
+		if len(best.Choices) == distractorCount+1 {
+			break
+		}
+	}
+	return best
+}
 
+// buildQuestion creates a question testing card, or nil if no valid wrong
+// answers exist for the category chosen.
+func (b *Battle) buildQuestion(card model.Card, usable []model.Card) *CombatQuestion {
 	categories := availableCategories(card)
 	if len(categories) == 0 {
 		return nil
@@ -144,7 +200,10 @@ func (b *Battle) GenerateQuestion(cards []model.Card) *CombatQuestion {
 		correctAnswer = card.Chinese
 	}
 
-	distractors := generateDistractors(card, usable, category, 3)
+	distractors := generateDistractors(card, usable, category, distractorCount)
+	if len(distractors) == 0 {
+		return nil
+	}
 
 	choices := make([]string, 0, len(distractors)+1)
 	choices = append(choices, correctAnswer)
@@ -173,6 +232,7 @@ func (b *Battle) GenerateQuestion(cards []model.Card) *CombatQuestion {
 		Damage:   damage,
 		Chinese:  card.Chinese,
 		Pinyin:   card.Pinyin,
+		English:  card.English,
 	}
 }
 
@@ -183,8 +243,11 @@ func (b *Battle) Answer(choiceIndex int) (correct bool, dmg int) {
 		return false, 0
 	}
 
+	b.Answered++
+
 	if choiceIndex == b.Question.Correct {
 		// Correct answer: player attacks enemy.
+		b.CorrectHits++
 		b.Combo++
 		if b.Combo > b.MaxCombo {
 			b.MaxCombo = b.Combo
@@ -203,6 +266,7 @@ func (b *Battle) Answer(choiceIndex int) (correct bool, dmg int) {
 
 		b.DamageDealt = actualDmg
 		b.DamageTaken = 0
+		b.TotalDealt += actualDmg
 		b.XPEarned += actualDmg
 		b.Turn++
 		b.State = BattlePlayerAttack
@@ -336,7 +400,7 @@ func generateDistractors(card model.Card, allCards []model.Card, category string
 	var candidates []string
 
 	for _, c := range allCards {
-		if c.ID == card.ID {
+		if c.ID == card.ID || ambiguous(card, c, category) {
 			continue
 		}
 		var val string
@@ -365,4 +429,59 @@ func generateDistractors(card model.Card, allCards []model.Card, category string
 	}
 
 	return candidates
+}
+
+// ambiguous reports whether other could also be a right answer to a question
+// about card, such as a homophone or a word with the same meaning.
+func ambiguous(card, other model.Card, category string) bool {
+	if other.Chinese == card.Chinese {
+		return true
+	}
+	switch category {
+	case "meaning", "reading":
+		return other.English == "" || sharesGloss(card.English, other.English)
+	case "pinyin", "character":
+		return other.Pinyin == "" || normalizePinyin(card.Pinyin) == normalizePinyin(other.Pinyin)
+	}
+	return false
+}
+
+// sharesGloss reports whether two English definitions have a meaning in common.
+func sharesGloss(a, b string) bool {
+	glosses := map[string]bool{}
+	for _, g := range splitGlosses(a) {
+		glosses[g] = true
+	}
+	for _, g := range splitGlosses(b) {
+		if glosses[g] {
+			return true
+		}
+	}
+	return false
+}
+
+// splitGlosses breaks a definition like "(to) look; a view" into comparable
+// meanings: "look" and "view".
+func splitGlosses(english string) []string {
+	cleaned := parenthetical.ReplaceAllString(strings.ToLower(english), "")
+	parts := strings.FieldsFunc(cleaned, func(r rune) bool {
+		return r == ';' || r == ',' || r == '/'
+	})
+
+	var glosses []string
+	for _, part := range parts {
+		g := strings.TrimSpace(part)
+		for _, article := range []string{"to ", "a ", "an ", "the "} {
+			g = strings.TrimPrefix(g, article)
+		}
+		if g != "" {
+			glosses = append(glosses, g)
+		}
+	}
+	return glosses
+}
+
+// normalizePinyin makes pinyin comparable across spacing and capitalization.
+func normalizePinyin(pinyin string) string {
+	return strings.ToLower(strings.Join(strings.Fields(pinyin), ""))
 }
