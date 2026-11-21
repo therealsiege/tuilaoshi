@@ -14,18 +14,37 @@ type CombatQuestion struct {
 	Prompt   string     // the question text (e.g. "What does 书 mean?")
 	Choices  []string   // 4-5 answer options
 	Correct  int        // index of correct answer
-	Category string     // "reading", "meaning", "pinyin", "character", "listening"
+	Category string     // "reading", "meaning", "pinyin", "character", "listening", "write"
 	Damage   int        // damage dealt on correct answer
 	Chinese  string     // the Chinese text being tested
 	Pinyin   string     // pinyin of the tested item
 	English  string     // meaning of the tested item
 	Card     model.Card // the card being tested, for saving the result
+	Accepted []string   // typed answers a "write" question takes
 }
 
-// CorrectAnswer returns the text of the correct choice.
+// CorrectAnswer returns the text of the correct choice, or the word itself
+// for a typed question.
 func (q *CombatQuestion) CorrectAnswer() string {
+	if q.Category == "write" {
+		return q.Chinese
+	}
 	return q.Choices[q.Correct]
 }
+
+// Accepts reports whether a typed answer is right.
+func (q *CombatQuestion) Accepts(text string) bool {
+	text = strings.TrimSpace(text)
+	for _, a := range q.Accepted {
+		if text == a {
+			return true
+		}
+	}
+	return false
+}
+
+// written reports whether q is answered by typing rather than choosing.
+func (q *CombatQuestion) written() bool { return q.Category == "write" }
 
 const (
 	// distractorCount is how many wrong choices a full question offers.
@@ -52,14 +71,23 @@ func (b *Battle) GenerateQuestion(cards []model.Card) *CombatQuestion {
 		if q == nil {
 			continue
 		}
-		if best == nil || len(q.Choices) > len(best.Choices) {
+		if best == nil || completeness(q) > completeness(best) {
 			best = q
 		}
-		if len(best.Choices) == distractorCount+1 {
+		if completeness(best) == distractorCount+1 {
 			break
 		}
 	}
 	return best
+}
+
+// completeness ranks questions: a typed question needs no choices, so it is
+// always complete.
+func completeness(q *CombatQuestion) int {
+	if q.written() {
+		return distractorCount + 1
+	}
+	return len(q.Choices)
 }
 
 // buildQuestion creates a question testing card, or nil if no valid wrong
@@ -68,6 +96,9 @@ func (b *Battle) buildQuestion(card model.Card, d deck) *CombatQuestion {
 	categories := availableCategories(card)
 	if b.Listening && card.Chinese != "" && card.Pinyin != "" {
 		categories = append(categories, "listening")
+	}
+	if b.Writing && card.Chinese != "" && card.Pinyin != "" && card.English != "" {
+		categories = append(categories, "write")
 	}
 	if len(categories) == 0 {
 		return nil
@@ -91,6 +122,17 @@ func (b *Battle) buildQuestion(card model.Card, d deck) *CombatQuestion {
 	case "listening": // the character question, spoken instead of shown
 		prompt = "Which word did you hear? (r replays)"
 		correctAnswer = card.Chinese
+	case "write":
+		return &CombatQuestion{
+			Prompt:   fmt.Sprintf("Write in Chinese: %s (%s)", card.English, card.Pinyin),
+			Category: category,
+			Damage:   b.damage() + writeBonus,
+			Chinese:  card.Chinese,
+			Pinyin:   card.Pinyin,
+			English:  card.English,
+			Card:     card,
+			Accepted: acceptedWritings(card, d),
+		}
 	}
 
 	distractors := generateDistractors(card, d, category, distractorCount)
@@ -115,7 +157,7 @@ func (b *Battle) buildQuestion(card model.Card, d deck) *CombatQuestion {
 		}
 	}
 
-	damage := 15 + rand.Intn(10) + 1 + b.Combo*3
+	damage := b.damage()
 
 	return &CombatQuestion{
 		Prompt:   prompt,
@@ -294,4 +336,27 @@ func splitGlosses(english string) []string {
 // normalizePinyin makes pinyin comparable across spacing and capitalization.
 func normalizePinyin(pinyin string) string {
 	return strings.ToLower(strings.Join(strings.Fields(pinyin), ""))
+}
+
+// writeBonus rewards producing a word over recognizing it.
+const writeBonus = 5
+
+// damage rolls a correct answer's base damage, growing with the combo.
+func (b *Battle) damage() int {
+	return 15 + rand.Intn(10) + 1 + b.Combo*3
+}
+
+// acceptedWritings lists the words a "write" question about card takes:
+// card's own, and any word sharing both its pinyin and a meaning.
+func acceptedWritings(card model.Card, d deck) []string {
+	accepted := []string{card.Chinese}
+	seen := map[string]bool{card.Chinese: true}
+	for _, c := range d.cards {
+		if seen[c.Chinese] || normalizePinyin(c.Pinyin) != normalizePinyin(card.Pinyin) || !sharesGloss(c.English, card.English) {
+			continue
+		}
+		seen[c.Chinese] = true
+		accepted = append(accepted, c.Chinese)
+	}
+	return accepted
 }

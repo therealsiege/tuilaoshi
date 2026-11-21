@@ -57,6 +57,16 @@ func NewWithDict(dict *Dict) Model {
 	return Model{inner: textinput.New(), dict: dict}
 }
 
+// SetMode switches input mode, dropping any composition. Chinese mode needs
+// a dictionary and is ignored without one.
+func (m *Model) SetMode(mode Mode) {
+	if mode == ModeChinese && m.dict == nil {
+		return
+	}
+	m.cancelComposition()
+	m.mode = mode
+}
+
 // --- Accessors that mirror textinput.Model ---
 
 func (m Model) Value() string      { return m.inner.Value() }
@@ -116,9 +126,11 @@ func (m Model) View() string {
 	b.WriteString(" ")
 
 	if m.composing && m.mode == ModeChinese {
-		// Show the composition buffer inline after existing text
-		// Render inner with composition overlay
-		b.WriteString(m.inner.View())
+		// Show the composition buffer inline after existing text; hide the
+		// placeholder, which would otherwise run into the buffer.
+		inner := m.inner
+		inner.Placeholder = ""
+		b.WriteString(inner.View())
 		if m.compBuf != "" {
 			compStyle := lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#C678DD")).

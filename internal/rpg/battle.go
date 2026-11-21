@@ -51,6 +51,7 @@ type Battle struct {
 	Answered    int  // questions answered
 	CorrectHits int  // questions answered correctly
 	Listening   bool // audio works, so some questions are heard rather than read
+	Writing     bool // the player can type Chinese, so some questions ask for it
 }
 
 // Accuracy returns the percentage of questions answered correctly.
@@ -63,7 +64,7 @@ func (b *Battle) Accuracy() int {
 
 // Rematch returns a fresh battle against the same enemy.
 func (b *Battle) Rematch(cards []model.Card) *Battle {
-	r := &Battle{Player: b.Player, Enemy: b.Enemy, State: BattleIntro, Listening: b.Listening}
+	r := &Battle{Player: b.Player, Enemy: b.Enemy, State: BattleIntro, Listening: b.Listening, Writing: b.Writing}
 	r.Player.HP = r.Player.MaxHP
 	r.Enemy.HP = r.Enemy.MaxHP
 	r.Question = r.GenerateQuestion(cards)
@@ -118,10 +119,23 @@ func (b *Battle) Answer(choiceIndex int) (correct bool, dmg int) {
 	if b.Question == nil {
 		return false, 0
 	}
+	return b.resolve(choiceIndex == b.Question.Correct)
+}
 
+// AnswerText processes a typed answer to a "write" question.
+func (b *Battle) AnswerText(text string) (correct bool, dmg int) {
+	if b.Question == nil {
+		return false, 0
+	}
+	return b.resolve(b.Question.Accepts(text))
+}
+
+// resolve applies a right or wrong answer: the player strikes, or the
+// enemy does.
+func (b *Battle) resolve(right bool) (correct bool, dmg int) {
 	b.Answered++
 
-	if choiceIndex == b.Question.Correct {
+	if right {
 		// Correct answer: player attacks enemy.
 		b.CorrectHits++
 		b.Combo++

@@ -96,7 +96,7 @@ func New(wikiDir string) (Model, error) {
 		stats:         stats.New(store),
 		journey:       journeyview.New(store),
 		radicals:      radicals.New(),
-		battle:        rpgview.New(store, ttsClient),
+		battle:        rpgview.New(store, ttsClient, dict),
 		prevRankName:  initialState.Rank.Name,
 		prevBossCount: initialBossCount,
 	}, nil

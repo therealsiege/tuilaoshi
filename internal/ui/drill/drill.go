@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -241,6 +242,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.state = stateEval
 				card := m.cards[m.current]
 				mode := m.effectiveMode()
+				if result, ok := exactChinese(card, answer, mode); ok {
+					return m, func() tea.Msg { return evalResultMsg{result: result} }
+				}
 				return m, func() tea.Msg {
 					result, err := m.claude.EvaluateDrill(context.Background(), card, answer, mode)
 					return evalResultMsg{result: result, err: err}
@@ -327,6 +331,21 @@ func (m *Model) advanceCard(diff model.DrillDifficulty) tea.Cmd {
 
 	card := m.cards[m.current]
 	return tea.Batch(textinput.Blink, ui.SpeakCmd(m.tts, card.Chinese, "zh"))
+}
+
+// exactChinese grades a typed answer locally when it is exactly the word a
+// production, listening, or sentence card asks for, so the common case needs
+// no Claude call and works offline. Anything else goes to Claude.
+func exactChinese(card model.Card, answer string, mode model.DrillMode) (model.DrillResult, bool) {
+	switch mode {
+	case model.ModeProduction, model.ModeListening, model.ModeSentence:
+	default:
+		return model.DrillResult{}, false
+	}
+	if card.Chinese == "" || strings.TrimSpace(answer) != card.Chinese {
+		return model.DrillResult{}, false
+	}
+	return model.DrillResult{Correct: true, Score: 5, Feedback: "完全正确！Exactly right: " + card.Chinese}, true
 }
 
 // noteSaveErr keeps the first failed save so the player sees it.

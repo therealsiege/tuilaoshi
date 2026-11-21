@@ -93,7 +93,11 @@ func (m Model) viewFighting() string {
 		b.WriteString("\n")
 	}
 	b.WriteString("\n")
-	b.WriteString(ui.HelpStyle.Render("  up/down navigate  |  enter/1-5 answer  |  esc flee"))
+	if q := m.battle.Question; q != nil && q.Category == "write" {
+		b.WriteString(ui.HelpStyle.Render("  type pinyin, space/1-9 pick  |  ctrl+space input mode  |  enter answer  |  esc flee"))
+	} else {
+		b.WriteString(ui.HelpStyle.Render("  up/down navigate  |  enter/1-5 answer  |  esc flee"))
+	}
 	return b.String()
 }
 
@@ -129,8 +133,8 @@ func (m Model) renderMissedAnswer(q *rpgengine.CombatQuestion) string {
 	b.WriteString("\n")
 	b.WriteString(ui.SubtitleStyle.Render("      " + q.Prompt))
 	b.WriteString("\n")
-	if m.battle.Selected >= 0 && m.battle.Selected < len(q.Choices) {
-		b.WriteString(ui.ErrorStyle.Render("      ✗ " + q.Choices[m.battle.Selected]))
+	if m.lastAnswer != "" {
+		b.WriteString(ui.ErrorStyle.Render("      ✗ " + m.lastAnswer))
 		b.WriteString("\n")
 	}
 	b.WriteString(ui.SuccessStyle.Render("      ✓ " + q.CorrectAnswer()))
@@ -292,6 +296,9 @@ func (m Model) renderQuestion() string {
 
 	b.WriteString(ui.SubtitleStyle.Render("  " + q.Prompt))
 	b.WriteString("\n\n")
+	if q.Category == "write" {
+		return b.String() + "  " + m.input.View() + "\n"
+	}
 
 	for i, choice := range q.Choices {
 		prefix := fmt.Sprintf("    %d. %s", i+1, choice)

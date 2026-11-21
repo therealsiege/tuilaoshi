@@ -42,6 +42,12 @@ func rightAnswers(q *CombatQuestion, pool []model.Card) []string {
 // right answer, at q.Correct.
 func checkQuestion(t *testing.T, q *CombatQuestion, pool []model.Card) {
 	t.Helper()
+	if q.written() {
+		if !q.Accepts(q.Chinese) || q.Accepts("") {
+			t.Fatalf("%q: accepts %v, want the word %q and not blank", q.Prompt, q.Accepted, q.Chinese)
+		}
+		return
+	}
 	if len(q.Choices) < 2 || len(q.Choices) > distractorCount+1 {
 		t.Fatalf("%q: %d choices %v", q.Prompt, len(q.Choices), q.Choices)
 	}
@@ -84,6 +90,7 @@ func TestQuestionsHaveExactlyOneRightAnswer(t *testing.T) {
 		pool := collidingPool(r)
 		b := testBattle(pool)
 		b.Listening = r.Intn(2) == 0
+		b.Writing = r.Intn(2) == 0
 		q := b.GenerateQuestion(pool)
 		if q == nil {
 			continue // no unambiguous question exists for this pool

@@ -3,6 +3,7 @@ package rpg
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -14,6 +15,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	rpgengine "github.com/therealsiege/tuilaoshi/internal/rpg"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
+	"github.com/therealsiege/tuilaoshi/internal/ui/input"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
@@ -42,12 +44,17 @@ type Model struct {
 	store  *wiki.Store
 	tts    *audio.Client
 	ttsErr error // why the last speech failed
-	gkeys  ui.GlobalKeys
-	battle *rpgengine.Battle
-	cards  []model.Card
-	state  viewState
-	width  int
-	height int
+
+	// Typed answers for "write" questions; writing is off without a dictionary.
+	input      input.Model
+	writing    bool
+	lastAnswer string // what the player chose or typed, shown after a miss
+	gkeys      ui.GlobalKeys
+	battle     *rpgengine.Battle
+	cards      []model.Card
+	state      viewState
+	width      int
+	height     int
 
 	// Animation timer: how many ticks remain before advancing state.
 	animTicks int
@@ -76,12 +83,17 @@ type logEntry struct {
 }
 
 // New creates a new RPG battle model.
-func New(store *wiki.Store, tts *audio.Client) Model {
+func New(store *wiki.Store, tts *audio.Client, dict *input.Dict) Model {
+	ti := input.NewWithDict(dict)
+	ti.SetPlaceholder("type pinyin, then pick characters")
+	ti.SetCharLimit(20)
 	return Model{
-		store: store,
-		tts:   tts,
-		gkeys: ui.DefaultGlobalKeys(),
-		state: stateIntro,
+		store:   store,
+		tts:     tts,
+		input:   ti,
+		writing: dict != nil,
+		gkeys:   ui.DefaultGlobalKeys(),
+		state:   stateIntro,
 	}
 }
 
@@ -111,7 +123,7 @@ func (m Model) Refresh() Model {
 	}
 	// Demons come from the chapters the pilgrimage has reached.
 	m.battle = rpgengine.NewRandomBattle(m.cards, m.mastered, journey.Pilgrimage(pages).Percent)
-	m.setListening()
+	m.setQuestionKinds()
 	m.state = stateIntro
 	m.log = nil
 	m.animTicks = 0
@@ -123,15 +135,17 @@ func (m Model) Refresh() Model {
 func (m Model) challengeBoss() Model {
 	m.cards = rpgengine.WeakCards(m.cards)
 	m.battle = rpgengine.NewBossBattle(m.cards, journey.BossEntry(*m.boss), m.mastered)
-	m.setListening()
+	m.setQuestionKinds()
 	m.bossFight = true
 	return m
 }
 
-// setListening asks for spoken questions when audio works.
-func (m *Model) setListening() {
+// setQuestionKinds asks for spoken questions when audio works, and typed
+// ones when Chinese input is available.
+func (m *Model) setQuestionKinds() {
 	if m.battle != nil {
 		m.battle.Listening = m.tts != nil && m.tts.Available()
+		m.battle.Writing = m.writing
 	}
 }
 
@@ -141,6 +155,17 @@ func (m Model) speakQuestion() tea.Cmd {
 		return ui.SpeakCmd(m.tts, q.Chinese, "zh")
 	}
 	return nil
+}
+
+// askQuestion readies the current question: it clears the answer box for a
+// typed question and speaks a listening one.
+func (m Model) askQuestion() (Model, tea.Cmd) {
+	if q := m.battle.Question; q != nil && q.Category == "write" {
+		m.input.Reset()
+		m.input.SetMode(input.ModeChinese)
+		return m, m.input.Focus()
+	}
+	return m, m.speakQuestion()
 }
 
 // Leave saves the battle's results when the player flees mid-fight.
@@ -160,14 +185,14 @@ func (m Model) startSession() Model {
 
 // recordAnswer logs an answer and reschedules its card: a miss makes it due
 // again tomorrow, and a hit counts once per battle as a "Hard" review.
-func (m *Model) recordAnswer(q *rpgengine.CombatQuestion, choice int, correct bool) {
+func (m *Model) recordAnswer(q *rpgengine.CombatQuestion, answer string, correct bool) {
 	diff := model.DiffAgain
 	if correct {
 		diff = model.DiffHard
 	}
 	m.session.Items = append(m.session.Items, model.SessionItem{
 		CardID:     q.Card.ID,
-		UserAnswer: q.Choices[choice],
+		UserAnswer: answer,
 		Correct:    correct,
 		Difficulty: diff,
 	})
@@ -240,7 +265,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.battle.State = rpgengine.BattlePlayerTurn
 				q := m.battle.GenerateQuestion(m.cards)
 				m.battle.Question = q
-				return m, m.speakQuestion()
+				return m.askQuestion()
 			}
 
 		case stateFighting:
@@ -263,8 +288,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 		case stateDefeat:
 			if key.Matches(msg, m.gkeys.Enter) || msg.Type == tea.KeySpace {
-				m = m.rematch()
-				return m, m.speakQuestion()
+				return m.rematch().askQuestion()
 			}
 		}
 	}
@@ -276,6 +300,14 @@ func (m Model) handleFightingKey(msg tea.KeyMsg) (Model, tea.Cmd) {
 		return m, nil
 	}
 	q := m.battle.Question
+	if q.Category == "write" {
+		if key.Matches(msg, m.gkeys.Enter) && !m.input.Composing() {
+			return m.submitText()
+		}
+		var cmd tea.Cmd
+		m.input, cmd = m.input.Update(msg)
+		return m, cmd
+	}
 	numChoices := len(q.Choices)
 
 	switch {
@@ -305,8 +337,27 @@ func (m Model) handleFightingKey(msg tea.KeyMsg) (Model, tea.Cmd) {
 }
 
 func (m Model) submitAnswer() (Model, tea.Cmd) {
+	q := m.battle.Question
 	correct, dmg := m.battle.Answer(m.battle.Selected)
-	m.recordAnswer(m.battle.Question, m.battle.Selected, correct)
+	return m.afterAnswer(q, q.Choices[m.battle.Selected], correct, dmg)
+}
+
+// submitText grades a typed answer to a "write" question.
+func (m Model) submitText() (Model, tea.Cmd) {
+	text := strings.TrimSpace(m.input.Value())
+	if text == "" {
+		return m, nil
+	}
+	m.input.Blur()
+	q := m.battle.Question
+	correct, dmg := m.battle.AnswerText(text)
+	return m.afterAnswer(q, text, correct, dmg)
+}
+
+// afterAnswer records an answer and starts the attack it earned.
+func (m Model) afterAnswer(q *rpgengine.CombatQuestion, answer string, correct bool, dmg int) (Model, tea.Cmd) {
+	m.lastAnswer = answer
+	m.recordAnswer(q, answer, correct)
 	if correct {
 		m.state = statePlayerAttack
 		m.battle.State = rpgengine.BattlePlayerAttack
@@ -364,7 +415,7 @@ func (m Model) nextTurn() (Model, tea.Cmd) {
 	m.battle.Selected = 0
 	q := m.battle.GenerateQuestion(m.cards)
 	m.battle.Question = q
-	return m, m.speakQuestion()
+	return m.askQuestion()
 }
 
 // tickAfter returns a Cmd that sends animTickMsg after a delay.

@@ -89,3 +89,31 @@ func TestListeningQuestionsOnlyWhenAudioWorks(t *testing.T) {
 		t.Error("no listening questions with audio available")
 	}
 }
+
+func TestWriteQuestionsGradeTypedChinese(t *testing.T) {
+	deck := append(testDeck(), card("6", "書", "shū", "book (traditional)"))
+	b := testBattle(deck)
+	b.Writing = true
+	var q *CombatQuestion
+	for i := 0; i < 300 && (q == nil || !q.written() || q.Chinese != "书"); i++ {
+		q = b.GenerateQuestion(deck)
+	}
+	if q == nil || !q.written() || q.Chinese != "书" {
+		t.Fatal("no write question for 书")
+	}
+	if strings.Contains(q.Prompt, q.Chinese) {
+		t.Fatalf("prompt gives the answer away: %q", q.Prompt)
+	}
+	for text, want := range map[string]bool{"书": true, " 书 ": true, "書": true, "水": false, "": false} {
+		if got := q.Accepts(text); got != want {
+			t.Errorf("Accepts(%q) = %v, want %v", text, got, want)
+		}
+	}
+	b.Question = q
+	if ok, _ := b.AnswerText("水"); ok || b.Answered != 1 || b.Player.HP == b.Player.MaxHP {
+		t.Errorf("wrong typed answer: ok=%v answered=%d hp=%d", ok, b.Answered, b.Player.HP)
+	}
+	if ok, dmg := b.AnswerText("书"); !ok || dmg <= 0 || b.CorrectHits != 1 {
+		t.Errorf("right typed answer: ok=%v dmg=%d hits=%d", ok, dmg, b.CorrectHits)
+	}
+}

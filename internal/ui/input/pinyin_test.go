@@ -1,6 +1,11 @@
 package input
 
-import "testing"
+import (
+	"strings"
+	"testing"
+
+	tea "github.com/charmbracelet/bubbletea"
+)
 
 func TestIsValidSyllable(t *testing.T) {
 	tests := []struct {
@@ -24,5 +29,16 @@ func TestIsValidSyllable(t *testing.T) {
 		if got := IsValidSyllable(tt.in); got != tt.want {
 			t.Errorf("IsValidSyllable(%q) = %v, want %v", tt.in, got, tt.want)
 		}
+	}
+}
+
+func TestComposingHidesPlaceholder(t *testing.T) {
+	m := NewWithDict(NewDict())
+	m.SetPlaceholder("type here")
+	m.SetMode(ModeChinese)
+	m.Focus()
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'s'}})
+	if v := m.View(); strings.Contains(v, "type here") {
+		t.Errorf("placeholder shown while composing: %q", v)
 	}
 }
