@@ -91,3 +91,12 @@ func pageFor(pages []model.Page, c model.Card) model.Page {
 	}
 	return model.Page{}
 }
+
+func TestThemeMatchesRadical(t *testing.T) {
+	water := Theme{Radicals: []string{"氵"}}
+	for radical, want := range map[string]bool{"氵 (water)": true, "氵(water)": true, "木 (wood)": false, "": false} {
+		if got := water.Matches(model.Card{Chinese: "x"}, model.Page{Radical: radical}); got != want {
+			t.Errorf("radical %q: Matches = %v, want %v", radical, got, want)
+		}
+	}
+}

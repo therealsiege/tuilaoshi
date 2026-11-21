@@ -1,7 +1,8 @@
 # Vocabulary themes for the journey's stages. A tribulation names a theme
 # with `theme: <id>`; stages without one keep the theme before them.
 # A word belongs to a theme when its page has one of the tags, its English
-# meaning has one of the keywords, or it contains one of the characters.
+# meaning has one of the keywords, it contains one of the characters, or (for
+# a character page) its radical is one of the radicals.
 - id: first-steps
   name: First steps
   levels: [HSK1]
@@ -9,6 +10,7 @@
   name: Rivers and crossings
   keywords: [river, water, sea, lake, flow, boat, ship, wave, swim, shore, sand]
   contains: [江, 河, 水, 海, 沙, 渡, 船]
+  radicals: [氵, 水]
 - id: family
   name: Family
   keywords: [mother, father, son, daughter, family, parent, child, birth, born]
@@ -18,6 +20,7 @@
   tags: [animal, zoology]
   keywords: [tiger, wolf, beast, animal, lion, bear, leopard]
   contains: [虎, 兽]
+  radicals: [犭]
 - id: roads
   name: Roads and danger
   keywords: [road, path, way, danger, dangerous, fall, follow, lost, travel]
@@ -27,6 +30,7 @@
   tags: [geography, geology]
   keywords: [mountain, ridge, peak, hill, rock, stone, cliff, valley]
   contains: [山, 岭, 石, 峰]
+  radicals: [山, 石]
 - id: basics
   name: Basic characters
   levels: [HSK1, HSK2]
@@ -34,10 +38,12 @@
   name: Horses and travel
   keywords: [horse, ride, journey, travel, saddle, dragon]
   contains: [马, 骑, 龙]
+  radicals: [马]
 - id: fire
   name: Fire and heat
   keywords: [fire, flame, burn, heat, hot, smoke, ash, fan]
   contains: [火, 烧, 热, 炎, 烟, 灯]
+  radicals: [火, 灬]
 - id: treasures
   name: Robes and treasures
   keywords: [clothes, robe, treasure, precious, jewel, steal, thief, temple, monk]
@@ -47,11 +53,13 @@
   tags: [agriculture, cooking]
   keywords: [eat, food, pig, farm, rice, field, cook, meal, hungry]
   contains: [吃, 饭, 猪, 田, 米]
+  radicals: [米, 田, 禾, 饣]
 - id: weather
   name: Wind and weather
   tags: [weather]
   keywords: [wind, storm, sky, cloud, rain, snow, thunder, fog]
   contains: [风, 雨, 云, 雷, 雾]
+  radicals: [雨, 风]
 - id: help
   name: Asking for help
   keywords: [help, ask, request, pray, rescue, save, protect]
@@ -65,21 +73,25 @@
   tags: [botany]
   keywords: [tree, fruit, plant, grow, garden, flower, leaf, wood, pine]
   contains: [树, 果, 木, 林, 花]
+  radicals: [木, 艹]
 - id: bones
   name: Bones and disguises
   tags: [anatomy, body]
   keywords: [bone, body, death, die, dead, ghost, disguise, false, lie, corpse]
   contains: [骨, 死, 假, 尸]
+  radicals: [骨, 歹, 尸]
 - id: courts
   name: Kings and courts
   tags: [government]
   keywords: [king, kingdom, palace, court, minister, official, emperor, queen]
   contains: [王, 国, 官, 宫]
+  radicals: [王]
 - id: metal
   name: Metal and magic
   tags: [metalwork, material]
   keywords: [metal, gold, silver, iron, copper, steel, magic, gourd]
   contains: [金, 银, 铁, 钢]
+  radicals: [钅, 金]
 - id: contests
   name: Rain and contests
   tags: [weather, sports]
@@ -90,26 +102,32 @@
   tags: [military]
   keywords: [weapon, sword, spear, staff, fight, war, soldier, army, battle]
   contains: [兵, 刀, 剑, 战]
+  radicals: [刀, 刂, 戈, 弓]
 - id: marriage
   name: Marriage
   keywords: [marry, marriage, wedding, wife, husband, bride, love]
   contains: [婚, 嫁, 娶, 爱]
+  radicals: [女]
 - id: fish
   name: Fish and deep water
   keywords: [fish, deep, ice, freeze, cold, basket, river]
   contains: [鱼, 冰, 深, 冷]
+  radicals: [鱼, 冫]
 - id: cattle
   name: Cattle and tricks
   keywords: [ox, cow, cattle, bull, trick, steal, catch]
   contains: [牛, 抓]
+  radicals: [牛]
 - id: women
   name: The Women's Kingdom
   keywords: [woman, women, girl, queen, mother, pregnant, child, baby]
   contains: [女, 母, 孕, 妇]
+  radicals: [女]
 - id: poison
   name: Poison and stings
   keywords: [poison, sting, insect, pain, bite, hurt, scorpion]
   contains: [毒, 虫, 痛]
+  radicals: [虫]
 - id: truth
   name: True and false
   keywords: [true, false, real, fake, same, different, copy, distinguish, believe]
@@ -118,32 +136,39 @@
   name: Temples and treasures
   keywords: [temple, monk, pagoda, light, treasure, buddha, pray]
   contains: [寺, 塔, 宝, 光]
+  radicals: [礻, 宀]
 - id: medicine
   name: Illness and medicine
   tags: [medicine, medical, symptom, treatment, pharmacy, healthcare]
   keywords: [ill, sick, disease, doctor, medicine, cure, heal]
   contains: [病, 药, 医]
+  radicals: [疒]
 - id: children
   name: Children
   keywords: [child, children, son, daughter, baby, young, boy, girl]
   contains: [子, 儿, 孩, 童]
+  radicals: [子]
 - id: silk
   name: Silk and webs
   keywords: [silk, thread, web, spider, weave, cloth, rope, line, tie]
   contains: [丝, 网, 线, 织]
+  radicals: [纟, 糸]
 - id: eyes
   name: Eyes and seeing
   keywords: [eye, see, look, watch, blind, sight, appear]
   contains: [目, 眼, 看, 见]
+  radicals: [目, 见]
 - id: birds
   name: Beasts and birds
   tags: [animal, zoology]
   keywords: [lion, elephant, bird, wing, fly, eagle, feather]
   contains: [鸟, 飞, 狮]
+  radicals: [鸟, 隹]
 - id: caves
   name: Caves and the deep
   keywords: [cave, hole, deep, bottom, mouse, rat, dark, underground]
   contains: [洞, 穴, 鼠, 深, 暗]
+  radicals: [穴]
 - id: law
   name: Law and order
   tags: [law, government]
@@ -158,6 +183,7 @@
   name: Crossing over
   keywords: [cross, boat, bridge, ferry, shore, bank, wave]
   contains: [渡, 船, 桥, 岸]
+  radicals: [舟]
 - id: festivals
   name: Lanterns and festivals
   keywords: [lamp, lantern, oil, festival, celebrate, horn, candle]
@@ -167,6 +193,7 @@
   tags: [astronomy]
   keywords: [moon, rabbit, jade, night, star]
   contains: [月, 兔, 玉, 星]
+  radicals: [月]
 - id: prison
   name: Prison and justice
   tags: [law]
@@ -177,6 +204,7 @@
   tags: [philosophy, classical, literary]
   keywords: [scripture, buddha, sutra, enlighten, heaven, spirit, wisdom]
   contains: [经, 佛, 法]
+  radicals: [礻]
 - id: homecoming
   name: Homecoming
   keywords: [return, home, back, emperor, capital, arrive]

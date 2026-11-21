@@ -8,7 +8,8 @@ import (
 )
 
 // Theme is a set of words that fits a part of the story, chosen by page
-// tags, keywords in the English meaning, or characters the word contains.
+// tags, keywords in the English meaning, characters the word contains, or
+// (for character pages) the character's radical.
 // Levels, when set, restrict the theme to those HSK levels.
 type Theme struct {
 	ID       string   `yaml:"id"`
@@ -17,6 +18,7 @@ type Theme struct {
 	Tags     []string `yaml:"tags,omitempty"`
 	Keywords []string `yaml:"keywords,omitempty"`
 	Contains []string `yaml:"contains,omitempty"`
+	Radicals []string `yaml:"radicals,omitempty"`
 }
 
 // ThemeByID returns the theme with id, or nil.
@@ -49,13 +51,17 @@ func (t Theme) Matches(c model.Card, page model.Page) bool {
 	if len(t.Levels) > 0 && !contains(t.Levels, page.Level) {
 		return false
 	}
-	if len(t.Tags) == 0 && len(t.Keywords) == 0 && len(t.Contains) == 0 {
+	if len(t.Tags) == 0 && len(t.Keywords) == 0 && len(t.Contains) == 0 && len(t.Radicals) == 0 {
 		return true // a level-only theme
 	}
 	for _, tag := range page.Tags {
 		if contains(t.Tags, tag) {
 			return true
 		}
+	}
+	// A page's radical reads like "氵 (water)" or "扌(hand)": match its first character.
+	if r := []rune(page.Radical); len(r) > 0 && contains(t.Radicals, string(r[0])) {
+		return true
 	}
 	for _, ch := range t.Contains {
 		if strings.Contains(c.Chinese, ch) {
