@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"time"
 
 	"gopkg.in/yaml.v3"
@@ -15,42 +16,67 @@ const journeyFile = "journey.yaml"
 
 type journeyRecord struct {
 	Cleared map[int]string `yaml:"cleared"`
+	Seen    []int          `yaml:"seen,omitempty"` // stages whose story scene has been shown
+}
+
+func (s *Store) readJourney() (journeyRecord, error) {
+	rec := journeyRecord{}
+	data, err := os.ReadFile(filepath.Join(s.Dir, journeyFile))
+	if err != nil && !os.IsNotExist(err) {
+		return rec, fmt.Errorf("read journey progress: %w", err)
+	}
+	if err == nil {
+		if err := yaml.Unmarshal(data, &rec); err != nil {
+			return rec, fmt.Errorf("parse %s: %w", journeyFile, err)
+		}
+	}
+	if rec.Cleared == nil {
+		rec.Cleared = map[int]string{}
+	}
+	return rec, nil
+}
+
+func (s *Store) writeJourney(rec journeyRecord) error {
+	data, err := yaml.Marshal(rec)
+	if err != nil {
+		return fmt.Errorf("encode journey progress: %w", err)
+	}
+	return os.WriteFile(filepath.Join(s.Dir, journeyFile), data, 0644)
 }
 
 // ClearedStages returns the date each stage was cleared, by tribulation
 // number. A missing file means none has been cleared yet.
 func (s *Store) ClearedStages() (map[int]string, error) {
-	rec := journeyRecord{Cleared: map[int]string{}}
-	data, err := os.ReadFile(filepath.Join(s.Dir, journeyFile))
-	if os.IsNotExist(err) {
-		return rec.Cleared, nil
-	}
-	if err != nil {
-		return nil, fmt.Errorf("read journey progress: %w", err)
-	}
-	if err := yaml.Unmarshal(data, &rec); err != nil {
-		return nil, fmt.Errorf("parse %s: %w", journeyFile, err)
-	}
-	if rec.Cleared == nil {
-		rec.Cleared = map[int]string{}
-	}
-	return rec.Cleared, nil
+	rec, err := s.readJourney()
+	return rec.Cleared, err
 }
 
 // RecordStageCleared saves a win that clears a stage. Winning again keeps
 // the date of the first clear.
 func (s *Store) RecordStageCleared(stage int, when time.Time) error {
-	cleared, err := s.ClearedStages()
+	rec, err := s.readJourney()
 	if err != nil {
 		return err
 	}
-	if _, ok := cleared[stage]; ok {
+	if _, ok := rec.Cleared[stage]; ok {
 		return nil
 	}
-	cleared[stage] = when.Format(dateFmt)
-	data, err := yaml.Marshal(journeyRecord{Cleared: cleared})
-	if err != nil {
-		return fmt.Errorf("encode journey progress: %w", err)
+	rec.Cleared[stage] = when.Format(dateFmt)
+	return s.writeJourney(rec)
+}
+
+// SceneSeen reports whether a stage's story scene has been shown.
+func (s *Store) SceneSeen(stage int) (bool, error) {
+	rec, err := s.readJourney()
+	return slices.Contains(rec.Seen, stage), err
+}
+
+// MarkSceneSeen records that a stage's story scene has been shown.
+func (s *Store) MarkSceneSeen(stage int) error {
+	rec, err := s.readJourney()
+	if err != nil || slices.Contains(rec.Seen, stage) {
+		return err
 	}
-	return os.WriteFile(filepath.Join(s.Dir, journeyFile), data, 0644)
+	rec.Seen = append(rec.Seen, stage)
+	return s.writeJourney(rec)
 }

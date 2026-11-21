@@ -17,6 +17,7 @@ import (
 	rpgengine "github.com/therealsiege/tuilaoshi/internal/rpg"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/ui/input"
+	"github.com/therealsiege/tuilaoshi/internal/ui/reader"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
@@ -29,6 +30,7 @@ const (
 	stateEnemyAttack
 	stateVictory
 	stateDefeat
+	stateScene // the open stage's story scene, before its first fight
 )
 
 const (
@@ -75,6 +77,11 @@ type Model struct {
 	// The stage this battle can clear, or nil for a practice battle; next
 	// is the stage being worked on (nil once all are cleared).
 	stage, next *journey.Stage
+
+	// The story scene shown before a stage's first fight.
+	scene       reader.Model
+	sceneOf     *journey.Scene
+	showEnglish bool
 	mastered    int            // the journey's mastered count, which scales player stats
 	counts      journey.Counts // characters learned and mastered, which open stages
 }
@@ -148,7 +155,8 @@ func (m Model) Refresh() Model {
 	m.state = stateIntro
 	m.log = nil
 	m.animTicks = 0
-	return m.startSession()
+	m = m.startSession()
+	return m.openScene()
 }
 
 // setQuestionKinds asks for spoken questions when audio works, and typed
@@ -262,6 +270,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m.nextTurn()
 
 	case tea.KeyMsg:
+		if m.state == stateScene && !key.Matches(msg, m.gkeys.Back) {
+			return m.updateScene(msg)
+		}
 		// Global escape: flee battle.
 		if key.Matches(msg, m.gkeys.Back) {
 			return m, ui.SwitchTo(ui.ViewDashboard)

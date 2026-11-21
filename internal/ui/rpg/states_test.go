@@ -9,6 +9,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 )
 
@@ -23,6 +24,7 @@ var stateNames = map[viewState]string{
 	stateEnemyAttack:  "EnemyAttack",
 	stateVictory:      "Victory",
 	stateDefeat:       "Defeat",
+	stateScene:        "Scene",
 }
 
 const outside viewState = -1 // [*]: opening the battle, or leaving to the dashboard
@@ -37,6 +39,7 @@ type transition struct {
 var (
 	enter = func(m Model) (Model, tea.Cmd) { return m.Update(tea.KeyMsg{Type: tea.KeyEnter}) }
 	esc   = func(m Model) (Model, tea.Cmd) { return m.Update(tea.KeyMsg{Type: tea.KeyEsc}) }
+	tab   = func(m Model) (Model, tea.Cmd) { return m.Update(tea.KeyMsg{Type: tea.KeyTab}) }
 	right = func(m Model) (Model, tea.Cmd) {
 		m.battle.Selected = m.battle.Question.Correct
 		return m.submitAnswer()
@@ -59,7 +62,10 @@ var (
 )
 
 var transitions = []transition{
+	{outside, stateScene, "open battle on a stage whose story scene is unseen", nil, nil},
 	{outside, stateIntro, "open battle (the open stage's demon or boss, else practice)", nil, nil},
+	{stateScene, stateIntro, "tab (scene marked seen)", nil, tab},
+	{stateScene, outside, "esc (flee)", nil, esc},
 	{stateIntro, stateFighting, "enter / space", nil, enter},
 	{stateFighting, statePlayerAttack, "right answer", nil, right},
 	{stateFighting, stateEnemyAttack, "wrong answer", nil, wrong},
@@ -78,6 +84,7 @@ func reach(t *testing.T, s viewState, setup func(*Model)) Model {
 	m := fixedBattle(t)
 	path := map[viewState][]func(Model) (Model, tea.Cmd){
 		stateIntro:        nil,
+		stateScene:        {func(m Model) (Model, tea.Cmd) { return m.showScene(journey.SceneFor(1)), nil }},
 		stateFighting:     {enter},
 		statePlayerAttack: {enter, right},
 		stateEnemyAttack:  {enter, wrong},

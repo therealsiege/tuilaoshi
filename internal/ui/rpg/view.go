@@ -27,6 +27,8 @@ func (m Model) View() string {
 	}
 
 	switch m.state {
+	case stateScene:
+		b.WriteString(m.viewScene())
 	case stateIntro:
 		b.WriteString(m.viewIntro())
 	case stateFighting:
@@ -347,6 +349,10 @@ func (m Model) renderStakes() string {
 			ui.ChineseStyle.Render(m.stage.Name), m.stage.English)
 		if m.stage.Boss != nil {
 			b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  BOSS! It will test your weakest words. Theme: %s", m.stage.Boss.Theme)))
+			b.WriteString("\n")
+		}
+		if journey.SceneFor(m.stage.Number) == nil {
+			b.WriteString(ui.MutedStyle.Render(ui.WrapText(m.stage.Desc, 72)))
 			b.WriteString("\n")
 		}
 		b.WriteString(ui.WarningStyle.Render("  Win to clear this tribulation."))

@@ -5,7 +5,10 @@ transition against the battle model. Regenerate with `make golden`.
 
 ```mermaid
 stateDiagram-v2
+    [*] --> Scene : open battle on a stage whose story scene is unseen
     [*] --> Intro : open battle (the open stage's demon or boss, else practice)
+    Scene --> Intro : tab (scene marked seen)
+    Scene --> [*] : esc (flee)
     Intro --> Fighting : enter / space
     Fighting --> PlayerAttack : right answer
     Fighting --> EnemyAttack : wrong answer

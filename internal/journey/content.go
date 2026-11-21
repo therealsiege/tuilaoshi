@@ -25,6 +25,7 @@ type Content struct {
 	Dialogue     []Dialogue
 	Themes       []Theme
 	Progression  Progression
+	Story        storyBook
 }
 
 // Progression sets which characters count toward opening a stage.
@@ -60,6 +61,7 @@ func LoadContent() (Content, error) {
 		{"dialogue", &c.Dialogue},
 		{"themes", &c.Themes},
 		{"progression", &c.Progression},
+		{"scenes", &c.Story},
 	}
 	for _, f := range files {
 		data, err := contentFS.ReadFile("content/" + f.name + ".yaml")

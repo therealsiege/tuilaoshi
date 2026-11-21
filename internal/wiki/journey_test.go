@@ -36,3 +36,19 @@ func TestClearedStagesReportsCorruptFile(t *testing.T) {
 		t.Error("corrupt journey file returned no error")
 	}
 }
+
+func TestSceneSeenSurvivesClears(t *testing.T) {
+	store := NewStore(t.TempDir())
+	if seen, err := store.SceneSeen(8); err != nil || seen {
+		t.Fatalf("fresh wiki: seen %v, err %v", seen, err)
+	}
+	if err := store.MarkSceneSeen(8); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.RecordStageCleared(1, time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	if seen, err := store.SceneSeen(8); err != nil || !seen {
+		t.Errorf("after a clear: seen %v, err %v; want the scene still marked", seen, err)
+	}
+}

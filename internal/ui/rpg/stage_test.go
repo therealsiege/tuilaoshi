@@ -35,7 +35,7 @@ func stageWiki(t *testing.T, mastered, cleared int) *wiki.Store {
 }
 
 func TestWinningOpenStageClearsIt(t *testing.T) {
-	m := New(stageWiki(t, 0, 0), nil, nil).Refresh()
+	m := skipScene(New(stageWiki(t, 0, 0), nil, nil).Refresh())
 	if m.stage == nil || m.stage.Number != 1 || m.battle.Enemy.Chinese != m.stage.Opponent.Name {
 		t.Fatalf("new learner: stage %v, enemy %s; want the stage 1 fight", m.stage, m.battle.Enemy.Chinese)
 	}
@@ -50,7 +50,7 @@ func TestWinningOpenStageClearsIt(t *testing.T) {
 		t.Errorf("victory screen doesn't say the stage cleared:\n%s", m.View())
 	}
 
-	m = m.Refresh() // stage 2 needs mastered characters this learner lacks
+	m = skipScene(m.Refresh()) // stage 2 needs characters this learner lacks
 	if m.stage != nil || m.next == nil || m.next.Number != 2 {
 		t.Fatalf("after clearing 1 with nothing mastered: stage %v, next %v; want practice before stage 2", m.stage, m.next)
 	}
@@ -61,11 +61,11 @@ func TestWinningOpenStageClearsIt(t *testing.T) {
 
 func TestBossStageIsABossBattle(t *testing.T) {
 	need := journey.TribulationAt(8).Unlock
-	m := New(stageWiki(t, need, 7), nil, nil).Refresh()
+	m := skipScene(New(stageWiki(t, need, 7), nil, nil).Refresh())
 	if m.stage == nil || m.stage.Number != 8 || m.stage.Boss == nil {
 		t.Fatalf("stage %+v; want the open boss stage 8", m.stage)
 	}
-	normal := New(stageWiki(t, need, 0), nil, nil).Refresh() // stage 1: same demon, not a boss
+	normal := skipScene(New(stageWiki(t, need, 0), nil, nil).Refresh()) // stage 1: same demon, not a boss
 	if m.battle.Enemy.MaxHP <= normal.battle.Enemy.MaxHP {
 		t.Errorf("boss HP %d not above the same demon's %d on an ordinary stage", m.battle.Enemy.MaxHP, normal.battle.Enemy.MaxHP)
 	}

@@ -30,7 +30,7 @@ func storeModel(t *testing.T) Model {
 		t.Fatal(err)
 	}
 
-	m := New(wiki.NewStore(dir), nil, nil).Refresh()
+	m := skipScene(New(wiki.NewStore(dir), nil, nil).Refresh())
 	if m.battle == nil || len(m.cards) != 4 {
 		t.Fatalf("battle not loaded from wiki: %d cards", len(m.cards))
 	}
@@ -238,4 +238,12 @@ func TestVictoryReportsWholeBattleAccuracy(t *testing.T) {
 	if view := m.View(); !strings.Contains(view, "50%") {
 		t.Errorf("victory view should report 50%% accuracy:\n%s", view)
 	}
+}
+
+// skipScene goes past a stage's story scene to the battle intro.
+func skipScene(m Model) Model {
+	if m.state == stateScene {
+		m, _ = m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	}
+	return m
 }

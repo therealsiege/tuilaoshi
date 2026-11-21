@@ -17,7 +17,7 @@ func (m Model) View() string {
 		b.WriteString("\n\n")
 	}
 	if m.open {
-		b.WriteString(m.viewText())
+		b.WriteString(m.TextView("  ←→ word · ↑↓ line · enter didn't know it (review tomorrow) · esc readings"))
 	} else {
 		b.WriteString(m.viewList())
 	}
@@ -44,7 +44,9 @@ func (m Model) viewList() string {
 	return b.String()
 }
 
-func (m Model) viewText() string {
+// TextView renders the open text with the selected word's gloss and the
+// given help line, for embedding in other screens.
+func (m Model) TextView(help string) string {
 	var b strings.Builder
 	b.WriteString(ui.SubtitleStyle.Render("  " + m.title))
 	b.WriteString("\n\n")
@@ -73,7 +75,7 @@ func (m Model) viewText() string {
 	b.WriteString("\n")
 	b.WriteString(m.viewGloss())
 	b.WriteString("\n")
-	b.WriteString(ui.HelpStyle.Render("  ←→ word · ↑↓ line · enter didn't know it (review tomorrow) · esc readings"))
+	b.WriteString(ui.HelpStyle.Render(help))
 	return b.String()
 }
 

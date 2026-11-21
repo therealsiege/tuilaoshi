@@ -1,0 +1,227 @@
+# Story scenes shown when a stage first opens, in graded Chinese. Read in the
+# reader: select a word for its meaning; marked words come back for review.
+# Names and story words not in the decks go in the glossary at the end.
+scenes:
+  - stage: 1
+    title: 金蝉遭贬 The Golden Cicada Falls
+    text:
+      - 很久很久以前，灵山上有一位佛祖。
+      - 佛祖讲经的时候，他的徒弟金蝉子没有好好听。
+      - 佛祖很不高兴，把金蝉子送到了人间。
+      - 金蝉子要在人间学习很多年，才能回来。
+    english: Long, long ago, a Buddha lived on Spirit Mountain. While the Buddha taught the scriptures, his disciple Golden Cicada did not listen well. The Buddha was displeased and sent Golden Cicada down to the human world, where he must learn for many years before he can return.
+    speaker: 唐僧
+    line: 这是我的第一难。
+    line_english: This is my first tribulation.
+  - stage: 2
+    title: 出胎几杀 Nearly Killed at Birth
+    text:
+      - 金蝉子在人间出生了，他叫陈玄奘。
+      - 他还没出生，坏人就杀了他的爸爸。
+      - 坏人还想杀这个孩子。
+      - 他的妈妈非常害怕，可是她一定要保护孩子。
+    english: Golden Cicada was born into the human world as Chen Xuanzang. Before he was born, bad men killed his father, and they wanted to kill the child too. His mother was terrified, but she was determined to protect him.
+    speaker: 唐僧
+    line: 妈妈，谢谢你保护了我。
+    line_english: Mother, thank you for protecting me.
+  - stage: 3
+    title: 满月抛江 Cast into the River
+    text:
+      - 孩子满一个月的时候，妈妈没有办法了。
+      - 她把孩子放在一块木板上，送到了江里。
+      - 江水带着孩子走了很远很远。
+      - 一位老和尚在江边看见了他，把他带回了寺里。
+    english: When the baby was one month old, his mother had no other way. She laid him on a wooden board and set him on the river. The river carried him far, far away, until an old monk saw him from the bank and took him back to the temple.
+    speaker: 唐僧
+    line: 是江水把我送到了师父身边。
+    line_english: It was the river that brought me to my master.
+  - stage: 4
+    title: 寻亲报冤 Finding His Mother
+    text:
+      - 孩子长大了，成了一个和尚，大家叫他玄奘。
+      - 十八岁那年，他知道了自己的故事。
+      - 他去江州找到了妈妈，又请外公帮忙。
+      - 最后，坏人被抓住了，一家人终于在一起了。
+    english: The child grew up and became a monk named Xuanzang. At eighteen he learned his own story. He went to Jiangzhou, found his mother, and asked his grandfather for help. In the end the bad men were caught, and the family was together at last.
+    speaker: 唐僧
+    line: 家人在一起，就是最大的幸福。
+    line_english: Being together as a family is the greatest happiness.
+  - stage: 5
+    title: 出城逢虎 A Tiger on the Road
+    text:
+      - 皇帝让玄奘去西天取经，还给了他一个新名字：唐三藏。
+      - 唐僧离开了长安，走上了往西的路。
+      - 没走多远，路上就出现了一只老虎。
+      - 唐僧非常害怕，可是他没有回头。
+    english: The emperor sent Xuanzang west to fetch the scriptures and gave him a new name, Tang Sanzang. Tang Sanzang left Chang'an and set out on the road west. He had not gone far when a tiger appeared on the road. He was terrified, but he did not turn back.
+    speaker: 唐僧
+    line: 路再难走，我也要往西走。
+    line_english: However hard the road, I will keep going west.
+  - stage: 6
+    title: 落坑折从 Into the Pit
+    text:
+      - 天还没亮，唐僧和两个随从在山路上走。
+      - 突然，他们都掉进了一个很深的坑里。
+      - 坑里有几个妖怪，吃掉了两个随从。
+      - 只有唐僧一个人活了下来。
+    english: Before dawn, Tang Sanzang and two attendants were walking a mountain road. Suddenly they all fell into a deep pit. Demons in the pit ate the two attendants. Only Tang Sanzang survived.
+    speaker: 唐僧
+    line: 现在只有我一个人了。
+    line_english: Now I am all alone.
+  - stage: 7
+    title: 双叉岭上 On Twin Fork Ridge
+    text:
+      - 唐僧一个人来到了双叉岭。
+      - 山很高，路很窄，到处都是野兽。
+      - 一位猎人帮助了他，带他走过了大山。
+      - 猎人说："前面就是两界山，我不能再往前走了。"
+    english: Tang Sanzang came alone to Twin Fork Ridge. The mountains were high, the path narrow, and wild beasts were everywhere. A hunter helped him across the mountains, then said, "Ahead is Two Boundary Mountain. I can go no further."
+    speaker: 唐僧
+    line: 谢谢你，好心的猎人。
+    line_english: Thank you, kind hunter.
+  - stage: 8
+    title: 两界山头 At Two Boundary Mountain
+    text:
+      - 在两界山下，有一只猴子已经被压了五百年。
+      - 他就是孙悟空。他大声地叫："师父，快救我！"
+      - 唐僧揭下了山上的符，孙悟空跳了出来。
+      - 可是，悟空的老敌人混世魔王也来了。
+    english: Beneath Two Boundary Mountain, a monkey had been pinned for five hundred years. He was Sun Wukong, and he shouted, "Master, save me!" Tang Sanzang peeled the charm off the mountain and Sun Wukong leapt out. But Wukong's old enemy, the Havoc Monster, had come too.
+    speaker: 孙悟空
+    line: 师父别怕，看俺老孙的！
+    line_english: Don't be afraid, Master. Leave it to old Sun!
+  - stage: 20
+    title: 贬退心猿 The White Bone Demon
+    text:
+      - 在白虎岭，一个漂亮的姑娘给唐僧送来了饭。
+      - 悟空用火眼金睛一看，她是白骨精变的！
+      - 悟空打了她三次，可是唐僧不相信悟空。
+      - 唐僧生气地说："你走吧，我不要你这个徒弟了。"
+    english: On White Tiger Ridge, a pretty young woman brought Tang Sanzang food. Wukong looked with his fiery golden eyes and saw she was the White Bone Demon in disguise. Wukong struck her three times, but Tang Sanzang did not believe him and said angrily, "Go away. You are no longer my disciple."
+    speaker: 孙悟空
+    line: 师父，她真的是妖怪啊！
+    line_english: Master, she really is a demon!
+  - stage: 25
+    title: 莲花洞高悬 Hanging in Lotus Cave
+    text:
+      - 平顶山莲花洞里住着金角大王和银角大王。
+      - 他们有一个宝葫芦，叫谁的名字，谁一回答就会被装进去。
+      - 唐僧被他们抓住了，挂在洞里。
+      - 悟空想了很多办法，要把师父救出来。
+    english: The Gold Horn King and the Silver Horn King lived in Lotus Cave on Flat-Top Mountain. They had a treasure gourd that would swallow anyone who answered when it called their name. They caught Tang Sanzang and hung him up in the cave, and Wukong tried trick after trick to rescue his master.
+    speaker: 孙悟空
+    line: 他叫我，我就是不回答！
+    line_english: He can call me all he likes. I won't answer!
+  - stage: 31
+    title: 请圣降妖 Red Boy's Fire
+    text:
+      - 红孩儿会放三昧真火，火又大又热。
+      - 悟空打不过他，还被火烧伤了。
+      - 没有办法，悟空只好去南海请观音菩萨。
+      - 观音菩萨来了，红孩儿终于被收服了。
+    english: Red Boy could breathe the True Fire of Samadhi, huge and scorching. Wukong could not beat him and was badly burned. With no other way, Wukong went to the South Sea to ask Guanyin Bodhisattva for help. Guanyin came, and Red Boy was finally subdued.
+    speaker: 孙悟空
+    line: 这火太厉害了，俺老孙也怕！
+    line_english: This fire is fierce. Even old Sun is afraid of it!
+  - stage: 52
+    title: 收缚魔王 The Bull Demon King
+    text:
+      - 火焰山的火烧了八百里，谁也过不去。
+      - 只有铁扇公主的芭蕉扇能把火扇灭。
+      - 牛魔王是她的丈夫，他不让悟空拿走扇子。
+      - 悟空和牛魔王打了很久很久。
+    english: The fire of the Flaming Mountains burned for eight hundred li, and no one could pass. Only Princess Iron Fan's banana-leaf fan could put it out. Her husband, the Bull Demon King, would not let Wukong take the fan, and the two of them fought for a long, long time.
+    speaker: 猪八戒
+    line: 好热啊！我们快点过山吧！
+    line_english: It's so hot! Let's get over this mountain, quick!
+  - stage: 59
+    title: 七情迷没 The Spider Spirits
+    text:
+      - 唐僧一个人去化斋，走进了盘丝洞。
+      - 洞里有七个漂亮的女子，她们都是蜘蛛精。
+      - 她们吐出白色的丝，把唐僧绑住了。
+      - 悟空看见洞口到处都是丝，知道师父有危险了。
+    english: Tang Sanzang went alone to beg for food and walked into Silk Cave. Inside were seven beautiful women, all of them spider spirits. They spat out white silk and bound him tight. When Wukong saw silk all over the cave mouth, he knew his master was in danger.
+    speaker: 沙悟净
+    line: 大师兄，师父又被妖怪抓走了！
+    line_english: Big brother, the demons have taken Master again!
+  - stage: 64
+    title: 请佛收魔 The Golden-Winged Roc
+    text:
+      - 狮驼岭有三个魔王，最厉害的是金翅大鹏。
+      - 他飞得非常快，一下子就能飞九万里。
+      - 连悟空也跑不过他。
+      - 最后，悟空去灵山请佛祖帮忙。
+    english: Three demon kings ruled Lion Camel Ridge, and the strongest was the Golden-Winged Roc. He flew so fast he could cover ninety thousand li in one go. Not even Wukong could outrun him. In the end Wukong went to Spirit Mountain to ask the Buddha for help.
+    speaker: 孙悟空
+    line: 他比我的筋斗云还快！
+    line_english: He's even faster than my somersault cloud!
+  - stage: 79
+    title: 路经十万八千里 The Last Trial
+    text:
+      - 走了十四年，唐僧师徒终于来到了灵山。
+      - 他们一共走了十万八千里，经历了很多困难。
+      - 佛祖在大雷音寺等着他们。
+      - 这是最后的考验：他们真的准备好了吗？
+    english: After fourteen years on the road, Tang Sanzang and his disciples at last reached Spirit Mountain. They had walked one hundred and eight thousand li through many hardships. The Buddha was waiting for them at the Great Thunder Monastery. This was the final test. Were they truly ready?
+    speaker: 唐僧
+    line: 徒弟们，我们终于到了。
+    line_english: My disciples, we have finally arrived.
+
+glossary:
+  - {word: 灵山, pinyin: Língshān, meaning: Spirit Mountain}
+  - {word: 佛祖, pinyin: Fózǔ, meaning: the Buddha}
+  - {word: 讲经, pinyin: jiǎngjīng, meaning: to teach the scriptures}
+  - {word: 金蝉子, pinyin: Jīnchánzǐ, meaning: Golden Cicada (Tang Sanzang in a past life)}
+  - {word: 人间, pinyin: rénjiān, meaning: the human world}
+  - {word: 陈玄奘, pinyin: Chén Xuánzàng, meaning: Chen Xuanzang (Tang Sanzang's birth name)}
+  - {word: 玄奘, pinyin: Xuánzàng, meaning: Xuanzang}
+  - {word: 木板, pinyin: mùbǎn, meaning: wooden board}
+  - {word: 和尚, pinyin: héshang, meaning: Buddhist monk}
+  - {word: 江州, pinyin: Jiāngzhōu, meaning: Jiangzhou (a city)}
+  - {word: 外公, pinyin: wàigōng, meaning: maternal grandfather}
+  - {word: 西天, pinyin: xītiān, meaning: the Western Paradise (India)}
+  - {word: 取经, pinyin: qǔjīng, meaning: to fetch the scriptures}
+  - {word: 唐三藏, pinyin: Táng Sānzàng, meaning: Tang Sanzang}
+  - {word: 唐僧, pinyin: Táng Sēng, meaning: Tang Sanzang, the Tang monk}
+  - {word: 长安, pinyin: Cháng'ān, meaning: Chang'an (the Tang capital)}
+  - {word: 随从, pinyin: suícóng, meaning: attendant, follower}
+  - {word: 妖怪, pinyin: yāoguài, meaning: demon, monster}
+  - {word: 双叉岭, pinyin: Shuāngchā Lǐng, meaning: Twin Fork Ridge}
+  - {word: 野兽, pinyin: yěshòu, meaning: wild beast}
+  - {word: 猎人, pinyin: lièrén, meaning: hunter}
+  - {word: 两界山, pinyin: Liǎngjiè Shān, meaning: Two Boundary Mountain}
+  - {word: 孙悟空, pinyin: Sūn Wùkōng, meaning: Sun Wukong, the Monkey King}
+  - {word: 悟空, pinyin: Wùkōng, meaning: Wukong}
+  - {word: 符, pinyin: fú, meaning: paper charm, talisman}
+  - {word: 混世魔王, pinyin: Hùnshì Mówáng, meaning: the Havoc Monster}
+  - {word: 俺老孙, pinyin: ǎn Lǎo Sūn, meaning: "old Sun (Wukong's name for himself)"}
+  - {word: 白虎岭, pinyin: Báihǔ Lǐng, meaning: White Tiger Ridge}
+  - {word: 火眼金睛, pinyin: huǒyǎn jīnjīng, meaning: fiery golden eyes (see through disguises)}
+  - {word: 白骨精, pinyin: Báigǔjīng, meaning: the White Bone Demon}
+  - {word: 徒弟, pinyin: túdì, meaning: disciple}
+  - {word: 平顶山, pinyin: Píngdǐng Shān, meaning: Flat-Top Mountain}
+  - {word: 莲花洞, pinyin: Liánhuā Dòng, meaning: Lotus Cave}
+  - {word: 金角大王, pinyin: Jīnjiǎo Dàwáng, meaning: the Gold Horn King}
+  - {word: 银角大王, pinyin: Yínjiǎo Dàwáng, meaning: the Silver Horn King}
+  - {word: 葫芦, pinyin: húlu, meaning: gourd}
+  - {word: 红孩儿, pinyin: Hóng Hái'ér, meaning: Red Boy}
+  - {word: 三昧真火, pinyin: sānmèi zhēnhuǒ, meaning: True Fire of Samadhi}
+  - {word: 南海, pinyin: Nánhǎi, meaning: the South Sea}
+  - {word: 观音菩萨, pinyin: Guānyīn Púsà, meaning: Guanyin Bodhisattva}
+  - {word: 收服, pinyin: shōufú, meaning: to subdue}
+  - {word: 火焰山, pinyin: Huǒyàn Shān, meaning: the Flaming Mountains}
+  - {word: 铁扇公主, pinyin: Tiěshàn Gōngzhǔ, meaning: Princess Iron Fan}
+  - {word: 芭蕉扇, pinyin: bājiāoshàn, meaning: banana-leaf fan}
+  - {word: 牛魔王, pinyin: Niú Mówáng, meaning: the Bull Demon King}
+  - {word: 化斋, pinyin: huàzhāi, meaning: (of a monk) to beg for food}
+  - {word: 盘丝洞, pinyin: Pánsī Dòng, meaning: Silk Cave}
+  - {word: 蜘蛛精, pinyin: zhīzhūjīng, meaning: spider spirit}
+  - {word: 大师兄, pinyin: dà shīxiōng, meaning: eldest fellow disciple (Wukong)}
+  - {word: 狮驼岭, pinyin: Shītuó Lǐng, meaning: Lion Camel Ridge}
+  - {word: 魔王, pinyin: mówáng, meaning: demon king}
+  - {word: 金翅大鹏, pinyin: Jīnchì Dàpéng, meaning: the Golden-Winged Roc}
+  - {word: 筋斗云, pinyin: jīndǒuyún, meaning: somersault cloud}
+  - {word: 大雷音寺, pinyin: Dà Léiyīn Sì, meaning: the Great Thunder Monastery}
+  - {word: 十万八千里, pinyin: shíwàn bāqiān lǐ, meaning: 108,000 li (a vast distance)}
+  - {word: 师徒, pinyin: shītú, meaning: master and disciples}

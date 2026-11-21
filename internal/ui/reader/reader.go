@@ -75,11 +75,16 @@ func (m Model) Refresh() Model {
 	return m
 }
 
-// openReading segments a reading's text against its own vocabulary and the
-// learner's decks.
+// openReading opens a wiki reading's text.
 func (m Model) openReading(p model.Page) Model {
+	return m.OpenText(p.Title, textSection(p.Body), wiki.ReadingVocab(p))
+}
+
+// OpenText opens lines of Chinese for word-by-word reading, glossed by vocab
+// first and then the learner's decks (call Refresh first to load them).
+func (m Model) OpenText(title string, lines []string, vocab []model.Card) Model {
 	m.vocab = map[string][]model.Card{}
-	for _, c := range wiki.ReadingVocab(p) {
+	for _, c := range vocab {
 		m.vocab[c.Chinese] = append(m.vocab[c.Chinese], c)
 	}
 	known := map[string]bool{}
@@ -89,8 +94,8 @@ func (m Model) openReading(p model.Page) Model {
 	for w := range m.vocab {
 		known[w] = true
 	}
-	m.title, m.lines, m.words = p.Title, nil, nil
-	for _, l := range textSection(p.Body) {
+	m.title, m.lines, m.words = title, nil, nil
+	for _, l := range lines {
 		toks := segment.Split(l, known)
 		for i, t := range toks {
 			if t.Word {
