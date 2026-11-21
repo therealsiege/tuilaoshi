@@ -16,10 +16,11 @@ var difficultyMultipliers = map[model.DrillDifficulty]float64{
 	model.DiffEasy:  3.5,
 }
 
-// UpdateSRS updates a card's SRS fields after a drill response.
+// updateSRS updates a card's SRS fields after a review. Callers outside this
+// package use Store.RecordReview, which also saves the result.
 // Uses difficulty-graded intervals: Again resets, Hard/Good/Easy multiply,
 // and any passing review grows the interval by at least a day.
-func UpdateSRS(card *model.Card, difficulty model.DrillDifficulty, now time.Time) {
+func updateSRS(card *model.Card, difficulty model.DrillDifficulty, now time.Time) {
 	card.LastReviewed = now
 
 	mult := difficultyMultipliers[difficulty]
@@ -42,15 +43,6 @@ func UpdateSRS(card *model.Card, difficulty model.DrillDifficulty, now time.Time
 	}
 }
 
-// UpdateSRSBool is a convenience wrapper for boolean correct/incorrect.
-func UpdateSRSBool(card *model.Card, correct bool, now time.Time) {
-	if correct {
-		UpdateSRS(card, model.DiffGood, now)
-	} else {
-		UpdateSRS(card, model.DiffAgain, now)
-	}
-}
-
 // DueItems scans all drillable pages and returns cards due for review.
 func DueItems(store *Store, now time.Time) ([]model.Card, error) {
 	allCards, err := store.DrillableCards()
@@ -68,7 +60,7 @@ func DueItems(store *Store, now time.Time) ([]model.Card, error) {
 }
 
 // ApplySRSToPage updates a page's SRS frontmatter fields from a card.
-func ApplySRSToPage(page *model.Page, card model.Card) {
+func applySRSToPage(page *model.Page, card model.Card) {
 	page.LastReviewed = card.LastReviewed
 	page.ReviewInterval = card.ReviewInterval
 	page.NextReview = card.NextReview

@@ -93,7 +93,7 @@ func (s *Store) DrillableCards() ([]model.Card, error) {
 // RecordReview reschedules a card after a review and saves the result:
 // vocabulary words to the word schedule file, other cards to their page.
 func (s *Store) RecordReview(card *model.Card, difficulty model.DrillDifficulty, now time.Time) error {
-	UpdateSRS(card, difficulty, now)
+	updateSRS(card, difficulty, now)
 
 	if isWordCard(card.ID) {
 		schedules, err := s.readWordSchedules()
@@ -113,6 +113,6 @@ func (s *Store) RecordReview(card *model.Card, difficulty model.DrillDifficulty,
 	if err != nil {
 		return err
 	}
-	ApplySRSToPage(&page, *card)
-	return s.WriteFrontmatter(page)
+	applySRSToPage(&page, *card)
+	return s.writeFrontmatter(page)
 }

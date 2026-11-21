@@ -8,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/cj/mandarin-wiki/internal/journey"
 	"github.com/cj/mandarin-wiki/internal/model"
 	rpgengine "github.com/cj/mandarin-wiki/internal/rpg"
 	"github.com/cj/mandarin-wiki/internal/ui"
@@ -158,19 +159,14 @@ func loadCards(store *wiki.Store) []model.Card {
 	return cards
 }
 
-// countMastered returns the count of cards with a review interval >= 21 days.
+// countMastered returns the mastered count the journey uses for ranks, so
+// battle stats grow with the same progress.
 func countMastered(store *wiki.Store) int {
 	pages, err := store.ListPages()
 	if err != nil {
 		return 0
 	}
-	count := 0
-	for _, p := range pages {
-		if p.ReviewInterval >= 21 {
-			count++
-		}
-	}
-	return count
+	return journey.CountMastered(pages)
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {

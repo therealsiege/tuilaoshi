@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cj/mandarin-wiki/internal/model"
 )
@@ -114,8 +112,9 @@ func (s *Store) ListDirPages(subdir string) ([]model.Page, error) {
 	return pages, nil
 }
 
-// WriteFrontmatter updates the frontmatter of a page on disk without changing the body.
-func (s *Store) WriteFrontmatter(page model.Page) error {
+// writeFrontmatter updates the frontmatter of a page on disk without changing
+// the body. Callers outside this package save reviews with RecordReview.
+func (s *Store) writeFrontmatter(page model.Page) error {
 	path := filepath.Join(s.Dir, page.Path)
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -158,95 +157,4 @@ func (s *Store) WriteFrontmatter(page model.Page) error {
 func (s *Store) PageCount() int {
 	pages, _ := s.ListPages()
 	return len(pages)
-}
-
-// WriteSession saves a drill/review session as a markdown file in wiki/sessions/.
-func (s *Store) WriteSession(sess model.Session) error {
-	sessDir := filepath.Join(s.Dir, "sessions")
-	if err := os.MkdirAll(sessDir, 0755); err != nil {
-		return fmt.Errorf("create sessions dir: %w", err)
-	}
-
-	filename := sess.StartedAt.Format("2006-01-02-150405") + ".md"
-	path := filepath.Join(sessDir, filename)
-
-	var b strings.Builder
-	b.WriteString("---\n")
-	b.WriteString("type: session\n")
-	b.WriteString(fmt.Sprintf("status: active\n"))
-	b.WriteString(fmt.Sprintf("last_reviewed: %s\n", FormatDate(time.Now())))
-	b.WriteString(fmt.Sprintf("tags: [%s]\n", sess.Type))
-	b.WriteString("---\n\n")
-
-	b.WriteString(fmt.Sprintf("# Session — %s\n\n", sess.StartedAt.Format("2006-01-02 15:04")))
-	b.WriteString(fmt.Sprintf("- **Type**: %s\n", sess.Type))
-	b.WriteString(fmt.Sprintf("- **Duration**: %s\n", sess.EndedAt.Sub(sess.StartedAt).Truncate(time.Second)))
-	b.WriteString(fmt.Sprintf("- **Cards**: %d\n", sess.CardsTotal))
-	b.WriteString(fmt.Sprintf("- **Correct**: %d\n", sess.CardsCorrect))
-	if sess.CardsTotal > 0 {
-		pct := float64(sess.CardsCorrect) / float64(sess.CardsTotal) * 100
-		b.WriteString(fmt.Sprintf("- **Accuracy**: %.0f%%\n", pct))
-	}
-	if sess.XP > 0 {
-		b.WriteString(fmt.Sprintf("%s%d\n", xpLinePrefix, sess.XP))
-	}
-	b.WriteString("\n## Results\n\n")
-	b.WriteString("| Card | Answer | Result | Difficulty |\n")
-	b.WriteString("|------|--------|--------|------------|\n")
-	for _, item := range sess.Items {
-		result := "incorrect"
-		if item.Correct {
-			result = "correct"
-		}
-		diff := difficultyLabel(item.Difficulty)
-		b.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n",
-			item.CardID, item.UserAnswer, result, diff))
-	}
-
-	return os.WriteFile(path, []byte(b.String()), 0644)
-}
-
-// xpLinePrefix starts the session-file line that records experience earned.
-const xpLinePrefix = "- **XP**: "
-
-// TotalXP sums the experience recorded across all session files.
-func (s *Store) TotalXP() int {
-	sessDir := filepath.Join(s.Dir, "sessions")
-	entries, err := os.ReadDir(sessDir)
-	if err != nil {
-		return 0
-	}
-
-	total := 0
-	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") {
-			continue
-		}
-		data, err := os.ReadFile(filepath.Join(sessDir, e.Name()))
-		if err != nil {
-			continue
-		}
-		for _, line := range strings.Split(string(data), "\n") {
-			if xp, ok := strings.CutPrefix(line, xpLinePrefix); ok {
-				n, _ := strconv.Atoi(strings.TrimSpace(xp))
-				total += n
-			}
-		}
-	}
-	return total
-}
-
-func difficultyLabel(d model.DrillDifficulty) string {
-	switch d {
-	case model.DiffAgain:
-		return "Again"
-	case model.DiffHard:
-		return "Hard"
-	case model.DiffGood:
-		return "Good"
-	case model.DiffEasy:
-		return "Easy"
-	default:
-		return "Good"
-	}
 }

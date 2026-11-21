@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/cj/mandarin-wiki/internal/model"
 )
@@ -72,7 +71,7 @@ func pageToCards(p model.Page) []model.Card {
 	base := model.Card{
 		ID:             p.Path,
 		Introduced:     p.Introduced,
-		LastReviewed:    p.LastReviewed,
+		LastReviewed:   p.LastReviewed,
 		ReviewInterval: p.ReviewInterval,
 		NextReview:     p.NextReview,
 	}
@@ -154,139 +153,6 @@ func extractAllVocabCards(body string, base model.Card) []model.Card {
 		cards = append(cards, c)
 	}
 	return cards
-}
-
-// DailyStats holds aggregated stats for a single day.
-type DailyStats struct {
-	Date          string
-	CardsReviewed int
-	Correct       int
-	NewCards      int
-}
-
-// TodayStats computes stats from session files for today.
-func (s *Store) TodayStats() DailyStats {
-	today := time.Now().Format("2006-01-02")
-	stats := DailyStats{Date: today}
-
-	sessDir := filepath.Join(s.Dir, "sessions")
-	entries, err := os.ReadDir(sessDir)
-	if err != nil {
-		return stats
-	}
-
-	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") {
-			continue
-		}
-		if !strings.HasPrefix(e.Name(), today) {
-			continue
-		}
-		data, err := os.ReadFile(filepath.Join(sessDir, e.Name()))
-		if err != nil {
-			continue
-		}
-		body := string(data)
-		for _, line := range strings.Split(body, "\n") {
-			trimmed := strings.TrimSpace(line)
-			if strings.HasPrefix(trimmed, "| ") && !strings.HasPrefix(trimmed, "| Card") && !strings.HasPrefix(trimmed, "|---") {
-				stats.CardsReviewed++
-				if strings.Contains(trimmed, "correct") || strings.Contains(trimmed, "Good") || strings.Contains(trimmed, "Easy") {
-					stats.Correct++
-				}
-			}
-		}
-	}
-	return stats
-}
-
-// Streak counts consecutive days (ending today or yesterday) with at least one session.
-func (s *Store) Streak() int {
-	sessDir := filepath.Join(s.Dir, "sessions")
-	entries, err := os.ReadDir(sessDir)
-	if err != nil {
-		return 0
-	}
-
-	// Collect unique session dates
-	dates := make(map[string]bool)
-	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") {
-			continue
-		}
-		if len(e.Name()) >= 10 {
-			dates[e.Name()[:10]] = true
-		}
-	}
-
-	if len(dates) == 0 {
-		return 0
-	}
-
-	streak := 0
-	day := time.Now()
-	// Allow streak to start from today or yesterday
-	if !dates[day.Format("2006-01-02")] {
-		day = day.AddDate(0, 0, -1)
-		if !dates[day.Format("2006-01-02")] {
-			return 0
-		}
-	}
-	for dates[day.Format("2006-01-02")] {
-		streak++
-		day = day.AddDate(0, 0, -1)
-	}
-	return streak
-}
-
-// WeekStats returns DailyStats for each of the last 7 days (index 0 = 6 days ago, 6 = today).
-func (s *Store) WeekStats() [7]DailyStats {
-	var week [7]DailyStats
-	now := time.Now()
-	for i := 0; i < 7; i++ {
-		day := now.AddDate(0, 0, i-6)
-		week[i].Date = day.Format("2006-01-02")
-	}
-
-	sessDir := filepath.Join(s.Dir, "sessions")
-	entries, err := os.ReadDir(sessDir)
-	if err != nil {
-		return week
-	}
-
-	dateIndex := make(map[string]int)
-	for i := 0; i < 7; i++ {
-		dateIndex[week[i].Date] = i
-	}
-
-	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") {
-			continue
-		}
-		if len(e.Name()) < 10 {
-			continue
-		}
-		dateStr := e.Name()[:10]
-		idx, ok := dateIndex[dateStr]
-		if !ok {
-			continue
-		}
-		data, err := os.ReadFile(filepath.Join(sessDir, e.Name()))
-		if err != nil {
-			continue
-		}
-		body := string(data)
-		for _, line := range strings.Split(body, "\n") {
-			trimmed := strings.TrimSpace(line)
-			if strings.HasPrefix(trimmed, "| ") && !strings.HasPrefix(trimmed, "| Card") && !strings.HasPrefix(trimmed, "|---") {
-				week[idx].CardsReviewed++
-				if strings.Contains(trimmed, "correct") || strings.Contains(trimmed, "Good") || strings.Contains(trimmed, "Easy") {
-					week[idx].Correct++
-				}
-			}
-		}
-	}
-	return week
 }
 
 // extractFirstVocabChinese pulls the first Chinese word from a vocabulary page body.

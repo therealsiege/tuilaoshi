@@ -53,6 +53,7 @@ type Model struct {
 
 	// Session tracking
 	session model.Session
+	saveErr error // first failed save this visit, shown until the queue reloads
 
 	width  int
 	height int
@@ -91,6 +92,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.items = due
 		m.cursor = 0
 		m.state = stateList
+		m.saveErr = nil
 		m.session = model.Session{
 			StartedAt: time.Now(),
 			Type:      "review",
@@ -192,7 +194,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			// Update SRS with difficulty
 			if m.cursor < len(m.items) {
 				card := &m.items[m.cursor]
-				_ = m.store.RecordReview(card, diff, time.Now())
+				m.noteSaveErr(m.store.RecordReview(card, diff, time.Now()))
 				m.session.Items = append(m.session.Items, model.SessionItem{
 					CardID:     card.ID,
 					UserAnswer: m.input.Value(),
@@ -210,7 +212,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.session.EndedAt = time.Now()
 				m.session.CardsTotal = m.total
 				m.session.CardsCorrect = m.correct
-				_ = m.store.WriteSession(m.session)
+				m.noteSaveErr(m.store.WriteSession(m.session))
 
 				due, _ := wiki.DueItems(m.store, time.Now())
 				m.items = due
@@ -238,12 +240,23 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	return m, nil
 }
 
+// noteSaveErr keeps the first failed save so the player sees it.
+func (m *Model) noteSaveErr(err error) {
+	if err != nil && m.saveErr == nil {
+		m.saveErr = err
+	}
+}
+
 func (m Model) View() string {
 	var b strings.Builder
 
 	title := ui.TitleStyle.Render("Review Queue 复习")
 	b.WriteString(title)
 	b.WriteString("\n\n")
+	if m.saveErr != nil {
+		b.WriteString(ui.ErrorStyle.Render(fmt.Sprintf("  Could not save progress: %v", m.saveErr)))
+		b.WriteString("\n\n")
+	}
 
 	switch m.state {
 	case stateList:

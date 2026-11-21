@@ -150,7 +150,7 @@ func TestUpdateSRSPassingReviewAlwaysGrows(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			card := model.Card{ReviewInterval: tt.interval}
-			UpdateSRS(&card, tt.diff, time.Now())
+			updateSRS(&card, tt.diff, time.Now())
 			if card.ReviewInterval != tt.want {
 				t.Errorf("interval = %d, want %d", card.ReviewInterval, tt.want)
 			}

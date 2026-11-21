@@ -3,6 +3,7 @@ package journey
 import (
 	"fmt"
 
+	"github.com/cj/mandarin-wiki/internal/model"
 	"github.com/cj/mandarin-wiki/internal/wiki"
 )
 
@@ -82,21 +83,37 @@ type State struct {
 	Lore         []LoreEntry
 }
 
+// masteredInterval is the review interval, in days, at which a character
+// counts as mastered for ranks, bosses, and battle stats.
+const masteredInterval = 7
+
+// IsMastered reports whether a page counts toward mastery.
+func IsMastered(p model.Page) bool {
+	return p.Type == "character" && p.ReviewInterval >= masteredInterval
+}
+
+// CountMastered returns how many pages count toward mastery.
+func CountMastered(pages []model.Page) int {
+	count := 0
+	for _, p := range pages {
+		if IsMastered(p) {
+			count++
+		}
+	}
+	return count
+}
+
 // Calculate computes the complete gamification state from the wiki store.
 func Calculate(store *wiki.Store) State {
 	pages, _ := store.ListPages()
 
-	// Count character pages and mastered characters
 	totalChars := 0
-	mastered := 0
 	for _, p := range pages {
 		if p.Type == "character" {
 			totalChars++
-			if p.ReviewInterval >= 7 {
-				mastered++
-			}
 		}
 	}
+	mastered := CountMastered(pages)
 
 	streak := store.Streak()
 

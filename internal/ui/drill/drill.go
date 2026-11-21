@@ -85,9 +85,10 @@ type Model struct {
 	// Session tracking
 	session model.Session
 
-	width  int
-	height int
-	err    error
+	width   int
+	height  int
+	err     error
+	saveErr error // first failed save this drill, shown until the next drill
 }
 
 // New creates a new drill model.
@@ -154,8 +155,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.state = stateDone
 			return m, nil
 		}
+		m.saveErr = nil
 		if len(due) == 0 {
-			m.cards, _ = m.store.DrillableCards()
+			m.cards, m.err = m.store.DrillableCards()
 		} else {
 			m.cards = due
 		}
@@ -309,7 +311,7 @@ func (m *Model) advanceCard(diff model.DrillDifficulty) tea.Cmd {
 	// Record session item
 	if m.current < len(m.cards) {
 		card := &m.cards[m.current]
-		_ = m.store.RecordReview(card, diff, time.Now())
+		m.noteSaveErr(m.store.RecordReview(card, diff, time.Now()))
 		m.session.Items = append(m.session.Items, model.SessionItem{
 			CardID:     card.ID,
 			UserAnswer: m.input.Value(),
@@ -327,7 +329,7 @@ func (m *Model) advanceCard(diff model.DrillDifficulty) tea.Cmd {
 		m.session.EndedAt = time.Now()
 		m.session.CardsTotal = m.total
 		m.session.CardsCorrect = m.correct
-		_ = m.store.WriteSession(m.session)
+		m.noteSaveErr(m.store.WriteSession(m.session))
 		return nil
 	}
 	m.state = statePrompt
@@ -338,12 +340,23 @@ func (m *Model) advanceCard(diff model.DrillDifficulty) tea.Cmd {
 	return tea.Batch(textinput.Blink, speakCmd(m.tts, card.Chinese, "zh"))
 }
 
+// noteSaveErr keeps the first failed save so the player sees it.
+func (m *Model) noteSaveErr(err error) {
+	if err != nil && m.saveErr == nil {
+		m.saveErr = err
+	}
+}
+
 func (m Model) View() string {
 	var b strings.Builder
 
 	title := ui.TitleStyle.Render("Drill 练习")
 	b.WriteString(title)
 	b.WriteString("\n\n")
+	if m.saveErr != nil {
+		b.WriteString(ui.ErrorStyle.Render(fmt.Sprintf("  Could not save progress: %v", m.saveErr)))
+		b.WriteString("\n\n")
+	}
 
 	switch m.state {
 	case stateModePick:
