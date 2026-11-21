@@ -11,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/therealsiege/tuilaoshi/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/segment"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -28,7 +29,7 @@ type Model struct {
 
 	open   bool // reading a text rather than choosing one
 	title  string
-	lines  [][]token
+	lines  [][]segment.Token
 	words  []place // every selectable word, in reading order
 	cursor int     // index into words
 
@@ -90,9 +91,9 @@ func (m Model) openReading(p model.Page) Model {
 	}
 	m.title, m.lines, m.words = p.Title, nil, nil
 	for _, l := range textSection(p.Body) {
-		toks := segment(l, known)
+		toks := segment.Split(l, known)
 		for i, t := range toks {
-			if t.word {
+			if t.Word {
 				m.words = append(m.words, place{len(m.lines), i})
 			}
 		}
@@ -108,7 +109,7 @@ func (m Model) current() string {
 		return ""
 	}
 	p := m.words[m.cursor]
-	return m.lines[p.line][p.tok].text
+	return m.lines[p.line][p.tok].Text
 }
 
 // glosses returns the meanings of a word: the reading's own first, then

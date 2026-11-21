@@ -3,6 +3,7 @@ package rpg
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -49,6 +50,7 @@ type Model struct {
 	input      input.Model
 	writing    bool
 	lastAnswer string // what the player chose or typed, shown after a miss
+	order      []int  // pieces picked so far for an "order" question, by index
 	gkeys      ui.GlobalKeys
 	battle     *rpgengine.Battle
 	cards      []model.Card
@@ -160,6 +162,7 @@ func (m Model) speakQuestion() tea.Cmd {
 // askQuestion readies the current question: it clears the answer box for a
 // typed question and speaks a listening one.
 func (m Model) askQuestion() (Model, tea.Cmd) {
+	m.order = nil
 	if q := m.battle.Question; q != nil && q.Category == "write" {
 		m.input.Reset()
 		m.input.SetMode(input.ModeChinese)
@@ -300,6 +303,9 @@ func (m Model) handleFightingKey(msg tea.KeyMsg) (Model, tea.Cmd) {
 		return m, nil
 	}
 	q := m.battle.Question
+	if q.Category == "order" {
+		return m.handleOrderKey(msg)
+	}
 	if q.Category == "write" {
 		if key.Matches(msg, m.gkeys.Enter) && !m.input.Composing() {
 			return m.submitText()
@@ -340,6 +346,42 @@ func (m Model) submitAnswer() (Model, tea.Cmd) {
 	q := m.battle.Question
 	correct, dmg := m.battle.Answer(m.battle.Selected)
 	return m.afterAnswer(q, q.Choices[m.battle.Selected], correct, dmg)
+}
+
+// handleOrderKey picks pieces with 1-9 and undoes with backspace; the
+// sentence is graded once every piece is placed.
+func (m Model) handleOrderKey(msg tea.KeyMsg) (Model, tea.Cmd) {
+	q := m.battle.Question
+	if msg.Type == tea.KeyBackspace {
+		if len(m.order) > 0 {
+			m.order = m.order[:len(m.order)-1]
+		}
+		return m, nil
+	}
+	s := msg.String()
+	if len(s) != 1 || s[0] < '1' || s[0] > '9' {
+		return m, nil
+	}
+	idx := int(s[0] - '1')
+	if idx >= len(q.Pieces) || slices.Contains(m.order, idx) {
+		return m, nil
+	}
+	m.order = append(m.order, idx)
+	if len(m.order) < len(q.Pieces) {
+		return m, nil
+	}
+	text := m.orderText()
+	correct, dmg := m.battle.AnswerText(text)
+	return m.afterAnswer(q, text, correct, dmg)
+}
+
+// orderText is the sentence built so far.
+func (m Model) orderText() string {
+	var b strings.Builder
+	for _, i := range m.order {
+		b.WriteString(m.battle.Question.Pieces[i])
+	}
+	return b.String()
 }
 
 // submitText grades a typed answer to a "write" question.

@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/therealsiege/tuilaoshi/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/segment"
+	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 // CombatQuestion is a multiple-choice question generated from wiki cards.
@@ -14,19 +16,20 @@ type CombatQuestion struct {
 	Prompt   string     // the question text (e.g. "What does 书 mean?")
 	Choices  []string   // 4-5 answer options
 	Correct  int        // index of correct answer
-	Category string     // "reading", "meaning", "pinyin", "character", "listening", "write"
+	Category string     // "reading", "meaning", "pinyin", "character", "listening", "write", "order"
 	Damage   int        // damage dealt on correct answer
 	Chinese  string     // the Chinese text being tested
 	Pinyin   string     // pinyin of the tested item
 	English  string     // meaning of the tested item
 	Card     model.Card // the card being tested, for saving the result
 	Accepted []string   // typed answers a "write" question takes
+	Pieces   []string   // shuffled words an "order" question is built from
 }
 
 // CorrectAnswer returns the text of the correct choice, or the word itself
 // for a typed question.
 func (q *CombatQuestion) CorrectAnswer() string {
-	if q.Category == "write" {
+	if q.written() || q.Category == "order" {
 		return q.Chinese
 	}
 	return q.Choices[q.Correct]
@@ -84,7 +87,7 @@ func (b *Battle) GenerateQuestion(cards []model.Card) *CombatQuestion {
 // completeness ranks questions: a typed question needs no choices, so it is
 // always complete.
 func completeness(q *CombatQuestion) int {
-	if q.written() {
+	if q.written() || q.Category == "order" {
 		return distractorCount + 1
 	}
 	return len(q.Choices)
@@ -99,6 +102,9 @@ func (b *Battle) buildQuestion(card model.Card, d deck) *CombatQuestion {
 	}
 	if b.Writing && card.Chinese != "" && card.Pinyin != "" && card.English != "" {
 		categories = append(categories, "write")
+	}
+	if len(card.Examples) > 0 {
+		categories = append(categories, "order")
 	}
 	if len(categories) == 0 {
 		return nil
@@ -135,6 +141,8 @@ func (b *Battle) questionAs(card model.Card, d deck, category string) *CombatQue
 	case "listening": // the character question, spoken instead of shown
 		prompt = "Which word did you hear? (r replays)"
 		correctAnswer = card.Chinese
+	case "order":
+		return b.orderQuestion(card, d)
 	case "write":
 		return &CombatQuestion{
 			Prompt:   fmt.Sprintf("Write in Chinese: %s (%s)", card.English, card.Pinyin),
@@ -215,12 +223,14 @@ func availableCategories(card model.Card) []string {
 type deck struct {
 	cards     []model.Card
 	byChinese map[string][]model.Card
+	known     map[string]bool // every word in the deck, for segmenting sentences
 }
 
 func newDeck(cards []model.Card) deck {
-	d := deck{cards: cards, byChinese: map[string][]model.Card{}}
+	d := deck{cards: cards, byChinese: map[string][]model.Card{}, known: map[string]bool{}}
 	for _, c := range cards {
 		d.byChinese[c.Chinese] = append(d.byChinese[c.Chinese], c)
+		d.known[c.Chinese] = true
 	}
 	return d
 }
@@ -372,4 +382,52 @@ func acceptedWritings(card model.Card, d deck) []string {
 		accepted = append(accepted, c.Chinese)
 	}
 	return accepted
+}
+
+// An "order" sentence must split into this many words: enough to be a
+// puzzle, few enough for the 1-9 keys.
+const (
+	minPieces = 3
+	maxPieces = 9
+)
+
+// orderQuestion asks the player to rebuild one of card's example sentences
+// from its shuffled words, or returns nil when none fits. The sentence is
+// split by the offline segmenter; grading compares the rebuilt text, so a
+// word split in two only makes one more piece.
+func (b *Battle) orderQuestion(card model.Card, d deck) *CombatQuestion {
+	for _, i := range rand.Perm(len(card.Examples)) {
+		zh, en, ok := wiki.ParseExample(card.Examples[i])
+		if !ok {
+			continue
+		}
+		var pieces []string
+		for _, t := range segment.Split(zh, d.known) {
+			if t.Word {
+				pieces = append(pieces, t.Text)
+			}
+		}
+		if len(pieces) < minPieces || len(pieces) > maxPieces {
+			continue
+		}
+		target := strings.Join(pieces, "")
+		shuffled := append([]string{}, pieces...)
+		for try := 0; try < 10 && strings.Join(shuffled, "") == target; try++ {
+			rand.Shuffle(len(shuffled), func(i, j int) { shuffled[i], shuffled[j] = shuffled[j], shuffled[i] })
+		}
+		if strings.Join(shuffled, "") == target {
+			continue // every order reads the same, e.g. repeated words
+		}
+		return &CombatQuestion{
+			Prompt:   "Put the words in order: " + en,
+			Category: "order",
+			Damage:   b.damage() + writeBonus,
+			Chinese:  target,
+			English:  en,
+			Card:     card,
+			Accepted: []string{target},
+			Pieces:   shuffled,
+		}
+	}
+	return nil
 }

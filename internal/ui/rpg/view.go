@@ -2,6 +2,7 @@ package rpg
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -95,6 +96,8 @@ func (m Model) viewFighting() string {
 	b.WriteString("\n")
 	if q := m.battle.Question; q != nil && q.Category == "write" {
 		b.WriteString(ui.HelpStyle.Render("  type pinyin, space/1-9 pick  |  ctrl+space input mode  |  enter answer  |  esc flee"))
+	} else if q != nil && q.Category == "order" {
+		b.WriteString(ui.HelpStyle.Render("  1-9 add the next word  |  backspace undo  |  esc flee"))
 	} else {
 		b.WriteString(ui.HelpStyle.Render("  up/down navigate  |  enter/1-5 answer  |  esc flee"))
 	}
@@ -298,6 +301,22 @@ func (m Model) renderQuestion() string {
 	b.WriteString("\n\n")
 	if q.Category == "write" {
 		return b.String() + "  " + m.input.View() + "\n"
+	}
+	if q.Category == "order" {
+		built := m.orderText()
+		if built == "" {
+			built = "…"
+		}
+		fmt.Fprintf(&b, "  %s %s\n\n  ", ui.MutedStyle.Render("Your sentence:"), ui.ChineseStyle.Render(built))
+		for i, p := range q.Pieces {
+			piece := fmt.Sprintf("%d.%s  ", i+1, p)
+			if slices.Contains(m.order, i) {
+				b.WriteString(ui.MutedStyle.Render(piece))
+			} else {
+				b.WriteString(ui.ChineseStyle.Render(piece))
+			}
+		}
+		return b.String() + "\n"
 	}
 
 	for i, choice := range q.Choices {

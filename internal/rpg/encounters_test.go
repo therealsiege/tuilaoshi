@@ -117,3 +117,28 @@ func TestWriteQuestionsGradeTypedChinese(t *testing.T) {
 		t.Errorf("right typed answer: ok=%v dmg=%d hits=%d", ok, dmg, b.CorrectHits)
 	}
 }
+
+func TestOrderQuestionsRebuildExampleSentences(t *testing.T) {
+	c := card("1", "书", "shū", "book")
+	c.Examples = []string{"- 我在看书。(Wǒ zài kàn shū.) — I'm reading."}
+	deck := append(testDeck()[1:], c, card("7", "看", "kàn", "look"), card("8", "我", "wǒ", "I"))
+	b := testBattle(deck)
+	q := b.orderQuestion(c, newDeck(deck))
+	if q == nil {
+		t.Fatal("no order question for a four-word sentence")
+	}
+	if q.Chinese != "我在看书" || len(q.Pieces) != 4 || strings.Join(q.Pieces, "") == q.Chinese {
+		t.Fatalf("target %q pieces %v: want 我在看书 in 4 shuffled pieces", q.Chinese, q.Pieces)
+	}
+	if !strings.Contains(q.Prompt, "I'm reading.") || strings.Contains(q.Prompt, "我") {
+		t.Errorf("prompt %q should show the translation only", q.Prompt)
+	}
+	if !q.Accepts("我在看书") || q.Accepts("书看在我") {
+		t.Error("order question grades the wrong sentence")
+	}
+	short := c
+	short.Examples = []string{"- 书。(Shū.) — A book."}
+	if b.orderQuestion(short, newDeck(deck)) != nil {
+		t.Error("one-word sentence became an order question")
+	}
+}

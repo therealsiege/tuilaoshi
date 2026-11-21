@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/therealsiege/tuilaoshi/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 const (
@@ -75,7 +76,7 @@ func Skills(pages []model.Page, cards []model.Card, readingVocab func(model.Page
 			vocab.ByLevel[l] = append(vocab.ByLevel[l], c)
 		case model.CardGrammar:
 			for i, ex := range c.Examples {
-				if zh, en, ok := ParseExample(ex); ok {
+				if zh, en, ok := wiki.ParseExample(ex); ok {
 					grammar.ByLevel[l] = append(grammar.ByLevel[l], model.Card{ID: fmt.Sprintf("%s#ex%d", c.ID, i), Chinese: zh, English: en})
 				}
 			}
@@ -87,22 +88,6 @@ func Skills(pages []model.Page, cards []model.Card, readingVocab func(model.Page
 		}
 	}
 	return []Skill{chars, vocab, grammar, reading}
-}
-
-// ParseExample splits an example line like
-// "- 请把门关上。(Qǐng bǎ mén guān shàng.) — Please close the door."
-// into its Chinese sentence and English translation.
-func ParseExample(line string) (chinese, english string, ok bool) {
-	line = strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(line), "- "))
-	left, english, found := strings.Cut(line, " — ")
-	if !found {
-		return "", "", false
-	}
-	if i := strings.IndexAny(left, "(（"); i >= 0 {
-		left = left[:i]
-	}
-	chinese, english = strings.TrimSpace(left), strings.TrimSpace(english)
-	return chinese, english, chinese != "" && english != ""
 }
 
 func hskLevel(level string) int {

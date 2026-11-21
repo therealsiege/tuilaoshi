@@ -7,7 +7,7 @@ Every screen, how to reach it from the dashboard, and what tests it. A test
 |-----|--------|--------------|------|-------|
 | — | Dashboard | Wiki counts, items due, today's progress, cultivation rank | `internal/ui/dashboard` | — |
 | `d` | Drill 练习 | Flashcards graded by Claude (exact typed Chinese is graded instantly, offline); modes: recognition, production, listening, sentence, random | `internal/ui/drill` | screen snapshots (mode picker, prompt) |
-| `f` | Battle 战斗 | Turn-based fight against a demon from the chapters reached; `b` challenges an unlocked boss; listening questions when audio works (`r` replays); write questions typed with the pinyin input; results save to word schedules | `internal/ui/rpg`, `internal/rpg` | snapshots (intro, fighting), [state chart](battle-states.md) transitions, save/reschedule tests, one-right-answer property test (random decks + real wiki) |
+| `f` | Battle 战斗 | Turn-based fight against a demon from the chapters reached; `b` challenges an unlocked boss; listening questions when audio works (`r` replays); write questions typed with the pinyin input; order questions (rebuild an example sentence from shuffled words, 1-9 / backspace); results save to word schedules | `internal/ui/rpg`, `internal/rpg` | snapshots (intro, fighting), [state chart](battle-states.md) transitions, save/reschedule tests, one-right-answer property test (random decks + real wiki) |
 | `b` | Browse 览 | Page list with rendered markdown | `internal/ui/browser` | — |
 | `/` | Search 找 | Browse, filtered by search | `internal/ui/browser` | — |
 | `c` | Chat 话 | Conversation with the Claude tutor; Chinese replies are spoken | `internal/ui/chat` | — |

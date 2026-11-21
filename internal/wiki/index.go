@@ -249,3 +249,19 @@ func containsCJK(s string) bool {
 func ReadingVocab(p model.Page) []model.Card {
 	return extractAllVocabCards(p.Body, model.Card{ID: p.Path})
 }
+
+// ParseExample splits an example line like
+// "- 请把门关上。(Qǐng bǎ mén guān shàng.) — Please close the door."
+// into its Chinese sentence and English translation.
+func ParseExample(line string) (chinese, english string, ok bool) {
+	line = strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(line), "- "))
+	left, english, found := strings.Cut(line, " — ")
+	if !found {
+		return "", "", false
+	}
+	if i := strings.IndexAny(left, "(（"); i >= 0 {
+		left = left[:i]
+	}
+	chinese, english = strings.TrimSpace(left), strings.TrimSpace(english)
+	return chinese, english, chinese != "" && english != ""
+}

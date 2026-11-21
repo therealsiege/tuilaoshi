@@ -59,11 +59,11 @@ func (m Model) viewText() string {
 		for ti, t := range m.lines[li] {
 			switch {
 			case li == sel.line && ti == sel.tok:
-				b.WriteString(ui.SelectedStyle.Render(t.text))
-			case t.word && m.marked[t.text]:
-				b.WriteString(ui.WarningStyle.Render(t.text))
+				b.WriteString(ui.SelectedStyle.Render(t.Text))
+			case t.Word && m.marked[t.Text]:
+				b.WriteString(ui.WarningStyle.Render(t.Text))
 			default:
-				b.WriteString(ui.ChineseStyle.Render(t.text))
+				b.WriteString(ui.ChineseStyle.Render(t.Text))
 			}
 		}
 		b.WriteString("\n")

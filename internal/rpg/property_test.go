@@ -5,6 +5,8 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/therealsiege/tuilaoshi/internal/model"
@@ -42,6 +44,12 @@ func rightAnswers(q *CombatQuestion, pool []model.Card) []string {
 // right answer, at q.Correct.
 func checkQuestion(t *testing.T, q *CombatQuestion, pool []model.Card) {
 	t.Helper()
+	if q.Category == "order" {
+		if !sameRunes(strings.Join(q.Pieces, ""), q.Chinese) || len(q.Pieces) < minPieces || len(q.Pieces) > maxPieces || !q.Accepts(q.Chinese) {
+			t.Fatalf("%q: pieces %v do not rebuild %q", q.Prompt, q.Pieces, q.Chinese)
+		}
+		return
+	}
 	if q.written() {
 		if !q.Accepts(q.Chinese) || q.Accepts("") {
 			t.Fatalf("%q: accepts %v, want the word %q and not blank", q.Prompt, q.Accepted, q.Chinese)
@@ -125,4 +133,12 @@ func TestRealWikiQuestionsHaveExactlyOneRightAnswer(t *testing.T) {
 		}
 		checkQuestion(t, q, pool)
 	}
+}
+
+// sameRunes reports whether a and b use the same characters, in any order.
+func sameRunes(a, b string) bool {
+	ra, rb := []rune(a), []rune(b)
+	sort.Slice(ra, func(i, j int) bool { return ra[i] < ra[j] })
+	sort.Slice(rb, func(i, j int) bool { return rb[i] < rb[j] })
+	return string(ra) == string(rb)
 }
