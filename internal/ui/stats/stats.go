@@ -8,6 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/cj/mandarin-wiki/internal/journey"
 	"github.com/cj/mandarin-wiki/internal/model"
 	"github.com/cj/mandarin-wiki/internal/ui"
 	"github.com/cj/mandarin-wiki/internal/wiki"
@@ -231,33 +232,11 @@ func (m Model) renderMasteryLevels() string {
 	lines = append(lines, ui.SubtitleStyle.Render("Mastery Levels"))
 	lines = append(lines, "")
 
-	levels := map[string]int{
-		"New":       0,
-		"Learning":  0,
-		"Familiar":  0,
-		"Confident": 0,
-		"Mastered":  0,
-	}
-	levelOrder := []string{"New", "Learning", "Familiar", "Confident", "Mastered"}
-
+	levels := map[string]int{}
 	for _, p := range m.pages {
 		switch p.Type {
 		case "character", "vocabulary", "grammar":
-		default:
-			continue
-		}
-		iv := p.ReviewInterval
-		switch {
-		case iv <= 0:
-			levels["New"]++
-		case iv <= 3:
-			levels["Learning"]++
-		case iv <= 14:
-			levels["Familiar"]++
-		case iv <= 30:
-			levels["Confident"]++
-		default:
-			levels["Mastered"]++
+			levels[reviewLevel(p.ReviewInterval)]++
 		}
 	}
 
@@ -266,7 +245,7 @@ func (m Model) renderMasteryLevels() string {
 		"Learning":  ui.ErrorStyle,
 		"Familiar":  ui.WarningStyle,
 		"Confident": ui.SuccessStyle,
-		"Mastered":  lipgloss.NewStyle().Foreground(lipgloss.Color("#61AFEF")),
+		"Long-term": lipgloss.NewStyle().Foreground(lipgloss.Color("#61AFEF")),
 	}
 
 	total := 0
@@ -284,7 +263,29 @@ func (m Model) renderMasteryLevels() string {
 		lines = append(lines, fmt.Sprintf("%s %s %d%s", label, miniBar(count, 15), count, ui.MutedStyle.Render(pct)))
 	}
 
+	// "Mastered" means one thing across the app: the journey's rule.
+	lines = append(lines, "", fmt.Sprintf("  Characters mastered: %d", journey.CountMastered(m.pages)))
 	return lipgloss.JoinVertical(lipgloss.Left, lines...)
+}
+
+// levelOrder lists review levels from newest to most settled.
+var levelOrder = []string{"New", "Learning", "Familiar", "Confident", "Long-term"}
+
+// reviewLevel buckets an item by its review interval in days. It is a
+// spaced-repetition scale for all item types, separate from journey.IsMastered.
+func reviewLevel(interval int) string {
+	switch {
+	case interval <= 0:
+		return "New"
+	case interval <= 3:
+		return "Learning"
+	case interval <= 14:
+		return "Familiar"
+	case interval <= 30:
+		return "Confident"
+	default:
+		return "Long-term"
+	}
 }
 
 func (m Model) renderStreak() string {
