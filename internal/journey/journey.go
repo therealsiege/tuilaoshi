@@ -46,8 +46,9 @@ type Boss struct {
 	Name     string // Chinese name
 	English  string
 	Theme    string // What type of characters
-	Required int    // Characters mastered to defeat
-	Defeated bool
+	Required int    // Characters mastered to unlock the fight
+	Unlocked bool   // enough characters mastered to challenge it
+	Defeated bool   // beaten in battle (recorded in wiki/bosses.yaml)
 }
 
 // Artifact is a collectible power-up earned through study.
@@ -110,30 +111,29 @@ func Calculate(store *wiki.Store) (State, error) {
 		return State{}, err
 	}
 
-	totalChars := 0
-	for _, p := range pages {
-		if p.Type == "character" {
-			totalChars++
-		}
-	}
 	mastered := CountMastered(pages)
 
 	streak := store.Streak()
 
-	nextBoss := findNextBoss(mastered)
+	victories, err := store.BossVictories()
+	if err != nil {
+		return State{}, err
+	}
+	bosses := Bosses(mastered, victories)
+	nextBoss := NextBoss(bosses)
 
 	// totalReviewed and daysStudied are not yet tracked — pass 0 for now.
 	// Achievements depending on those metrics will simply show as unearned.
 	totalReviewed := 0
 	daysStudied := 0
 
-	progress := calculateProgress(mastered, totalChars)
+	progress := Pilgrimage(pages)
 
 	return State{
 		Rank:         calculateRank(mastered),
 		Progress:     progress,
 		Companions:   buildCompanions(mastered),
-		Bosses:       buildBosses(mastered),
+		Bosses:       bosses,
 		NextBoss:     nextBoss,
 		Artifacts:    buildArtifacts(mastered, streak),
 		Quests:       buildQuests(mastered, streak, nextBoss),
@@ -312,79 +312,6 @@ func buildCompanions(mastered int) []Companion {
 	return companions
 }
 
-func buildBosses(mastered int) []Boss {
-	bosses := []Boss{
-		{
-			Name:     "混世魔王",
-			English:  "Havoc Monster",
-			Theme:    "Basic radicals",
-			Required: 100,
-			Defeated: mastered >= 100,
-		},
-		{
-			Name:     "白骨精",
-			English:  "White Bone Demon",
-			Theme:    "Common characters",
-			Required: 250,
-			Defeated: mastered >= 250,
-		},
-		{
-			Name:     "红孩儿",
-			English:  "Red Boy",
-			Theme:    "Fire radicals",
-			Required: 500,
-			Defeated: mastered >= 500,
-		},
-		{
-			Name:     "蜘蛛精",
-			English:  "Spider Demon",
-			Theme:    "Complex characters",
-			Required: 800,
-			Defeated: mastered >= 800,
-		},
-		{
-			Name:     "金角大王",
-			English:  "Gold Horn King",
-			Theme:    "Metal radicals",
-			Required: 1200,
-			Defeated: mastered >= 1200,
-		},
-		{
-			Name:     "牛魔王",
-			English:  "Bull Demon King",
-			Theme:    "Advanced vocabulary",
-			Required: 1800,
-			Defeated: mastered >= 1800,
-		},
-		{
-			Name:     "大鹏金翅鸟",
-			English:  "Golden-Winged Roc",
-			Theme:    "Literary characters",
-			Required: 2500,
-			Defeated: mastered >= 2500,
-		},
-		{
-			Name:     "如来佛祖",
-			English:  "Buddha (Final Trial)",
-			Theme:    "Complete mastery",
-			Required: 4000,
-			Defeated: mastered >= 4000,
-		},
-	}
-
-	return bosses
-}
-
-func findNextBoss(mastered int) *Boss {
-	bosses := buildBosses(mastered)
-	for i := range bosses {
-		if !bosses[i].Defeated {
-			return &bosses[i]
-		}
-	}
-	return nil
-}
-
 func buildArtifacts(mastered, streak int) []Artifact {
 	artifacts := []Artifact{
 		{
@@ -464,7 +391,7 @@ func buildQuests(mastered, streak int, nextBoss *Boss) []Quest {
 		quests = append(quests, Quest{
 			Name:    "Demon Slayer",
 			Chinese: "击败妖怪",
-			Desc:    fmt.Sprintf("Defeat %s %s: master %d characters", nextBoss.Name, nextBoss.English, nextBoss.Required),
+			Desc:    fmt.Sprintf("Unlock %s %s: master %d characters, then win the fight", nextBoss.Name, nextBoss.English, nextBoss.Required),
 			Target:  nextBoss.Required,
 			Current: mastered,
 			Done:    mastered >= nextBoss.Required,

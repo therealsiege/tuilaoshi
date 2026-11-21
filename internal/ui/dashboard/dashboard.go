@@ -225,6 +225,9 @@ func (m Model) renderCultivationMeter() string {
 		bossLine = fmt.Sprintf("  Next boss: %s %s",
 			ui.ChineseStyle.Render(boss.Name),
 			ui.MutedStyle.Render(boss.English))
+		if boss.Unlocked {
+			bossLine += ui.WarningStyle.Render("  unlocked: f, then b")
+		}
 	}
 
 	lines := []string{

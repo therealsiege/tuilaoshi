@@ -59,6 +59,12 @@ type Model struct {
 	saveErr  error
 	loadErr  error // why the wiki could not be read for this battle
 	totalXP  int   // lifetime XP, read back after saving
+
+	// The next unbeaten boss, when enough characters are mastered to
+	// challenge it from the intro; bossFight is set once challenged.
+	boss      *journey.Boss
+	bossFight bool
+	mastered  int // the journey's mastered count, which scales player stats
 }
 
 type logEntry struct {
@@ -91,14 +97,29 @@ func (m Model) SetSize(w, h int) Model {
 func (m Model) Refresh() Model {
 	cards, cardsErr := m.store.DrillableCards()
 	pages, pagesErr := m.store.ListPages()
+	victories, bossErr := m.store.BossVictories()
 	m.cards = cards
-	m.loadErr = errors.Join(cardsErr, pagesErr)
-	// The mastered count the journey uses for ranks, so battle stats grow with the same progress.
-	m.battle = rpgengine.NewRandomBattle(m.cards, journey.CountMastered(pages))
+	m.loadErr = errors.Join(cardsErr, pagesErr, bossErr)
+	m.mastered = journey.CountMastered(pages)
+	m.boss, m.bossFight = nil, false
+	if next := journey.NextBoss(journey.Bosses(m.mastered, victories)); next != nil && next.Unlocked {
+		m.boss = next
+	}
+	// Demons come from the chapters the pilgrimage has reached.
+	m.battle = rpgengine.NewRandomBattle(m.cards, m.mastered, journey.Pilgrimage(pages).Percent)
 	m.state = stateIntro
 	m.log = nil
 	m.animTicks = 0
 	return m.startSession()
+}
+
+// challengeBoss swaps the road demon for the unlocked boss, which quizzes
+// the learner's weakest words.
+func (m Model) challengeBoss() Model {
+	m.cards = rpgengine.WeakCards(m.cards)
+	m.battle = rpgengine.NewBossBattle(m.cards, journey.BossEntry(*m.boss), m.mastered)
+	m.bossFight = true
+	return m
 }
 
 // Leave saves the battle's results when the player flees mid-fight.
@@ -154,6 +175,12 @@ func (m *Model) saveSession() {
 		m.saveErr = err
 		return
 	}
+	if m.bossFight && m.battle.PlayerWon() {
+		if err := m.store.RecordBossVictory(m.boss.Name, time.Now()); err != nil {
+			m.saveErr = err
+			return
+		}
+	}
 	m.saved = true
 	m.totalXP = m.store.TotalXP()
 }
@@ -180,6 +207,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 		switch m.state {
 		case stateIntro:
+			if msg.String() == "b" && m.boss != nil && !m.bossFight {
+				return m.challengeBoss(), nil
+			}
 			if key.Matches(msg, m.gkeys.Enter) || msg.Type == tea.KeySpace {
 				m.state = stateFighting
 				m.battle.State = rpgengine.BattlePlayerTurn

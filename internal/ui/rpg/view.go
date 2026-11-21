@@ -58,8 +58,17 @@ func (m Model) viewIntro() string {
 	b.WriteString(ui.MutedStyle.Render(enemy.Name))
 	b.WriteString("\n\n")
 
-	b.WriteString(ui.WarningStyle.Render("  A demon blocks your path!"))
+	switch {
+	case m.bossFight:
+		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  BOSS! It will test your weakest words. Theme: %s", m.boss.Theme)))
+	default:
+		b.WriteString(ui.WarningStyle.Render("  A demon blocks your path!"))
+	}
 	b.WriteString("\n\n")
+	if m.boss != nil && !m.bossFight {
+		fmt.Fprintf(&b, "  %s  challenge boss %s %s instead (unlocked)\n\n",
+			ui.ChineseStyle.Render("[b]"), ui.ChineseStyle.Render(m.boss.Name), m.boss.English)
+	}
 	b.WriteString(ui.HelpStyle.Render("  enter/space begin battle  |  esc flee"))
 
 	return b.String()
@@ -154,6 +163,10 @@ func (m Model) viewVictory() string {
 
 	fmt.Fprintf(&b, "  %s defeated!\n\n",
 		ui.ChineseStyle.Render(m.battle.Enemy.Chinese))
+	if m.bossFight {
+		b.WriteString(ui.WarningStyle.Render("  Boss beaten! The road west opens."))
+		b.WriteString("\n\n")
+	}
 
 	fmt.Fprintf(&b, "  XP Earned:    %d\n", m.battle.XPEarned)
 	fmt.Fprintf(&b, "  Turns:        %d\n", m.battle.Turn)

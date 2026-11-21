@@ -484,191 +484,52 @@ func TestBuildCompanionsFields(t *testing.T) {
 	}
 }
 
-func TestBuildBosses(t *testing.T) {
+func TestBosses(t *testing.T) {
 	thresholds := []int{100, 250, 500, 800, 1200, 1800, 2500, 4000}
-
-	tests := []struct {
-		name     string
-		mastered int
-		want     []bool // defeated state for each of the 8 bosses
-	}{
-		{
-			name:     "zero mastered no bosses defeated",
-			mastered: 0,
-			want:     []bool{false, false, false, false, false, false, false, false},
-		},
-		{
-			name:     "99 mastered no bosses defeated",
-			mastered: 99,
-			want:     []bool{false, false, false, false, false, false, false, false},
-		},
-		{
-			name:     "100 mastered defeats first boss",
-			mastered: 100,
-			want:     []bool{true, false, false, false, false, false, false, false},
-		},
-		{
-			name:     "249 mastered still only first boss",
-			mastered: 249,
-			want:     []bool{true, false, false, false, false, false, false, false},
-		},
-		{
-			name:     "250 mastered defeats second boss",
-			mastered: 250,
-			want:     []bool{true, true, false, false, false, false, false, false},
-		},
-		{
-			name:     "500 mastered defeats three bosses",
-			mastered: 500,
-			want:     []bool{true, true, true, false, false, false, false, false},
-		},
-		{
-			name:     "800 mastered defeats four bosses",
-			mastered: 800,
-			want:     []bool{true, true, true, true, false, false, false, false},
-		},
-		{
-			name:     "1200 mastered defeats five bosses",
-			mastered: 1200,
-			want:     []bool{true, true, true, true, true, false, false, false},
-		},
-		{
-			name:     "1800 mastered defeats six bosses",
-			mastered: 1800,
-			want:     []bool{true, true, true, true, true, true, false, false},
-		},
-		{
-			name:     "2500 mastered defeats seven bosses",
-			mastered: 2500,
-			want:     []bool{true, true, true, true, true, true, true, false},
-		},
-		{
-			name:     "4000 mastered defeats all bosses",
-			mastered: 4000,
-			want:     []bool{true, true, true, true, true, true, true, true},
-		},
-		{
-			name:     "large number defeats all bosses",
-			mastered: 10000,
-			want:     []bool{true, true, true, true, true, true, true, true},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := buildBosses(tt.mastered)
-			if len(got) != 8 {
-				t.Fatalf("got %d bosses, want 8", len(got))
+	for _, mastered := range []int{0, 99, 100, 249, 250, 500, 800, 1200, 1800, 2500, 4000, 10000} {
+		got := Bosses(mastered, map[string]string{"混世魔王": "2026-11-01"})
+		if len(got) != len(thresholds) {
+			t.Fatalf("got %d bosses, want %d", len(got), len(thresholds))
+		}
+		for i, b := range got {
+			if b.Required != thresholds[i] {
+				t.Errorf("boss[%d].Required = %d, want %d", i, b.Required, thresholds[i])
 			}
-			for i, b := range got {
-				if b.Defeated != tt.want[i] {
-					t.Errorf("boss %s (%s) Defeated = %v, want %v (required=%d, mastered=%d)",
-						b.Name, b.English, b.Defeated, tt.want[i], thresholds[i], tt.mastered)
-				}
-				if b.Required != thresholds[i] {
-					t.Errorf("boss[%d].Required = %d, want %d", i, b.Required, thresholds[i])
-				}
+			if want := mastered >= thresholds[i]; b.Unlocked != want {
+				t.Errorf("mastered %d: %s Unlocked = %v, want %v", mastered, b.English, b.Unlocked, want)
 			}
-		})
+			if want := i == 0; b.Defeated != want {
+				t.Errorf("mastered %d: %s Defeated = %v, want %v (only victories count)", mastered, b.English, b.Defeated, want)
+			}
+		}
 	}
 }
 
-func TestFindNextBoss(t *testing.T) {
+func TestNextBossIsFirstUnbeaten(t *testing.T) {
 	tests := []struct {
-		name        string
-		mastered    int
-		wantNil     bool
-		wantEnglish string
-		wantReq     int
+		victories   []string
+		wantEnglish string // "" for none left
 	}{
-		{
-			name:        "zero mastered next boss is Havoc Monster",
-			mastered:    0,
-			wantEnglish: "Havoc Monster",
-			wantReq:     100,
-		},
-		{
-			name:        "99 mastered still Havoc Monster",
-			mastered:    99,
-			wantEnglish: "Havoc Monster",
-			wantReq:     100,
-		},
-		{
-			name:        "100 mastered next boss is White Bone Demon",
-			mastered:    100,
-			wantEnglish: "White Bone Demon",
-			wantReq:     250,
-		},
-		{
-			name:        "250 mastered next boss is Red Boy",
-			mastered:    250,
-			wantEnglish: "Red Boy",
-			wantReq:     500,
-		},
-		{
-			name:        "500 mastered next boss is Spider Demon",
-			mastered:    500,
-			wantEnglish: "Spider Demon",
-			wantReq:     800,
-		},
-		{
-			name:        "800 mastered next boss is Gold Horn King",
-			mastered:    800,
-			wantEnglish: "Gold Horn King",
-			wantReq:     1200,
-		},
-		{
-			name:        "1200 mastered next boss is Bull Demon King",
-			mastered:    1200,
-			wantEnglish: "Bull Demon King",
-			wantReq:     1800,
-		},
-		{
-			name:        "1800 mastered next boss is Golden-Winged Roc",
-			mastered:    1800,
-			wantEnglish: "Golden-Winged Roc",
-			wantReq:     2500,
-		},
-		{
-			name:        "2500 mastered next boss is Buddha",
-			mastered:    2500,
-			wantEnglish: "Buddha (Final Trial)",
-			wantReq:     4000,
-		},
-		{
-			name:     "4000 mastered all defeated returns nil",
-			mastered: 4000,
-			wantNil:  true,
-		},
-		{
-			name:     "huge mastered returns nil",
-			mastered: 99999,
-			wantNil:  true,
-		},
+		{nil, "Havoc Monster"},
+		{[]string{"混世魔王"}, "White Bone Demon"},
+		{[]string{"白骨精"}, "Havoc Monster"}, // order matters, not the set
+		{[]string{"混世魔王", "白骨精", "红孩儿", "蜘蛛精", "金角大王", "牛魔王", "金翅大鹏", "如来佛祖"}, ""},
 	}
-
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := findNextBoss(tt.mastered)
-			if tt.wantNil {
-				if got != nil {
-					t.Errorf("expected nil, got boss %q", got.English)
-				}
-				return
+		v := map[string]string{}
+		for _, name := range tt.victories {
+			v[name] = "2026-11-01"
+		}
+		got := NextBoss(Bosses(99999, v))
+		if tt.wantEnglish == "" {
+			if got != nil {
+				t.Errorf("victories %v: next boss %q, want none", tt.victories, got.English)
 			}
-			if got == nil {
-				t.Fatal("expected a boss, got nil")
-			}
-			if got.English != tt.wantEnglish {
-				t.Errorf("English = %q, want %q", got.English, tt.wantEnglish)
-			}
-			if got.Required != tt.wantReq {
-				t.Errorf("Required = %d, want %d", got.Required, tt.wantReq)
-			}
-			if got.Defeated {
-				t.Error("next boss should not be defeated")
-			}
-		})
+			continue
+		}
+		if got == nil || got.English != tt.wantEnglish {
+			t.Errorf("victories %v: next boss %v, want %s", tt.victories, got, tt.wantEnglish)
+		}
 	}
 }
 

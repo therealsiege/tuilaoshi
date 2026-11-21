@@ -9,6 +9,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 )
 
@@ -54,12 +55,15 @@ var (
 		return m, cmd
 	}
 	// The hit has already landed by the attack states, so these set the result.
+	pressB     = func(m Model) (Model, tea.Cmd) { return m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("b")}) }
+	unlockBoss = func(m *Model) { b := journey.Bosses(100, nil)[0]; m.boss = &b }
 	enemyDown  = func(m *Model) { m.battle.Enemy.HP = 0 }
 	playerDown = func(m *Model) { m.battle.Player.HP = 0 }
 )
 
 var transitions = []transition{
-	{outside, stateIntro, "open battle", nil, nil},
+	{outside, stateIntro, "open battle (a demon from the chapters reached)", nil, nil},
+	{stateIntro, stateIntro, "b, when the next boss is unlocked (boss fight)", unlockBoss, pressB},
 	{stateIntro, stateFighting, "enter / space", nil, enter},
 	{stateFighting, statePlayerAttack, "right answer", nil, right},
 	{stateFighting, stateEnemyAttack, "wrong answer", nil, wrong},

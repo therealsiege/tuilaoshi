@@ -111,16 +111,6 @@ func NewBattle(cards []model.Card, demon journey.BestiaryEntry, playerRank strin
 	return b
 }
 
-// NewRandomBattle creates a battle against a randomly selected demon.
-func NewRandomBattle(cards []model.Card, masteredCount int) *Battle {
-	demons := journey.Bestiary()
-	if len(demons) == 0 {
-		return nil
-	}
-	demon := demons[rand.Intn(len(demons))]
-	return NewBattle(cards, demon, "", masteredCount)
-}
-
 // Answer processes the player's choice and returns whether it was correct
 // along with the damage dealt or taken.
 func (b *Battle) Answer(choiceIndex int) (correct bool, dmg int) {
