@@ -36,3 +36,40 @@ func TestUpdateSectionReplacesOnlyThatSection(t *testing.T) {
 		t.Error("missing section returned no error")
 	}
 }
+
+func TestListPagesSeesChangedNewAndDeletedFiles(t *testing.T) {
+	store := NewStore(t.TempDir())
+	write := func(name, title string) {
+		t.Helper()
+		if err := os.WriteFile(filepath.Join(store.Dir, name), []byte("---\ntype: reference\n---\n\n# "+title+"\n"), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	titles := func() map[string]string {
+		t.Helper()
+		pages, err := store.ListPages()
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := map[string]string{}
+		for _, p := range pages {
+			got[p.Path] = p.Title
+		}
+		return got
+	}
+
+	write("a.md", "First")
+	write("b.md", "Gone soon")
+	titles() // fill the cache
+
+	write("a.md", "Edited outside the app")
+	write("c.md", "New")
+	if err := os.Remove(filepath.Join(store.Dir, "b.md")); err != nil {
+		t.Fatal(err)
+	}
+	got := titles()
+	want := map[string]string{"a.md": "Edited outside the app", "c.md": "New"}
+	if len(got) != len(want) || got["a.md"] != want["a.md"] || got["c.md"] != want["c.md"] {
+		t.Errorf("pages %v, want %v", got, want)
+	}
+}

@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/therealsiege/tuilaoshi/internal/model"
 )
@@ -12,6 +14,17 @@ import (
 // Store provides read/write access to wiki markdown files.
 type Store struct {
 	Dir string // absolute path to the wiki/ directory
+
+	// Parsed pages by relative path, reused while a file's modification time
+	// and size are unchanged, so screens can list the whole wiki cheaply.
+	mu    sync.Mutex
+	pages map[string]cachedPage
+}
+
+type cachedPage struct {
+	mod  time.Time
+	size int64
+	page model.Page
 }
 
 // NewStore creates a Store rooted at the given wiki directory.
@@ -28,9 +41,13 @@ func (s *Store) ReadPage(relPath string) (model.Page, error) {
 	return ParsePage(relPath, data)
 }
 
-// ListPages returns all markdown pages under the wiki directory.
+// ListPages returns all markdown pages under the wiki directory. Files
+// unchanged since the last call are not read or parsed again.
 func (s *Store) ListPages() ([]model.Page, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	var pages []model.Page
+	fresh := map[string]cachedPage{}
 	err := filepath.Walk(s.Dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -42,6 +59,11 @@ func (s *Store) ListPages() ([]model.Page, error) {
 		if err != nil {
 			return err
 		}
+		if c, ok := s.pages[relPath]; ok && c.mod.Equal(info.ModTime()) && c.size == info.Size() {
+			fresh[relPath] = c
+			pages = append(pages, c.page)
+			return nil
+		}
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return nil // skip unreadable files
@@ -50,9 +72,13 @@ func (s *Store) ListPages() ([]model.Page, error) {
 		if err != nil {
 			return nil // skip unparseable files
 		}
+		fresh[relPath] = cachedPage{mod: info.ModTime(), size: info.Size(), page: page}
 		pages = append(pages, page)
 		return nil
 	})
+	if err == nil {
+		s.pages = fresh // drops deleted files
+	}
 	return pages, err
 }
 
