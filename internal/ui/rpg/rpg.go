@@ -9,11 +9,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/cj/mandarin-wiki/internal/journey"
-	"github.com/cj/mandarin-wiki/internal/model"
-	rpgengine "github.com/cj/mandarin-wiki/internal/rpg"
-	"github.com/cj/mandarin-wiki/internal/ui"
-	"github.com/cj/mandarin-wiki/internal/wiki"
+	"github.com/therealsiege/tuilaoshi/internal/journey"
+	"github.com/therealsiege/tuilaoshi/internal/model"
+	rpgengine "github.com/therealsiege/tuilaoshi/internal/rpg"
+	"github.com/therealsiege/tuilaoshi/internal/ui"
+	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 type viewState int

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/cj/mandarin-wiki/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/model"
 )
 
 // IndexEntry represents a single item in index.md.

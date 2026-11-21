@@ -3,8 +3,8 @@ package rpg
 import (
 	"testing"
 
-	"github.com/cj/mandarin-wiki/internal/journey"
-	"github.com/cj/mandarin-wiki/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/journey"
+	"github.com/therealsiege/tuilaoshi/internal/model"
 )
 
 func card(id, chinese, pinyin, english string) model.Card {

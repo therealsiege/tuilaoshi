@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/cj/mandarin-wiki/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/model"
 )
 
 // Candidate represents a Chinese character option for a given pinyin.

@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cj/mandarin-wiki/internal/journey"
-	"github.com/cj/mandarin-wiki/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/journey"
+	"github.com/therealsiege/tuilaoshi/internal/model"
 )
 
 func TestReviewLevel(t *testing.T) {

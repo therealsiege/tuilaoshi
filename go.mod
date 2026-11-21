@@ -1,4 +1,4 @@
-module github.com/cj/mandarin-wiki
+module github.com/therealsiege/tuilaoshi
 
 go 1.27.1
 

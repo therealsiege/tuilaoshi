@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cj/mandarin-wiki/internal/journey"
-	"github.com/cj/mandarin-wiki/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/journey"
+	"github.com/therealsiege/tuilaoshi/internal/model"
 )
 
 // CombatQuestion is a multiple-choice question generated from wiki cards.

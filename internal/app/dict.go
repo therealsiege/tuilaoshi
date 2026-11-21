@@ -1,9 +1,9 @@
 package app
 
 import (
-	"github.com/cj/mandarin-wiki/internal/model"
-	"github.com/cj/mandarin-wiki/internal/ui/input"
-	"github.com/cj/mandarin-wiki/internal/wiki"
+	"github.com/therealsiege/tuilaoshi/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/ui/input"
+	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 // buildDict constructs a pinyin-to-character dictionary from all wiki pages.

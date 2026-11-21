@@ -7,7 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/cj/mandarin-wiki/internal/ui"
+	"github.com/therealsiege/tuilaoshi/internal/ui"
 )
 
 // RadicalGroup holds a radical and its family of example characters.

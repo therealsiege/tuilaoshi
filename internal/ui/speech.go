@@ -3,7 +3,7 @@ package ui
 import (
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/cj/mandarin-wiki/internal/audio"
+	"github.com/therealsiege/tuilaoshi/internal/audio"
 )
 
 // SpeechDoneMsg reports that text-to-speech finished, with the error if it failed.

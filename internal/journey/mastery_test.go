@@ -3,7 +3,7 @@ package journey
 import (
 	"testing"
 
-	"github.com/cj/mandarin-wiki/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/model"
 )
 
 func TestIsMastered(t *testing.T) {

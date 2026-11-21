@@ -6,9 +6,9 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 
-	rpgengine "github.com/cj/mandarin-wiki/internal/rpg"
-	"github.com/cj/mandarin-wiki/internal/ui"
-	"github.com/cj/mandarin-wiki/internal/ui/imgview"
+	rpgengine "github.com/therealsiege/tuilaoshi/internal/rpg"
+	"github.com/therealsiege/tuilaoshi/internal/ui"
+	"github.com/therealsiege/tuilaoshi/internal/ui/imgview"
 )
 
 func (m Model) View() string {

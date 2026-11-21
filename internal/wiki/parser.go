@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cj/mandarin-wiki/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/model"
 	"gopkg.in/yaml.v3"
 )
 

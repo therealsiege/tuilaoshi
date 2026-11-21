@@ -3,8 +3,8 @@ package journey
 import (
 	"fmt"
 
-	"github.com/cj/mandarin-wiki/internal/model"
-	"github.com/cj/mandarin-wiki/internal/wiki"
+	"github.com/therealsiege/tuilaoshi/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 // Rank represents the player's cultivation level, inspired by xianxia novels.

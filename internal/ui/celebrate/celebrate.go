@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/cj/mandarin-wiki/internal/ui"
-	"github.com/cj/mandarin-wiki/internal/ui/imgview"
+	"github.com/therealsiege/tuilaoshi/internal/ui"
+	"github.com/therealsiege/tuilaoshi/internal/ui/imgview"
 )
 
 // Event types for celebrations.

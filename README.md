@@ -105,6 +105,7 @@ Or with `go install`:
 
 ```bash
 go install github.com/therealsiege/tuilaoshi/cmd/mandarin@latest
+mandarin -wiki path/to/tuilaoshi/wiki   # the wiki lives in the repo, so point at a clone
 ```
 
 ### Configure

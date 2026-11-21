@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/cj/mandarin-wiki/internal/journey"
-	"github.com/cj/mandarin-wiki/internal/ui"
-	"github.com/cj/mandarin-wiki/internal/ui/imgview"
-	"github.com/cj/mandarin-wiki/internal/wiki"
+	"github.com/therealsiege/tuilaoshi/internal/journey"
+	"github.com/therealsiege/tuilaoshi/internal/ui"
+	"github.com/therealsiege/tuilaoshi/internal/ui/imgview"
+	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 // Model is the Journey to the West gamification view.

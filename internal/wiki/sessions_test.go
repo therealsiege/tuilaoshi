@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cj/mandarin-wiki/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/model"
 )
 
 func writeTestSession(t *testing.T, store *Store, start time.Time, items ...model.SessionItem) {

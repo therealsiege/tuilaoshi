@@ -10,10 +10,10 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/cj/mandarin-wiki/internal/audio"
-	"github.com/cj/mandarin-wiki/internal/claude"
-	"github.com/cj/mandarin-wiki/internal/ui"
-	"github.com/cj/mandarin-wiki/internal/ui/input"
+	"github.com/therealsiege/tuilaoshi/internal/audio"
+	"github.com/therealsiege/tuilaoshi/internal/claude"
+	"github.com/therealsiege/tuilaoshi/internal/ui"
+	"github.com/therealsiege/tuilaoshi/internal/ui/input"
 )
 
 type chatState int

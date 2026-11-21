@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cj/mandarin-wiki/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/model"
 )
 
 // Session files in wiki/sessions/ record each drill, review, and battle.

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cj/mandarin-wiki/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/model"
 )
 
 const vocabPage = `---

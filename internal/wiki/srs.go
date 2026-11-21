@@ -3,7 +3,7 @@ package wiki
 import (
 	"time"
 
-	"github.com/cj/mandarin-wiki/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/model"
 )
 
 const initialInterval = 1 // days
