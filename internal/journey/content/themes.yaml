@@ -1,0 +1,183 @@
+# Vocabulary themes for the journey's stages. A tribulation names a theme
+# with `theme: <id>`; stages without one keep the theme before them.
+# A word belongs to a theme when its page has one of the tags, its English
+# meaning has one of the keywords, or it contains one of the characters.
+- id: first-steps
+  name: First steps
+  levels: [HSK1]
+- id: rivers
+  name: Rivers and crossings
+  keywords: [river, water, sea, lake, flow, boat, ship, wave, swim, shore, sand]
+  contains: [江, 河, 水, 海, 沙, 渡, 船]
+- id: family
+  name: Family
+  keywords: [mother, father, son, daughter, family, parent, child, birth, born]
+  contains: [母, 父, 家, 儿, 子]
+- id: beasts
+  name: Wild beasts
+  tags: [animal, zoology]
+  keywords: [tiger, wolf, beast, animal, lion, bear, leopard]
+  contains: [虎, 兽]
+- id: roads
+  name: Roads and danger
+  keywords: [road, path, way, danger, dangerous, fall, follow, lost, travel]
+  contains: [路, 道, 险]
+- id: mountains
+  name: Mountains
+  tags: [geography, geology]
+  keywords: [mountain, ridge, peak, hill, rock, stone, cliff, valley]
+  contains: [山, 岭, 石, 峰]
+- id: basics
+  name: Basic characters
+  levels: [HSK1, HSK2]
+- id: horses
+  name: Horses and travel
+  keywords: [horse, ride, journey, travel, saddle, dragon]
+  contains: [马, 骑, 龙]
+- id: fire
+  name: Fire and heat
+  keywords: [fire, flame, burn, heat, hot, smoke, ash, fan]
+  contains: [火, 烧, 热, 炎, 烟, 灯]
+- id: treasures
+  name: Robes and treasures
+  keywords: [clothes, robe, treasure, precious, jewel, steal, thief, temple, monk]
+  contains: [衣, 宝, 偷, 寺, 僧]
+- id: farm
+  name: Farm and food
+  tags: [agriculture, cooking]
+  keywords: [eat, food, pig, farm, rice, field, cook, meal, hungry]
+  contains: [吃, 饭, 猪, 田, 米]
+- id: weather
+  name: Wind and weather
+  tags: [weather]
+  keywords: [wind, storm, sky, cloud, rain, snow, thunder, fog]
+  contains: [风, 雨, 云, 雷, 雾]
+- id: help
+  name: Asking for help
+  keywords: [help, ask, request, pray, rescue, save, protect]
+  contains: [求, 救, 帮, 助]
+- id: temptation
+  name: Wealth and temptation
+  keywords: [rich, wealth, money, marry, wife, beautiful, test, tempt]
+  contains: [富, 钱, 婚]
+- id: trees
+  name: Trees and fruit
+  tags: [botany]
+  keywords: [tree, fruit, plant, grow, garden, flower, leaf, wood, pine]
+  contains: [树, 果, 木, 林, 花]
+- id: bones
+  name: Bones and disguises
+  tags: [anatomy, body]
+  keywords: [bone, body, death, die, dead, ghost, disguise, false, lie, corpse]
+  contains: [骨, 死, 假, 尸]
+- id: courts
+  name: Kings and courts
+  tags: [government]
+  keywords: [king, kingdom, palace, court, minister, official, emperor, queen]
+  contains: [王, 国, 官, 宫]
+- id: metal
+  name: Metal and magic
+  tags: [metalwork, material]
+  keywords: [metal, gold, silver, iron, copper, steel, magic, gourd]
+  contains: [金, 银, 铁, 钢]
+- id: contests
+  name: Rain and contests
+  tags: [weather, sports]
+  keywords: [rain, compete, contest, win, lose, bet, match, race]
+  contains: [雨, 赛, 赢, 输]
+- id: weapons
+  name: Weapons and war
+  tags: [military]
+  keywords: [weapon, sword, spear, staff, fight, war, soldier, army, battle]
+  contains: [兵, 刀, 剑, 战]
+- id: marriage
+  name: Marriage
+  keywords: [marry, marriage, wedding, wife, husband, bride, love]
+  contains: [婚, 嫁, 娶, 爱]
+- id: fish
+  name: Fish and deep water
+  keywords: [fish, deep, ice, freeze, cold, basket, river]
+  contains: [鱼, 冰, 深, 冷]
+- id: cattle
+  name: Cattle and tricks
+  keywords: [ox, cow, cattle, bull, trick, steal, catch]
+  contains: [牛, 抓]
+- id: women
+  name: The Women's Kingdom
+  keywords: [woman, women, girl, queen, mother, pregnant, child, baby]
+  contains: [女, 母, 孕, 妇]
+- id: poison
+  name: Poison and stings
+  keywords: [poison, sting, insect, pain, bite, hurt, scorpion]
+  contains: [毒, 虫, 痛]
+- id: truth
+  name: True and false
+  keywords: [true, false, real, fake, same, different, copy, distinguish, believe]
+  contains: [真, 假, 同]
+- id: temples
+  name: Temples and treasures
+  keywords: [temple, monk, pagoda, light, treasure, buddha, pray]
+  contains: [寺, 塔, 宝, 光]
+- id: medicine
+  name: Illness and medicine
+  tags: [medicine, medical, symptom, treatment, pharmacy, healthcare]
+  keywords: [ill, sick, disease, doctor, medicine, cure, heal]
+  contains: [病, 药, 医]
+- id: children
+  name: Children
+  keywords: [child, children, son, daughter, baby, young, boy, girl]
+  contains: [子, 儿, 孩, 童]
+- id: silk
+  name: Silk and webs
+  keywords: [silk, thread, web, spider, weave, cloth, rope, line, tie]
+  contains: [丝, 网, 线, 织]
+- id: eyes
+  name: Eyes and seeing
+  keywords: [eye, see, look, watch, blind, sight, appear]
+  contains: [目, 眼, 看, 见]
+- id: birds
+  name: Beasts and birds
+  tags: [animal, zoology]
+  keywords: [lion, elephant, bird, wing, fly, eagle, feather]
+  contains: [鸟, 飞, 狮]
+- id: caves
+  name: Caves and the deep
+  keywords: [cave, hole, deep, bottom, mouse, rat, dark, underground]
+  contains: [洞, 穴, 鼠, 深, 暗]
+- id: law
+  name: Law and order
+  tags: [law, government]
+  keywords: [law, rule, punish, kill, ban, crime, judge]
+  contains: [法, 罪, 刑]
+- id: mist
+  name: Mist and mountains
+  tags: [weather, geography]
+  keywords: [fog, mist, cloud, hide, mountain, leopard]
+  contains: [雾, 云, 山, 藏]
+- id: crossing
+  name: Crossing over
+  keywords: [cross, boat, bridge, ferry, shore, bank, wave]
+  contains: [渡, 船, 桥, 岸]
+- id: festivals
+  name: Lanterns and festivals
+  keywords: [lamp, lantern, oil, festival, celebrate, horn, candle]
+  contains: [灯, 油, 节]
+- id: moon
+  name: Moon and rabbit
+  tags: [astronomy]
+  keywords: [moon, rabbit, jade, night, star]
+  contains: [月, 兔, 玉, 星]
+- id: prison
+  name: Prison and justice
+  tags: [law]
+  keywords: [prison, jail, thief, steal, judge, accuse, guilty]
+  contains: [狱, 盗, 罪]
+- id: scripture
+  name: Scripture and enlightenment
+  tags: [philosophy, classical, literary]
+  keywords: [scripture, buddha, sutra, enlighten, heaven, spirit, wisdom]
+  contains: [经, 佛, 法]
+- id: homecoming
+  name: Homecoming
+  keywords: [return, home, back, emperor, capital, arrive]
+  contains: [回, 家, 京, 归]

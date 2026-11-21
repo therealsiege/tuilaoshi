@@ -20,6 +20,7 @@ type Stage struct {
 	Status   StageStatus
 	Opponent BestiaryEntry // the demon or boss fought here
 	Boss     *Boss         // set when this is a boss stage
+	Words    Theme         // the vocabulary theme fought with here
 }
 
 // Stages lays out all 81 stages for a learner with mastered characters
@@ -32,12 +33,16 @@ func Stages(mastered int, cleared map[int]string) []Stage {
 	}
 	stages := make([]Stage, len(content.Tribulations))
 	opponent := content.Bestiary[0]
+	theme := content.Themes[0]
 	allBefore := true // every earlier stage cleared
 	for i, t := range content.Tribulations {
 		if d := BestiaryLookup(t.Demon); d != nil {
 			opponent = *d
 		}
-		s := Stage{Tribulation: t, Opponent: opponent, Boss: bosses[t.Number]}
+		if th := ThemeByID(t.Theme); th != nil {
+			theme = *th
+		}
+		s := Stage{Tribulation: t, Opponent: opponent, Boss: bosses[t.Number], Words: theme}
 		if s.Boss != nil {
 			s.Opponent = BossEntry(*s.Boss)
 		}
@@ -72,6 +77,7 @@ func Bosses(mastered int, cleared map[int]string) []Boss {
 	for i := range bosses {
 		if t := TribulationAt(bosses[i].Stage); t != nil {
 			bosses[i].Required = t.Unlock
+			bosses[i].Theme = stageTheme(t.Number).Name
 		}
 		bosses[i].Unlocked = mastered >= bosses[i].Required
 		_, bosses[i].Defeated = cleared[bosses[i].Stage]

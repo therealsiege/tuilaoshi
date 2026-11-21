@@ -124,3 +124,21 @@ func TestLoreAndDialogueReferencesResolve(t *testing.T) {
 		}
 	}
 }
+
+func TestThemesAreNamedAndReferenced(t *testing.T) {
+	ids := map[string]bool{}
+	for _, th := range content.Themes {
+		if th.ID == "" || th.Name == "" || ids[th.ID] {
+			t.Errorf("theme %q needs a unique id and a name", th.ID)
+		}
+		ids[th.ID] = true
+	}
+	if content.Tribulations[0].Theme == "" {
+		t.Error("the first tribulation must name a theme")
+	}
+	for _, tr := range content.Tribulations {
+		if tr.Theme != "" && !ids[tr.Theme] {
+			t.Errorf("tribulation %d names theme %q, which isn't in themes.yaml", tr.Number, tr.Theme)
+		}
+	}
+}

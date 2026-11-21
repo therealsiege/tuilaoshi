@@ -45,11 +45,11 @@ type Companion struct {
 type Boss struct {
 	Name     string `yaml:"name,omitempty"` // Chinese name
 	English  string `yaml:"english,omitempty"`
-	Theme    string `yaml:"theme,omitempty"` // What type of characters
-	Stage    int    `yaml:"stage"`           // tribulation where it is fought
-	Required int    `yaml:"-"`               // characters mastered to open that stage
-	Unlocked bool   `yaml:"-"`               // enough characters mastered to challenge it
-	Defeated bool   `yaml:"-"`               // beaten in battle (recorded in wiki/bosses.yaml)
+	Theme    string `yaml:"-"`     // name of its stage's vocabulary theme
+	Stage    int    `yaml:"stage"` // tribulation where it is fought
+	Required int    `yaml:"-"`     // characters mastered to open that stage
+	Unlocked bool   `yaml:"-"`     // enough characters mastered to challenge it
+	Defeated bool   `yaml:"-"`     // beaten in battle (recorded in wiki/bosses.yaml)
 }
 
 // Artifact is a collectible power-up earned through study.

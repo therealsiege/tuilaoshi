@@ -7,7 +7,7 @@ Every screen, how to reach it from the dashboard, and what tests it. A test
 |-----|--------|--------------|------|-------|
 | — | Dashboard | Wiki counts, items due, today's progress, cultivation rank | `internal/ui/dashboard` | — |
 | `d` | Drill 练习 | Flashcards graded by Claude (exact typed Chinese is graded instantly, offline); modes: recognition, production, listening, sentence, random | `internal/ui/drill` | screen snapshots (mode picker, prompt) |
-| `f` | Battle 战斗 | Turn-based fight: the open tribulation's demon or boss (winning clears the stage), or practice while the next stage still needs mastered characters; listening questions when audio works (`r` replays); write questions typed with the pinyin input; order questions (rebuild an example sentence from shuffled words, 1-9 / backspace); results save to word schedules | `internal/ui/rpg`, `internal/rpg` | snapshots (intro, fighting), [state chart](battle-states.md) transitions, save/reschedule tests, one-right-answer property test (random decks + real wiki) |
+| `f` | Battle 战斗 | Turn-based fight: the open tribulation's demon or boss with that stage's themed words (winning clears the stage), or practice on the coming stage's words while the next stage still needs mastered characters; listening questions when audio works (`r` replays); write questions typed with the pinyin input; order questions (rebuild an example sentence from shuffled words, 1-9 / backspace); results save to word schedules | `internal/ui/rpg`, `internal/rpg` | snapshots (intro, fighting), [state chart](battle-states.md) transitions, save/reschedule tests, one-right-answer property test (random decks + real wiki) |
 | `b` | Browse 览 | Page list with rendered markdown | `internal/ui/browser` | — |
 | `/` | Search 找 | Browse, filtered by search | `internal/ui/browser` | — |
 | `c` | Chat 话 | Conversation with the Claude tutor; Chinese replies are spoken | `internal/ui/chat` | — |
@@ -29,4 +29,4 @@ Shared pieces:
 Recordings (`make recordings`, needs `brew install vhs`; tapes in `docs/tapes`, played on a copy of the wiki):
 [battle](recordings/battle.gif), [journey](recordings/journey.gif).
 
-Journey content (tribulations, demons, bosses, companions, lore, dialogue) is data in `internal/journey/content/*.yaml`, embedded in the binary; `internal/journey/content_test.go` validates it as a whole, so adding a demon or lore passage is a YAML-only change.
+Journey content (tribulations, demons, bosses, companions, lore, dialogue, vocabulary themes) is data in `internal/journey/content/*.yaml`, embedded in the binary; `internal/journey/content_test.go` validates it as a whole, so adding a demon or lore passage is a YAML-only change.

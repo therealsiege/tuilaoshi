@@ -5,12 +5,14 @@
   location: 灵山
   unlock: 0
   demon: 混世魔王
+  theme: first-steps
 - number: 2
   name: 出胎几杀
   english: Nearly Killed at Birth
   desc: The infant Chen Xuanzang is marked for death when bandits murder his father and seize his mother on the road to his father's government post.
   location: 洪江
   unlock: 6
+  theme: rivers
 - number: 3
   name: 满月抛江
   english: Cast into the River at Full Moon
@@ -23,24 +25,28 @@
   desc: The young monk discovers his true origins, finds his mother, and brings the murderer Liu Hong to justice, reuniting the broken family.
   location: 江州
   unlock: 29
+  theme: family
 - number: 5
   name: 出城逢虎
   english: Encountering a Tiger Outside the City
   desc: Tang Sanzang is nearly devoured by a fierce tiger shortly after departing the gates of Chang'an on his westward pilgrimage.
   location: 长安
   unlock: 45
+  theme: beasts
 - number: 6
   name: 落坑折从
   english: Falling into a Pit, Losing Followers
   desc: The pilgrim stumbles into a demon pit in the wilderness, and his two attendants are seized and eaten by mountain demons.
   location: 巩州
   unlock: 62
+  theme: roads
 - number: 7
   name: 双叉岭上
   english: On Twin Fork Ridge
   desc: Three demon kings — a tiger, a bear, and a bull — ambush Tang Sanzang on Twin Fork Ridge, but the planet Venus intervenes to save him.
   location: 双叉岭
   unlock: 82
+  theme: mountains
 - number: 8
   name: 两界山头
   english: At Two Boundary Mountain
@@ -48,18 +54,21 @@
   location: 两界山
   unlock: 104
   demon: 混世魔王
+  theme: basics
 - number: 9
   name: 陡涧换马
   english: Exchanging the Horse at Steep Ravine
   desc: The White Dragon Prince swallows the pilgrim's horse whole in the rapids of Eagle Grief Stream and is subdued by Guanyin to become the new mount.
   location: 蛇盘山鹰愁涧
   unlock: 126
+  theme: horses
 - number: 10
   name: 夜被火烧
   english: Burned in the Night
   desc: The greedy abbot of Guanyin Temple sets fire to the meditation hall at midnight, hoping to steal Tang Sanzang's precious kasaya robe in the blaze.
   location: 观音禅院
   unlock: 151
+  theme: fire
 - number: 11
   name: 失却袈裟
   english: Losing the Kasaya Robe
@@ -67,12 +76,14 @@
   location: 黑风山
   unlock: 177
   demon: 黑熊精
+  theme: treasures
 - number: 12
   name: 收降八戒
   english: Subduing Zhu Bajie
   desc: At Gao Village, Sun Wukong battles the pig demon who has taken a farmer's daughter as his bride, and Zhu Bajie joins the pilgrimage as the second disciple.
   location: 高老庄
   unlock: 204
+  theme: farm
 - number: 13
   name: 黄风怪阻
   english: Obstructed by the Yellow Wind Demon
@@ -80,18 +91,21 @@
   location: 黄风岭
   unlock: 232
   demon: 黄风怪
+  theme: weather
 - number: 14
   name: 请求灵吉
   english: Seeking Lingji Bodhisattva's Aid
   desc: Sun Wukong travels to find Lingji Bodhisattva, who subdues the Yellow Wind Demon with the Settling Wind Pill and a golden dragon staff.
   location: 小须弥山
   unlock: 262
+  theme: help
 - number: 15
   name: 流沙难渡
   english: Unable to Cross the Flowing Sands
   desc: The pilgrims reach the vast Flowing Sands River where a fearsome water demon attacks anyone who tries to cross, defeating Zhu Bajie in battle.
   location: 流沙河
   unlock: 293
+  theme: rivers
 - number: 16
   name: 收得沙僧
   english: Recruiting Sha Wujing
@@ -104,12 +118,14 @@
   desc: Four bodhisattvas disguise themselves as a wealthy widow and her daughters to test the pilgrims' resolve, and Zhu Bajie falls for the trap and is tied to a tree all night.
   location: 四圣试禅心
   unlock: 358
+  theme: temptation
 - number: 18
   name: 五庄观中
   english: At Five Villages Temple
   desc: The pilgrims stop at the temple of Immortal Zhen Yuan, where the legendary ginseng fruit tree bears fruit shaped like human infants every nine thousand years.
   location: 万寿山五庄观
   unlock: 392
+  theme: trees
 - number: 19
   name: 难活人参
   english: Trouble with the Ginseng Fruit Tree
@@ -123,12 +139,14 @@
   location: 白虎岭
   unlock: 463
   demon: 白骨精
+  theme: bones
 - number: 21
   name: 黑松林失散
   english: Separated in Black Pine Forest
   desc: Without Sun Wukong, the pilgrims are ambushed in the dark Black Pine Forest and Tang Sanzang is captured by the Yellow Robe Demon.
   location: 黑松林
   unlock: 500
+  theme: trees
 - number: 22
   name: 宝象国捉僧
   english: The Monk Seized in Precious Image Kingdom
@@ -136,6 +154,7 @@
   location: 宝象国
   unlock: 538
   demon: 黄袍怪
+  theme: courts
 - number: 23
   name: 金銮殿变虎
   english: Transformed into a Tiger at the Golden Hall
@@ -150,6 +169,7 @@
   location: 平顶山
   unlock: 617
   demon: 银角大王
+  theme: metal
 - number: 25
   name: 莲花洞高悬
   english: Dangling in Lotus Cave
@@ -163,6 +183,7 @@
   desc: The true king of Crow-Cock Kingdom appears as a ghost to Tang Sanzang, murdered and impersonated by a lion demon who has ruled in his place for three years.
   location: 乌鸡国
   unlock: 699
+  theme: courts
 - number: 27
   name: 被魔化身
   english: Impersonated by a Demon
@@ -176,6 +197,7 @@
   location: 号山
   unlock: 784
   demon: 红孩儿
+  theme: fire
 - number: 29
   name: 风摄圣僧
   english: The Holy Monk Swept Away by Wind
@@ -203,12 +225,14 @@
   desc: A dragon demon capsizes the pilgrims' boat on the Black River, dragging Tang Sanzang to an underwater palace where the monster plans to eat him.
   location: 黑水河
   unlock: 965
+  theme: rivers
 - number: 33
   name: 搬运车迟
   english: Hauling Carts at Cart-Slow Kingdom
   desc: The pilgrims discover that Buddhist monks have been enslaved to haul carts while three Daoist imposters rule Cart-Slow Kingdom with fake miracles.
   location: 车迟国
   unlock: 1012
+  theme: contests
 - number: 34
   name: 大赌输赢
   english: The Great Wager
@@ -227,6 +251,7 @@
   desc: A leopard demon steals the pilgrims' weapons in the night, forcing Sun Wukong to track the thief to a hidden mountain lair before the pilgrims can continue.
   location: 金平府
   unlock: 1158
+  theme: weapons
 - number: 37
   name: 会赴龙华
   english: Attending the Dragon Flower Assembly
@@ -239,6 +264,7 @@
   desc: A jade rabbit spirit, escaped from the Moon Palace, impersonates the princess of India and tries to force Tang Sanzang into marriage through a ball-tossing ceremony.
   location: 天竺国
   unlock: 1258
+  theme: marriage
 - number: 39
   name: 路逢大河
   english: Encountering a Great River on the Road
@@ -246,6 +272,7 @@
   location: 通天河
   unlock: 1309
   demon: 金鱼精
+  theme: fish
 - number: 40
   name: 身落天河
   english: Falling into the Heavenly River
@@ -267,6 +294,7 @@
   location: 金兜山
   unlock: 1468
   demon: 青牛精
+  theme: cattle
 - number: 43
   name: 普天神难伏
   english: No Deity in Heaven Can Subdue It
@@ -280,12 +308,14 @@
   desc: The pilgrims learn the deeper karmic connections between the demons they face and the celestial beings of heaven, revealing that many monsters are wayward immortals.
   location: 西行路上
   unlock: 1576
+  theme: scripture
 - number: 45
   name: 吃水遭毒
   english: Poisoned by Drinking Water
   desc: Tang Sanzang and Zhu Bajie drink from the Motherhood River in the Kingdom of Women and become magically pregnant, writhing in agony until Sun Wukong fetches abortion water from the Miscarriage Spring.
   location: 西梁女国
   unlock: 1632
+  theme: women
 - number: 46
   name: 西梁国留婚
   english: Detained for Marriage in the Western Liang Kingdom
@@ -299,12 +329,14 @@
   location: 毒敌山琵琶洞
   unlock: 1744
   demon: 蝎子精
+  theme: poison
 - number: 48
   name: 再贬心猿
   english: Banishing the Mind-Monkey Again
   desc: Tang Sanzang drives Sun Wukong away a second time after the monkey kills more bandits, and the pilgrim is left vulnerable on the road without his champion.
   location: 西行路上
   unlock: 1801
+  theme: truth
 - number: 49
   name: 难辨猕猴
   english: Unable to Distinguish the Macaque
@@ -319,6 +351,7 @@
   location: 火焰山
   unlock: 1917
   demon: 铁扇公主
+  theme: fire
 - number: 51
   name: 求取芭蕉扇
   english: Seeking the Banana Leaf Fan
@@ -340,6 +373,7 @@
   location: 祭赛国
   unlock: 2096
   demon: 九头虫
+  theme: temples
 - number: 54
   name: 金光寺鬼
   english: The Ghost of Golden Light Temple
@@ -353,6 +387,7 @@
   desc: The pilgrims arrive at a city where the king has fallen gravely ill, and Sun Wukong disguises himself as a physician to diagnose and cure the ruler's mysterious ailment.
   location: 朱紫国
   unlock: 2218
+  theme: medicine
 - number: 56
   name: 取宝比丘
   english: Retrieving the Treasure at Bhikku Kingdom
@@ -360,6 +395,7 @@
   location: 比丘国
   unlock: 2280
   demon: 白鹿精
+  theme: children
 - number: 57
   name: 小子城中
   english: In the City of Little Children
@@ -381,12 +417,14 @@
   location: 盘丝洞
   unlock: 2469
   demon: 蜘蛛精
+  theme: silk
 - number: 60
   name: 多目遭伤
   english: Wounded by the Hundred-Eyed Demon
   desc: The centipede demon, patron of the spider sisters, unleashes blinding golden light from his thousand eyes, injuring Sun Wukong until the Vairocana mother goddess intervenes.
   location: 黄花观
   unlock: 2533
+  theme: eyes
 - number: 61
   name: 路阻狮驼
   english: Blocked at Lion Camel Ridge
@@ -394,6 +432,7 @@
   location: 狮驼岭
   unlock: 2598
   demon: 金翅大鹏
+  theme: birds
 - number: 62
   name: 怪分三色
   english: Three Demons of Different Colors
@@ -422,6 +461,7 @@
   location: 比丘国
   unlock: 2862
   demon: 白鹿精
+  theme: children
 - number: 66
   name: 辨认真邪
   english: Distinguishing True from False
@@ -429,18 +469,21 @@
   location: 西行路上
   unlock: 2930
   demon: 黄眉怪
+  theme: truth
 - number: 67
   name: 松林救怪
   english: Rescuing the Monster in the Pine Forest
   desc: Tang Sanzang's compassion leads him to help a seemingly helpless creature in the pine forest, only for it to reveal its demonic nature and attack.
   location: 荆棘岭
   unlock: 2997
+  theme: trees
 - number: 68
   name: 僧房卧病
   english: Falling Ill in the Monastery
   desc: Tang Sanzang collapses with a grave fever at a remote monastery, and Sun Wukong must find medicine while protecting his master from lurking demons.
   location: 西行路上
   unlock: 3066
+  theme: medicine
 - number: 69
   name: 无底洞深
   english: The Bottomless Cave
@@ -448,30 +491,35 @@
   location: 陷空山无底洞
   unlock: 3135
   demon: 白毛鼠精
+  theme: caves
 - number: 70
   name: 灭法国难
   english: Tribulation in the Kingdom of Dharma-Destruction
   desc: The king of Dharma-Destruction has vowed to kill ten thousand monks, and Tang Sanzang is the last one needed to complete the murderous tally.
   location: 灭法国
   unlock: 3204
+  theme: law
 - number: 71
   name: 隐雾山遇妖
   english: Meeting Demons at Hidden-Mist Mountain
   desc: A leopard demon on Hidden-Mist Mountain transforms into a damsel in distress to lure Tang Sanzang into a trap, nearly succeeding before Sun Wukong sees through the disguise.
   location: 隐雾山
   unlock: 3274
+  theme: mist
 - number: 72
   name: 凌云渡脱胎
   english: Shedding the Mortal Body at Cloud-Reaching Ford
   desc: At the crossing before Spirit Mountain, Tang Sanzang steps onto a bottomless boat, watches his own mortal corpse float away downstream, and is reborn in a purified body.
   location: 凌云渡
   unlock: 3344
+  theme: crossing
 - number: 73
   name: 竹节山遭难
   english: Disaster at Bamboo-Joint Mountain
   desc: Pangolin and serpent demons attack the pilgrims on the wooded slopes of Bamboo-Joint Mountain, testing their endurance so close to the journey's end.
   location: 竹节山
   unlock: 3415
+  theme: festivals
 - number: 74
   name: 玄英洞受苦
   english: Suffering in Dark-Spirit Cave
@@ -491,18 +539,21 @@
   location: 天竺国
   unlock: 3631
   demon: 玉兔精
+  theme: moon
 - number: 77
   name: 铜台府监禁
   english: Imprisoned at Bronze Terrace Prefecture
   desc: The pilgrims are falsely accused of murder and thrown into the dungeons of Bronze Terrace Prefecture, where corrupt officials plot to confiscate their scriptures.
   location: 铜台府
   unlock: 3704
+  theme: prison
 - number: 78
   name: 凌云渡脱凡
   english: Transcending Mortality at Cloud-Reaching Ford
   desc: The pilgrims cross the Cloud-Reaching Ford on the Boatman of No-Bottom's vessel, leaving behind the final traces of their earthly existence.
   location: 凌云渡
   unlock: 3777
+  theme: scripture
 - number: 79
   name: 路经十万八千里
   english: Traversing One Hundred and Eight Thousand Li
@@ -516,6 +567,7 @@
   desc: A turtle ferry in the heavenly river tilts the pilgrims into the water, soaking the wordless sutras and forcing them to dry the scriptures on a rock — the final, eighty-first trial imposed by fate.
   location: 通天河
   unlock: 3925
+  theme: rivers
 - number: 81
   name: 取经回大唐
   english: Returning to the Great Tang with the Sutras
@@ -523,3 +575,4 @@
   location: 长安
   unlock: 4000
   demon: 如来佛祖
+  theme: homecoming

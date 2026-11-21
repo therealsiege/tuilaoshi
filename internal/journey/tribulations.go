@@ -9,6 +9,7 @@ type Tribulation struct {
 	Location string `yaml:"location,omitempty"` // place name in Chinese
 	Unlock   int    `yaml:"unlock"`             // mastered characters needed to open this stage
 	Demon    string `yaml:"demon,omitempty"`    // bestiary name of the demon fought here; empty keeps the last one met
+	Theme    string `yaml:"theme,omitempty"`    // themes.yaml id of the words fought with here; empty keeps the last one
 }
 
 // AllTribulations returns the complete list of 81 tribulations.

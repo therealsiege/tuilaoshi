@@ -123,9 +123,14 @@ func (m Model) Refresh() Model {
 	if m.next != nil && m.next.Status == journey.StageOpen {
 		m.stage = m.next
 	}
+	// Battles use the words of the stage being fought, or practise the
+	// coming stage's words.
+	if s := m.next; s != nil {
+		m.cards = journey.StageCards(*s, pages, cards)
+	}
 	switch {
 	case m.stage != nil && m.stage.Boss != nil:
-		// Bosses quiz the learner's weakest words.
+		// Bosses quiz the learner's weakest of those words.
 		m.cards = rpgengine.WeakCards(m.cards)
 		m.battle = rpgengine.NewBossBattle(m.cards, m.stage.Opponent, m.mastered)
 	case m.stage != nil:

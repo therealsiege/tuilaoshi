@@ -23,6 +23,7 @@ type Content struct {
 	Companions   []Companion
 	Lore         []LoreEntry
 	Dialogue     []Dialogue
+	Themes       []Theme
 }
 
 // content is loaded once at startup; the embedded files are checked by
@@ -50,6 +51,7 @@ func LoadContent() (Content, error) {
 		{"companions", &c.Companions},
 		{"lore", &c.Lore},
 		{"dialogue", &c.Dialogue},
+		{"themes", &c.Themes},
 	}
 	for _, f := range files {
 		data, err := contentFS.ReadFile("content/" + f.name + ".yaml")

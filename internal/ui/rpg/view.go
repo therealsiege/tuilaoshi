@@ -349,10 +349,11 @@ func (m Model) renderStakes() string {
 			b.WriteString("\n")
 		}
 		b.WriteString(ui.WarningStyle.Render("  Win to clear this tribulation."))
+		b.WriteString(ui.MutedStyle.Render("  Words: " + m.stage.Words.Name))
 	case m.next != nil:
 		b.WriteString(ui.WarningStyle.Render("  A demon blocks your path! (practice)"))
-		fmt.Fprintf(&b, "\n  %s", ui.MutedStyle.Render(fmt.Sprintf("Master %d more characters to open tribulation %d, %s.",
-			m.next.Unlock-m.mastered, m.next.Number, m.next.English)))
+		fmt.Fprintf(&b, "\n  %s", ui.MutedStyle.Render(fmt.Sprintf("Master %d more characters to open tribulation %d, %s. Practising its words: %s.",
+			m.next.Unlock-m.mastered, m.next.Number, m.next.English, m.next.Words.Name)))
 	default:
 		b.WriteString(ui.WarningStyle.Render("  All 81 tribulations cleared. Practice freely."))
 	}

@@ -1,32 +1,24 @@
 - name: 混世魔王
   english: Havoc Monster
-  theme: Basic radicals
   stage: 8
 - name: 白骨精
   english: White Bone Demon
-  theme: Common characters
   stage: 20
 - name: 金角大王
   english: Gold Horn King
-  theme: Metal radicals
   stage: 25
 - name: 红孩儿
   english: Red Boy
-  theme: Fire radicals
   stage: 31
 - name: 牛魔王
   english: Bull Demon King
-  theme: Advanced vocabulary
   stage: 52
 - name: 蜘蛛精
   english: Spider Demon
-  theme: Complex characters
   stage: 59
 - name: 金翅大鹏
   english: Golden-Winged Roc
-  theme: Literary characters
   stage: 64
 - name: 如来佛祖
   english: Buddha (Final Trial)
-  theme: Complete mastery
   stage: 79
