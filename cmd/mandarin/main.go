@@ -26,7 +26,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	if _, err := tea.NewProgram(app.New(dir)).Run(); err != nil {
+	m, err := app.New(dir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "mandarin: %v\n", err)
+		os.Exit(1)
+	}
+	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "mandarin: %v\n", err)
 		os.Exit(1)
 	}

@@ -104,8 +104,11 @@ func CountMastered(pages []model.Page) int {
 }
 
 // Calculate computes the complete gamification state from the wiki store.
-func Calculate(store *wiki.Store) State {
-	pages, _ := store.ListPages()
+func Calculate(store *wiki.Store) (State, error) {
+	pages, err := store.ListPages()
+	if err != nil {
+		return State{}, err
+	}
 
 	totalChars := 0
 	for _, p := range pages {
@@ -136,7 +139,7 @@ func Calculate(store *wiki.Store) State {
 		Quests:       buildQuests(mastered, streak, nextBoss),
 		Achievements: buildAchievements(mastered, totalReviewed, streak, daysStudied),
 		Lore:         buildLore(progress.Tribulation),
-	}
+	}, nil
 }
 
 func calculateRank(mastered int) Rank {

@@ -30,12 +30,11 @@ type Message struct {
 	Time    time.Time
 }
 
-type ttsFinishedMsg struct{}
-
 // Model is the chat view model.
 type Model struct {
 	claude   *claude.Client
 	tts      *audio.Client
+	ttsErr   error // why the last speech failed
 	messages []Message
 	input    input.Model
 	viewport viewport.Model
@@ -102,18 +101,13 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 		var cmds []tea.Cmd
 		cmds = append(cmds, focusCmd, textinput.Blink)
-		if m.tts != nil && m.tts.Available() && spokenText != "" {
-			chinese := extractChinese(spokenText)
-			if chinese != "" {
-				cmds = append(cmds, func() tea.Msg {
-					_ = m.tts.Speak(chinese, "zh")
-					return ttsFinishedMsg{}
-				})
-			}
+		if spokenText != "" {
+			cmds = append(cmds, ui.SpeakCmd(m.tts, extractChinese(spokenText), "zh"))
 		}
 		return m, tea.Batch(cmds...)
 
-	case ttsFinishedMsg:
+	case ui.SpeechDoneMsg:
+		m.ttsErr = msg.Err
 		return m, nil
 
 	case tea.KeyMsg:
@@ -158,10 +152,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			}
 
 		case tea.KeyPgUp:
-			m.viewport.HalfViewUp()
+			m.viewport.HalfPageUp()
 			return m, nil
 		case tea.KeyPgDown:
-			m.viewport.HalfViewDown()
+			m.viewport.HalfPageDown()
 			return m, nil
 		}
 
@@ -181,6 +175,7 @@ func (m Model) View() string {
 	title := ui.TitleStyle.Render("Chat 对话")
 	b.WriteString(title)
 	b.WriteString("\n\n")
+	b.WriteString(ui.AudioError(m.ttsErr))
 
 	// Messages viewport
 	contentHeight := m.height - 8
@@ -228,14 +223,6 @@ func (m *Model) refreshViewport() {
 			// Right-aligned user bubble
 			wrapped := ui.WrapText(msg.Content, bubbleWidth)
 			bubble := ui.ChatBubbleUserStyle.Render(wrapped)
-			// Right-align by padding
-			padLen := contentWidth - len(msg.Content)
-			if padLen < 2 {
-				padLen = 2
-			}
-			if padLen > contentWidth-10 {
-				padLen = 4
-			}
 			lines = append(lines, fmt.Sprintf("%s  %s", timestamp, ui.SubtitleStyle.Render("You")))
 			lines = append(lines, "    "+bubble)
 		} else {

@@ -1,7 +1,6 @@
 package wiki
 
 import (
-	"regexp"
 	"strings"
 	"time"
 
@@ -83,8 +82,6 @@ func extractTitle(body string) string {
 	return ""
 }
 
-var pinyinRe = regexp.MustCompile(`\(([^)]+)\)`)
-
 // parseCharacterFields extracts character-specific data from the body.
 func parseCharacterFields(p *model.Page) {
 	lines := strings.Split(p.Body, "\n")
@@ -143,7 +140,10 @@ func parseDate(s string) time.Time {
 	if s == "" {
 		return time.Time{}
 	}
-	t, _ := time.Parse(dateFmt, s)
+	t, err := time.Parse(dateFmt, s)
+	if err != nil {
+		return time.Time{}
+	}
 	return t
 }
 

@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -25,7 +26,8 @@ type Model struct {
 	journeyState journey.State
 	streak       int
 	due          int
-	xp           int // lifetime battle XP
+	xp           int   // lifetime battle XP
+	loadErr      error // why the wiki could not be read, shown under the header
 	width        int
 	height       int
 }
@@ -51,14 +53,7 @@ type refreshMsg struct{}
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case refreshMsg:
-		m.stats = m.store.Stats()
-		due, _ := wiki.DueItems(m.store, time.Now())
-		m.due = len(due)
-		m.daily = m.store.TodayStats()
-		m.streak = m.store.Streak()
-		m.xp = m.store.TotalXP()
-		m.journeyState = journey.Calculate(m.store)
-		return m, nil
+		return m.Refresh(), nil
 
 	case tea.KeyMsg:
 		switch {
@@ -93,6 +88,7 @@ func (m Model) View() string {
 	// Decorative header
 	b.WriteString(ui.Header("推老师 TuīLǎoShī"))
 	b.WriteString("\n\n")
+	b.WriteString(ui.LoadError(m.loadErr))
 
 	// Two-column layout: stats + today's progress
 	statsBox := lipgloss.JoinVertical(lipgloss.Left,
@@ -147,17 +143,17 @@ func (m Model) View() string {
 	b.WriteString("\n\n")
 	b.WriteString(ui.SubtitleStyle.Render("  Actions"))
 	b.WriteString("\n\n")
-	b.WriteString(fmt.Sprintf("  %s  练 Start a flashcard drill\n", ui.ChineseStyle.Render("[d]")))
-	b.WriteString(fmt.Sprintf("  %s  战 Fight a demon (RPG)\n", ui.ChineseStyle.Render("[f]")))
-	b.WriteString(fmt.Sprintf("  %s  览 Browse wiki pages\n", ui.ChineseStyle.Render("[b]")))
-	b.WriteString(fmt.Sprintf("  %s  话 Chat with tutor\n", ui.ChineseStyle.Render("[c]")))
-	b.WriteString(fmt.Sprintf("  %s  复 Review due items\n", ui.ChineseStyle.Render("[r]")))
-	b.WriteString(fmt.Sprintf("  %s  统 Study statistics\n", ui.ChineseStyle.Render("[s]")))
-	b.WriteString(fmt.Sprintf("  %s  游 Journey to the West\n", ui.ChineseStyle.Render("[j]")))
-	b.WriteString(fmt.Sprintf("  %s  部 Radical explorer\n", ui.ChineseStyle.Render("[x]")))
-	b.WriteString(fmt.Sprintf("  %s  声 Change voice\n", ui.ChineseStyle.Render("[v]")))
-	b.WriteString(fmt.Sprintf("  %s  找 Search wiki\n", ui.ChineseStyle.Render("[/]")))
-	b.WriteString(fmt.Sprintf("  %s  退 Quit\n", ui.ChineseStyle.Render("[q]")))
+	fmt.Fprintf(&b, "  %s  练 Start a flashcard drill\n", ui.ChineseStyle.Render("[d]"))
+	fmt.Fprintf(&b, "  %s  战 Fight a demon (RPG)\n", ui.ChineseStyle.Render("[f]"))
+	fmt.Fprintf(&b, "  %s  览 Browse wiki pages\n", ui.ChineseStyle.Render("[b]"))
+	fmt.Fprintf(&b, "  %s  话 Chat with tutor\n", ui.ChineseStyle.Render("[c]"))
+	fmt.Fprintf(&b, "  %s  复 Review due items\n", ui.ChineseStyle.Render("[r]"))
+	fmt.Fprintf(&b, "  %s  统 Study statistics\n", ui.ChineseStyle.Render("[s]"))
+	fmt.Fprintf(&b, "  %s  游 Journey to the West\n", ui.ChineseStyle.Render("[j]"))
+	fmt.Fprintf(&b, "  %s  部 Radical explorer\n", ui.ChineseStyle.Render("[x]"))
+	fmt.Fprintf(&b, "  %s  声 Change voice\n", ui.ChineseStyle.Render("[v]"))
+	fmt.Fprintf(&b, "  %s  找 Search wiki\n", ui.ChineseStyle.Render("[/]"))
+	fmt.Fprintf(&b, "  %s  退 Quit\n", ui.ChineseStyle.Render("[q]"))
 	b.WriteString("\n")
 
 	// Footer
@@ -265,12 +261,14 @@ func (m Model) SetSize(w, h int) Model {
 
 // Refresh reloads data from the wiki store.
 func (m Model) Refresh() Model {
-	m.stats = m.store.Stats()
-	due, _ := wiki.DueItems(m.store, time.Now())
+	var statsErr, dueErr, journeyErr error
+	m.stats, statsErr = m.store.Stats()
+	due, dueErr := wiki.DueItems(m.store, time.Now())
 	m.due = len(due)
 	m.daily = m.store.TodayStats()
 	m.streak = m.store.Streak()
 	m.xp = m.store.TotalXP()
-	m.journeyState = journey.Calculate(m.store)
+	m.journeyState, journeyErr = journey.Calculate(m.store)
+	m.loadErr = errors.Join(statsErr, dueErr, journeyErr)
 	return m
 }

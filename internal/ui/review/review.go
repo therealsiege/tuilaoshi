@@ -28,8 +28,6 @@ const (
 	stateDifficulty                    // showing feedback + difficulty buttons
 )
 
-type ttsFinishedMsg struct{}
-
 // Model is the review queue view model.
 type Model struct {
 	store  *wiki.Store
@@ -54,6 +52,8 @@ type Model struct {
 	// Session tracking
 	session model.Session
 	saveErr error // first failed save this visit, shown until the queue reloads
+	loadErr error // why the review queue could not be read
+	ttsErr  error // why the last speech failed
 
 	width  int
 	height int
@@ -88,8 +88,7 @@ type reviewEvalMsg struct {
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case loadDueMsg:
-		due, _ := wiki.DueItems(m.store, time.Now())
-		m.items = due
+		m.items, m.loadErr = wiki.DueItems(m.store, time.Now())
 		m.cursor = 0
 		m.state = stateList
 		m.saveErr = nil
@@ -116,7 +115,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.state = stateDifficulty
 		return m, nil
 
-	case ttsFinishedMsg:
+	case ui.SpeechDoneMsg:
+		m.ttsErr = msg.Err
 		return m, nil
 
 	case tea.KeyMsg:
@@ -137,15 +137,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 					m.input.Reset()
 					m.input.Focus()
 					card := m.items[m.cursor]
-					var cmds []tea.Cmd
-					cmds = append(cmds, textinput.Blink)
-					if m.tts != nil && m.tts.Available() && card.Chinese != "" {
-						cmds = append(cmds, func() tea.Msg {
-							_ = m.tts.Speak(card.Chinese, "zh")
-							return ttsFinishedMsg{}
-						})
-					}
-					return m, tea.Batch(cmds...)
+					return m, tea.Batch(textinput.Blink, ui.SpeakCmd(m.tts, card.Chinese, "zh"))
 				}
 			}
 			return m, nil
@@ -214,8 +206,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.session.CardsCorrect = m.correct
 				m.noteSaveErr(m.store.WriteSession(m.session))
 
-				due, _ := wiki.DueItems(m.store, time.Now())
-				m.items = due
+				m.items, m.loadErr = wiki.DueItems(m.store, time.Now())
 				m.cursor = 0
 				m.state = stateList
 			} else {
@@ -223,15 +214,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.input.Reset()
 				m.input.Focus()
 				card := m.items[m.cursor]
-				var cmds []tea.Cmd
-				cmds = append(cmds, textinput.Blink)
-				if m.tts != nil && m.tts.Available() && card.Chinese != "" {
-					cmds = append(cmds, func() tea.Msg {
-						_ = m.tts.Speak(card.Chinese, "zh")
-						return ttsFinishedMsg{}
-					})
-				}
-				return m, tea.Batch(cmds...)
+				return m, tea.Batch(textinput.Blink, ui.SpeakCmd(m.tts, card.Chinese, "zh"))
 			}
 			return m, nil
 		}
@@ -253,6 +236,8 @@ func (m Model) View() string {
 	title := ui.TitleStyle.Render("Review Queue 复习")
 	b.WriteString(title)
 	b.WriteString("\n\n")
+	b.WriteString(ui.LoadError(m.loadErr))
+	b.WriteString(ui.AudioError(m.ttsErr))
 	if m.saveErr != nil {
 		b.WriteString(ui.ErrorStyle.Render(fmt.Sprintf("  Could not save progress: %v", m.saveErr)))
 		b.WriteString("\n\n")
@@ -334,12 +319,12 @@ func (m Model) View() string {
 		}
 		b.WriteString("\n\n")
 		b.WriteString("  Rate difficulty:\n")
-		b.WriteString(fmt.Sprintf("  %s  %s  %s  %s\n",
+		fmt.Fprintf(&b, "  %s  %s  %s  %s\n",
 			ui.DiffAgainStyle.Render("[1] Again"),
 			ui.DiffHardStyle.Render("[2] Hard"),
 			ui.DiffGoodStyle.Render("[3] Good"),
 			ui.DiffEasyStyle.Render("[4] Easy"),
-		))
+		)
 		b.WriteString("\n")
 		remaining := len(m.items) - m.cursor - 1
 		if remaining > 0 {
@@ -387,8 +372,7 @@ func (m Model) SetSize(w, h int) Model {
 
 // Refresh reloads due items.
 func (m Model) Refresh() Model {
-	due, _ := wiki.DueItems(m.store, time.Now())
-	m.items = due
+	m.items, m.loadErr = wiki.DueItems(m.store, time.Now())
 	m.cursor = 0
 	m.correct = 0
 	m.total = 0

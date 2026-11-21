@@ -35,9 +35,12 @@ type ContentStats struct {
 }
 
 // Stats computes summary statistics about the wiki content.
-func (s *Store) Stats() ContentStats {
-	pages, _ := s.ListPages()
+func (s *Store) Stats() (ContentStats, error) {
 	var stats ContentStats
+	pages, err := s.ListPages()
+	if err != nil {
+		return stats, err
+	}
 	stats.TotalPages = len(pages)
 	for _, p := range pages {
 		switch p.Type {
@@ -53,7 +56,7 @@ func (s *Store) Stats() ContentStats {
 			stats.SessionPages++
 		}
 	}
-	return stats
+	return stats, nil
 }
 
 // CardsFromPages converts wiki pages into flashcards for drilling.

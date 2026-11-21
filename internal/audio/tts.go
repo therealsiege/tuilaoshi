@@ -119,7 +119,7 @@ func (c *Client) Speak(text, lang string) error {
 }
 
 // synthesize calls the Fish Audio TTS API and returns raw MP3 bytes.
-func (c *Client) synthesize(text string, voice Voice) ([]byte, error) {
+func (c *Client) synthesize(text string, voice Voice) (_ []byte, err error) {
 	payload := ttsRequest{
 		Text:        text,
 		ReferenceID: voice.ID,
@@ -146,10 +146,17 @@ func (c *Client) synthesize(text string, voice Voice) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("tts api call: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); err == nil && closeErr != nil {
+			err = fmt.Errorf("close tts response: %w", closeErr)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
-		errBody, _ := io.ReadAll(resp.Body)
+		errBody, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return nil, fmt.Errorf("tts api error %d (body unreadable: %v)", resp.StatusCode, readErr)
+		}
 		return nil, fmt.Errorf("tts api error %d: %s", resp.StatusCode, string(errBody))
 	}
 
@@ -163,13 +170,16 @@ func playAudio(data []byte) error {
 	if err != nil {
 		return fmt.Errorf("create temp audio file: %w", err)
 	}
-	defer os.Remove(tmpFile.Name())
+	// Best effort: a leftover file in the temp dir is harmless and the OS reclaims it.
+	defer os.Remove(tmpFile.Name()) //nolint:errcheck // best effort, see above
 
-	if _, err := tmpFile.Write(data); err != nil {
-		tmpFile.Close()
+	_, err = tmpFile.Write(data)
+	if closeErr := tmpFile.Close(); err == nil {
+		err = closeErr
+	}
+	if err != nil {
 		return fmt.Errorf("write temp audio file: %w", err)
 	}
-	tmpFile.Close()
 
 	var cmd *exec.Cmd
 	switch runtime.GOOS {

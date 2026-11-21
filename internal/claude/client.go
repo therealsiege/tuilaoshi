@@ -170,7 +170,11 @@ func parseDrillResponse(response string) model.DrillResult {
 		}
 		if strings.HasPrefix(upper, "SCORE:") {
 			val := strings.TrimSpace(strings.TrimPrefix(upper, "SCORE:"))
-			fmt.Sscanf(val, "%d", &result.Score)
+			// An unparseable score stays 0; Correct and Feedback still stand.
+			var score int
+			if _, err := fmt.Sscanf(val, "%d", &score); err == nil {
+				result.Score = score
+			}
 		}
 		if strings.HasPrefix(upper, "FEEDBACK:") {
 			result.Feedback = strings.TrimSpace(line[len("FEEDBACK:"):])

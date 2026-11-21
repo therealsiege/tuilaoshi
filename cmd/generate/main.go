@@ -182,13 +182,15 @@ func main() {
 			continue
 		}
 
-		if err := t.Execute(f, data); err != nil {
+		err = t.Execute(f, data)
+		if closeErr := f.Close(); err == nil {
+			err = closeErr
+		}
+		if err != nil {
 			fmt.Fprintf(os.Stderr, "error writing %s: %v\n", outPath, err)
-			f.Close()
 			errored++
 			continue
 		}
-		f.Close()
 		generated++
 	}
 

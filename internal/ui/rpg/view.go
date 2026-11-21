@@ -16,6 +16,7 @@ func (m Model) View() string {
 
 	b.WriteString(ui.Header("BATTLE  战斗"))
 	b.WriteString("\n\n")
+	b.WriteString(ui.LoadError(m.loadErr))
 
 	if m.battle == nil {
 		b.WriteString(ui.MutedStyle.Render("  No battle loaded. Press esc to return."))
@@ -151,13 +152,13 @@ func (m Model) viewVictory() string {
 	b.WriteString(ui.SuccessStyle.Bold(true).Render("  VICTORY!  胜利!"))
 	b.WriteString("\n\n")
 
-	b.WriteString(fmt.Sprintf("  %s defeated!\n\n",
-		ui.ChineseStyle.Render(m.battle.Enemy.Chinese)))
+	fmt.Fprintf(&b, "  %s defeated!\n\n",
+		ui.ChineseStyle.Render(m.battle.Enemy.Chinese))
 
-	b.WriteString(fmt.Sprintf("  XP Earned:    %d\n", m.battle.XPEarned))
-	b.WriteString(fmt.Sprintf("  Turns:        %d\n", m.battle.Turn))
-	b.WriteString(fmt.Sprintf("  Max Combo:    %d\n", m.battle.MaxCombo))
-	b.WriteString(fmt.Sprintf("  Accuracy:     %d%%\n", m.battle.Accuracy()))
+	fmt.Fprintf(&b, "  XP Earned:    %d\n", m.battle.XPEarned)
+	fmt.Fprintf(&b, "  Turns:        %d\n", m.battle.Turn)
+	fmt.Fprintf(&b, "  Max Combo:    %d\n", m.battle.MaxCombo)
+	fmt.Fprintf(&b, "  Accuracy:     %d%%\n", m.battle.Accuracy())
 	b.WriteString(m.renderSaveStatus())
 	b.WriteString("\n")
 	b.WriteString(ui.HelpStyle.Render("  enter/space continue  |  esc back"))
@@ -176,10 +177,10 @@ func (m Model) viewDefeat() string {
 	b.WriteString(ui.PinyinStyle.Render("  失败乃成功之母 -- Failure is the mother of success."))
 	b.WriteString("\n\n")
 
-	b.WriteString(fmt.Sprintf("  Turns survived:  %d\n", m.battle.Turn))
-	b.WriteString(fmt.Sprintf("  Max Combo:       %d\n", m.battle.MaxCombo))
-	b.WriteString(fmt.Sprintf("  Damage Dealt:    %d\n", m.battle.TotalDealt))
-	b.WriteString(fmt.Sprintf("  XP Earned:       %d\n", m.battle.XPEarned))
+	fmt.Fprintf(&b, "  Turns survived:  %d\n", m.battle.Turn)
+	fmt.Fprintf(&b, "  Max Combo:       %d\n", m.battle.MaxCombo)
+	fmt.Fprintf(&b, "  Damage Dealt:    %d\n", m.battle.TotalDealt)
+	fmt.Fprintf(&b, "  XP Earned:       %d\n", m.battle.XPEarned)
 	b.WriteString(m.renderSaveStatus())
 	b.WriteString("\n")
 	b.WriteString(ui.HelpStyle.Render("  enter/space try again  |  esc back"))

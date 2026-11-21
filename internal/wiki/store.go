@@ -38,7 +38,10 @@ func (s *Store) ListPages() ([]model.Page, error) {
 		if info.IsDir() || !strings.HasSuffix(info.Name(), ".md") {
 			return nil
 		}
-		relPath, _ := filepath.Rel(s.Dir, path)
+		relPath, err := filepath.Rel(s.Dir, path)
+		if err != nil {
+			return err
+		}
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return nil // skip unreadable files
@@ -125,36 +128,30 @@ func (s *Store) writeFrontmatter(page model.Page) error {
 
 	var b strings.Builder
 	b.WriteString("---\n")
-	b.WriteString(fmt.Sprintf("type: %s\n", page.Type))
+	fmt.Fprintf(&b, "type: %s\n", page.Type)
 	if page.Level != "" {
-		b.WriteString(fmt.Sprintf("level: %s\n", page.Level))
+		fmt.Fprintf(&b, "level: %s\n", page.Level)
 	}
 	if page.Status != "" {
-		b.WriteString(fmt.Sprintf("status: %s\n", page.Status))
+		fmt.Fprintf(&b, "status: %s\n", page.Status)
 	}
 	if !page.LastReviewed.IsZero() {
-		b.WriteString(fmt.Sprintf("last_reviewed: %s\n", FormatDate(page.LastReviewed)))
+		fmt.Fprintf(&b, "last_reviewed: %s\n", FormatDate(page.LastReviewed))
 	}
 	if len(page.Tags) > 0 {
-		b.WriteString(fmt.Sprintf("tags: [%s]\n", strings.Join(page.Tags, ", ")))
+		fmt.Fprintf(&b, "tags: [%s]\n", strings.Join(page.Tags, ", "))
 	}
 	if !page.Introduced.IsZero() {
-		b.WriteString(fmt.Sprintf("introduced: %s\n", FormatDate(page.Introduced)))
+		fmt.Fprintf(&b, "introduced: %s\n", FormatDate(page.Introduced))
 	}
 	if page.ReviewInterval > 0 {
-		b.WriteString(fmt.Sprintf("review_interval: %d\n", page.ReviewInterval))
+		fmt.Fprintf(&b, "review_interval: %d\n", page.ReviewInterval)
 	}
 	if !page.NextReview.IsZero() {
-		b.WriteString(fmt.Sprintf("next_review: %s\n", FormatDate(page.NextReview)))
+		fmt.Fprintf(&b, "next_review: %s\n", FormatDate(page.NextReview))
 	}
 	b.WriteString("---\n\n")
 	b.WriteString(body)
 
 	return os.WriteFile(path, []byte(b.String()), 0644)
-}
-
-// PageCount returns the total number of markdown files.
-func (s *Store) PageCount() int {
-	pages, _ := s.ListPages()
-	return len(pages)
 }

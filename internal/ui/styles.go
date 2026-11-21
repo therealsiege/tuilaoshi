@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -223,4 +224,12 @@ func WrapText(text string, maxWidth int) string {
 	}
 	lines = append(lines, line)
 	return strings.Join(lines, "\n")
+}
+
+// LoadError renders why a screen could not read the wiki, or "" when it could.
+func LoadError(err error) string {
+	if err == nil {
+		return ""
+	}
+	return ErrorStyle.Render(fmt.Sprintf("  Could not read the wiki: %v", err)) + "\n\n"
 }

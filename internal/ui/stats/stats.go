@@ -1,6 +1,7 @@
 package stats
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -14,14 +15,15 @@ import (
 
 // Model is the statistics view model.
 type Model struct {
-	store  *wiki.Store
-	stats  wiki.ContentStats
-	daily  wiki.DailyStats
-	week   [7]wiki.DailyStats
-	streak int
-	pages  []model.Page
-	width  int
-	height int
+	store   *wiki.Store
+	stats   wiki.ContentStats
+	daily   wiki.DailyStats
+	week    [7]wiki.DailyStats
+	streak  int
+	pages   []model.Page
+	loadErr error // why the wiki could not be read, shown above the numbers
+	width   int
+	height  int
 }
 
 // New creates a new stats model.
@@ -40,12 +42,7 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg.(type) {
 	case refreshMsg:
-		m.stats = m.store.Stats()
-		m.daily = m.store.TodayStats()
-		m.streak = m.store.Streak()
-		m.week = m.store.WeekStats()
-		m.pages, _ = m.store.ListPages()
-		return m, nil
+		return m.Refresh(), nil
 	}
 	return m, nil
 }
@@ -56,6 +53,7 @@ func (m Model) View() string {
 	title := ui.TitleStyle.Render("Study Statistics 学习统计")
 	b.WriteString(title)
 	b.WriteString("\n\n")
+	b.WriteString(ui.LoadError(m.loadErr))
 
 	// Section 1: Study Overview
 	overviewBox := m.renderOverview()
@@ -343,10 +341,12 @@ func (m Model) SetSize(w, h int) Model {
 
 // Refresh reloads data from the wiki store.
 func (m Model) Refresh() Model {
-	m.stats = m.store.Stats()
+	var statsErr, pagesErr error
+	m.stats, statsErr = m.store.Stats()
 	m.daily = m.store.TodayStats()
 	m.streak = m.store.Streak()
 	m.week = m.store.WeekStats()
-	m.pages, _ = m.store.ListPages()
+	m.pages, pagesErr = m.store.ListPages()
+	m.loadErr = errors.Join(statsErr, pagesErr)
 	return m
 }

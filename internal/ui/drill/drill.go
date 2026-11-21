@@ -89,6 +89,7 @@ type Model struct {
 	height  int
 	err     error
 	saveErr error // first failed save this drill, shown until the next drill
+	ttsErr  error // why the last speech failed
 }
 
 // New creates a new drill model.
@@ -116,19 +117,6 @@ type loadCardsMsg struct{}
 type evalResultMsg struct {
 	result model.DrillResult
 	err    error
-}
-
-type ttsFinishedMsg struct{}
-
-// speakCmd returns a Cmd that speaks text in the background.
-func speakCmd(tts *audio.Client, text, lang string) tea.Cmd {
-	if tts == nil || !tts.Available() || text == "" {
-		return nil
-	}
-	return func() tea.Msg {
-		_ = tts.Speak(text, lang)
-		return ttsFinishedMsg{}
-	}
 }
 
 // effectiveMode returns the mode for the current card.
@@ -181,7 +169,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		}
 
 		card := m.cards[m.current]
-		return m, tea.Batch(textinput.Blink, speakCmd(m.tts, card.Chinese, "zh"))
+		return m, tea.Batch(textinput.Blink, ui.SpeakCmd(m.tts, card.Chinese, "zh"))
 
 	case evalResultMsg:
 		if msg.err != nil {
@@ -214,7 +202,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.state = stateDifficulty
 		return m, nil
 
-	case ttsFinishedMsg:
+	case ui.SpeechDoneMsg:
+		m.ttsErr = msg.Err
 		return m, nil
 
 	case tea.KeyMsg:
@@ -337,7 +326,7 @@ func (m *Model) advanceCard(diff model.DrillDifficulty) tea.Cmd {
 	m.input.Focus()
 
 	card := m.cards[m.current]
-	return tea.Batch(textinput.Blink, speakCmd(m.tts, card.Chinese, "zh"))
+	return tea.Batch(textinput.Blink, ui.SpeakCmd(m.tts, card.Chinese, "zh"))
 }
 
 // noteSaveErr keeps the first failed save so the player sees it.
@@ -353,6 +342,7 @@ func (m Model) View() string {
 	title := ui.TitleStyle.Render("Drill 练习")
 	b.WriteString(title)
 	b.WriteString("\n\n")
+	b.WriteString(ui.AudioError(m.ttsErr))
 	if m.saveErr != nil {
 		b.WriteString(ui.ErrorStyle.Render(fmt.Sprintf("  Could not save progress: %v", m.saveErr)))
 		b.WriteString("\n\n")
@@ -442,12 +432,12 @@ func (m Model) View() string {
 		}
 		b.WriteString("\n\n")
 		b.WriteString("  Rate difficulty:\n")
-		b.WriteString(fmt.Sprintf("  %s  %s  %s  %s\n",
+		fmt.Fprintf(&b, "  %s  %s  %s  %s\n",
 			ui.DiffAgainStyle.Render("[1] Again"),
 			ui.DiffHardStyle.Render("[2] Hard"),
 			ui.DiffGoodStyle.Render("[3] Good"),
 			ui.DiffEasyStyle.Render("[4] Easy"),
-		))
+		)
 		b.WriteString("\n")
 		b.WriteString(ui.HelpStyle.Render("  1-4 rate · enter default (Good) · esc back"))
 
@@ -465,10 +455,10 @@ func (m Model) View() string {
 		} else {
 			b.WriteString(ui.SubtitleStyle.Render("  Session Complete 完成"))
 			b.WriteString("\n\n")
-			b.WriteString(fmt.Sprintf("  Cards:     %d\n", m.total))
-			b.WriteString(fmt.Sprintf("  Correct:   %d\n", m.correct))
+			fmt.Fprintf(&b, "  Cards:     %d\n", m.total)
+			fmt.Fprintf(&b, "  Correct:   %d\n", m.correct)
 			if m.maxCombo > 0 {
-				b.WriteString(fmt.Sprintf("  Best combo: %d\n", m.maxCombo))
+				fmt.Fprintf(&b, "  Best combo: %d\n", m.maxCombo)
 			}
 			pct := float64(m.correct) / float64(m.total) * 100
 			scoreText := fmt.Sprintf("  Score:   %.0f%%", pct)
@@ -547,11 +537,11 @@ func (m Model) renderEncounter() string {
 		hits = 3
 	}
 	swords := strings.Repeat("X", hits) + strings.Repeat("-", 3-hits)
-	b.WriteString(fmt.Sprintf("  %s [%s] %d/3",
+	fmt.Fprintf(&b, "  %s [%s] %d/3",
 		ui.ErrorStyle.Render("⚔"),
 		swords,
 		hits,
-	))
+	)
 
 	return b.String()
 }

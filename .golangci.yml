@@ -6,3 +6,8 @@ linters:
     errcheck:
       # `_ = store.WriteSession(...)` hid failed saves; handle or surface the error instead.
       check-blank: true
+
+issues:
+  # Report every finding; the defaults hide repeats of the same message.
+  max-issues-per-linter: 0
+  max-same-issues: 0

@@ -81,3 +81,17 @@ func TestStreakStartsYesterdayWhenNothingToday(t *testing.T) {
 		t.Errorf("Streak() = %d, want 1", got)
 	}
 }
+
+func TestParseSessionSkipsMalformedXP(t *testing.T) {
+	rec := parseSession("2026-11-21", xpLinePrefix+" 12\n"+xpLinePrefix+" lots\n")
+	if rec.XP != 12 {
+		t.Errorf("XP = %d, want 12 (malformed line ignored)", rec.XP)
+	}
+}
+
+func TestStatsReportsUnreadableWiki(t *testing.T) {
+	store := NewStore(t.TempDir() + "/missing")
+	if _, err := store.Stats(); err == nil {
+		t.Error("Stats on a missing wiki returned no error")
+	}
+}

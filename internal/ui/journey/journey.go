@@ -18,16 +18,13 @@ type Model struct {
 	tab            int // 0=journey, 1=party, 2=bosses, 3=artifacts, 4=quests, 5=achievements, 6=lore, 7=bestiary
 	width          int
 	height         int
-	bestiaryCursor int // selected demon index in the bestiary tab
+	bestiaryCursor int   // selected demon index in the bestiary tab
+	loadErr        error // why the wiki could not be read, shown under the header
 }
 
 // New creates a new journey view model.
 func New(store *wiki.Store) Model {
-	return Model{
-		store: store,
-		state: journey.Calculate(store),
-		tab:   0,
-	}
+	return Model{store: store}.Refresh()
 }
 
 func (m Model) Init() tea.Cmd {
@@ -76,6 +73,7 @@ func (m Model) View() string {
 	// Header
 	b.WriteString(ui.Header("西游记 Journey to the West"))
 	b.WriteString("\n\n")
+	b.WriteString(ui.LoadError(m.loadErr))
 
 	// Tab bar
 	b.WriteString(m.renderTabBar())
@@ -113,7 +111,7 @@ func (m Model) SetSize(w, h int) Model {
 
 // Refresh reloads data from the wiki store.
 func (m Model) Refresh() Model {
-	m.state = journey.Calculate(m.store)
+	m.state, m.loadErr = journey.Calculate(m.store)
 	return m
 }
 
@@ -296,10 +294,10 @@ func (m Model) renderParty() string {
 			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     %s", companion.Role)))
 			if companion.Ability != "" {
 				b.WriteString("\n")
-				b.WriteString(fmt.Sprintf("     %s %s: %s",
+				fmt.Fprintf(&b, "     %s %s: %s",
 					companion.AbilityIcon,
 					ui.SuccessStyle.Render(companion.Ability),
-					companion.AbilityDesc))
+					companion.AbilityDesc)
 			}
 		} else {
 			// Locked companion
@@ -492,7 +490,7 @@ func (m Model) renderAchievements() string {
 	total := len(achievements)
 
 	// Summary line
-	b.WriteString(fmt.Sprintf("  %d / %d earned", earned, total))
+	fmt.Fprintf(&b, "  %d / %d earned", earned, total)
 	b.WriteString("\n\n")
 
 	// Group by category and render each group

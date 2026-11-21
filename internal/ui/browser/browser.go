@@ -34,6 +34,7 @@ type Model struct {
 	width    int
 	height   int
 	gkeys    ui.GlobalKeys
+	loadErr  error // why the wiki could not be read, shown above the list
 }
 
 // New creates a new browser model.
@@ -55,8 +56,7 @@ type loadPagesMsg struct{}
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case loadPagesMsg:
-		pages, _ := m.store.ListPages()
-		m.pages = pages
+		m.pages, m.loadErr = m.store.ListPages()
 		m.resetFilter()
 		if len(m.filtered) > 0 {
 			m.renderCurrentPage()
@@ -80,7 +80,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 					m.renderCurrentPage()
 				}
 			} else {
-				m.viewport.LineUp(1)
+				m.viewport.ScrollUp(1)
 			}
 			return m, nil
 
@@ -91,7 +91,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 					m.renderCurrentPage()
 				}
 			} else {
-				m.viewport.LineDown(1)
+				m.viewport.ScrollDown(1)
 			}
 			return m, nil
 
@@ -212,7 +212,7 @@ func (m Model) View() string {
 	title := ui.TitleStyle.Render("Wiki Browser 浏览")
 	help := ui.HelpStyle.Render("  tab switch pane · ↑↓ navigate · esc back · type to filter")
 
-	return fmt.Sprintf("%s\n%s\n%s", title, main, help)
+	return fmt.Sprintf("%s\n%s%s\n%s", title, ui.LoadError(m.loadErr), main, help)
 }
 
 // SetSize updates the terminal dimensions.
@@ -224,8 +224,7 @@ func (m Model) SetSize(w, h int) Model {
 
 // Refresh reloads pages from store.
 func (m Model) Refresh() Model {
-	pages, _ := m.store.ListPages()
-	m.pages = pages
+	m.pages, m.loadErr = m.store.ListPages()
 	m.resetFilter()
 	m.cursor = 0
 	if len(m.filtered) > 0 {

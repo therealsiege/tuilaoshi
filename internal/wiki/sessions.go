@@ -53,21 +53,21 @@ func (s *Store) WriteSession(sess model.Session) error {
 	b.WriteString("---\n")
 	b.WriteString("type: session\n")
 	b.WriteString("status: active\n")
-	b.WriteString(fmt.Sprintf("last_reviewed: %s\n", FormatDate(time.Now())))
-	b.WriteString(fmt.Sprintf("tags: [%s]\n", sess.Type))
+	fmt.Fprintf(&b, "last_reviewed: %s\n", FormatDate(time.Now()))
+	fmt.Fprintf(&b, "tags: [%s]\n", sess.Type)
 	b.WriteString("---\n\n")
 
-	b.WriteString(fmt.Sprintf("# Session — %s\n\n", sess.StartedAt.Format("2006-01-02 15:04")))
-	b.WriteString(fmt.Sprintf("- **Type**: %s\n", sess.Type))
-	b.WriteString(fmt.Sprintf("- **Duration**: %s\n", sess.EndedAt.Sub(sess.StartedAt).Truncate(time.Second)))
-	b.WriteString(fmt.Sprintf("- **Cards**: %d\n", sess.CardsTotal))
-	b.WriteString(fmt.Sprintf("- **Correct**: %d\n", sess.CardsCorrect))
+	fmt.Fprintf(&b, "# Session — %s\n\n", sess.StartedAt.Format("2006-01-02 15:04"))
+	fmt.Fprintf(&b, "- **Type**: %s\n", sess.Type)
+	fmt.Fprintf(&b, "- **Duration**: %s\n", sess.EndedAt.Sub(sess.StartedAt).Truncate(time.Second))
+	fmt.Fprintf(&b, "- **Cards**: %d\n", sess.CardsTotal)
+	fmt.Fprintf(&b, "- **Correct**: %d\n", sess.CardsCorrect)
 	if sess.CardsTotal > 0 {
 		pct := float64(sess.CardsCorrect) / float64(sess.CardsTotal) * 100
-		b.WriteString(fmt.Sprintf("- **Accuracy**: %.0f%%\n", pct))
+		fmt.Fprintf(&b, "- **Accuracy**: %.0f%%\n", pct)
 	}
 	if sess.XP > 0 {
-		b.WriteString(fmt.Sprintf("%s%d\n", xpLinePrefix, sess.XP))
+		fmt.Fprintf(&b, "%s%d\n", xpLinePrefix, sess.XP)
 	}
 	b.WriteString("\n## Results\n\n")
 	b.WriteString(resultHeader + "\n")
@@ -78,8 +78,8 @@ func (s *Store) WriteSession(sess model.Session) error {
 			result = "correct"
 		}
 		diff := difficultyLabel(item.Difficulty)
-		b.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n",
-			item.CardID, item.UserAnswer, result, diff))
+		fmt.Fprintf(&b, "| %s | %s | %s | %s |\n",
+			item.CardID, item.UserAnswer, result, diff)
 	}
 
 	return os.WriteFile(path, []byte(b.String()), 0644)
@@ -128,8 +128,10 @@ func parseSession(date, content string) sessionRecord {
 	for _, line := range strings.Split(content, "\n") {
 		trimmed := strings.TrimSpace(line)
 		if xp, ok := strings.CutPrefix(trimmed, xpLinePrefix); ok {
-			n, _ := strconv.Atoi(strings.TrimSpace(xp))
-			rec.XP += n
+			// A hand-edited, malformed XP line counts as no XP rather than failing the whole history.
+			if n, err := strconv.Atoi(strings.TrimSpace(xp)); err == nil {
+				rec.XP += n
+			}
 			continue
 		}
 		correct, ok := parseResultRow(trimmed)

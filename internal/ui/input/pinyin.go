@@ -60,24 +60,13 @@ func IsValidSyllable(s string) bool {
 		return false
 	}
 
-	// Try to split into initial + final
-	initial := ""
+	// Strip the initial, if any, leaving the final.
+	// Check two-letter initials first (zh, ch, sh).
 	final := s
-
-	// Check two-letter initials first (zh, ch, sh)
-	if len(s) >= 3 {
-		prefix := s[:2]
-		if validInitials[prefix] {
-			initial = prefix
-			final = s[2:]
-		}
-	}
-	if initial == "" && len(s) >= 2 {
-		prefix := s[:1]
-		if validInitials[prefix] {
-			initial = prefix
-			final = s[1:]
-		}
+	if len(s) >= 3 && validInitials[s[:2]] {
+		final = s[2:]
+	} else if len(s) >= 2 && validInitials[s[:1]] {
+		final = s[1:]
 	}
 
 	if final == "" {

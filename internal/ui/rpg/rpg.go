@@ -1,6 +1,7 @@
 package rpg
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -56,7 +57,8 @@ type Model struct {
 	reviewed map[string]bool // cards whose correct answer has counted this battle
 	saved    bool
 	saveErr  error
-	totalXP  int // lifetime XP, read back after saving
+	loadErr  error // why the wiki could not be read for this battle
+	totalXP  int   // lifetime XP, read back after saving
 }
 
 type logEntry struct {
@@ -87,9 +89,12 @@ func (m Model) SetSize(w, h int) Model {
 
 // Refresh reloads battle state with fresh cards from the wiki.
 func (m Model) Refresh() Model {
-	m.cards = loadCards(m.store)
-	mastered := countMastered(m.store)
-	m.battle = rpgengine.NewRandomBattle(m.cards, mastered)
+	cards, cardsErr := m.store.DrillableCards()
+	pages, pagesErr := m.store.ListPages()
+	m.cards = cards
+	m.loadErr = errors.Join(cardsErr, pagesErr)
+	// The mastered count the journey uses for ranks, so battle stats grow with the same progress.
+	m.battle = rpgengine.NewRandomBattle(m.cards, journey.CountMastered(pages))
 	m.state = stateIntro
 	m.log = nil
 	m.animTicks = 0
@@ -151,22 +156,6 @@ func (m *Model) saveSession() {
 	}
 	m.saved = true
 	m.totalXP = m.store.TotalXP()
-}
-
-// loadCards pulls drillable cards from the wiki store.
-func loadCards(store *wiki.Store) []model.Card {
-	cards, _ := store.DrillableCards()
-	return cards
-}
-
-// countMastered returns the mastered count the journey uses for ranks, so
-// battle stats grow with the same progress.
-func countMastered(store *wiki.Store) int {
-	pages, err := store.ListPages()
-	if err != nil {
-		return 0
-	}
-	return journey.CountMastered(pages)
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {

@@ -10,14 +10,12 @@ import (
 	"github.com/cj/mandarin-wiki/internal/audio"
 	"github.com/cj/mandarin-wiki/internal/claude"
 	"github.com/cj/mandarin-wiki/internal/journey"
-	"github.com/cj/mandarin-wiki/internal/model"
 	"github.com/cj/mandarin-wiki/internal/ui"
 	"github.com/cj/mandarin-wiki/internal/ui/browser"
 	"github.com/cj/mandarin-wiki/internal/ui/celebrate"
 	"github.com/cj/mandarin-wiki/internal/ui/chat"
 	"github.com/cj/mandarin-wiki/internal/ui/dashboard"
 	"github.com/cj/mandarin-wiki/internal/ui/drill"
-	"github.com/cj/mandarin-wiki/internal/ui/input"
 	journeyview "github.com/cj/mandarin-wiki/internal/ui/journey"
 	"github.com/cj/mandarin-wiki/internal/ui/radicals"
 	"github.com/cj/mandarin-wiki/internal/ui/review"
@@ -59,17 +57,24 @@ type Model struct {
 	voiceCategory int // 0 = Chinese, 1 = English
 }
 
-// New creates a new app model.
-func New(wikiDir string) Model {
+// New creates a new app model. It fails when the wiki cannot be read.
+func New(wikiDir string) (Model, error) {
 	store := wiki.NewStore(wikiDir)
 	claudeClient := claude.New()
 	ttsClient := audio.New()
 
+	pages, err := store.ListPages()
+	if err != nil {
+		return Model{}, fmt.Errorf("read wiki: %w", err)
+	}
 	// Build pinyin/character dictionary from wiki pages
-	dict := buildDict(store)
+	dict := buildDict(pages)
 
 	// Snapshot initial journey state to detect future milestones.
-	initialState := journey.Calculate(store)
+	initialState, err := journey.Calculate(store)
+	if err != nil {
+		return Model{}, fmt.Errorf("read wiki: %w", err)
+	}
 	initialBossCount := 0
 	for _, b := range initialState.Bosses {
 		if b.Defeated {
@@ -94,24 +99,7 @@ func New(wikiDir string) Model {
 		battle:        rpgview.New(store),
 		prevRankName:  initialState.Rank.Name,
 		prevBossCount: initialBossCount,
-	}
-}
-
-// buildDict constructs a pinyin-to-character dictionary from all wiki pages.
-func buildDict(store *wiki.Store) *input.Dict {
-	pages, err := store.ListPages()
-	if err != nil {
-		return input.NewDict()
-	}
-	var drillable []model.Page
-	for _, p := range pages {
-		switch p.Type {
-		case "character", "vocabulary", "grammar":
-			drillable = append(drillable, p)
-		}
-	}
-	cards := wiki.CardsFromPages(drillable)
-	return input.NewFromCards(cards)
+	}, nil
 }
 
 func (m Model) Init() tea.Cmd {
@@ -342,7 +330,10 @@ func (m Model) isInputComposing() bool {
 // checkCelebrations compares current journey state against previous snapshots
 // and triggers a celebration when a rank-up or boss defeat is detected.
 func (m *Model) checkCelebrations() {
-	state := journey.Calculate(m.store)
+	state, err := journey.Calculate(m.store)
+	if err != nil {
+		return // the screens report read errors; a celebration can wait for the next check
+	}
 
 	// Count currently defeated bosses.
 	bossCount := 0
