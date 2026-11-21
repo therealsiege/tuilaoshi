@@ -1,4 +1,4 @@
-.PHONY: build run test fmt check lint clean
+.PHONY: build run test fmt check lint golden clean
 
 GOLANGCI_LINT = go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 
@@ -28,6 +28,10 @@ check:
 
 lint:
 	$(GOLANGCI_LINT) run ./...
+
+# Rewrite screen snapshots (testdata/*.golden) after an intended UI change; review the diff.
+golden:
+	UPDATE_GOLDEN=1 go test ./internal/ui/...
 
 clean:
 	rm -f cmd/mandarin/mandarin
