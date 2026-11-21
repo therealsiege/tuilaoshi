@@ -170,3 +170,39 @@ func TestNovelLinesAreLabelledOriginal(t *testing.T) {
 		t.Errorf("original line not labelled:\n%s", m.View())
 	}
 }
+
+func TestPlaysTheLineFromTheOriginalAudio(t *testing.T) {
+	var played []clip
+	orig := playClip
+	t.Cleanup(func() { playClip = orig })
+	playClip = func(audio string, c clip) error {
+		if audio != "/ep/audio.mp3" {
+			return fmt.Errorf("wrong file %s", audio)
+		}
+		played = append(played, c)
+		return nil
+	}
+	m := New(uitest.Wiki(t, map[string]string{"vocabulary/food.md": food})).SetSize(80, 30).Refresh()
+	m = m.OpenEpisode(model.Episode{Title: "ep", Audio: "/ep/audio.mp3", Lines: []model.DialogueLine{
+		{Chinese: "猴王出世", Start: time.Second, End: 4 * time.Second},
+		{Chinese: "在很久很久以前", Start: 9 * time.Second, End: 12 * time.Second},
+	}})
+	if !strings.Contains(m.View(), "p: hear this line") {
+		t.Error("no audio hint")
+	}
+	m = press(m, tea.KeyDown)
+	m, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("p")})
+	if cmd == nil {
+		t.Fatal("p did nothing")
+	}
+	m, _ = m.Update(cmd())
+	if len(played) != 1 || played[0] != (clip{9 * time.Second, 12 * time.Second}) || m.status != "" {
+		t.Errorf("played %v, status %q; want line 2's clip", played, m.status)
+	}
+
+	playClip = func(string, clip) error { return fmt.Errorf("no speakers") }
+	_, cmd = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("p")})
+	if m, _ = m.Update(cmd()); m.status != "no speakers" {
+		t.Errorf("status %q; want the playback error", m.status)
+	}
+}

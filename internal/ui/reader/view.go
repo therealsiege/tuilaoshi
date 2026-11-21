@@ -134,6 +134,9 @@ func (m Model) viewGloss() string {
 			b.WriteString(ui.MutedStyle.Render("  e: show this line in English") + "\n")
 		}
 	}
+	if m.audio != "" {
+		b.WriteString(ui.MutedStyle.Render("  p: hear this line (original audio)") + "\n")
+	}
 	if m.status != "" {
 		b.WriteString(ui.MutedStyle.Render("  " + m.status))
 		b.WriteString("\n")

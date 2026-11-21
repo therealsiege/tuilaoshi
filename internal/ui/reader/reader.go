@@ -6,6 +6,9 @@ package reader
 
 import (
 	"errors"
+	"fmt"
+	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -23,6 +26,39 @@ type item struct {
 	title, tag string
 	page       *model.Page
 	episode    *model.Episode
+}
+
+// clip is where a line is spoken in the episode's audio.
+type clip struct{ start, end time.Duration }
+
+// clipDoneMsg reports that a line's audio finished, or why it failed.
+type clipDoneMsg struct{ err error }
+
+// playClip plays part of an audio file; tests replace it.
+var playClip = func(audio string, c clip) error {
+	player, err := exec.LookPath("ffplay")
+	if err != nil {
+		return fmt.Errorf("playing original audio needs ffplay (brew install ffmpeg)")
+	}
+	out, err := exec.Command(player, "-nodisp", "-autoexit", "-loglevel", "error",
+		"-ss", fmt.Sprintf("%.3f", c.start.Seconds()), "-t", fmt.Sprintf("%.3f", (c.end-c.start).Seconds()), audio).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("ffplay: %v %s", err, strings.TrimSpace(string(out)))
+	}
+	return nil
+}
+
+// playLine plays the selected line from the episode's original audio.
+func (m Model) playLine() tea.Cmd {
+	if m.audio == "" || len(m.words) == 0 {
+		return nil
+	}
+	c := m.clips[m.words[m.cursor].line]
+	if c.end <= c.start {
+		return nil
+	}
+	audio := m.audio
+	return func() tea.Msg { return clipDoneMsg{playClip(audio, c)} }
 }
 
 // place is the position of a word token: its line and index in that line.
@@ -47,6 +83,8 @@ type Model struct {
 	marked      map[string]bool         // words marked as not known this visit
 	english     []string                // each line's translation, when known
 	showEnglish bool                    // show the current line's translation
+	audio       string                  // the episode's original audio, if any
+	clips       []clip                  // where each line is spoken in it
 	status      string                  // result of the last mark
 
 	loadErr, saveErr error
@@ -121,6 +159,7 @@ func (m Model) OpenText(title string, lines []string, vocab []model.Card) Model 
 		known[w] = true
 	}
 	m.title, m.lines, m.words, m.english, m.showEnglish = title, nil, nil, nil, false
+	m.audio, m.clips = "", nil
 	for _, l := range lines {
 		toks := segment.Split(l, known)
 		for i, t := range toks {
@@ -149,7 +188,11 @@ func (m Model) OpenEpisode(ep model.Episode) Model {
 		}
 	}
 	m = m.OpenText(ep.Title, lines, journey.StoryGlossary())
-	m.english = english
+	m.english, m.audio = english, ep.Audio
+	m.clips = make([]clip, len(ep.Lines))
+	for i, l := range ep.Lines {
+		m.clips[i] = clip{l.Start, l.End}
+	}
 	return m
 }
 
@@ -201,6 +244,12 @@ func (m Model) mark() Model {
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	if done, ok := msg.(clipDoneMsg); ok {
+		if done.err != nil {
+			m.status = done.err.Error()
+		}
+		return m, nil
+	}
 	k, ok := msg.(tea.KeyMsg)
 	if !ok {
 		return m, nil
@@ -237,6 +286,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m = m.mark()
 	case k.String() == "e":
 		m.showEnglish = !m.showEnglish
+	case k.String() == "p":
+		return m, m.playLine()
 	}
 	return m, nil
 }
