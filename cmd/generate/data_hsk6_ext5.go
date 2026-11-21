@@ -198,4 +198,3 @@ func HSK6Ext5Chars() []Char {
 		{Hanzi: "表", Pinyin: "biǎo", PinyinNum: "biao3", Meaning: "表, 表表, 表表表", MeaningCap: "表, 表表, 表表表", Radical: "衣 (clothing)", Strokes: 8, Level: "HSK6", Tags: "HSK6, general, 表表", Compounds: []Compound{{Hanzi: "表示", Pinyin: "biǎo shì", Meaning: "表表表表"}, {Hanzi: "仪表", Pinyin: "yí biǎo", Meaning: "表表表表"}}, Sentences: []Sentence{{Chinese: "他仪表堂堂，风度翩翩。", Pinyin: "Tā yí biǎo táng táng, fēng dù piān piān.", English: "He has a dignified appearance and graceful bearing."}}, Notes: "表表表表表表表表表表表表表表表表表."},
 	}
 }
-

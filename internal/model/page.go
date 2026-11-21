@@ -8,9 +8,9 @@ type Page struct {
 	Path string
 
 	// Frontmatter fields
-	Type           string    // grammar, vocabulary, character, reading, session, reference
-	Level          string    // HSK1-HSK6, advanced
-	Status         string    // draft, active, review-needed
+	Type           string // grammar, vocabulary, character, reading, session, reference
+	Level          string // HSK1-HSK6, advanced
+	Status         string // draft, active, review-needed
 	LastReviewed   time.Time
 	Tags           []string
 	Introduced     time.Time

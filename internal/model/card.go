@@ -33,7 +33,7 @@ const (
 
 // Card is a single flashcard derived from a wiki page.
 type Card struct {
-	ID       string   // file path relative to wiki/
+	ID       string // file path relative to wiki/
 	Type     CardType
 	Chinese  string
 	Pinyin   string
@@ -42,7 +42,7 @@ type Card struct {
 
 	// SRS fields
 	Introduced     time.Time
-	LastReviewed    time.Time
+	LastReviewed   time.Time
 	ReviewInterval int // days
 	NextReview     time.Time
 }

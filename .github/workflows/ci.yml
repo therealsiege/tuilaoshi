@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
 
     steps:
@@ -14,16 +14,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version-file: go.mod
 
-      - name: Build mandarin
-        run: go build ./cmd/mandarin
-
-      - name: Build generate
-        run: go build ./cmd/generate
-
-      - name: Vet
-        run: go vet ./...
-
-      - name: Test
-        run: go test ./...
+      - name: Format, file length, vet, build, test
+        run: make check

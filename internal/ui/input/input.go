@@ -40,9 +40,9 @@ type Model struct {
 
 	// Chinese mode composition state
 	composing  bool
-	compBuf    string       // raw pinyin being composed
-	candidates []Candidate  // current candidate list
-	candPage   int          // pagination offset
+	compBuf    string      // raw pinyin being composed
+	candidates []Candidate // current candidate list
+	candPage   int         // pagination offset
 }
 
 const candidatesPerPage = 9
@@ -59,15 +59,15 @@ func NewWithDict(dict *Dict) Model {
 
 // --- Accessors that mirror textinput.Model ---
 
-func (m Model) Value() string          { return m.inner.Value() }
-func (m *Model) SetValue(s string)     { m.inner.SetValue(s) }
-func (m *Model) Reset()                { m.cancelComposition(); m.inner.Reset() }
-func (m Model) Focused() bool          { return m.inner.Focused() }
-func (m *Model) Focus() tea.Cmd        { return m.inner.Focus() }
-func (m *Model) Blur()                 { m.inner.Blur() }
-func (m Model) Cursor() int            { return m.inner.Position() }
-func (m Model) Mode() Mode             { return m.mode }
-func (m Model) Composing() bool        { return m.composing }
+func (m Model) Value() string      { return m.inner.Value() }
+func (m *Model) SetValue(s string) { m.inner.SetValue(s) }
+func (m *Model) Reset()            { m.cancelComposition(); m.inner.Reset() }
+func (m Model) Focused() bool      { return m.inner.Focused() }
+func (m *Model) Focus() tea.Cmd    { return m.inner.Focus() }
+func (m *Model) Blur()             { m.inner.Blur() }
+func (m Model) Cursor() int        { return m.inner.Position() }
+func (m Model) Mode() Mode         { return m.mode }
+func (m Model) Composing() bool    { return m.composing }
 
 // Placeholder pass-through.
 func (m *Model) SetPlaceholder(s string) { m.inner.Placeholder = s }

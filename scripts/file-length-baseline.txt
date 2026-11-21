@@ -1,0 +1,9 @@
+521 internal/app/app.go
+557 internal/confusables/confusables.go
+584 internal/journey/dialogue.go
+806 internal/journey/journey_test.go
+595 internal/journey/tribulations.go
+1169 internal/mnemonic/mnemonic.go
+579 internal/phonetic/phonetic.go
+690 internal/ui/drill/drill.go
+764 internal/ui/journey/journey.go

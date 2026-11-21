@@ -196,4 +196,3 @@ func HealthcareChars() []Char {
 		{Hanzi: "辨", Pinyin: "biàn", PinyinNum: "bian4", Meaning: "distinguish, differentiate", MeaningCap: "Differentiate", Radical: "辛 (bitter)", Strokes: 16, Level: "HSK5", Tags: "HSK5, healthcare, TCM, verb", Compounds: []Compound{{Hanzi: "辨证", Pinyin: "biàn zhèng", Meaning: "pattern differentiation (TCM)"}, {Hanzi: "分辨", Pinyin: "fēn biàn", Meaning: "to distinguish"}, {Hanzi: "辨认", Pinyin: "biàn rèn", Meaning: "to identify"}}, Sentences: []Sentence{{Chinese: "中医强调辨证论治。", Pinyin: "Zhōng yī qiáng diào biàn zhèng lùn zhì.", English: "TCM emphasizes pattern differentiation and treatment."}}, Notes: "Differentiation; core TCM diagnostic principle."},
 	}
 }
-

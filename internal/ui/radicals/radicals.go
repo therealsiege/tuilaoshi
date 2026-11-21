@@ -12,9 +12,9 @@ import (
 
 // RadicalGroup holds a radical and its family of example characters.
 type RadicalGroup struct {
-	Radical  string   // e.g. "氵"
-	Name     string   // e.g. "water"
-	Chinese  string   // e.g. "三点水"
+	Radical  string // e.g. "氵"
+	Name     string // e.g. "water"
+	Chinese  string // e.g. "三点水"
 	Strokes  int
 	Examples []string // e.g. ["河", "海", "湖", "洗", "流"]
 }

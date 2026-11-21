@@ -185,12 +185,12 @@ func (m Model) renderSRSDistribution() string {
 
 	// Bucket cards by review interval
 	buckets := map[string]int{
-		"1d":    0,
-		"2-3d":  0,
-		"4-7d":  0,
-		"8-14d": 0,
+		"1d":     0,
+		"2-3d":   0,
+		"4-7d":   0,
+		"8-14d":  0,
 		"15-30d": 0,
-		"30d+":  0,
+		"30d+":   0,
 	}
 	bucketOrder := []string{"1d", "2-3d", "4-7d", "8-14d", "15-30d", "30d+"}
 

@@ -93,12 +93,12 @@ func SwitchTo(v View) tea.Cmd {
 
 // DashboardKeys defines keybindings for the dashboard view.
 type DashboardKeys struct {
-	Drill   key.Binding
-	Browse  key.Binding
-	Chat    key.Binding
-	Review  key.Binding
-	Voice   key.Binding
-	Stats   key.Binding
+	Drill    key.Binding
+	Browse   key.Binding
+	Chat     key.Binding
+	Review   key.Binding
+	Voice    key.Binding
+	Stats    key.Binding
 	Search   key.Binding
 	Journey  key.Binding
 	Radicals key.Binding

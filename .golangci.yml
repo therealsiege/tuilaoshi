@@ -1,0 +1,8 @@
+version: "2"
+
+linters:
+  default: standard
+  settings:
+    errcheck:
+      # `_ = store.WriteSession(...)` hid failed saves; handle or surface the error instead.
+      check-blank: true
