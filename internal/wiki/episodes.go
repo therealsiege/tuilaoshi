@@ -35,6 +35,9 @@ func (s *Store) PrivateEpisodes() ([]model.Episode, error) {
 	}
 	var episodes []model.Episode
 	for _, e := range entries {
+		if strings.HasPrefix(e.Name(), ".") {
+			continue // hidden: backups, system files
+		}
 		path := filepath.Join(dir, e.Name())
 		var ep model.Episode
 		switch ext := strings.ToLower(filepath.Ext(e.Name())); {

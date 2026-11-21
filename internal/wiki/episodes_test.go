@@ -53,6 +53,12 @@ func TestEpisodeFolderMatchesEnglishByTimeAndFindsAudio(t *testing.T) {
 	en := "1\n00:00:02,130 --> 00:00:05,770\n(Transcribed by TurboScribe. Go Unlimited to remove this message.) The Monkey King appears.\n\n" +
 		"2\n00:00:10,150 --> 00:00:12,410\nA long, long time ago,\n\n3\n00:00:13,670 --> 00:00:15,190\nin the ancient China known as Shenzhou,\n\n" +
 		"4\n00:09:00,000 --> 00:09:01,000\nstray line far from any Chinese\n"
+	if err := os.MkdirAll(filepath.Join(store.Dir, PrivateEpisodesDir, ".backup"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(store.Dir, PrivateEpisodesDir, ".backup", "ep01.zh.srt.orig"), []byte(zh), 0644); err != nil {
+		t.Fatal(err)
+	}
 	for name, body := range map[string]string{"ep01.srt": en, "ep01.srt copy": zh, "ep01.mp3": "ID3", "notes.md": "x"} {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte(body), 0644); err != nil {
 			t.Fatal(err)
