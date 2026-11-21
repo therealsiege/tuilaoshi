@@ -12,7 +12,7 @@ import (
 // Use SDK constants for model names.
 var (
 	drillModel = anthropic.ModelClaudeHaiku4_5
-	chatModel  = anthropic.ModelClaudeSonnet4_5
+	chatModel  = anthropic.ModelClaudeSonnet5_5
 )
 
 const tutorSystemPrompt = `You are a Mandarin Chinese tutor helping a learner reactivate their university-level Mandarin.
