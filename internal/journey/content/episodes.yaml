@@ -1,0 +1,129 @@
+# Dialogue episodes, unlocked as the pilgrimage reaches their stage and read
+# in the reader (t). Lines are graded Chinese (HSK2-3) with English.
+# source: "original" for episodes written for this app; novel adaptations
+# cite their chapter. Speakers must be companions, demons, or in cast.
+cast: [观音菩萨, 小白龙, 高老太公, 黑熊精, 镇元大仙, 清风, 车迟国王, 虎力大仙, 女王, 假悟空, 铁扇公主]
+
+episodes:
+  - id: dragon-horse
+    stage: 9
+    title: 鹰愁涧 The Dragon at Eagle Grief Stream
+    source: original
+    lines:
+      - {speaker: 唐僧, zh: 悟空，我的马呢？刚才还在河边喝水。, en: "Wukong, where's my horse? It was just drinking by the river."}
+      - {speaker: 孙悟空, zh: 师父，水里有一条白龙，他把马吃了！, en: "Master, there's a white dragon in the water. He ate the horse!"}
+      - {speaker: 唐僧, zh: 没有马，我们怎么去西天？, en: "Without a horse, how will we get to the West?"}
+      - {speaker: 孙悟空, zh: 别着急，俺老孙去打他！, en: "Don't worry. Old Sun will go and beat him!"}
+      - {speaker: 观音菩萨, zh: 悟空，住手。这条龙也要去西天。, en: "Wukong, stop. This dragon is going west too."}
+      - {speaker: 小白龙, zh: 对不起，我不知道那是师父的马。, en: "I'm sorry. I didn't know that was the master's horse."}
+      - {speaker: 观音菩萨, zh: 你就变成一匹白马，帮唐僧走路吧。, en: "Then turn into a white horse and carry Tang Sanzang."}
+      - {speaker: 唐僧, zh: 太好了！我们又有马了。, en: "Wonderful! We have a horse again."}
+  - id: stolen-robe
+    stage: 11
+    title: 黑风山 The Stolen Robe
+    source: original
+    lines:
+      - {speaker: 唐僧, zh: 悟空，我的袈裟不见了！那是佛祖送给我的。, en: "Wukong, my robe is gone! The Buddha gave it to me."}
+      - {speaker: 孙悟空, zh: 昨天晚上着火的时候，有人偷走了它。, en: "Someone stole it last night, during the fire."}
+      - {speaker: 唐僧, zh: 是谁这么坏？, en: "Who would do such a thing?"}
+      - {speaker: 孙悟空, zh: 我看见一个黑影往黑风山跑了。, en: "I saw a dark shape run toward Black Wind Mountain."}
+      - {speaker: 黑熊精, zh: 这件袈裟真漂亮，我要请朋友们来看看。, en: "What a beautiful robe. I'll invite my friends to come and see it."}
+      - {speaker: 孙悟空, zh: 黑熊，快把袈裟还给我师父！, en: "Bear, give my master's robe back, now!"}
+      - {speaker: 黑熊精, zh: 你有本事，就自己来拿吧！, en: "If you're so good, come and take it yourself!"}
+  - id: gao-village
+    stage: 12
+    title: 高老庄 Zhu Bajie at Gao Village
+    source: original
+    lines:
+      - {speaker: 高老太公, zh: 师父，请帮帮我们！一个妖怪住在我家，不肯走。, en: "Master, please help us! A demon lives in my house and won't leave."}
+      - {speaker: 唐僧, zh: 他是什么样的妖怪？, en: "What kind of demon is he?"}
+      - {speaker: 高老太公, zh: 他的耳朵很大，嘴很长，吃饭吃得特别多。, en: "He has huge ears and a long snout, and he eats enormous amounts."}
+      - {speaker: 孙悟空, zh: 哈哈，一定是一只猪！今天晚上我去看看。, en: "Ha! It must be a pig. I'll go and have a look tonight."}
+      - {speaker: 猪八戒, zh: 谁在我的房间里？快出来！, en: "Who's in my room? Come out!"}
+      - {speaker: 孙悟空, zh: 俺老孙在这儿！你为什么不走？, en: "Old Sun is right here! Why won't you leave?"}
+      - {speaker: 猪八戒, zh: 你是孙悟空？观音菩萨让我等唐僧，我等了很久了！, en: "You're Sun Wukong? Guanyin told me to wait for Tang Sanzang. I've been waiting a long time!"}
+      - {speaker: 唐僧, zh: 原来是这样。那你跟我们一起去西天吧。, en: "So that's how it is. Then come west with us."}
+      - {speaker: 猪八戒, zh: 好啊，师父！路上有好吃的吗？, en: "Sure, Master! Is there good food on the way?"}
+  - id: yellow-wind
+    stage: 13
+    title: 黄风岭 The Yellow Wind
+    source: original
+    lines:
+      - {speaker: 猪八戒, zh: 好大的风！我的眼睛都睁不开了。, en: "What a wind! I can't even open my eyes."}
+      - {speaker: 孙悟空, zh: 这不是一般的风，是黄风怪吹的。, en: "That's no ordinary wind. The Yellow Wind Demon is blowing it."}
+      - {speaker: 唐僧, zh: 风停了……咦，我怎么在一个山洞里？, en: "The wind has stopped... Huh, how did I end up in a cave?"}
+      - {speaker: 黄风怪, zh: 抓到唐僧了！今天晚上就吃他。, en: "We've caught Tang Sanzang! We'll eat him tonight."}
+      - {speaker: 孙悟空, zh: 我的眼睛被风吹得很疼，看不清楚。, en: "The wind has hurt my eyes. I can't see clearly."}
+      - {speaker: 猪八戒, zh: 大师兄，我们去找人帮忙吧！, en: "Big brother, let's go and find someone to help!"}
+  - id: sha-wujing
+    stage: 16
+    title: 流沙河 Sha Wujing Joins
+    source: original
+    lines:
+      - {speaker: 猪八戒, zh: 这条河这么宽，水这么急，我们怎么过去？, en: "This river is so wide and so fast. How do we get across?"}
+      - {speaker: 孙悟空, zh: 我可以飞过去，可是师父不能飞。, en: "I can fly over, but Master can't fly."}
+      - {speaker: 沙悟净, zh: 谁敢来流沙河？, en: "Who dares come to the Flowing Sands River?"}
+      - {speaker: 唐僧, zh: 我是从东土大唐来的和尚，要去西天取经。, en: "I am a monk from the Great Tang in the East, going west to fetch the scriptures."}
+      - {speaker: 沙悟净, zh: 您就是唐僧？我在这里等了您很多年！, en: "You're Tang Sanzang? I've been waiting for you here for many years!"}
+      - {speaker: 沙悟净, zh: 师父，我帮您挑行李，我们一起走吧。, en: "Master, I'll carry the luggage for you. Let's go together."}
+      - {speaker: 猪八戒, zh: 太好了，以后我不用挑行李了！, en: "Great, now I don't have to carry the luggage!"}
+  - id: ginseng-fruit
+    stage: 19
+    title: 人参果 The Ginseng Fruit
+    source: original
+    lines:
+      - {speaker: 清风, zh: 这是人参果，一万年才结三十个。, en: "This is ginseng fruit. The tree bears only thirty in ten thousand years."}
+      - {speaker: 唐僧, zh: 它看起来像一个小孩子，我不敢吃。, en: "It looks like a little child. I don't dare eat it."}
+      - {speaker: 猪八戒, zh: 师父不吃，我吃！猴哥，你去摘几个。, en: "If Master won't eat it, I will! Monkey brother, go and pick a few."}
+      - {speaker: 孙悟空, zh: 嘘，小声一点，别让他们听见。, en: "Shh, keep your voice down. Don't let them hear."}
+      - {speaker: 猪八戒, zh: 我吃得太快了，还没尝到是什么味道！, en: "I ate it too fast. I didn't even taste it!"}
+      - {speaker: 清风, zh: 果子少了！一定是你们偷的！, en: "Fruit is missing! It must have been you who stole it!"}
+      - {speaker: 孙悟空, zh: 偷就偷了，我把这棵树也推倒！, en: "So what if we did? I'll knock the whole tree down too!"}
+      - {speaker: 镇元大仙, zh: 你们弄倒了我的树，一个都别想走！, en: "You've knocked down my tree. None of you is leaving!"}
+  - id: rain-contest
+    stage: 35
+    title: 车迟国 The Rain Contest
+    source: original
+    lines:
+      - {speaker: 车迟国王, zh: 很久没有下雨了，谁能求来雨，我就听谁的。, en: "It hasn't rained in a long time. Whoever can bring rain, I will listen to."}
+      - {speaker: 虎力大仙, zh: 我先来！我一敲令牌，雨就会下来。, en: "I'll go first! When I strike my token, the rain will come."}
+      - {speaker: 孙悟空, zh: 风婆婆，雷公，你们先别动，等俺老孙说话。, en: "Old Mother Wind, Thunder Lord, hold still. Wait for old Sun's word."}
+      - {speaker: 车迟国王, zh: 怎么没有风，也没有云？, en: "Why is there no wind, and no clouds?"}
+      - {speaker: 唐僧, zh: 现在该我们了。悟空，看你的了。, en: "Now it's our turn. Wukong, it's up to you."}
+      - {speaker: 孙悟空, zh: 下雨吧！, en: "Let it rain!"}
+      - {speaker: 车迟国王, zh: 下雨了！下雨了！还是这位和尚有本事。, en: "It's raining! It's raining! This monk is the one with real skill."}
+  - id: womens-kingdom
+    stage: 46
+    title: 西梁女国 The Women's Kingdom
+    source: original
+    lines:
+      - {speaker: 女王, zh: 你就是从大唐来的唐僧吗？长得真好看。, en: "Are you Tang Sanzang from the Great Tang? You are very handsome."}
+      - {speaker: 唐僧, zh: 陛下，我只是一个和尚，要去西天取经。, en: "Your Majesty, I am only a monk, on my way west for the scriptures."}
+      - {speaker: 女王, zh: 留下来吧，做我的国王，这里什么都有。, en: "Stay. Be my king. Here you will have everything."}
+      - {speaker: 猪八戒, zh: 师父不要，我可以留下来！, en: "If Master doesn't want to, I can stay!"}
+      - {speaker: 孙悟空, zh: 八戒，别说话！师父，我有一个办法。, en: "Bajie, be quiet! Master, I have a plan."}
+      - {speaker: 唐僧, zh: 陛下，谢谢你的好意，可是我一定要往西走。, en: "Your Majesty, thank you for your kindness, but I must keep going west."}
+  - id: two-monkeys
+    stage: 49
+    title: 真假美猴王 The Real and Fake Monkey King
+    source: original
+    lines:
+      - {speaker: 沙悟净, zh: 怎么有两个大师兄？, en: "How can there be two of Big Brother?"}
+      - {speaker: 孙悟空, zh: 我才是真的孙悟空！, en: "I'm the real Sun Wukong!"}
+      - {speaker: 假悟空, zh: 你说谎！我才是真的！, en: "You're lying! I'm the real one!"}
+      - {speaker: 猪八戒, zh: 他们说的话一样，长得也一样，我看不出来。, en: "They say the same things and look the same. I can't tell them apart."}
+      - {speaker: 唐僧, zh: 我念紧箍咒，谁头疼，谁就是真的。, en: "I'll recite the headband spell. Whoever gets a headache is the real one."}
+      - {speaker: 猪八戒, zh: 师父，两个都在喊头疼！, en: "Master, they're both crying that their head hurts!"}
+      - {speaker: 孙悟空, zh: 我们去找佛祖，佛祖一定能分清楚。, en: "Let's go to the Buddha. The Buddha can surely tell us apart."}
+  - id: borrowing-the-fan
+    stage: 51
+    title: 芭蕉扇 Borrowing the Fan
+    source: original
+    lines:
+      - {speaker: 孙悟空, zh: 嫂子，借你的芭蕉扇用一用，好吗？, en: "Sister-in-law, may I borrow your banana-leaf fan?"}
+      - {speaker: 铁扇公主, zh: 你害了我的儿子红孩儿，还想借扇子？, en: "You harmed my son Red Boy, and now you want my fan?"}
+      - {speaker: 孙悟空, zh: 红孩儿现在跟着观音菩萨，过得很好。, en: "Red Boy is with Guanyin now, and he's doing well."}
+      - {speaker: 铁扇公主, zh: 我不借！你走吧！, en: "I won't lend it! Go away!"}
+      - {speaker: 孙悟空, zh: 不借也可以，那我就变成小虫，飞进你的肚子里。, en: "Fine, don't. Then I'll turn into a little bug and fly into your stomach."}
+      - {speaker: 铁扇公主, zh: 好疼！好疼！我借给你，快出来！, en: "It hurts! It hurts! I'll lend it to you, come out!"}
+      - {speaker: 猪八戒, zh: 猴哥，这把扇子是真的吗？我看不太像。, en: "Monkey brother, is this fan real? It doesn't look quite right to me."}

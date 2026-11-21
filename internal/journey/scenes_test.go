@@ -67,3 +67,65 @@ func TestScenesAreGlossedByRealWiki(t *testing.T) {
 		}
 	}
 }
+
+func TestEpisodesAreCompleteWithKnownSpeakers(t *testing.T) {
+	joins := map[string]int{}
+	for _, c := range content.Companions {
+		joins[c.Name] = c.Stage
+	}
+	known := map[string]bool{}
+	for _, d := range content.Bestiary {
+		known[d.Name] = true
+	}
+	for _, c := range content.Episodes.Cast {
+		known[c] = true
+	}
+	ids := map[string]bool{}
+	for _, e := range content.Episodes.Episodes {
+		if e.ID == "" || ids[e.ID] || e.Title == "" || e.Source == "" || len(e.Lines) == 0 || TribulationAt(e.Stage) == nil {
+			t.Errorf("episode %q needs a unique id, title, source, lines and a real stage", e.ID)
+		}
+		ids[e.ID] = true
+		for _, l := range e.Lines {
+			if l.Chinese == "" || l.English == "" {
+				t.Errorf("episode %s has a line without Chinese or English: %+v", e.ID, l)
+			}
+			if at, companion := joins[l.Speaker]; companion && at > e.Stage {
+				t.Errorf("episode %s (stage %d): %s speaks before joining at %d", e.ID, e.Stage, l.Speaker, at)
+			} else if !companion && !known[l.Speaker] {
+				t.Errorf("episode %s: speaker %q is not a companion, demon or in the cast", e.ID, l.Speaker)
+			}
+		}
+	}
+}
+
+func TestEpisodesAreGlossedByRealWiki(t *testing.T) {
+	dir := filepath.Join("..", "..", "wiki")
+	if _, err := os.Stat(dir); err != nil || testing.Short() {
+		t.Skip("needs the wiki")
+	}
+	cards, err := wiki.NewStore(dir).DrillableCards()
+	if err != nil {
+		t.Fatal(err)
+	}
+	known := map[string]bool{}
+	for _, c := range append(cards, StoryGlossary()...) {
+		known[c.Chinese] = true
+	}
+	for _, e := range content.Episodes.Episodes {
+		var words, missing []string
+		for _, l := range e.Lines {
+			for _, tok := range segment.Split(l.Speaker+"："+l.Chinese, known) {
+				if tok.Word {
+					words = append(words, tok.Text)
+					if !known[tok.Text] {
+						missing = append(missing, tok.Text)
+					}
+				}
+			}
+		}
+		if len(missing)*10 > len(words) {
+			t.Errorf("episode %s: %d of %d words have no gloss: %s", e.ID, len(missing), len(words), strings.Join(missing, " "))
+		}
+	}
+}

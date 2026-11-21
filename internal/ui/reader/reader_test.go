@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -133,5 +134,27 @@ func TestPrivateEpisodeReadsAsDialogue(t *testing.T) {
 	m = press(m, tea.KeyDown) // the next line has no translation
 	if strings.Contains(m.View(), "Master, a demon!") || m.current() != "菜单" {
 		t.Errorf("line 2: at %q\n%s", m.current(), m.View())
+	}
+}
+
+func TestJourneyEpisodesUnlockWithTheStage(t *testing.T) {
+	titles := func(m Model) string {
+		var out []string
+		for _, it := range m.items {
+			out = append(out, it.title)
+		}
+		return strings.Join(out, " | ")
+	}
+	fresh := New(uitest.Wiki(t, map[string]string{"vocabulary/food.md": food})).Refresh()
+	if strings.Contains(titles(fresh), "鹰愁涧") {
+		t.Errorf("stage 9's episode listed at the start: %s", titles(fresh))
+	}
+	cleared := "cleared:\n"
+	for i := 1; i <= 8; i++ {
+		cleared += fmt.Sprintf("    %d: \"2026-11-21\"\n", i)
+	}
+	at9 := New(uitest.Wiki(t, map[string]string{"vocabulary/food.md": food, "journey.yaml": cleared})).Refresh()
+	if !strings.Contains(titles(at9), "鹰愁涧") || strings.Contains(titles(at9), "黑风山") {
+		t.Errorf("at stage 9: %s; want stage 9's episode and not stage 11's", titles(at9))
 	}
 }

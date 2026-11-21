@@ -75,10 +75,17 @@ func (m Model) Refresh() Model {
 	readings, readErr := m.store.ListPagesByType("reading")
 	cards, cardsErr := m.store.DrillableCards()
 	private, privErr := m.store.PrivateEpisodes()
-	m.loadErr = errors.Join(readErr, cardsErr, privErr)
+	pages, pagesErr := m.store.ListPages()
+	cleared, clearedErr := m.store.ClearedStages()
+	m.loadErr = errors.Join(readErr, cardsErr, privErr, pagesErr, clearedErr)
 	m.items = nil
 	for i := range readings {
 		m.items = append(m.items, item{title: readings[i].Title, tag: readings[i].Level, page: &readings[i]})
+	}
+	// Journey episodes unlock as the pilgrimage reaches their stage.
+	reached := journey.ReachedEpisodes(journey.Pilgrimage(pages, cleared).Tribulation)
+	for i := range reached {
+		m.items = append(m.items, item{title: reached[i].Title, tag: "journey episode", episode: &reached[i]})
 	}
 	for i := range private {
 		m.items = append(m.items, item{title: private[i].Title, tag: "your episode", episode: &private[i]})

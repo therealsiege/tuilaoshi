@@ -45,3 +45,31 @@ func StoryGlossary() []model.Card {
 	}
 	return cards
 }
+
+// JourneyEpisode is a dialogue episode tied to a stage, in content/episodes.yaml.
+type JourneyEpisode struct {
+	ID     string               `yaml:"id"`
+	Stage  int                  `yaml:"stage"`
+	Title  string               `yaml:"title"`
+	Source string               `yaml:"source"`
+	Lines  []model.DialogueLine `yaml:"lines"`
+}
+
+// episodeBook is content/episodes.yaml: the episodes and the cast of
+// speakers who are neither companions nor demons.
+type episodeBook struct {
+	Cast     []string         `yaml:"cast"`
+	Episodes []JourneyEpisode `yaml:"episodes"`
+}
+
+// ReachedEpisodes returns the episodes of stages up to current, in story
+// order, ready for the reader.
+func ReachedEpisodes(current int) []model.Episode {
+	var eps []model.Episode
+	for _, e := range content.Episodes.Episodes {
+		if e.Stage <= current {
+			eps = append(eps, model.Episode{Title: e.Title, Source: e.Source, Lines: e.Lines})
+		}
+	}
+	return eps
+}

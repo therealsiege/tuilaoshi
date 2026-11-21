@@ -14,7 +14,7 @@ Every screen, how to reach it from the dashboard, and what tests it. A test
 | `r` | Review 复 | Due items only, graded with spaced repetition | `internal/ui/review` | screen snapshots (list, prompt) |
 | `s` | Stats 统 | Daily/weekly activity, streak, review levels, characters mastered | `internal/ui/stats` | review-level bands, mastered count matches journey |
 | `j` | Journey 游 | Journey to the West progress: rank, companions, bosses, artifacts, quests, achievements, lore, bestiary | `internal/ui/journey`, `internal/journey` | mastery rule |
-| `t` | Reading 读 | Read texts from `wiki/readings` and dialogue episodes (including your own .srt/.txt subtitles in the git-ignored `wiki/private/episodes`) word by word with pinyin and meanings; enter marks a word you didn't know so it comes back tomorrow | `internal/ui/reader` | segmentation, glosses, mark-for-review, screen snapshots (list, text) |
+| `t` | Reading 读 | Read texts from `wiki/readings` dialogue episodes unlocked along the journey, and your own episodes ( .srt/.txt subtitles in the git-ignored `wiki/private/episodes`) word by word with pinyin and meanings; enter marks a word you didn't know so it comes back tomorrow | `internal/ui/reader` | segmentation, glosses, mark-for-review, screen snapshots (list, text) |
 | `a` | Assess 测 | Adaptive diagnostic per skill (characters, vocabulary, grammar sentences, reading vocabulary): starts at HSK3, 3 questions per level, writes the levels and priority areas to `wiki/overview.md` | `internal/ui/assessment`, `internal/assess` | staircase, overview rewrite, full run on a test wiki, intro snapshot |
 | `x` | Radicals 部 | Radical families explorer | `internal/ui/radicals` | — |
 | `v` | Voice 声 | Choose Chinese and English text-to-speech voices | `internal/app` | — |
@@ -29,4 +29,4 @@ Shared pieces:
 Recordings (`make recordings`, needs `brew install vhs`; tapes in `docs/tapes`, played on a copy of the wiki):
 [battle](recordings/battle.gif), [journey](recordings/journey.gif).
 
-Journey content (tribulations, demons, bosses, companions, lore, dialogue, vocabulary themes, story scenes, demon and companion abilities) is data in `internal/journey/content/*.yaml`, embedded in the binary; `internal/journey/content_test.go` validates it as a whole, so adding a demon or lore passage is a YAML-only change.
+Journey content (tribulations, demons, bosses, companions, lore, dialogue, vocabulary themes, story scenes, dialogue episodes, demon and companion abilities) is data in `internal/journey/content/*.yaml`, embedded in the binary; `internal/journey/content_test.go` validates it as a whole, so adding a demon or lore passage is a YAML-only change.
