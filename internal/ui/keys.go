@@ -79,6 +79,7 @@ const (
 	ViewJourney
 	ViewRadicals
 	ViewBattle
+	ViewReading
 )
 
 // SwitchViewMsg tells the app to change views.
@@ -102,6 +103,7 @@ type DashboardKeys struct {
 	Search   key.Binding
 	Journey  key.Binding
 	Radicals key.Binding
+	Reading  key.Binding
 	Battle   key.Binding
 }
 
@@ -148,6 +150,10 @@ func DefaultDashboardKeys() DashboardKeys {
 			key.WithKeys("f"),
 			key.WithHelp("f", "fight"),
 		),
+		Reading: key.NewBinding(
+			key.WithKeys("t"),
+			key.WithHelp("t", "read"),
+		),
 	}
 }
 
@@ -164,6 +170,7 @@ func HelpText(v View) string {
 			"  s  Study statistics\n" +
 			"  j  Journey to the West\n" +
 			"  x  Radical explorer\n" +
+			"  t  Read a text\n" +
 			"  v  Change voice\n" +
 			"  /  Search wiki\n" +
 			"  ?  Toggle help\n" +

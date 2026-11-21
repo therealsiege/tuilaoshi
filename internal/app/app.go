@@ -18,6 +18,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/ui/drill"
 	journeyview "github.com/therealsiege/tuilaoshi/internal/ui/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui/radicals"
+	"github.com/therealsiege/tuilaoshi/internal/ui/reader"
 	"github.com/therealsiege/tuilaoshi/internal/ui/review"
 	rpgview "github.com/therealsiege/tuilaoshi/internal/ui/rpg"
 	"github.com/therealsiege/tuilaoshi/internal/ui/stats"
@@ -45,6 +46,7 @@ type Model struct {
 	journey   journeyview.Model
 	radicals  radicals.Model
 	battle    rpgview.Model
+	reader    reader.Model
 
 	// Celebration state
 	celebration    *celebrate.Celebration // active celebration to display
@@ -97,6 +99,7 @@ func New(wikiDir string) (Model, error) {
 		journey:       journeyview.New(store),
 		radicals:      radicals.New(),
 		battle:        rpgview.New(store, ttsClient, dict),
+		reader:        reader.New(store),
 		prevRankName:  initialState.Rank.Name,
 		prevBossCount: initialBossCount,
 	}, nil
@@ -123,6 +126,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.journey = m.journey.SetSize(msg.Width, msg.Height)
 		m.radicals = m.radicals.SetSize(msg.Width, msg.Height)
 		m.battle = m.battle.SetSize(msg.Width, msg.Height)
+		m.reader = m.reader.SetSize(msg.Width, msg.Height)
 		return m, nil
 
 	case ui.SwitchViewMsg:
@@ -160,6 +164,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ui.ViewBattle:
 			m.battle = m.battle.Refresh()
 			return m, m.battle.Init()
+		case ui.ViewReading:
+			m.reader = m.reader.Refresh()
+			return m, m.reader.Init()
 		}
 		return m, nil
 
@@ -195,8 +202,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if key.Matches(msg, m.keys.Quit) && m.currentView == ui.ViewDashboard {
 			return m, tea.Quit
 		}
-		// Global back to dashboard (unless input is composing in Chinese mode)
-		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard {
+		// Global back to dashboard (unless input is composing in Chinese mode,
+		// or esc closes an open reading)
+		readingOpen := m.currentView == ui.ViewReading && m.reader.Open()
+		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard && !readingOpen {
 			if !m.isInputComposing() {
 				if m.currentView == ui.ViewBattle {
 					m.battle = m.battle.Leave()
@@ -229,52 +238,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.radicals, cmd = m.radicals.Update(msg)
 	case ui.ViewBattle:
 		m.battle, cmd = m.battle.Update(msg)
+	case ui.ViewReading:
+		m.reader, cmd = m.reader.Update(msg)
 	}
 	return m, cmd
-}
-
-func (m *Model) updateVoicePicker(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	zhVoices := audio.ChineseVoices()
-	enVoices := audio.EnglishVoices()
-
-	var maxItems int
-	if m.voiceCategory == 0 {
-		maxItems = len(zhVoices)
-	} else {
-		maxItems = len(enVoices)
-	}
-
-	switch {
-	case key.Matches(msg, m.keys.Up):
-		if m.voiceCursor > 0 {
-			m.voiceCursor--
-		}
-	case key.Matches(msg, m.keys.Down):
-		if m.voiceCursor < maxItems-1 {
-			m.voiceCursor++
-		}
-	case key.Matches(msg, m.keys.Tab):
-		if m.voiceCategory == 0 {
-			m.voiceCategory = 1
-		} else {
-			m.voiceCategory = 0
-		}
-		m.voiceCursor = 0
-	case key.Matches(msg, m.keys.Enter):
-		if m.voiceCategory == 0 && m.voiceCursor < len(zhVoices) {
-			m.tts.SetChineseVoice(zhVoices[m.voiceCursor])
-		} else if m.voiceCategory == 1 && m.voiceCursor < len(enVoices) {
-			m.tts.SetEnglishVoice(enVoices[m.voiceCursor])
-		}
-		m.currentView = ui.ViewDashboard
-		m.dashboard = m.dashboard.Refresh()
-		return m, m.dashboard.Init()
-	case key.Matches(msg, m.keys.Back):
-		m.currentView = ui.ViewDashboard
-		m.dashboard = m.dashboard.Refresh()
-		return m, m.dashboard.Init()
-	}
-	return m, nil
 }
 
 func (m Model) View() string {
@@ -299,6 +266,8 @@ func (m Model) View() string {
 		content = m.radicals.View()
 	case ui.ViewBattle:
 		content = m.battle.View()
+	case ui.ViewReading:
+		content = m.reader.View()
 	default:
 		content = m.dashboard.View()
 	}
@@ -323,6 +292,8 @@ func (m Model) isInputComposing() bool {
 		return m.chat.InputComposing()
 	case ui.ViewReview:
 		return m.review.InputComposing()
+	case ui.ViewBattle:
+		return m.battle.InputComposing()
 	}
 	return false
 }
@@ -372,66 +343,6 @@ func (m *Model) checkCelebrations() {
 	// Keep snapshots current even when no celebration fires.
 	m.prevRankName = state.Rank.Name
 	m.prevBossCount = bossCount
-}
-
-func (m Model) voicePickerView() string {
-	var b strings.Builder
-
-	title := ui.TitleStyle.Render("Voice Picker 语音选择")
-	b.WriteString(title)
-	b.WriteString("\n\n")
-
-	zhVoices := audio.ChineseVoices()
-	enVoices := audio.EnglishVoices()
-
-	// Category tabs
-	if m.voiceCategory == 0 {
-		b.WriteString(ui.ActiveTabStyle.Render("Chinese 中文"))
-	} else {
-		b.WriteString(ui.TabStyle.Render("Chinese 中文"))
-	}
-	b.WriteString("  ")
-	if m.voiceCategory == 1 {
-		b.WriteString(ui.ActiveTabStyle.Render("English"))
-	} else {
-		b.WriteString(ui.TabStyle.Render("English"))
-	}
-	b.WriteString("\n\n")
-
-	if m.voiceCategory == 0 {
-		current := m.tts.ChineseVoice()
-		for i, v := range zhVoices {
-			label := fmt.Sprintf("  %s", v.Name)
-			if v.ID == current.ID {
-				label += " " + ui.SuccessStyle.Render("(current)")
-			}
-			if i == m.voiceCursor {
-				b.WriteString(ui.SelectedStyle.Render("▸ " + label))
-			} else {
-				b.WriteString(ui.UnselectedStyle.Render("  " + label))
-			}
-			b.WriteString("\n")
-		}
-	} else {
-		current := m.tts.EnglishVoice()
-		for i, v := range enVoices {
-			label := fmt.Sprintf("  %s", v.Name)
-			if v.ID == current.ID {
-				label += " " + ui.SuccessStyle.Render("(current)")
-			}
-			if i == m.voiceCursor {
-				b.WriteString(ui.SelectedStyle.Render("▸ " + label))
-			} else {
-				b.WriteString(ui.UnselectedStyle.Render("  " + label))
-			}
-			b.WriteString("\n")
-		}
-	}
-
-	b.WriteString("\n")
-	b.WriteString(ui.HelpStyle.Render("  ↑↓ select · tab switch category · enter confirm · esc back"))
-
-	return b.String()
 }
 
 func (m Model) renderCelebrationOverlay(base string) string {

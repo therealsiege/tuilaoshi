@@ -75,6 +75,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, ui.SwitchTo(ui.ViewRadicals)
 		case key.Matches(msg, m.keys.Battle):
 			return m, ui.SwitchTo(ui.ViewBattle)
+		case key.Matches(msg, m.keys.Reading):
+			return m, ui.SwitchTo(ui.ViewReading)
 		case key.Matches(msg, m.keys.Search):
 			return m, ui.SwitchTo(ui.ViewBrowser)
 		}
@@ -151,6 +153,7 @@ func (m Model) View() string {
 	fmt.Fprintf(&b, "  %s  统 Study statistics\n", ui.ChineseStyle.Render("[s]"))
 	fmt.Fprintf(&b, "  %s  游 Journey to the West\n", ui.ChineseStyle.Render("[j]"))
 	fmt.Fprintf(&b, "  %s  部 Radical explorer\n", ui.ChineseStyle.Render("[x]"))
+	fmt.Fprintf(&b, "  %s  读 Read a text\n", ui.ChineseStyle.Render("[t]"))
 	fmt.Fprintf(&b, "  %s  声 Change voice\n", ui.ChineseStyle.Render("[v]"))
 	fmt.Fprintf(&b, "  %s  找 Search wiki\n", ui.ChineseStyle.Render("[/]"))
 	fmt.Fprintf(&b, "  %s  退 Quit\n", ui.ChineseStyle.Render("[q]"))

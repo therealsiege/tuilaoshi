@@ -243,3 +243,9 @@ func containsCJK(s string) bool {
 	}
 	return false
 }
+
+// ReadingVocab returns the vocabulary table rows of a reading page as cards,
+// for glossing its text.
+func ReadingVocab(p model.Page) []model.Card {
+	return extractAllVocabCards(p.Body, model.Card{ID: p.Path})
+}

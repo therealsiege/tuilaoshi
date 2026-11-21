@@ -424,3 +424,7 @@ func tickAfter(d time.Duration) tea.Cmd {
 		return animTickMsg{}
 	})
 }
+
+// InputComposing reports whether a typed answer is mid-composition, so esc
+// cancels it rather than fleeing.
+func (m Model) InputComposing() bool { return m.input.Composing() }

@@ -1,4 +1,3 @@
-512 internal/app/app.go
 557 internal/confusables/confusables.go
 584 internal/journey/dialogue.go
 667 internal/journey/journey_test.go
