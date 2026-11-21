@@ -327,7 +327,6 @@ func (m Model) renderBosses() string {
 		return b.String()
 	}
 
-	mastered := m.state.Progress.Mastered
 	for i, boss := range m.state.Bosses {
 		if i > 0 {
 			b.WriteString("\n")
@@ -349,9 +348,10 @@ func (m Model) renderBosses() string {
 				b.WriteString("\n")
 				b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("     NEXT BOSS! Theme: %s", boss.Theme)))
 				b.WriteString("\n")
-				b.WriteString("     " + ui.ProgressBar(mastered, boss.Required, 20))
-				b.WriteString(ui.MutedStyle.Render(fmt.Sprintf(" %d/%d", mastered, boss.Required)))
-				remaining := boss.Required - mastered
+				have := m.state.Counts.Have(boss.Stage)
+				b.WriteString("     " + ui.ProgressBar(have, boss.Required, 20))
+				b.WriteString(ui.MutedStyle.Render(fmt.Sprintf(" %d/%d", have, boss.Required)))
+				remaining := boss.Required - have
 				if remaining > 0 {
 					b.WriteString("\n")
 					b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     Need %d more characters", remaining)))

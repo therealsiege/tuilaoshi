@@ -1,0 +1,5 @@
+# How stages open. Early stages count characters being learned, so the story
+# moves in the first week; after learning_until they count mastered
+# characters (review interval of 7+ days).
+learning_until: 15    # last tribulation that counts characters being learned
+learning_interval: 2  # review interval (days) at which a character counts as learned: answered correctly at least once

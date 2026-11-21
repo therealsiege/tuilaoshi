@@ -231,7 +231,7 @@ func (m Model) renderCultivationMeter() string {
 		if s.Status == journey.StageOpen {
 			bossLine += ui.WarningStyle.Render("  ready: f to fight")
 		} else {
-			bossLine += ui.MutedStyle.Render(fmt.Sprintf("  master %d more", s.Unlock-progress.Mastered))
+			bossLine += ui.MutedStyle.Render("  " + journey.NeedText(*s, m.journeyState.Counts))
 		}
 	}
 

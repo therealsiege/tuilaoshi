@@ -10,7 +10,7 @@ import (
 )
 
 func TestReachedDemonsGrowWithProgress(t *testing.T) {
-	stages := journey.Stages(0, nil)
+	stages := journey.Stages(journey.Counts{}, nil)
 	start, end := ReachedDemons(stages, 1), ReachedDemons(stages, 81)
 	if len(start) == 0 {
 		t.Fatal("a new learner meets no demons")
@@ -61,7 +61,7 @@ func TestWeakCardsPreferShakyWords(t *testing.T) {
 }
 
 func TestBossEntryFindsBestiaryArt(t *testing.T) {
-	for _, b := range journey.Bosses(0, nil) {
+	for _, b := range journey.Bosses(journey.Counts{}, nil) {
 		if e := journey.BossEntry(b); e.Art == "" {
 			t.Errorf("boss %s %s has no bestiary entry", b.Name, b.English)
 		}

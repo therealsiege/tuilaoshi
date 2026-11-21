@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/therealsiege/tuilaoshi/internal/journey"
 	rpgengine "github.com/therealsiege/tuilaoshi/internal/rpg"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/ui/imgview"
@@ -352,8 +353,9 @@ func (m Model) renderStakes() string {
 		b.WriteString(ui.MutedStyle.Render("  Words: " + m.stage.Words.Name))
 	case m.next != nil:
 		b.WriteString(ui.WarningStyle.Render("  A demon blocks your path! (practice)"))
-		fmt.Fprintf(&b, "\n  %s", ui.MutedStyle.Render(fmt.Sprintf("Master %d more characters to open tribulation %d, %s. Practising its words: %s.",
-			m.next.Unlock-m.mastered, m.next.Number, m.next.English, m.next.Words.Name)))
+		need := journey.NeedText(*m.next, m.counts)
+		fmt.Fprintf(&b, "\n  %s", ui.MutedStyle.Render(fmt.Sprintf("%s%s to open tribulation %d, %s. Practising its words: %s.",
+			strings.ToUpper(need[:1]), need[1:], m.next.Number, m.next.English, m.next.Words.Name)))
 	default:
 		b.WriteString(ui.WarningStyle.Render("  All 81 tribulations cleared. Practice freely."))
 	}

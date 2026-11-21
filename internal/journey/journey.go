@@ -80,6 +80,7 @@ type State struct {
 	Bosses       []Boss
 	NextBoss     *Boss
 	Stage        *Stage // the stage being worked on; nil once all are cleared
+	Counts       Counts // characters being learned and mastered, which open stages
 	Artifacts    []Artifact
 	Quests       []Quest
 	Achievements []Achievement
@@ -93,6 +94,23 @@ const masteredInterval = 7
 // IsMastered reports whether a page counts toward mastery.
 func IsMastered(p model.Page) bool {
 	return p.Type == "character" && p.ReviewInterval >= masteredInterval
+}
+
+// Counts are the learner's characters that open stages: those being learned
+// (answered correctly at least once) and those mastered.
+type Counts struct {
+	Learned, Mastered int
+}
+
+// CountProgress counts the character pages being learned and mastered.
+func CountProgress(pages []model.Page) Counts {
+	c := Counts{Mastered: CountMastered(pages)}
+	for _, p := range pages {
+		if p.Type == "character" && p.ReviewInterval >= content.Progression.LearningInterval {
+			c.Learned++
+		}
+	}
+	return c
 }
 
 // CountMastered returns how many pages count toward mastery.
@@ -113,7 +131,8 @@ func Calculate(store *wiki.Store) (State, error) {
 		return State{}, err
 	}
 
-	mastered := CountMastered(pages)
+	counts := CountProgress(pages)
+	mastered := counts.Mastered
 
 	streak := store.Streak()
 
@@ -121,9 +140,9 @@ func Calculate(store *wiki.Store) (State, error) {
 	if err != nil {
 		return State{}, err
 	}
-	bosses := Bosses(mastered, cleared)
+	bosses := Bosses(counts, cleared)
 	nextBoss := NextBoss(bosses)
-	stages := Stages(mastered, cleared)
+	stages := Stages(counts, cleared)
 
 	// totalReviewed and daysStudied are not yet tracked — pass 0 for now.
 	// Achievements depending on those metrics will simply show as unearned.
@@ -136,6 +155,7 @@ func Calculate(store *wiki.Store) (State, error) {
 		Rank:         calculateRank(mastered),
 		Progress:     progress,
 		Stage:        CurrentStage(stages),
+		Counts:       counts,
 		Companions:   buildCompanions(cleared),
 		Bosses:       bosses,
 		NextBoss:     nextBoss,
@@ -340,4 +360,13 @@ func buildQuests(mastered, streak int, nextBoss *Boss) []Quest {
 	}
 
 	return quests
+}
+
+// NeedText says what a locked stage still needs, e.g. "learn 6 more characters".
+func NeedText(s Stage, c Counts) string {
+	verb := "master"
+	if CountsLearning(s.Number) {
+		verb = "learn"
+	}
+	return fmt.Sprintf("%s %d more characters", verb, s.Needed(c))
 }

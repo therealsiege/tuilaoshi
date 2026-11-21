@@ -24,6 +24,13 @@ type Content struct {
 	Lore         []LoreEntry
 	Dialogue     []Dialogue
 	Themes       []Theme
+	Progression  Progression
+}
+
+// Progression sets which characters count toward opening a stage.
+type Progression struct {
+	LearningUntil    int `yaml:"learning_until"`    // last stage that counts characters being learned
+	LearningInterval int `yaml:"learning_interval"` // review interval (days) that counts as learned
 }
 
 // content is loaded once at startup; the embedded files are checked by
@@ -52,6 +59,7 @@ func LoadContent() (Content, error) {
 		{"lore", &c.Lore},
 		{"dialogue", &c.Dialogue},
 		{"themes", &c.Themes},
+		{"progression", &c.Progression},
 	}
 	for _, f := range files {
 		data, err := contentFS.ReadFile("content/" + f.name + ".yaml")

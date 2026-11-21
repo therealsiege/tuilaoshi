@@ -23,11 +23,26 @@ type Stage struct {
 	Words    Theme         // the vocabulary theme fought with here
 }
 
-// Stages lays out all 81 stages for a learner with mastered characters
+// CountsLearning reports whether stage n opens by characters being learned
+// rather than mastered (see content/progression.yaml).
+func CountsLearning(n int) bool { return n <= content.Progression.LearningUntil }
+
+// Have is how many of the characters stage n counts the learner has.
+func (c Counts) Have(n int) int {
+	if CountsLearning(n) {
+		return c.Learned
+	}
+	return c.Mastered
+}
+
+// Needed is how many more characters the stage needs before it opens.
+func (s Stage) Needed(c Counts) int { return max(0, s.Unlock-c.Have(s.Number)) }
+
+// Stages lays out all 81 stages for a learner with counts of characters
 // and cleared stages (tribulation number -> date).
-func Stages(mastered int, cleared map[int]string) []Stage {
+func Stages(counts Counts, cleared map[int]string) []Stage {
 	bosses := map[int]*Boss{}
-	list := Bosses(mastered, cleared)
+	list := Bosses(counts, cleared)
 	for i := range list {
 		bosses[list[i].Stage] = &list[i]
 	}
@@ -50,7 +65,7 @@ func Stages(mastered int, cleared map[int]string) []Stage {
 		switch {
 		case won:
 			s.Status = StageCleared
-		case allBefore && mastered >= t.Unlock:
+		case allBefore && counts.Have(t.Number) >= t.Unlock:
 			s.Status = StageOpen
 		}
 		allBefore = allBefore && won
@@ -71,15 +86,15 @@ func CurrentStage(stages []Stage) *Stage {
 }
 
 // Bosses lists the journey's bosses in story order. A boss is unlocked when
-// its stage's characters are mastered and defeated when its stage is cleared.
-func Bosses(mastered int, cleared map[int]string) []Boss {
+// its stage has enough characters and defeated when its stage is cleared.
+func Bosses(counts Counts, cleared map[int]string) []Boss {
 	bosses := append([]Boss{}, content.Bosses...)
 	for i := range bosses {
 		if t := TribulationAt(bosses[i].Stage); t != nil {
 			bosses[i].Required = t.Unlock
 			bosses[i].Theme = stageTheme(t.Number).Name
 		}
-		bosses[i].Unlocked = mastered >= bosses[i].Required
+		bosses[i].Unlocked = counts.Have(bosses[i].Stage) >= bosses[i].Required
 		_, bosses[i].Defeated = cleared[bosses[i].Stage]
 	}
 	return bosses
@@ -115,10 +130,10 @@ func Pilgrimage(pages []model.Page, cleared map[int]string) Progress {
 			totalChars++
 		}
 	}
-	mastered := CountMastered(pages)
+	counts := CountProgress(pages)
 	current := len(content.Tribulations)
-	if s := CurrentStage(Stages(mastered, cleared)); s != nil {
+	if s := CurrentStage(Stages(counts, cleared)); s != nil {
 		current = s.Number
 	}
-	return calculateProgress(current, len(cleared), mastered, totalChars)
+	return calculateProgress(current, len(cleared), counts.Mastered, totalChars)
 }

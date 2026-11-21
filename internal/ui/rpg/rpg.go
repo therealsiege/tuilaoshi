@@ -75,7 +75,8 @@ type Model struct {
 	// The stage this battle can clear, or nil for a practice battle; next
 	// is the stage being worked on (nil once all are cleared).
 	stage, next *journey.Stage
-	mastered    int // the journey's mastered count, which scales player stats
+	mastered    int            // the journey's mastered count, which scales player stats
+	counts      journey.Counts // characters learned and mastered, which open stages
 }
 
 type logEntry struct {
@@ -117,8 +118,9 @@ func (m Model) Refresh() Model {
 	cleared, clearedErr := m.store.ClearedStages()
 	m.cards = cards
 	m.loadErr = errors.Join(cardsErr, pagesErr, clearedErr)
-	m.mastered = journey.CountMastered(pages)
-	stages := journey.Stages(m.mastered, cleared)
+	m.counts = journey.CountProgress(pages)
+	m.mastered = m.counts.Mastered
+	stages := journey.Stages(m.counts, cleared)
 	m.stage, m.next = nil, journey.CurrentStage(stages)
 	if m.next != nil && m.next.Status == journey.StageOpen {
 		m.stage = m.next

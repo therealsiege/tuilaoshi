@@ -1,6 +1,7 @@
 package journey
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -220,28 +221,46 @@ func clearedThrough(n int) map[int]string {
 }
 
 func TestStagesOpenByMasteryAndClearByWinning(t *testing.T) {
-	stages := Stages(0, nil)
+	stages := Stages(Counts{}, nil)
 	if len(stages) != 81 || stages[0].Status != StageOpen || stages[1].Status != StageLocked {
 		t.Fatalf("new learner: stage 1 %v, stage 2 %v; want stage 1 open, the rest locked", stages[0].Status, stages[1].Status)
 	}
 	// Mastery alone doesn't skip ahead: stage 2 waits for stage 1's win.
-	if s := Stages(9999, nil); s[1].Status != StageLocked {
+	if s := Stages(Counts{Learned: 9999, Mastered: 9999}, nil); s[1].Status != StageLocked {
 		t.Error("stage 2 opened before stage 1 was cleared")
 	}
-	s := Stages(stages[1].Unlock, clearedThrough(1))
+	s := Stages(Counts{Learned: stages[1].Unlock}, clearedThrough(1))
 	if s[0].Status != StageCleared || s[1].Status != StageOpen || CurrentStage(s).Number != 2 {
 		t.Errorf("after clearing 1 with stage 2's mastery: %v %v, current %d", s[0].Status, s[1].Status, CurrentStage(s).Number)
 	}
-	if s := Stages(stages[1].Unlock-1, clearedThrough(1)); s[1].Status != StageLocked {
+	if s := Stages(Counts{Learned: stages[1].Unlock - 1, Mastered: 9999}, clearedThrough(1)); s[1].Status != StageLocked {
 		t.Error("stage 2 opened without its mastery")
 	}
-	if CurrentStage(Stages(9999, clearedThrough(81))) != nil {
+	if CurrentStage(Stages(Counts{Learned: 9999, Mastered: 9999}, clearedThrough(81))) != nil {
 		t.Error("a finished pilgrimage still has a current stage")
 	}
 }
 
+func TestEarlyStagesCountLearnedLaterMastered(t *testing.T) {
+	last := content.Progression.LearningUntil
+	early, late := Stages(Counts{}, nil)[1], Stages(Counts{}, nil)[last]
+	learner := Counts{Learned: late.Unlock, Mastered: 0}
+	if s := Stages(learner, clearedThrough(1)); s[1].Status != StageOpen {
+		t.Errorf("stage 2 with %d learned characters is %v, want open", early.Unlock, s[1].Status)
+	}
+	if s := Stages(learner, clearedThrough(last)); s[last].Status != StageLocked {
+		t.Errorf("stage %d opened on learned characters; it counts mastered ones", last+1)
+	}
+	if got := NeedText(late, Counts{Mastered: late.Unlock - 3}); got != "master 3 more characters" {
+		t.Errorf("NeedText = %q", got)
+	}
+	if got := NeedText(early, Counts{}); got != fmt.Sprintf("learn %d more characters", early.Unlock) {
+		t.Errorf("NeedText = %q", got)
+	}
+}
+
 func TestStageOpponents(t *testing.T) {
-	stages := Stages(0, nil)
+	stages := Stages(Counts{}, nil)
 	for _, s := range stages {
 		if s.Opponent.Name == "" {
 			t.Errorf("stage %d has no opponent", s.Number)
@@ -273,7 +292,7 @@ func TestCompanionsJoinAtTheirStage(t *testing.T) {
 }
 
 func TestBosses(t *testing.T) {
-	for _, b := range Bosses(0, clearedThrough(8)) {
+	for _, b := range Bosses(Counts{}, clearedThrough(8)) {
 		if b.Required != TribulationAt(b.Stage).Unlock {
 			t.Errorf("%s needs %d characters, not its stage's %d", b.English, b.Required, TribulationAt(b.Stage).Unlock)
 		}
@@ -281,10 +300,10 @@ func TestBosses(t *testing.T) {
 			t.Errorf("%s (stage %d) Defeated = %v after clearing stages 1-8", b.English, b.Stage, b.Defeated)
 		}
 	}
-	if next := NextBoss(Bosses(0, clearedThrough(8))); next == nil || next.Name != "白骨精" {
+	if next := NextBoss(Bosses(Counts{}, clearedThrough(8))); next == nil || next.Name != "白骨精" {
 		t.Errorf("next boss after stage 8 = %v, want White Bone Demon", next)
 	}
-	if NextBoss(Bosses(0, clearedThrough(81))) != nil {
+	if NextBoss(Bosses(Counts{}, clearedThrough(81))) != nil {
 		t.Error("a boss is left after every stage is cleared")
 	}
 }

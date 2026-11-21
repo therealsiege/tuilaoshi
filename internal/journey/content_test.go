@@ -142,3 +142,10 @@ func TestThemesAreNamedAndReferenced(t *testing.T) {
 		}
 	}
 }
+
+func TestProgressionSettingsAreInRange(t *testing.T) {
+	p := content.Progression
+	if p.LearningUntil < 0 || p.LearningUntil > len(content.Tribulations) || p.LearningInterval < 1 || p.LearningInterval >= masteredInterval {
+		t.Errorf("progression %+v: learning_until must be a tribulation (or 0), learning_interval 1-%d days", p, masteredInterval-1)
+	}
+}
