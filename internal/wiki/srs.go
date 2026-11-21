@@ -10,29 +10,29 @@ const initialInterval = 1 // days
 
 // Difficulty multipliers (SM-2 inspired).
 var difficultyMultipliers = map[model.DrillDifficulty]float64{
-	model.DiffAgain: 0,   // reset to 1 day
+	model.DiffAgain: 0, // reset to 1 day
 	model.DiffHard:  1.2,
 	model.DiffGood:  2.5,
 	model.DiffEasy:  3.5,
 }
 
 // UpdateSRS updates a card's SRS fields after a drill response.
-// Uses difficulty-graded intervals: Again resets, Hard/Good/Easy multiply.
+// Uses difficulty-graded intervals: Again resets, Hard/Good/Easy multiply,
+// and any passing review grows the interval by at least a day.
 func UpdateSRS(card *model.Card, difficulty model.DrillDifficulty, now time.Time) {
 	card.LastReviewed = now
 
 	mult := difficultyMultipliers[difficulty]
 	if difficulty == model.DiffAgain || mult == 0 {
 		card.ReviewInterval = initialInterval
+	} else if card.ReviewInterval == 0 {
+		card.ReviewInterval = initialInterval
 	} else {
-		if card.ReviewInterval == 0 {
-			card.ReviewInterval = initialInterval
-		} else {
-			card.ReviewInterval = int(float64(card.ReviewInterval) * mult)
+		next := int(float64(card.ReviewInterval) * mult)
+		if next <= card.ReviewInterval {
+			next = card.ReviewInterval + 1
 		}
-		if card.ReviewInterval < 1 {
-			card.ReviewInterval = 1
-		}
+		card.ReviewInterval = next
 	}
 
 	card.NextReview = now.AddDate(0, 0, card.ReviewInterval)
@@ -53,20 +53,11 @@ func UpdateSRSBool(card *model.Card, correct bool, now time.Time) {
 
 // DueItems scans all drillable pages and returns cards due for review.
 func DueItems(store *Store, now time.Time) ([]model.Card, error) {
-	pages, err := store.ListPages()
+	allCards, err := store.DrillableCards()
 	if err != nil {
 		return nil, err
 	}
 
-	var drillable []model.Page
-	for _, p := range pages {
-		switch p.Type {
-		case "character", "vocabulary", "grammar":
-			drillable = append(drillable, p)
-		}
-	}
-
-	allCards := CardsFromPages(drillable)
 	var due []model.Card
 	for _, c := range allCards {
 		if c.IsDue(now) {

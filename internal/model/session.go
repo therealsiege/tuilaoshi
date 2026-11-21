@@ -2,13 +2,14 @@ package model
 
 import "time"
 
-// Session records a practice session (drill, chat, review).
+// Session records a practice session (drill, chat, review, battle).
 type Session struct {
 	StartedAt    time.Time
 	EndedAt      time.Time
-	Type         string // "drill", "chat", "review"
+	Type         string // "drill", "chat", "review", "battle"
 	CardsTotal   int
 	CardsCorrect int
+	XP           int // experience earned, recorded for battles
 	Items        []SessionItem
 }
 

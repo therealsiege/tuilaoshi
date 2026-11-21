@@ -210,6 +210,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Global back to dashboard (unless input is composing in Chinese mode)
 		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard {
 			if !m.isInputComposing() {
+				if m.currentView == ui.ViewBattle {
+					m.battle = m.battle.Leave()
+				}
 				m.currentView = ui.ViewDashboard
 				m.dashboard = m.dashboard.Refresh()
 				return m, m.dashboard.Init()

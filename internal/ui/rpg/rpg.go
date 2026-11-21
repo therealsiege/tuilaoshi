@@ -49,6 +49,13 @@ type Model struct {
 
 	// Combat log lines (most recent last).
 	log []logEntry
+
+	// Results of this battle, saved to the wiki when it ends or the player flees.
+	session  model.Session
+	reviewed map[string]bool // cards whose correct answer has counted this battle
+	saved    bool
+	saveErr  error
+	totalXP  int // lifetime XP, read back after saving
 }
 
 type logEntry struct {
@@ -85,23 +92,70 @@ func (m Model) Refresh() Model {
 	m.state = stateIntro
 	m.log = nil
 	m.animTicks = 0
+	return m.startSession()
+}
+
+// Leave saves the battle's results when the player flees mid-fight.
+func (m Model) Leave() Model {
+	m.saveSession()
 	return m
+}
+
+// startSession begins recording results for a new battle.
+func (m Model) startSession() Model {
+	m.session = model.Session{StartedAt: time.Now(), Type: "battle"}
+	m.reviewed = map[string]bool{}
+	m.saved = false
+	m.saveErr = nil
+	return m
+}
+
+// recordAnswer logs an answer and reschedules its card: a miss makes it due
+// again tomorrow, and a hit counts once per battle as a "Hard" review.
+func (m *Model) recordAnswer(q *rpgengine.CombatQuestion, choice int, correct bool) {
+	diff := model.DiffAgain
+	if correct {
+		diff = model.DiffHard
+	}
+	m.session.Items = append(m.session.Items, model.SessionItem{
+		CardID:     q.Card.ID,
+		UserAnswer: q.Choices[choice],
+		Correct:    correct,
+		Difficulty: diff,
+	})
+
+	if m.store == nil || (correct && m.reviewed[q.Card.ID]) {
+		return
+	}
+	card := q.Card
+	if err := m.store.RecordReview(&card, diff, time.Now()); err != nil {
+		m.saveErr = err
+	}
+	m.reviewed[q.Card.ID] = true
+}
+
+// saveSession writes the battle to the wiki's session log once, so it counts
+// toward stats, streaks, and lifetime XP.
+func (m *Model) saveSession() {
+	if m.saved || m.store == nil || m.battle == nil || len(m.session.Items) == 0 {
+		return
+	}
+	m.session.EndedAt = time.Now()
+	m.session.CardsTotal = m.battle.Answered
+	m.session.CardsCorrect = m.battle.CorrectHits
+	m.session.XP = m.battle.XPEarned
+	if err := m.store.WriteSession(m.session); err != nil {
+		m.saveErr = err
+		return
+	}
+	m.saved = true
+	m.totalXP = m.store.TotalXP()
 }
 
 // loadCards pulls drillable cards from the wiki store.
 func loadCards(store *wiki.Store) []model.Card {
-	pages, err := store.ListPages()
-	if err != nil {
-		return nil
-	}
-	var drillable []model.Page
-	for _, p := range pages {
-		switch p.Type {
-		case "character", "vocabulary", "grammar":
-			drillable = append(drillable, p)
-		}
-	}
-	return wiki.CardsFromPages(drillable)
+	cards, _ := store.DrillableCards()
+	return cards
 }
 
 // countMastered returns the count of cards with a review interval >= 21 days.
@@ -209,6 +263,7 @@ func (m Model) handleFightingKey(msg tea.KeyMsg) (Model, tea.Cmd) {
 
 func (m Model) submitAnswer() (Model, tea.Cmd) {
 	correct, dmg := m.battle.Answer(m.battle.Selected)
+	m.recordAnswer(m.battle.Question, m.battle.Selected, correct)
 	if correct {
 		m.state = statePlayerAttack
 		m.battle.State = rpgengine.BattlePlayerAttack
@@ -245,7 +300,7 @@ func (m Model) rematch() Model {
 	m.state = stateFighting
 	m.log = nil
 	m.animTicks = 0
-	return m
+	return m.startSession()
 }
 
 func (m Model) nextTurn() (Model, tea.Cmd) {
@@ -257,6 +312,7 @@ func (m Model) nextTurn() (Model, tea.Cmd) {
 			m.state = stateDefeat
 			m.battle.State = rpgengine.BattleDefeat
 		}
+		m.saveSession()
 		return m, nil
 	}
 	// Back to player turn with a new question.

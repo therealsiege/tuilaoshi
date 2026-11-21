@@ -24,13 +24,13 @@ import (
 type state int
 
 const (
-	stateModePick state = iota // choosing drill mode
-	stateLoading               // loading cards
-	statePrompt                // showing card, waiting for answer
-	stateEval                  // evaluating answer with Claude
-	stateFeedback              // showing Claude's feedback
-	stateDifficulty            // waiting for difficulty rating
-	stateDone                  // no more cards
+	stateModePick   state = iota // choosing drill mode
+	stateLoading                 // loading cards
+	statePrompt                  // showing card, waiting for answer
+	stateEval                    // evaluating answer with Claude
+	stateFeedback                // showing Claude's feedback
+	stateDifficulty              // waiting for difficulty rating
+	stateDone                    // no more cards
 )
 
 type modeOption struct {
@@ -155,15 +155,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, nil
 		}
 		if len(due) == 0 {
-			pages, _ := m.store.ListPages()
-			var drillable []model.Page
-			for _, p := range pages {
-				switch p.Type {
-				case "character", "vocabulary", "grammar":
-					drillable = append(drillable, p)
-				}
-			}
-			m.cards = wiki.CardsFromPages(drillable)
+			m.cards, _ = m.store.DrillableCards()
 		} else {
 			m.cards = due
 		}
@@ -317,12 +309,7 @@ func (m *Model) advanceCard(diff model.DrillDifficulty) tea.Cmd {
 	// Record session item
 	if m.current < len(m.cards) {
 		card := &m.cards[m.current]
-		wiki.UpdateSRS(card, diff, time.Now())
-		page, err := m.store.ReadPage(card.ID)
-		if err == nil {
-			wiki.ApplySRSToPage(&page, *card)
-			_ = m.store.WriteFrontmatter(page)
-		}
+		_ = m.store.RecordReview(card, diff, time.Now())
 		m.session.Items = append(m.session.Items, model.SessionItem{
 			CardID:     card.ID,
 			UserAnswer: m.input.Value(),

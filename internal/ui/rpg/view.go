@@ -158,6 +158,7 @@ func (m Model) viewVictory() string {
 	b.WriteString(fmt.Sprintf("  Turns:        %d\n", m.battle.Turn))
 	b.WriteString(fmt.Sprintf("  Max Combo:    %d\n", m.battle.MaxCombo))
 	b.WriteString(fmt.Sprintf("  Accuracy:     %d%%\n", m.battle.Accuracy()))
+	b.WriteString(m.renderSaveStatus())
 	b.WriteString("\n")
 	b.WriteString(ui.HelpStyle.Render("  enter/space continue  |  esc back"))
 
@@ -178,10 +179,24 @@ func (m Model) viewDefeat() string {
 	b.WriteString(fmt.Sprintf("  Turns survived:  %d\n", m.battle.Turn))
 	b.WriteString(fmt.Sprintf("  Max Combo:       %d\n", m.battle.MaxCombo))
 	b.WriteString(fmt.Sprintf("  Damage Dealt:    %d\n", m.battle.TotalDealt))
+	b.WriteString(fmt.Sprintf("  XP Earned:       %d\n", m.battle.XPEarned))
+	b.WriteString(m.renderSaveStatus())
 	b.WriteString("\n")
 	b.WriteString(ui.HelpStyle.Render("  enter/space try again  |  esc back"))
 
 	return b.String()
+}
+
+// renderSaveStatus reports lifetime XP once the battle is saved, or why
+// saving failed.
+func (m Model) renderSaveStatus() string {
+	if m.saveErr != nil {
+		return ui.ErrorStyle.Render(fmt.Sprintf("  Could not save results: %v", m.saveErr)) + "\n"
+	}
+	if !m.saved {
+		return ""
+	}
+	return ui.SuccessStyle.Render(fmt.Sprintf("  Total XP:     %d", m.totalXP)) + "\n"
 }
 
 func (m Model) renderHPBars() string {

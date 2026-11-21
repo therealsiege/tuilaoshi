@@ -25,6 +25,7 @@ type Model struct {
 	journeyState journey.State
 	streak       int
 	due          int
+	xp           int // lifetime battle XP
 	width        int
 	height       int
 }
@@ -55,6 +56,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.due = len(due)
 		m.daily = m.store.TodayStats()
 		m.streak = m.store.Streak()
+		m.xp = m.store.TotalXP()
 		m.journeyState = journey.Calculate(m.store)
 		return m, nil
 
@@ -237,6 +239,9 @@ func (m Model) renderCultivationMeter() string {
 		charsLine,
 		tribLine,
 	}
+	if m.xp > 0 {
+		lines = append(lines, ui.MutedStyle.Render(fmt.Sprintf("  Battle XP: %d", m.xp)))
+	}
 	if bossLine != "" {
 		lines = append(lines, bossLine)
 	}
@@ -265,6 +270,7 @@ func (m Model) Refresh() Model {
 	m.due = len(due)
 	m.daily = m.store.TodayStats()
 	m.streak = m.store.Streak()
+	m.xp = m.store.TotalXP()
 	m.journeyState = journey.Calculate(m.store)
 	return m
 }

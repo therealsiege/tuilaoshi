@@ -192,12 +192,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			// Update SRS with difficulty
 			if m.cursor < len(m.items) {
 				card := &m.items[m.cursor]
-				wiki.UpdateSRS(card, diff, time.Now())
-				page, err := m.store.ReadPage(card.ID)
-				if err == nil {
-					wiki.ApplySRSToPage(&page, *card)
-					_ = m.store.WriteFrontmatter(page)
-				}
+				_ = m.store.RecordReview(card, diff, time.Now())
 				m.session.Items = append(m.session.Items, model.SessionItem{
 					CardID:     card.ID,
 					UserAnswer: m.input.Value(),

@@ -1,6 +1,8 @@
 package rpg
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -10,7 +12,129 @@ import (
 	"github.com/cj/mandarin-wiki/internal/model"
 	rpgengine "github.com/cj/mandarin-wiki/internal/rpg"
 	"github.com/cj/mandarin-wiki/internal/ui"
+	"github.com/cj/mandarin-wiki/internal/wiki"
 )
+
+// storeModel returns a battle backed by a temporary wiki with one
+// vocabulary page.
+func storeModel(t *testing.T) Model {
+	t.Helper()
+	dir := t.TempDir()
+	page := "---\ntype: vocabulary\nreview_interval: 10\nnext_review: 2026-12-01\n---\n\n# Basics\n\n" +
+		"| Word | Pinyin | English |\n|------|--------|---------|\n" +
+		"| 书 | shū | book |\n| 水 | shuǐ | water |\n| 火 | huǒ | fire |\n| 山 | shān | mountain |\n"
+	if err := os.MkdirAll(filepath.Join(dir, "vocabulary"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "vocabulary", "basics.md"), []byte(page), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	m := New(wiki.NewStore(dir)).Refresh()
+	if m.battle == nil || len(m.cards) != 4 {
+		t.Fatalf("battle not loaded from wiki: %d cards", len(m.cards))
+	}
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	return m
+}
+
+func scheduleFor(t *testing.T, m Model, id string) model.Card {
+	t.Helper()
+	cards, err := m.store.DrillableCards()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range cards {
+		if c.ID == id {
+			return c
+		}
+	}
+	t.Fatalf("no card %q", id)
+	return model.Card{}
+}
+
+func TestMissReschedulesWordForTomorrow(t *testing.T) {
+	m := storeModel(t)
+	missed := m.battle.Question.Card.ID
+
+	m = missQuestion(m)
+
+	if got := scheduleFor(t, m, missed); got.ReviewInterval != 1 {
+		t.Errorf("missed word interval = %d, want 1", got.ReviewInterval)
+	}
+}
+
+func TestCorrectAnswerCountsOncePerBattle(t *testing.T) {
+	m := storeModel(t)
+	q := m.battle.Question
+	id := q.Card.ID
+
+	for i := 0; i < 3; i++ {
+		m.battle.Question = q
+		m.battle.Selected = q.Correct
+		m, _ = m.submitAnswer()
+		m.state = stateFighting
+	}
+
+	if got := scheduleFor(t, m, id); got.ReviewInterval != 12 {
+		t.Errorf("interval = %d, want 12 (one Hard review of 10)", got.ReviewInterval)
+	}
+	if len(m.session.Items) != 3 {
+		t.Errorf("session has %d items, want all 3 answers", len(m.session.Items))
+	}
+}
+
+func TestBattleEndSavesSessionWithXP(t *testing.T) {
+	m := storeModel(t)
+	m.battle.Enemy.HP = 1
+	m.battle.Selected = m.battle.Question.Correct
+	m, _ = m.submitAnswer()
+	for m.state == statePlayerAttack {
+		m, _ = m.Update(animTickMsg{})
+	}
+
+	if m.state != stateVictory {
+		t.Fatalf("state = %v, want stateVictory", m.state)
+	}
+	if m.saveErr != nil {
+		t.Fatalf("save failed: %v", m.saveErr)
+	}
+	if got, want := m.store.TotalXP(), m.battle.XPEarned; got != want || got == 0 {
+		t.Errorf("TotalXP() = %d, want %d", got, want)
+	}
+	if !strings.Contains(m.View(), "Total XP") {
+		t.Error("victory screen should show lifetime XP")
+	}
+
+	m = m.Leave()
+	if got := m.store.TotalXP(); got != m.battle.XPEarned {
+		t.Errorf("leaving after victory saved again: TotalXP() = %d", got)
+	}
+}
+
+func TestFleeingSavesAnswersSoFar(t *testing.T) {
+	m := storeModel(t)
+	m = missQuestion(m)
+
+	m = m.Leave()
+
+	if !m.saved {
+		t.Error("fleeing with answers should save the session")
+	}
+	if m.store.TodayStats().CardsReviewed != 1 {
+		t.Errorf("today's stats should include the battle answer")
+	}
+}
+
+func TestFleeingBeforeAnsweringSavesNothing(t *testing.T) {
+	m := storeModel(t)
+
+	m = m.Leave()
+
+	if _, err := os.Stat(filepath.Join(m.store.Dir, "sessions")); !os.IsNotExist(err) {
+		t.Error("an empty battle should not write a session")
+	}
+}
 
 func fightingModel() Model {
 	cards := []model.Card{

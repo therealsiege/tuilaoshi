@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -186,6 +187,9 @@ func (s *Store) WriteSession(sess model.Session) error {
 		pct := float64(sess.CardsCorrect) / float64(sess.CardsTotal) * 100
 		b.WriteString(fmt.Sprintf("- **Accuracy**: %.0f%%\n", pct))
 	}
+	if sess.XP > 0 {
+		b.WriteString(fmt.Sprintf("%s%d\n", xpLinePrefix, sess.XP))
+	}
 	b.WriteString("\n## Results\n\n")
 	b.WriteString("| Card | Answer | Result | Difficulty |\n")
 	b.WriteString("|------|--------|--------|------------|\n")
@@ -200,6 +204,36 @@ func (s *Store) WriteSession(sess model.Session) error {
 	}
 
 	return os.WriteFile(path, []byte(b.String()), 0644)
+}
+
+// xpLinePrefix starts the session-file line that records experience earned.
+const xpLinePrefix = "- **XP**: "
+
+// TotalXP sums the experience recorded across all session files.
+func (s *Store) TotalXP() int {
+	sessDir := filepath.Join(s.Dir, "sessions")
+	entries, err := os.ReadDir(sessDir)
+	if err != nil {
+		return 0
+	}
+
+	total := 0
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(sessDir, e.Name()))
+		if err != nil {
+			continue
+		}
+		for _, line := range strings.Split(string(data), "\n") {
+			if xp, ok := strings.CutPrefix(line, xpLinePrefix); ok {
+				n, _ := strconv.Atoi(strings.TrimSpace(xp))
+				total += n
+			}
+		}
+	}
+	return total
 }
 
 func difficultyLabel(d model.DrillDifficulty) string {

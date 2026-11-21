@@ -13,14 +13,15 @@ import (
 
 // CombatQuestion is a multiple-choice question generated from wiki cards.
 type CombatQuestion struct {
-	Prompt   string   // the question text (e.g. "What does 书 mean?")
-	Choices  []string // 4-5 answer options
-	Correct  int      // index of correct answer
-	Category string   // "reading", "meaning", "pinyin", "character"
-	Damage   int      // damage dealt on correct answer
-	Chinese  string   // the Chinese text being tested
-	Pinyin   string   // pinyin of the tested item
-	English  string   // meaning of the tested item
+	Prompt   string     // the question text (e.g. "What does 书 mean?")
+	Choices  []string   // 4-5 answer options
+	Correct  int        // index of correct answer
+	Category string     // "reading", "meaning", "pinyin", "character"
+	Damage   int        // damage dealt on correct answer
+	Chinese  string     // the Chinese text being tested
+	Pinyin   string     // pinyin of the tested item
+	English  string     // meaning of the tested item
+	Card     model.Card // the card being tested, for saving the result
 }
 
 // CorrectAnswer returns the text of the correct choice.
@@ -233,6 +234,7 @@ func (b *Battle) buildQuestion(card model.Card, usable []model.Card) *CombatQues
 		Chinese:  card.Chinese,
 		Pinyin:   card.Pinyin,
 		English:  card.English,
+		Card:     card,
 	}
 }
 
