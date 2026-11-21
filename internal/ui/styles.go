@@ -175,7 +175,7 @@ func ProgressBar(current, total, width int) string {
 
 // Header renders a decorative Chinese-style header with box-drawing borders.
 func Header(title string) string {
-	titleLen := len([]rune(title))
+	titleLen := lipgloss.Width(title) // display cells: CJK characters are two wide
 	padTotal := 30
 	if titleLen+4 > padTotal {
 		padTotal = titleLen + 4
@@ -187,7 +187,7 @@ func Header(title string) string {
 	top := MutedStyle.Render("╔" + strings.Repeat("═", padTotal) + "╗")
 	mid := MutedStyle.Render("║") +
 		MutedStyle.Render(leftPad) + " " +
-		TitleStyle.Render(title) + " " +
+		TitleStyle.MarginBottom(0).Render(title) + " " + // a margin would break the line
 		MutedStyle.Render(rightPad) +
 		MutedStyle.Render("║")
 	bot := MutedStyle.Render("╚" + strings.Repeat("═", padTotal) + "╝")
