@@ -66,7 +66,10 @@ func (m Model) viewScene() string {
 	sc := m.sceneOf
 	b.WriteString(m.scene.TextView(""))
 	if m.showEnglish {
-		b.WriteString("\n" + ui.MutedStyle.Render(ui.WrapText(sc.English, 72)) + "\n")
+		b.WriteString("\n")
+		for _, line := range strings.Split(ui.WrapText(sc.English, 70), "\n") {
+			b.WriteString(ui.MutedStyle.Render("  "+line) + "\n")
+		}
 	}
 	fmt.Fprintf(&b, "\n  %s %s\n  %s\n\n", ui.ChineseStyle.Render(sc.Speaker+"："), ui.ChineseStyle.Render(sc.Line),
 		ui.MutedStyle.Render(sc.LineEnglish))

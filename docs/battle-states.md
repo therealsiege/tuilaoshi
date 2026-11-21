@@ -12,6 +12,7 @@ stateDiagram-v2
     Intro --> Fighting : enter / space
     Fighting --> PlayerAttack : right answer
     Fighting --> EnemyAttack : wrong answer
+    Fighting --> EnemyAttack : time runs out (burning enemy)
     PlayerAttack --> Fighting : animation ends, enemy alive
     PlayerAttack --> Victory : animation ends, enemy HP 0 (saves; clears the stage)
     EnemyAttack --> Fighting : enter / space, player alive

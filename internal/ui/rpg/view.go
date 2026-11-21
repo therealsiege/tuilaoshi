@@ -64,6 +64,7 @@ func (m Model) viewIntro() string {
 	b.WriteString("\n\n")
 
 	b.WriteString(m.renderStakes())
+	b.WriteString(m.renderAbilities())
 	b.WriteString(ui.HelpStyle.Render("  enter/space begin battle  |  esc flee"))
 
 	return b.String()
@@ -81,6 +82,7 @@ func (m Model) viewFighting() string {
 	b.WriteString(m.renderLog())
 	b.WriteString("\n")
 	if m.battle.Question != nil {
+		b.WriteString(m.renderTimer())
 		b.WriteString(m.renderQuestion())
 	} else {
 		b.WriteString(ui.MutedStyle.Render("  Not enough study cards to form a question. Press esc to flee."))
@@ -92,7 +94,11 @@ func (m Model) viewFighting() string {
 	} else if q != nil && q.Category == "order" {
 		b.WriteString(ui.HelpStyle.Render("  1-9 add the next word  |  backspace undo  |  esc flee"))
 	} else {
-		b.WriteString(ui.HelpStyle.Render("  up/down navigate  |  enter/1-5 answer  |  esc flee"))
+		help := "  up/down navigate  |  enter/1-5 answer  |  esc flee"
+		if q := m.battle.Question; m.battle.Effects.Reveals > 0 && q != nil && len(q.Choices) > 2 {
+			help += "  |  w fiery eyes"
+		}
+		b.WriteString(ui.HelpStyle.Render(help))
 	}
 	return b.String()
 }
@@ -352,8 +358,9 @@ func (m Model) renderStakes() string {
 			b.WriteString("\n")
 		}
 		if journey.SceneFor(m.stage.Number) == nil {
-			b.WriteString(ui.MutedStyle.Render(ui.WrapText(m.stage.Desc, 72)))
-			b.WriteString("\n")
+			for _, line := range strings.Split(ui.WrapText(m.stage.Desc, 70), "\n") {
+				b.WriteString(ui.MutedStyle.Render("  "+line) + "\n")
+			}
 		}
 		b.WriteString(ui.WarningStyle.Render("  Win to clear this tribulation."))
 		b.WriteString(ui.MutedStyle.Render("  Words: " + m.stage.Words.Name))

@@ -69,6 +69,7 @@ var transitions = []transition{
 	{stateIntro, stateFighting, "enter / space", nil, enter},
 	{stateFighting, statePlayerAttack, "right answer", nil, right},
 	{stateFighting, stateEnemyAttack, "wrong answer", nil, wrong},
+	{stateFighting, stateEnemyAttack, "time runs out (burning enemy)", nil, timeRunsOut},
 	{statePlayerAttack, stateFighting, "animation ends, enemy alive", nil, animationEnds},
 	{statePlayerAttack, stateVictory, "animation ends, enemy HP 0 (saves; clears the stage)", enemyDown, animationEnds},
 	{stateEnemyAttack, stateFighting, "enter / space, player alive", nil, enter},

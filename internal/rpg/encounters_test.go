@@ -143,3 +143,18 @@ func TestOrderQuestionsRebuildExampleSentences(t *testing.T) {
 		t.Error("one-word sentence became an order question")
 	}
 }
+
+func TestContentNamesOnlyRegisteredAbilities(t *testing.T) {
+	for _, d := range journey.Bestiary() {
+		for _, a := range d.Abilities {
+			if !KnownAbility(a, true) {
+				t.Errorf("demon %s has unknown ability %q", d.Name, a)
+			}
+		}
+	}
+	for _, c := range journey.Party(nil) {
+		if c.Effect != "" && !KnownAbility(c.Effect, false) {
+			t.Errorf("companion %s has unknown ability %q", c.Name, c.Effect)
+		}
+	}
+}

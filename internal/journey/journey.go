@@ -39,6 +39,7 @@ type Companion struct {
 	Ability     string `yaml:"ability,omitempty"`      // ability name
 	AbilityDesc string `yaml:"ability_desc,omitempty"` // what the ability does
 	AbilityIcon string `yaml:"ability_icon,omitempty"` // single ASCII char
+	Effect      string `yaml:"effect,omitempty"`       // battle ability by name (see rpg.Effects)
 }
 
 // Boss is a demon king encounter.
@@ -261,6 +262,9 @@ func calculateProgress(tribulation, cleared, mastered, totalChars int) Progress 
 		Percent:     percent,
 	}
 }
+
+// Party returns the companions, marking who has joined for cleared stages.
+func Party(cleared map[int]string) []Companion { return buildCompanions(cleared) }
 
 // buildCompanions marks who has joined: each companion joins when the
 // stage of their story is cleared (Tang Sanzang travels from the start).

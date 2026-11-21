@@ -82,8 +82,15 @@ type Model struct {
 	scene       reader.Model
 	sceneOf     *journey.Scene
 	showEnglish bool
-	mastered    int            // the journey's mastered count, which scales player stats
-	counts      journey.Counts // characters learned and mastered, which open stages
+
+	// Abilities in play, as the intro describes them, and the answer timer
+	// of a burning enemy: qseq numbers questions so stale ticks are ignored.
+	abilities []string
+	deadline  time.Time
+	qseq      int
+	now       func() time.Time
+	mastered  int            // the journey's mastered count, which scales player stats
+	counts    journey.Counts // characters learned and mastered, which open stages
 }
 
 type logEntry struct {
@@ -152,40 +159,12 @@ func (m Model) Refresh() Model {
 		m.battle = rpgengine.NewRandomBattle(m.cards, m.mastered, rpgengine.ReachedDemons(stages, reached))
 	}
 	m.setQuestionKinds()
+	m.applyAbilities(cleared)
 	m.state = stateIntro
 	m.log = nil
 	m.animTicks = 0
 	m = m.startSession()
 	return m.openScene()
-}
-
-// setQuestionKinds asks for spoken questions when audio works, and typed
-// ones when Chinese input is available.
-func (m *Model) setQuestionKinds() {
-	if m.battle != nil {
-		m.battle.Listening = m.tts != nil && m.tts.Available()
-		m.battle.Writing = m.writing
-	}
-}
-
-// speakQuestion plays a listening question's word; nil for other questions.
-func (m Model) speakQuestion() tea.Cmd {
-	if q := m.battle.Question; q != nil && q.Category == "listening" {
-		return ui.SpeakCmd(m.tts, q.Chinese, "zh")
-	}
-	return nil
-}
-
-// askQuestion readies the current question: it clears the answer box for a
-// typed question and speaks a listening one.
-func (m Model) askQuestion() (Model, tea.Cmd) {
-	m.order = nil
-	if q := m.battle.Question; q != nil && q.Category == "write" {
-		m.input.Reset()
-		m.input.SetMode(input.ModeChinese)
-		return m, m.input.Focus()
-	}
-	return m, m.speakQuestion()
 }
 
 // Leave saves the battle's results when the player flees mid-fight.
@@ -256,6 +235,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case ui.SpeechDoneMsg:
 		m.ttsErr = msg.Err
 		return m, nil
+
+	case timerMsg:
+		return m.onTimer(msg)
 
 	case animTickMsg:
 		// A tick can outlive its attack if the player flees and starts a new battle.
@@ -344,6 +326,8 @@ func (m Model) handleFightingKey(msg tea.KeyMsg) (Model, tea.Cmd) {
 		}
 	case key.Matches(msg, m.gkeys.Enter):
 		return m.submitAnswer()
+	case msg.String() == "w":
+		return m.reveal(), nil
 	case msg.String() == "r":
 		return m, m.speakQuestion()
 	default:
@@ -416,7 +400,11 @@ func (m Model) submitText() (Model, tea.Cmd) {
 // afterAnswer records an answer and starts the attack it earned.
 func (m Model) afterAnswer(q *rpgengine.CombatQuestion, answer string, correct bool, dmg int) (Model, tea.Cmd) {
 	m.lastAnswer = answer
+	m.qseq++ // stops the answer timer
 	m.recordAnswer(q, answer, correct)
+	if e := m.battle.Event; e != "" {
+		m.log = appendLog(m.log, logEntry{text: e, style: ui.SuccessStyle})
+	}
 	if correct {
 		m.state = statePlayerAttack
 		m.battle.State = rpgengine.BattlePlayerAttack

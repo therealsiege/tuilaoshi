@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp"
+	"slices"
+	"sort"
 	"strings"
 
+	"github.com/therealsiege/tuilaoshi/internal/confusables"
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	"github.com/therealsiege/tuilaoshi/internal/segment"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
@@ -106,6 +109,9 @@ func (b *Battle) buildQuestion(card model.Card, d deck) *CombatQuestion {
 	if len(card.Examples) > 0 {
 		categories = append(categories, "order")
 	}
+	if b.Effects.HidePinyin {
+		categories = slices.DeleteFunc(categories, func(c string) bool { return c == "pinyin" || c == "character" })
+	}
 	if len(categories) == 0 {
 		return nil
 	}
@@ -145,7 +151,7 @@ func (b *Battle) questionAs(card model.Card, d deck, category string) *CombatQue
 		return b.orderQuestion(card, d)
 	case "write":
 		return &CombatQuestion{
-			Prompt:   fmt.Sprintf("Write in Chinese: %s (%s)", card.English, card.Pinyin),
+			Prompt:   b.writePrompt(card),
 			Category: category,
 			Damage:   b.damage() + writeBonus,
 			Chinese:  card.Chinese,
@@ -156,7 +162,7 @@ func (b *Battle) questionAs(card model.Card, d deck, category string) *CombatQue
 		}
 	}
 
-	distractors := generateDistractors(card, d, category, distractorCount)
+	distractors := generateDistractors(card, d, category, distractorCount, b.Effects.LookAlike)
 	if len(distractors) == 0 {
 		return nil
 	}
@@ -237,7 +243,7 @@ func newDeck(cards []model.Card) deck {
 
 // generateDistractors picks wrong answers from other cards for a given
 // question category. It returns up to count unique distractors.
-func generateDistractors(card model.Card, d deck, category string, count int) []string {
+func generateDistractors(card model.Card, d deck, category string, count int, lookAlike bool) []string {
 	correctAnswer := ""
 	switch category {
 	case "meaning":
@@ -275,10 +281,16 @@ func generateDistractors(card model.Card, d deck, category string, count int) []
 		candidates = append(candidates, val)
 	}
 
-	// Shuffle candidates and take up to count.
+	// Shuffle candidates and take up to count, the most similar first when
+	// the enemy disguises its lies.
 	rand.Shuffle(len(candidates), func(i, j int) {
 		candidates[i], candidates[j] = candidates[j], candidates[i]
 	})
+	if lookAlike && correctAnswer == card.Chinese {
+		sort.SliceStable(candidates, func(i, j int) bool {
+			return resemblance(card.Chinese, candidates[i]) > resemblance(card.Chinese, candidates[j])
+		})
+	}
 
 	if len(candidates) > count {
 		candidates = candidates[:count]
@@ -430,4 +442,49 @@ func (b *Battle) orderQuestion(card model.Card, d deck) *CombatQuestion {
 		}
 	}
 	return nil
+}
+
+// writePrompt asks for card in Chinese, with its pinyin unless the enemy
+// blinds the player.
+func (b *Battle) writePrompt(card model.Card) string {
+	if b.Effects.HidePinyin {
+		return "Write in Chinese: " + card.English
+	}
+	return fmt.Sprintf("Write in Chinese: %s (%s)", card.English, card.Pinyin)
+}
+
+// lookAlikes maps each character to those commonly confused with it by sight.
+var lookAlikes = func() map[string][]string {
+	m := map[string][]string{}
+	for _, p := range confusables.Pairs() {
+		if p.Category != "visual" {
+			continue
+		}
+		for _, a := range p.Chars {
+			for _, b := range p.Chars {
+				if a.Hanzi != b.Hanzi {
+					m[a.Hanzi] = append(m[a.Hanzi], b.Hanzi)
+				}
+			}
+		}
+	}
+	return m
+}()
+
+// resemblance scores how much a wrong answer looks like the right one:
+// a known look-alike character, then shared characters, then equal length.
+func resemblance(answer, other string) int {
+	score := 0
+	if slices.Contains(lookAlikes[answer], other) {
+		score += 10
+	}
+	for _, r := range other {
+		if strings.ContainsRune(answer, r) {
+			score += 3
+		}
+	}
+	if len([]rune(answer)) == len([]rune(other)) {
+		score++
+	}
+	return score
 }

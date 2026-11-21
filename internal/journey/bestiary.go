@@ -13,6 +13,7 @@ type BestiaryEntry struct {
 	Art       string   `yaml:"-"`                    // 3-5 line ASCII art of the demon
 	ArtLines  []string `yaml:"art,omitempty"`        // Art as written in content/bestiary.yaml, one quoted line each (block scalars lose leading spaces)
 	ImagePath string   `yaml:"image_path,omitempty"` // path to a terminal-renderable image (defaults to assets/images/demons/NAME.png)
+	Abilities []string `yaml:"abilities,omitempty"`  // battle abilities by name (see rpg.Effects)
 }
 
 // Bestiary returns all demon entries in the catalog.

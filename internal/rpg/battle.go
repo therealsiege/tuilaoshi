@@ -52,6 +52,11 @@ type Battle struct {
 	CorrectHits int  // questions answered correctly
 	Listening   bool // audio works, so some questions are heard rather than read
 	Writing     bool // the player can type Chinese, so some questions ask for it
+
+	Effects      Effects // abilities in play; reveals and shields are used up
+	startEffects Effects // as the battle began, for rematches
+	struck       bool    // the player has landed a hit (for FirstStrike)
+	Event        string  // what an ability did on the last answer, for the log
 }
 
 // Accuracy returns the percentage of questions answered correctly.
@@ -65,6 +70,7 @@ func (b *Battle) Accuracy() int {
 // Rematch returns a fresh battle against the same enemy.
 func (b *Battle) Rematch(cards []model.Card) *Battle {
 	r := &Battle{Player: b.Player, Enemy: b.Enemy, State: BattleIntro, Listening: b.Listening, Writing: b.Writing}
+	r.SetEffects(b.startEffects)
 	r.Player.HP = r.Player.MaxHP
 	r.Enemy.HP = r.Enemy.MaxHP
 	r.Question = r.GenerateQuestion(cards)
@@ -134,6 +140,7 @@ func (b *Battle) AnswerText(text string) (correct bool, dmg int) {
 // enemy does.
 func (b *Battle) resolve(right bool) (correct bool, dmg int) {
 	b.Answered++
+	b.Event = ""
 
 	if right {
 		// Correct answer: player attacks enemy.
@@ -148,6 +155,11 @@ func (b *Battle) resolve(right bool) (correct bool, dmg int) {
 		if actualDmg < 5 {
 			actualDmg = 5
 		}
+		if b.Effects.FirstStrike && !b.struck {
+			actualDmg *= 2
+			b.Event = "白龙马 carries you in: a double-strength first strike!"
+		}
+		b.struck = true
 
 		b.Enemy.HP -= actualDmg
 		if b.Enemy.HP < 0 {
@@ -165,11 +177,21 @@ func (b *Battle) resolve(right bool) (correct bool, dmg int) {
 	}
 
 	// Wrong answer: enemy attacks player.
-	b.Combo = 0
+	if b.Effects.HalfCombo {
+		b.Combo /= 2
+	} else {
+		b.Combo = 0
+	}
 
 	enemyDmg := b.Enemy.Attack - b.Player.Defense/2 + rand.Intn(5) + 1
 	if enemyDmg < 5 {
 		enemyDmg = 5
+	}
+	enemyDmg += enemyDmg * b.Effects.MissDamage / 100
+	if b.Effects.Shields > 0 {
+		b.Effects.Shields--
+		enemyDmg = 0
+		b.Event = "沙悟净 steps in and takes the blow!"
 	}
 
 	b.Player.HP -= enemyDmg

@@ -9,7 +9,8 @@
   emoji: M
   role: Battles difficult characters
   ability: 火眼金睛
-  ability_desc: Reveals mnemonic decompositions for difficult characters
+  ability_desc: 'Once per battle, press w to strike out two wrong answers'
+  effect: reveal
   ability_icon: ◎
 - name: 白龙马
   stage: 9
@@ -17,7 +18,8 @@
   emoji: H
   role: Speeds up learning
   ability: 日行千里
-  ability_desc: 'Speeds up journey: progress counts double on review days'
+  ability_desc: 'Your first hit in each battle deals double damage'
+  effect: first_strike
   ability_icon: »
 - name: 猪八戒
   stage: 12
@@ -25,7 +27,8 @@
   emoji: P
   role: Helps with radicals
   ability: 懒人有懒福
-  ability_desc: 'Reduces streak penalty: mistakes only reset half the streak'
+  ability_desc: 'A miss only halves your combo instead of losing it'
+  effect: half_combo
   ability_icon: "~"
 - name: 沙悟净
   stage: 16
@@ -33,5 +36,6 @@
   emoji: S
   role: Organizes reviews
   ability: 勤勤恳恳
-  ability_desc: 'Marks items for review: highlights characters due for review'
+  ability_desc: 'Takes the first enemy hit of each battle for you'
+  effect: shield
   ability_icon: ·
