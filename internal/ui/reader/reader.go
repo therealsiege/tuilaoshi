@@ -141,6 +141,9 @@ func (m Model) OpenEpisode(ep model.Episode) Model {
 	english := make([]string, len(ep.Lines))
 	for i, l := range ep.Lines {
 		lines[i], english[i] = l.Chinese, l.English
+		if l.Original {
+			english[i] = "原文, from the novel: " + l.English
+		}
 		if l.Speaker != "" {
 			lines[i] = l.Speaker + "：" + l.Chinese
 		}

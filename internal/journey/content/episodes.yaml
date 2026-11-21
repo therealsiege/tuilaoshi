@@ -1,8 +1,9 @@
 # Dialogue episodes, unlocked as the pilgrimage reaches their stage and read
 # in the reader (t). Lines are graded Chinese (HSK2-3) with English.
 # source: "original" for episodes written for this app; novel adaptations
-# cite their chapter. Speakers must be companions, demons, or in cast.
-cast: [观音菩萨, 小白龙, 高老太公, 黑熊精, 镇元大仙, 清风, 车迟国王, 虎力大仙, 女王, 假悟空, 铁扇公主]
+# cite their chapter, and mark lines quoted verbatim from the public-domain
+# novel (Wikisource text, converted to simplified) with original: true. Speakers must be companions, demons, or in cast.
+cast: [旁白, 老者, 太宗, 观音菩萨, 小白龙, 高老太公, 黑熊精, 镇元大仙, 清风, 车迟国王, 虎力大仙, 女王, 假悟空, 铁扇公主]
 
 episodes:
   - id: dragon-horse
@@ -127,3 +128,68 @@ episodes:
       - {speaker: 孙悟空, zh: 不借也可以，那我就变成小虫，飞进你的肚子里。, en: "Fine, don't. Then I'll turn into a little bug and fly into your stomach."}
       - {speaker: 铁扇公主, zh: 好疼！好疼！我借给你，快出来！, en: "It hurts! It hurts! I'll lend it to you, come out!"}
       - {speaker: 猪八戒, zh: 猴哥，这把扇子是真的吗？我看不太像。, en: "Monkey brother, is this fan real? It doesn't look quite right to me."}
+  - id: novel-14
+    stage: 8
+    title: 第十四回 心猿归正 Wukong Freed (novel)
+    source: novel, chapter 14
+    lines:
+      - {speaker: 旁白, zh: 唐僧来到两界山，听见山脚下有人大叫。, en: "Tang Sanzang reached Two Boundary Mountain and heard someone shouting at its foot."}
+      - {speaker: 孙悟空, zh: 师父，你怎么此时才来？来得好，来得好。救我出来，我保你上西天去也。, en: "Master, why have you only come now? Good that you came, good that you came. Get me out, and I'll guard you all the way to the West.", original: true}
+      - {speaker: 孙悟空, zh: 你可是东土大王差往西天取经去的么？, en: "Are you the one the king of the Eastern Land sent west for the scriptures?", original: true}
+      - {speaker: 唐僧, zh: 我正是，你问怎么？, en: "I am. Why do you ask?", original: true}
+      - {speaker: 孙悟空, zh: 这山顶上有我佛如来的金字压帖，你只上山去将帖儿揭起，我就出来了。, en: "On top of this mountain is the Buddha's golden-lettered seal. Just climb up and peel it off, and I'll come out.", original: true}
+      - {speaker: 旁白, zh: 唐僧揭下了压帖，山一动，猴子跳了出来。, en: "Tang Sanzang peeled off the seal, the mountain shook, and the monkey leapt out."}
+      - {speaker: 唐僧, zh: 我与你起个混名，称为行者，好么？, en: "I'll give you a nickname and call you Pilgrim. How's that?", original: true}
+      - {speaker: 孙悟空, zh: 好，好，好。, en: "Good, good, good.", original: true}
+  - id: novel-27
+    stage: 20
+    title: 第二十七回 尸魔三戏唐三藏 The Corpse Demon's Tricks (novel)
+    source: novel, chapter 27
+    lines:
+      - {speaker: 唐僧, zh: 悟空，我这一日，肚中饥了，你去那里化些斋吃。, en: "Wukong, I've gone all day and I'm hungry. Go and beg some food for me to eat.", original: true}
+      - {speaker: 旁白, zh: 悟空去南山摘桃子。这时候，一个年轻的女子提着饭走来了。, en: "Wukong went to the southern hill to pick peaches. Just then a young woman came along carrying food."}
+      - {speaker: 猪八戒, zh: 女菩萨，往那里去？手里提著是甚么东西？, en: "Lady bodhisattva, where are you going? What's that you're carrying?", original: true}
+      - {speaker: 孙悟空, zh: 师父，你面前这个女子，莫当做个好人，他是个妖精，要来骗你哩。, en: "Master, don't take this woman in front of you for a good person. She's a demon, come to trick you.", original: true}
+      - {speaker: 旁白, zh: 悟空打了妖精三次，唐僧非常生气。, en: "Wukong struck the demon three times, and Tang Sanzang was furious."}
+      - {speaker: 唐僧, zh: 我不要你做徒弟。, en: "I don't want you as my disciple.", original: true}
+      - {speaker: 孙悟空, zh: 你不要我做徒弟，只怕你西天路去不成。, en: "If you won't have me as your disciple, I'm afraid you'll never make it to the West.", original: true}
+      - {speaker: 唐僧, zh: 这个猴子胡说，就有这许多妖怪？, en: "This monkey talks nonsense. Are there really so many demons?", original: true}
+  - id: novel-34
+    stage: 25
+    title: 第三十四回 葫芦 The Gourd That Calls Your Name (novel)
+    source: novel, chapter 34
+    lines:
+      - {speaker: 旁白, zh: 银角大王有一个宝葫芦。他叫谁的名字，谁一答应，就会被装进去。, en: "The Silver Horn King had a treasure gourd. Whoever answered when he called their name was sucked inside."}
+      - {speaker: 银角大王, zh: 我也不与你交兵，我且叫你一声，你敢应我么？, en: "I won't fight you. I'll just call your name once. Do you dare answer me?", original: true}
+      - {speaker: 孙悟空, zh: 可怕你叫上千声，我就答应你万声！, en: "Call me a thousand times and I'll answer you ten thousand!", original: true}
+      - {speaker: 银角大王, zh: 者行孙。, en: "Zhe Xingsun!", original: true}
+      - {speaker: 孙悟空, zh: 我真名字叫做孙行者，起的鬼名字叫做者行孙。真名字可以装得，鬼名字好道装不得。, en: "My real name is Sun Xingzhe; the made-up one is Zhe Xingsun. A real name can be caught, but surely a fake one can't.", original: true}
+      - {speaker: 旁白, zh: 他忍不住答应了一声，就被吸进了葫芦里。, en: "He couldn't help answering once, and was sucked into the gourd."}
+      - {speaker: 孙悟空, zh: 天呀！孤拐都化了。, en: "Heavens! My ankles have melted away!", original: true}
+      - {speaker: 旁白, zh: 其实悟空没有化，他想骗妖怪打开葫芦。, en: "Wukong hadn't melted at all. He wanted to trick the demon into opening the gourd."}
+  - id: novel-59
+    stage: 50
+    title: 第五十九回 火焰山 The Flaming Mountains (novel)
+    source: novel, chapter 59
+    lines:
+      - {speaker: 唐僧, zh: 如今正是秋天，却怎返有热气？, en: "It's autumn now, so why is it hot instead?", original: true}
+      - {speaker: 猪八戒, zh: 哥啊！据你说，不是日落之处，为何这等酷热？, en: "Brother! If this isn't where the sun sets, as you say, why is it so scorching?", original: true}
+      - {speaker: 沙悟净, zh: 想是天时不正，秋行夏令故也。, en: "Perhaps the seasons are out of order, and autumn is keeping summer's rules.", original: true}
+      - {speaker: 老者, zh: 敝地唤做火焰山，无春无秋，四季皆热。, en: "Our place is called the Flaming Mountains. There is no spring and no autumn; all four seasons are hot.", original: true}
+      - {speaker: 旁白, zh: 悟空去翠云山芭蕉洞，找铁扇公主借扇子。, en: "Wukong went to the Banana Leaf Cave on Emerald Cloud Mountain to borrow the fan from Princess Iron Fan."}
+      - {speaker: 铁扇公主, zh: 这泼猴！今日来了。, en: "That wretched monkey! So today he's come.", original: true}
+      - {speaker: 孙悟空, zh: 嫂嫂，老孙在此奉揖。, en: "Sister-in-law, old Sun bows to you.", original: true}
+      - {speaker: 铁扇公主, zh: 谁是你的嫂嫂？那个要你奉揖？, en: "Who's your sister-in-law? Who wants your bows?", original: true}
+  - id: novel-100
+    stage: 81
+    title: 第一百回 径回东土 Home to the East (novel)
+    source: novel, chapter 100
+    lines:
+      - {speaker: 旁白, zh: 唐僧带着真经回到长安，皇帝太宗亲自出来迎接。, en: "Tang Sanzang returned to Chang'an with the true scriptures, and Emperor Taizong came out to greet him in person."}
+      - {speaker: 太宗, zh: 御弟来也？, en: "Has my imperial brother come?", original: true}
+      - {speaker: 太宗, zh: 久劳远涉，今已贞观二十七年矣。, en: "After such long labors and far travels, it is now the twenty-seventh year of Zhenguan.", original: true}
+      - {speaker: 唐僧, zh: 小徒俱是山村旷野之妖身，未谙中华圣朝之礼数，万望主公赦罪。, en: "My disciples are all demons from wild hills and villages and don't know the manners of the sacred court. I beg Your Majesty to pardon them.", original: true}
+      - {speaker: 太宗, zh: 不罪他，不罪他。都同请东阁赴宴去也。, en: "No blame, no blame. Come, all of you, to the banquet in the East Pavilion.", original: true}
+      - {speaker: 旁白, zh: 最后，师徒都回到灵山，得到了佛祖的封赏。, en: "In the end, master and disciples all returned to Spirit Mountain and received the Buddha's rewards."}
+      - {speaker: 猪八戒, zh: 他们都成佛，如何把我做个净坛使者？, en: "They all become Buddhas, so why make me the Altar Cleanser?", original: true}
+

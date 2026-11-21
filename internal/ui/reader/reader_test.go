@@ -8,6 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/model"
 	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
 )
 
@@ -156,5 +157,16 @@ func TestJourneyEpisodesUnlockWithTheStage(t *testing.T) {
 	at9 := New(uitest.Wiki(t, map[string]string{"vocabulary/food.md": food, "journey.yaml": cleared})).Refresh()
 	if !strings.Contains(titles(at9), "鹰愁涧") || strings.Contains(titles(at9), "黑风山") {
 		t.Errorf("at stage 9: %s; want stage 9's episode and not stage 11's", titles(at9))
+	}
+}
+
+func TestNovelLinesAreLabelledOriginal(t *testing.T) {
+	m := New(uitest.Wiki(t, map[string]string{"vocabulary/food.md": food})).SetSize(80, 30).Refresh()
+	m = m.OpenEpisode(model.Episode{Title: "第十四回", Lines: []model.DialogueLine{
+		{Speaker: "唐僧", Chinese: "我正是，你问怎么？", English: "I am. Why do you ask?", Original: true},
+	}})
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("e")})
+	if !strings.Contains(m.View(), "原文, from the novel: I am. Why do you ask?") {
+		t.Errorf("original line not labelled:\n%s", m.View())
 	}
 }

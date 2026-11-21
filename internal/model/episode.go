@@ -9,8 +9,10 @@ type Episode struct {
 }
 
 // DialogueLine is one spoken line. Speaker and English may be empty.
+// Original marks a line quoted verbatim from a source text (the novel).
 type DialogueLine struct {
-	Speaker string `yaml:"speaker,omitempty"`
-	Chinese string `yaml:"zh"`
-	English string `yaml:"en,omitempty"`
+	Speaker  string `yaml:"speaker,omitempty"`
+	Chinese  string `yaml:"zh"`
+	English  string `yaml:"en,omitempty"`
+	Original bool   `yaml:"original,omitempty"`
 }
