@@ -1,0 +1,14 @@
+Assess 测
+
+
+  A short diagnostic: for each skill it starts at HSK3, moves up a level
+  after 2 of 3 right and down otherwise, and finds where you are.
+  Results replace the assessment table in wiki/overview.md.
+
+  Character recognition    HSK3–4
+  Vocabulary (passive)     not enough cards
+  Grammar                  not enough cards
+  Reading comprehension    not enough cards
+
+
+  enter start · esc back

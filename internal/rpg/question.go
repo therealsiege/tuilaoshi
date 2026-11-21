@@ -103,8 +103,21 @@ func (b *Battle) buildQuestion(card model.Card, d deck) *CombatQuestion {
 	if len(categories) == 0 {
 		return nil
 	}
-	category := categories[rand.Intn(len(categories))]
+	return b.questionAs(card, d, categories[rand.Intn(len(categories))])
+}
 
+// MeaningQuestion asks what card means, with wrong answers drawn from pool,
+// or returns nil when pool has no unambiguous wrong answer. Assessments use
+// it outside battles.
+func MeaningQuestion(card model.Card, pool []model.Card) *CombatQuestion {
+	if card.Chinese == "" || card.English == "" {
+		return nil
+	}
+	return (&Battle{}).questionAs(card, newDeck(filterUsableCards(pool)), "meaning")
+}
+
+// questionAs builds a question of the given category about card.
+func (b *Battle) questionAs(card model.Card, d deck, category string) *CombatQuestion {
 	var prompt, correctAnswer string
 	switch category {
 	case "meaning":

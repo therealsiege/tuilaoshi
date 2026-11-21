@@ -11,6 +11,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/claude"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
+	"github.com/therealsiege/tuilaoshi/internal/ui/assessment"
 	"github.com/therealsiege/tuilaoshi/internal/ui/browser"
 	"github.com/therealsiege/tuilaoshi/internal/ui/celebrate"
 	"github.com/therealsiege/tuilaoshi/internal/ui/chat"
@@ -47,6 +48,7 @@ type Model struct {
 	radicals  radicals.Model
 	battle    rpgview.Model
 	reader    reader.Model
+	assess    assessment.Model
 
 	// Celebration state
 	celebration    *celebrate.Celebration // active celebration to display
@@ -100,6 +102,7 @@ func New(wikiDir string) (Model, error) {
 		radicals:      radicals.New(),
 		battle:        rpgview.New(store, ttsClient, dict),
 		reader:        reader.New(store),
+		assess:        assessment.New(store),
 		prevRankName:  initialState.Rank.Name,
 		prevBossCount: initialBossCount,
 	}, nil
@@ -127,6 +130,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.radicals = m.radicals.SetSize(msg.Width, msg.Height)
 		m.battle = m.battle.SetSize(msg.Width, msg.Height)
 		m.reader = m.reader.SetSize(msg.Width, msg.Height)
+		m.assess = m.assess.SetSize(msg.Width, msg.Height)
 		return m, nil
 
 	case ui.SwitchViewMsg:
@@ -167,6 +171,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ui.ViewReading:
 			m.reader = m.reader.Refresh()
 			return m, m.reader.Init()
+		case ui.ViewAssess:
+			m.assess = m.assess.Refresh()
+			return m, m.assess.Init()
 		}
 		return m, nil
 
@@ -240,6 +247,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.battle, cmd = m.battle.Update(msg)
 	case ui.ViewReading:
 		m.reader, cmd = m.reader.Update(msg)
+	case ui.ViewAssess:
+		m.assess, cmd = m.assess.Update(msg)
 	}
 	return m, cmd
 }
@@ -268,6 +277,8 @@ func (m Model) View() string {
 		content = m.battle.View()
 	case ui.ViewReading:
 		content = m.reader.View()
+	case ui.ViewAssess:
+		content = m.assess.View()
 	default:
 		content = m.dashboard.View()
 	}

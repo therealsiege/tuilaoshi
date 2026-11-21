@@ -155,3 +155,35 @@ func (s *Store) writeFrontmatter(page model.Page) error {
 
 	return os.WriteFile(path, []byte(b.String()), 0644)
 }
+
+// UpdateSection rewrites the body of a page's "## heading" section, up to
+// the next "## " heading, with update(old body). It fails if the page has
+// no such section.
+func (s *Store) UpdateSection(relPath, heading string, update func(old string) string) error {
+	path := filepath.Join(s.Dir, relPath)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	lines := strings.Split(string(data), "\n")
+	start := -1
+	for i, l := range lines {
+		if strings.TrimSpace(l) == "## "+heading {
+			start = i
+			break
+		}
+	}
+	if start < 0 {
+		return fmt.Errorf("%s has no %q section", relPath, heading)
+	}
+	end := len(lines)
+	for i := start + 1; i < len(lines); i++ {
+		if strings.HasPrefix(lines[i], "## ") {
+			end = i
+			break
+		}
+	}
+	body := strings.Trim(update(strings.Join(lines[start+1:end], "\n")), "\n")
+	out := append(append(append([]string{}, lines[:start+1]...), body, ""), lines[end:]...)
+	return os.WriteFile(path, []byte(strings.Join(out, "\n")), 0644)
+}

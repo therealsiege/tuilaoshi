@@ -15,6 +15,7 @@ Every screen, how to reach it from the dashboard, and what tests it. A test
 | `s` | Stats 统 | Daily/weekly activity, streak, review levels, characters mastered | `internal/ui/stats` | review-level bands, mastered count matches journey |
 | `j` | Journey 游 | Journey to the West progress: rank, companions, bosses, artifacts, quests, achievements, lore, bestiary | `internal/ui/journey`, `internal/journey` | mastery rule |
 | `t` | Reading 读 | Read texts from `wiki/readings` word by word with pinyin and meanings; enter marks a word you didn't know so it comes back tomorrow | `internal/ui/reader` | segmentation, glosses, mark-for-review, screen snapshots (list, text) |
+| `a` | Assess 测 | Adaptive diagnostic per skill (characters, vocabulary, grammar sentences, reading vocabulary): starts at HSK3, 3 questions per level, writes the levels and priority areas to `wiki/overview.md` | `internal/ui/assessment`, `internal/assess` | staircase, overview rewrite, full run on a test wiki, intro snapshot |
 | `x` | Radicals 部 | Radical families explorer | `internal/ui/radicals` | — |
 | `v` | Voice 声 | Choose Chinese and English text-to-speech voices | `internal/app` | — |
 | `q` | Quit 退 | Leave the app (from the dashboard) | `internal/app` | — |
