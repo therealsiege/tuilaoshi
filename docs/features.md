@@ -28,3 +28,5 @@ Shared pieces:
 
 Recordings (`make recordings`, needs `brew install vhs`; tapes in `docs/tapes`, played on a copy of the wiki):
 [battle](recordings/battle.gif), [journey](recordings/journey.gif).
+
+Journey content (tribulations, demons, bosses, companions, lore, dialogue) is data in `internal/journey/content/*.yaml`, embedded in the binary; `internal/journey/content_test.go` validates it as a whole, so adding a demon or lore passage is a YAML-only change.

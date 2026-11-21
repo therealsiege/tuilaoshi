@@ -1,0 +1,396 @@
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 师父，你的坚持比我的筋斗云还厉害！
+  pinyin: Shīfu, nǐ de jiānchí bǐ wǒ de jīndǒuyún hái lìhai!
+  translation: Master, your persistence is mightier than my somersault cloud!
+  trigger: streak
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 连我都佩服你了，师兄！
+  pinyin: Lián wǒ dōu pèifu nǐ le, shīxiōng!
+  translation: Even I admire you, senior brother!
+  trigger: streak
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 师父每天都在进步，真了不起。
+  pinyin: Shīfu měi tiān dōu zài jìnbù, zhēn liǎobuqǐ.
+  translation: Master improves every day, truly remarkable.
+  trigger: streak
+- speaker: 白龙马
+  english: Bai Longma
+  line: '*稳稳地走在路上，每一步都很坚定*'
+  pinyin: '*wěnwěn de zǒu zài lù shang, měi yī bù dōu hěn jiāndìng*'
+  translation: '*walks steadily on the road, every step firm and sure*'
+  trigger: streak
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 俺老孙看你这劲头，取经一定能成功！
+  pinyin: Ǎn lǎo Sūn kàn nǐ zhè jìntóu, qǔjīng yīdìng néng chénggōng!
+  translation: Old Sun sees your drive -- fetching the sutras will surely succeed!
+  trigger: streak
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 师父，你比我勤快多了，我都不好意思偷懒了。
+  pinyin: Shīfu, nǐ bǐ wǒ qínkuài duō le, wǒ dōu bù hǎoyìsi tōulǎn le.
+  translation: Master, you are much more diligent than me -- I'm too embarrassed to slack off now.
+  trigger: streak
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 日复一日，师父的功夫越来越深了。
+  pinyin: Rì fù yī rì, shīfu de gōngfu yuè lái yuè shēn le.
+  translation: Day after day, Master's skill grows ever deeper.
+  trigger: streak
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 好样的！这份毅力连天上的神仙都佩服！
+  pinyin: Hǎoyàng de! Zhè fèn yìlì lián tiānshang de shénxiān dōu pèifu!
+  translation: Well done! This perseverance would impress even the heavenly immortals!
+  trigger: streak
+- speaker: 白龙马
+  english: Bai Longma
+  line: '*轻轻地点头，眼里满是敬意*'
+  pinyin: '*qīngqīng de diǎntóu, yǎn lǐ mǎn shì jìngyì*'
+  translation: '*nods gently, eyes full of respect*'
+  trigger: streak
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 坚持下去就有好吃的……不对，就有好结果！
+  pinyin: Jiānchí xiàqù jiù yǒu hǎochī de... bùduì, jiù yǒu hǎo jiéguǒ!
+  translation: Keep going and there'll be good food... wait, I mean good results!
+  trigger: streak
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 师父的毅力就像流沙河的水，永远不会停下来。
+  pinyin: Shīfu de yìlì jiù xiàng Liúshā Hé de shuǐ, yǒngyuǎn bù huì tíng xiàlái.
+  translation: Master's perseverance is like the waters of the Flowing Sands River -- it never stops.
+  trigger: streak
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 好！师父又突破了一层！
+  pinyin: Hǎo! Shīfu yòu tūpò le yī céng!
+  translation: Good! Master has broken through another level!
+  trigger: rank_up
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 师父的修行又进了一步。
+  pinyin: Shīfu de xiūxíng yòu jìn le yī bù.
+  translation: Master's cultivation has advanced another step.
+  trigger: rank_up
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 哎呀，师父升级了！我们是不是可以吃顿好的庆祝一下？
+  pinyin: Āiyā, shīfu shēngjí le! Wǒmen shì bù shì kěyǐ chī dùn hǎo de qìngzhù yīxià?
+  translation: Oh my, Master leveled up! Can we have a nice meal to celebrate?
+  trigger: rank_up
+- speaker: 白龙马
+  english: Bai Longma
+  line: '*欢快地嘶鸣，高高扬起前蹄*'
+  pinyin: '*huānkuài de sīmíng, gāogāo yáng qǐ qián tí*'
+  translation: '*whinnies joyfully, rearing up on hind legs*'
+  trigger: rank_up
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 俺老孙就知道师父不简单！继续加油！
+  pinyin: Ǎn lǎo Sūn jiù zhīdào shīfu bù jiǎndān! Jìxù jiāyóu!
+  translation: Old Sun always knew Master was extraordinary! Keep it up!
+  trigger: rank_up
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 恭喜师父，修为更上一层楼。
+  pinyin: Gōngxǐ shīfu, xiūwéi gèng shàng yī céng lóu.
+  translation: Congratulations Master, your cultivation has risen to new heights.
+  trigger: rank_up
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 师父比我强太多了，我得加把劲才行！
+  pinyin: Shīfu bǐ wǒ qiáng tài duō le, wǒ děi jiā bǎ jìn cái xíng!
+  translation: Master is so much better than me -- I need to put in more effort!
+  trigger: rank_up
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 这一关过了！下一关也不在话下！
+  pinyin: Zhè yī guān guò le! Xià yī guān yě bù zài huà xià!
+  translation: This stage is cleared! The next one will be no problem either!
+  trigger: rank_up
+- speaker: 白龙马
+  english: Bai Longma
+  line: '*用力跺蹄，表示庆贺*'
+  pinyin: '*yònglì duò tí, biǎoshì qìnghè*'
+  translation: '*stamps hooves firmly in celebration*'
+  trigger: rank_up
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 师父一步一个脚印，稳扎稳打。
+  pinyin: Shīfu yī bù yī gè jiǎoyìn, wěn zhā wěn dǎ.
+  translation: Master moves one step at a time, steady and sure.
+  trigger: rank_up
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 师父都突破了，那我今天也不偷懒了！
+  pinyin: Shīfu dōu tūpò le, nà wǒ jīntiān yě bù tōulǎn le!
+  translation: Master has broken through, so I won't slack off today either!
+  trigger: rank_up
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 这妖怪不过如此！吃俺老孙一棒！
+  pinyin: Zhè yāoguài bùguò rúcǐ! Chī ǎn lǎo Sūn yī bàng!
+  translation: This demon is nothing! Take a blow from Old Sun!
+  trigger: boss_defeat
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 师兄威武！不过功劳也有我一份吧？
+  pinyin: Shīxiōng wēiwǔ! Bùguò gōngláo yě yǒu wǒ yī fèn ba?
+  translation: Senior brother is mighty! But I deserve some credit too, right?
+  trigger: boss_defeat
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 妖怪已除，前方的路安全了。
+  pinyin: Yāoguài yǐ chú, qiánfāng de lù ānquán le.
+  translation: The demon has been vanquished -- the road ahead is safe now.
+  trigger: boss_defeat
+- speaker: 白龙马
+  english: Bai Longma
+  line: '*昂首阔步，踏过妖怪的阵地*'
+  pinyin: '*áng shǒu kuò bù, tà guò yāoguài de zhèndì*'
+  translation: '*strides proudly, stepping over the demon''s territory*'
+  trigger: boss_defeat
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 哈哈！看你还敢不敢挡俺老孙的路！
+  pinyin: Hāhā! Kàn nǐ hái gǎn bù gǎn dǎng ǎn lǎo Sūn de lù!
+  translation: Haha! Let's see if you dare block Old Sun's path again!
+  trigger: boss_defeat
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 打完妖怪我饿了，有没有东西吃？
+  pinyin: Dǎ wán yāoguài wǒ è le, yǒu méi yǒu dōngxi chī?
+  translation: After beating the demon I'm hungry -- is there anything to eat?
+  trigger: boss_defeat
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 师父不用担心了，这一难已经过去了。
+  pinyin: Shīfu bù yòng dānxīn le, zhè yī nàn yǐjīng guòqù le.
+  translation: Master need not worry anymore -- this tribulation has passed.
+  trigger: boss_defeat
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 师父放心，有俺老孙在，什么妖怪都不怕！
+  pinyin: Shīfu fàngxīn, yǒu ǎn lǎo Sūn zài, shénme yāoguài dōu bù pà!
+  translation: Rest easy, Master -- with Old Sun here, no demon need be feared!
+  trigger: boss_defeat
+- speaker: 白龙马
+  english: Bai Longma
+  line: '*满意地喷了一口气，甩了甩尾巴*'
+  pinyin: '*mǎnyì de pēn le yī kǒu qì, shuǎi le shuǎi wěiba*'
+  translation: '*snorts with satisfaction and swishes tail*'
+  trigger: boss_defeat
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 这个妖怪比我想的好打！嘿嘿，师父厉害！
+  pinyin: Zhège yāoguài bǐ wǒ xiǎng de hǎo dǎ! Hēihēi, shīfu lìhai!
+  translation: This demon was easier than I expected! Hehe, Master is amazing!
+  trigger: boss_defeat
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 又一个妖怪败了，师父的力量越来越强。
+  pinyin: Yòu yī gè yāoguài bài le, shīfu de lìliàng yuè lái yuè qiáng.
+  translation: Another demon has fallen -- Master's power grows ever stronger.
+  trigger: boss_defeat
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 师父别灰心，再来一次！
+  pinyin: Shīfu bié huīxīn, zài lái yī cì!
+  translation: Don't be discouraged, Master! Try again!
+  trigger: mistake
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 没关系，慢慢来。
+  pinyin: Méi guānxi, mànman lái.
+  translation: It's okay, take it slow.
+  trigger: mistake
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 师父，我也经常记错呢！
+  pinyin: Shīfu, wǒ yě jīngcháng jì cuò ne!
+  translation: Master, I often get things wrong too!
+  trigger: mistake
+- speaker: 白龙马
+  english: Bai Longma
+  line: '*轻轻蹭了蹭师父的手，表示安慰*'
+  pinyin: '*qīngqīng cèng le cèng shīfu de shǒu, biǎoshì ānwèi*'
+  translation: '*gently nuzzles Master''s hand in comfort*'
+  trigger: mistake
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 错一次怕什么？俺老孙大闹天宫也失败过！
+  pinyin: Cuò yī cì pà shénme? Ǎn lǎo Sūn dànào tiāngōng yě shībài guò!
+  translation: What's one mistake to fear? Even Old Sun failed when wreaking havoc in heaven!
+  trigger: mistake
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 别难过了，我请师父吃桃子！哦，桃子被猴哥吃了……
+  pinyin: Bié nánguò le, wǒ qǐng shīfu chī táozi! Ó, táozi bèi hóugē chī le...
+  translation: Don't be sad, I'll treat Master to peaches! Oh, the monkey ate them all...
+  trigger: mistake
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 错误是学习的一部分，师父不必在意。
+  pinyin: Cuòwù shì xuéxí de yī bùfen, shīfu bùbì zàiyì.
+  translation: Mistakes are part of learning -- Master need not worry about it.
+  trigger: mistake
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 没事！这个字比妖怪还难，但师父一定能记住！
+  pinyin: Méishì! Zhège zì bǐ yāoguài hái nán, dàn shīfu yīdìng néng jì zhù!
+  translation: No worries! This character is harder than a demon, but Master will surely remember it!
+  trigger: mistake
+- speaker: 白龙马
+  english: Bai Longma
+  line: '*安静地站在一旁，耐心等待*'
+  pinyin: '*ānjìng de zhàn zài yīpáng, nàixīn děngdài*'
+  translation: '*stands quietly nearby, waiting patiently*'
+  trigger: mistake
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 这个字确实难，连我看了都头疼！
+  pinyin: Zhège zì quèshí nán, lián wǒ kàn le dōu tóuténg!
+  translation: This character really is hard -- even I get a headache looking at it!
+  trigger: mistake
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 师父再看一遍，我相信下次一定能记住。
+  pinyin: Shīfu zài kàn yī biàn, wǒ xiāngxìn xià cì yīdìng néng jì zhù.
+  translation: Master, look at it once more -- I believe you will remember next time for sure.
+  trigger: mistake
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 今天的修行结束了，师父辛苦了。
+  pinyin: Jīntiān de xiūxíng jiéshù le, shīfu xīnkǔ le.
+  translation: Today's practice is done -- Master has worked hard.
+  trigger: review_complete
+- speaker: 白龙马
+  english: Bai Longma
+  line: '*赞许地跺了跺蹄子*'
+  pinyin: '*zànxǔ de duò le duò tízi*'
+  translation: '*stamps hooves approvingly*'
+  trigger: review_complete
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 不错不错！今天的功课做完了，明天继续！
+  pinyin: Búcuò búcuò! Jīntiān de gōngkè zuò wán le, míngtiān jìxù!
+  translation: Not bad! Today's lesson is done -- continue tomorrow!
+  trigger: review_complete
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 终于做完了！可以休息一下吃点东西了吧？
+  pinyin: Zhōngyú zuò wán le! Kěyǐ xiūxi yīxià chī diǎn dōngxi le ba?
+  translation: Finally done! Can we rest and eat something now?
+  trigger: review_complete
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 师父今天学得很认真，我来帮师父整理行李。
+  pinyin: Shīfu jīntiān xué de hěn rènzhēn, wǒ lái bāng shīfu zhěnglǐ xínglǐ.
+  translation: Master studied very earnestly today -- let me help pack the luggage.
+  trigger: review_complete
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 今天的路走完了，师父好好休息吧！
+  pinyin: Jīntiān de lù zǒu wán le, shīfu hǎohǎo xiūxi ba!
+  translation: Today's journey is complete -- Master, please rest well!
+  trigger: review_complete
+- speaker: 白龙马
+  english: Bai Longma
+  line: '*安静地卧在树下，闭上了眼睛*'
+  pinyin: '*ānjìng de wò zài shù xià, bì shàng le yǎnjīng*'
+  translation: '*lies down quietly under a tree and closes its eyes*'
+  trigger: review_complete
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 师父今天太厉害了，我都看饿了！
+  pinyin: Shīfu jīntiān tài lìhai le, wǒ dōu kàn è le!
+  translation: Master was so amazing today that just watching made me hungry!
+  trigger: review_complete
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 今天又往西天近了一步，师父早点休息吧。
+  pinyin: Jīntiān yòu wǎng xītiān jìn le yī bù, shīfu zǎo diǎn xiūxi ba.
+  translation: Today we moved one step closer to the Western Heaven -- Master, please rest early.
+  trigger: review_complete
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 师父，今天的功夫没白练！俺去给你摘些果子。
+  pinyin: Shīfu, jīntiān de gōngfu méi bái liàn! Ǎn qù gěi nǐ zhāi xiē guǒzi.
+  translation: Master, today's practice was not in vain! Let me go pick some fruit for you.
+  trigger: review_complete
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 辛苦辛苦！下次少学一点也没关系嘛……
+  pinyin: Xīnkǔ xīnkǔ! Xià cì shǎo xué yīdiǎn yě méi guānxi ma...
+  translation: Hard work! Maybe learn a bit less next time, that's fine too...
+  trigger: review_complete
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 师父，我们休息够了吧？该继续赶路了！
+  pinyin: Shīfu, wǒmen xiūxi gòu le ba? Gāi jìxù gǎnlù le!
+  translation: Master, we've rested enough, right? Time to continue the journey!
+  trigger: idle
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 师父，妖怪可不会等我们的！
+  pinyin: Shīfu, yāoguài kě bù huì děng wǒmen de!
+  translation: Master, the demons won't wait for us!
+  trigger: idle
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 师父，我已经把行李整理好了，随时可以出发。
+  pinyin: Shīfu, wǒ yǐjīng bǎ xínglǐ zhěnglǐ hǎo le, suíshí kěyǐ chūfā.
+  translation: Master, I've already packed the luggage -- we can depart at any time.
+  trigger: idle
+- speaker: 白龙马
+  english: Bai Longma
+  line: '*不安地踏着蹄子，想要继续赶路*'
+  pinyin: '*bù''ān de tà zhe tízi, xiǎng yào jìxù gǎnlù*'
+  translation: '*paws the ground restlessly, eager to continue the journey*'
+  trigger: idle
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 连我都坐不住了，师父快来学习吧！
+  pinyin: Lián wǒ dōu zuò bù zhù le, shīfu kuài lái xuéxí ba!
+  translation: Even I can't sit still anymore -- Master, come study!
+  trigger: idle
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 师父！前面的路还很长，不能停下来啊！
+  pinyin: Shīfu! Qiánmiàn de lù hái hěn cháng, bù néng tíng xiàlái a!
+  translation: Master! The road ahead is still long -- we cannot stop!
+  trigger: idle
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 师父，经书不会自己走过来的。
+  pinyin: Shīfu, jīngshū bù huì zìjǐ zǒu guòlái de.
+  translation: Master, the sutras won't walk to us on their own.
+  trigger: idle
+- speaker: 猪八戒
+  english: Zhu Bajie
+  line: 我都起来了，师父你还不来？那我也回去睡了！
+  pinyin: Wǒ dōu qǐlái le, shīfu nǐ hái bù lái? Nà wǒ yě huíqù shuì le!
+  translation: Even I'm up already -- Master, aren't you coming? Then I'm going back to sleep!
+  trigger: idle
+- speaker: 孙悟空
+  english: Sun Wukong
+  line: 俺在这里等了好久了！师父快来！
+  pinyin: Ǎn zài zhèlǐ děng le hǎojiǔ le! Shīfu kuài lái!
+  translation: I've been waiting here for ages! Master, hurry up!
+  trigger: idle
+- speaker: 白龙马
+  english: Bai Longma
+  line: '*朝着西方的方向看，焦急地甩着尾巴*'
+  pinyin: '*cháo zhe xīfāng de fāngxiàng kàn, jiāojí de shuǎi zhe wěiba*'
+  translation: '*looks toward the west, swishing tail anxiously*'
+  trigger: idle
+- speaker: 沙悟净
+  english: Sha Wujing
+  line: 师父，不学习的日子，妖怪就会变强。
+  pinyin: Shīfu, bù xuéxí de rìzi, yāoguài jiù huì biàn qiáng.
+  translation: Master, on days without study, the demons grow stronger.
+  trigger: idle

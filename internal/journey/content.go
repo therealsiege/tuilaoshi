@@ -1,0 +1,70 @@
+package journey
+
+import (
+	"embed"
+	"fmt"
+	"strings"
+
+	"gopkg.in/yaml.v3"
+)
+
+// The journey's story content lives in content/*.yaml, embedded in the
+// binary. Adding a demon, boss, lore passage or line of dialogue is a data
+// change; content_test.go validates the whole set.
+//
+//go:embed content/*.yaml
+var contentFS embed.FS
+
+// Content is the journey's story data.
+type Content struct {
+	Tribulations []Tribulation
+	Bestiary     []BestiaryEntry
+	Bosses       []Boss
+	Companions   []Companion
+	Lore         []LoreEntry
+	Dialogue     []Dialogue
+}
+
+// content is loaded once at startup; the embedded files are checked by
+// tests, so a parse failure is a build defect.
+var content = mustLoadContent()
+
+func mustLoadContent() Content {
+	c, err := LoadContent()
+	if err != nil {
+		panic(err)
+	}
+	return c
+}
+
+// LoadContent parses the embedded content files.
+func LoadContent() (Content, error) {
+	var c Content
+	files := []struct {
+		name string
+		into any
+	}{
+		{"tribulations", &c.Tribulations},
+		{"bestiary", &c.Bestiary},
+		{"bosses", &c.Bosses},
+		{"companions", &c.Companions},
+		{"lore", &c.Lore},
+		{"dialogue", &c.Dialogue},
+	}
+	for _, f := range files {
+		data, err := contentFS.ReadFile("content/" + f.name + ".yaml")
+		if err != nil {
+			return Content{}, fmt.Errorf("journey content: %w", err)
+		}
+		if err := yaml.Unmarshal(data, f.into); err != nil {
+			return Content{}, fmt.Errorf("journey content %s.yaml: %w", f.name, err)
+		}
+	}
+	for i := range c.Bestiary {
+		c.Bestiary[i].Art, c.Bestiary[i].ArtLines = strings.Join(c.Bestiary[i].ArtLines, "\n"), nil
+		if c.Bestiary[i].ImagePath == "" {
+			c.Bestiary[i].ImagePath = fmt.Sprintf("assets/images/demons/%s.png", c.Bestiary[i].Name)
+		}
+	}
+	return c, nil
+}

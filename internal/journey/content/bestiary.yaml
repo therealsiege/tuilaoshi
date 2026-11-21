@@ -1,0 +1,308 @@
+- name: 混世魔王
+  english: Havoc Monster
+  title: 混世魔王
+  title_eng: Demon King of Confusion
+  origin: A lesser demon who seized the Water Curtain Cave while Sun Wukong was away training under Master Subhuti.
+  powers: Commands a horde of minor demons and wields a massive iron blade
+  weakness: Sun Wukong reclaimed his cave and slew him with a single stroke of a stolen sword, his very first boss battle
+  chapter: Chapter 2-3
+  art:
+    - '    _/\_'
+    - '   (o  o)'
+    - '  --\  /--'
+    - '    |\/|'
+    - '    /  \'
+- name: 白骨精
+  english: White Bone Demon
+  title: 尸魔
+  title_eng: Corpse Demon
+  origin: A skeleton demon who achieved sentience and shape-shifting powers after centuries of absorbing yin energy on White Tiger Ridge.
+  powers: Transforms into three disguises — a young woman, an old woman, and an old man — to trick Tang Sanzang
+  weakness: Sun Wukong saw through all three disguises with his fiery golden eyes and struck her down, though Tang Sanzang banished him for it
+  chapter: Chapters 27-28
+  art:
+    - '    .-.'
+    - '   (x x)'
+    - '    |=|'
+    - '   /|+|\'
+    - '    d  b'
+- name: 黄风怪
+  english: Yellow Wind Demon
+  title: 黄风大王
+  title_eng: Great King of Yellow Wind
+  origin: Originally a marten who lived beneath the lamp of Lingji Bodhisattva's temple and stole its lamp oil, then fled to Yellow Wind Ridge.
+  powers: Commands devastating samadhi wind storms that blind and disorient opponents, even Sun Wukong
+  weakness: Lingji Bodhisattva subdued him with the Stabilizing Wind Pill and a golden dragon claw lance
+  chapter: Chapters 20-21
+  art:
+    - '   ~~//~~'
+    - '  ( @.@ )'
+    - '  /|~~~|\'
+    - '   | W |'
+    - '   ^   ^'
+- name: 黄袍怪
+  english: Yellow Robe Demon
+  title: 奎木狼
+  title_eng: Star Spirit Kui Mu Lang
+  origin: The Wood Wolf star spirit of the Kui constellation who fell to earth to live with his celestial lover Baihua, the princess of Baoxiang Kingdom.
+  powers: Transforms Tang Sanzang into a tiger with dark magic and possesses tremendous combat skill as a celestial warrior
+  weakness: Sun Wukong was recalled from exile, freed Sanzang, and fought him until the celestial authorities summoned the star spirit back to heaven
+  chapter: Chapters 28-31
+  art:
+    - '   /|  |\'
+    - '  ( o--o )'
+    - '   |/~~\|'
+    - '   | ][ |'
+    - '   _/  \_'
+- name: 金角大王
+  english: Gold Horn King
+  title: 金角大王
+  title_eng: Great King Gold Horn
+  origin: Originally a boy attendant who tended Laozi's golden brazier, sent to earth by Guanyin to test the pilgrims.
+  powers: Possesses five magical treasures including the Purple Gold Red Gourd, the Jade Vase, and the Plantain Fan
+  weakness: Sun Wukong outsmarted them through cunning and deception, swapping the treasures and trapping them in their own gourds
+  chapter: Chapters 32-35
+  art:
+    - '   ,/|\.'
+    - '  / o o \'
+    - '  | _L_ |'
+    - '  |/|||\ |'
+    - '   // \\'
+- name: 银角大王
+  english: Silver Horn King
+  title: 银角大王
+  title_eng: Great King Silver Horn
+  origin: The other boy attendant from Laozi's palace, partner to Gold Horn, equally armed with stolen celestial treasures.
+  powers: Wields the Seven Star Sword and commands the magical rope that binds immortals, works in tandem with his brother
+  weakness: Tricked by Sun Wukong's shape-shifting and trapped in the Purple Gold Red Gourd; Laozi reclaimed both demons
+  chapter: Chapters 32-35
+  art:
+    - '   ,/|\.'
+    - '  / - - \'
+    - '  | _v_ |'
+    - '  |/|||\|'
+    - '   // \\'
+- name: 红孩儿
+  english: Red Boy
+  title: 圣婴大王
+  title_eng: Holy Infant King
+  origin: Son of the Bull Demon King and Princess Iron Fan, raised in the volcanic Fire Cloud Cave where he mastered samadhi true fire.
+  powers: Breathes samadhi true fire from his mouth and nostrils, which cannot be extinguished by ordinary water
+  weakness: Guanyin trapped him with celestial blades on a lotus throne and made him her disciple, the Boy of Wealth
+  chapter: Chapters 40-42
+  art:
+    - '   *\~/*'
+    - '   (>.< )'
+    - '  ~|/^\|~'
+    - '   | V |'
+    - '   ^   ^'
+- name: 黑熊精
+  english: Black Bear Demon
+  title: 黑风山主
+  title_eng: Lord of Black Wind Mountain
+  origin: A black bear who cultivated the Dao for centuries on Black Wind Mountain near the Guanyin Temple.
+  powers: Immense physical strength, skilled in martial combat, and cunning enough to befriend corrupt monks
+  weakness: Guanyin disguised herself as a Daoist offering a pill of immortality, which was actually a mind-controlling pellet that subdued him
+  chapter: Chapters 16-17
+  art:
+    - '   (n n)'
+    - '  [| . |]'
+    - '  [|\_/|]'
+    - '  [| | |]'
+    - '   _/ \_'
+- name: 青牛精
+  english: Green Bull Demon
+  title: 独角兕大王
+  title_eng: Great King Single-Horn Rhinoceros
+  origin: Laozi's own blue-green bull mount that escaped the celestial stables and descended to earth as a demon king.
+  powers: Possesses the Diamond Jade Bracelet (金刚琢) that absorbs and neutralizes all weapons, including Sun Wukong's staff
+  weakness: Only Laozi himself could reclaim the bracelet and subdue his own mount, returning it to the celestial realm
+  chapter: Chapters 50-52
+  art:
+    - '  (__/)__'
+    - '  (o   o )>'
+    - '  /| U |/'
+    - ' / |===| \'
+    - '    || ||'
+- name: 蜘蛛精
+  english: Spider Demons
+  title: 七情迷
+  title_eng: Seven Passions
+  origin: Seven spider sisters who established themselves at Silk Cave (盘丝洞), each embodying one of the seven emotions.
+  powers: Weave poisonous silk webs from their navels, transform into beautiful women, and ensnare victims with illusion and desire
+  weakness: Sun Wukong destroyed their webs while Zhu Bajie fought them at the bathhouse; their senior, the Hundred-Eye Demon, was subdued by Vairocana Buddha's mother
+  chapter: Chapters 72-73
+  art:
+    - '  /\()/\'
+    - ' //    \\'
+    - ((  ><  ))
+    - ' \\    //'
+    - '  \/()\/'
+- name: 蝎子精
+  english: Scorpion Demon
+  title: 琵琶精
+  title_eng: Pipa Spirit
+  origin: A scorpion spirit who once stung the Buddha himself when he was lecturing at the Thunder Monastery, then fled to Pipa Cave.
+  powers: Her tail stinger is lethally venomous, powerful enough to wound even Buddha; she can transform into a beautiful woman
+  weakness: Defeated by the Star Lord of the Pleiades (Mao Ri Xing), a celestial rooster whose crowing is her bane
+  chapter: Chapter 55-56
+  art:
+    - '    )>'
+    - '   /o o\'
+    - '  | === |'
+    - '  \\ ~ /'
+    - '   \\|/=>'
+- name: 六耳猕猴
+  english: Six-Eared Macaque
+  title: 假悟空
+  title_eng: False Wukong
+  origin: One of the four primates of chaos, a creature born from heaven and earth who can hear and know all things across the universe.
+  powers: A perfect copy of Sun Wukong in appearance, power, and even his staff, indistinguishable by any spell or mirror
+  weakness: Only Buddha could tell the two apart; he revealed the impostor under his golden bowl and Sun Wukong struck him down
+  chapter: Chapters 56-58
+  art:
+    - '   ,.-.'
+    - '  ( o.o)'
+    - '   |=|?'
+    - '  /|M|\'
+    - '   d  b'
+- name: 牛魔王
+  english: Bull Demon King
+  title: 大力牛魔王
+  title_eng: Great Strength Bull Demon King
+  origin: Once a sworn brother of Sun Wukong from their demon days, now the most powerful independent demon king, lord of Cuiyun Mountain.
+  powers: Can transform into any shape, possesses enormous strength, rides iron chariots, and rivals Sun Wukong in raw combat power
+  weakness: Defeated by the combined forces of Sun Wukong, Zhu Bajie, Nezha, and the Heavenly King Li Jing's demon-revealing mirror
+  chapter: Chapters 59-61
+  art:
+    - '  (\\||//)'
+    - '   (o  o)'
+    - '    |UU|'
+    - '   /|  |\'
+    - '  /_|  |_\'
+- name: 铁扇公主
+  english: Princess Iron Fan
+  title: 罗刹女
+  title_eng: Rakshasi
+  origin: Wife of the Bull Demon King and mother of Red Boy, she guards the palm-leaf fan at Palm Leaf Cave near the Flaming Mountains.
+  powers: Wields the Plantain Fan (芭蕉扇) which can extinguish fire or create hurricanes with a single wave
+  weakness: Sun Wukong shrank himself and entered her stomach, causing unbearable pain until she surrendered the fan
+  chapter: Chapters 59-61
+  art:
+    - '    ___'
+    - '   / ~ \'
+    - '  ( -.- )'
+    - '   \\_//'
+    - '    )|('
+- name: 白鹿精
+  english: White Deer Demon
+  title: 比丘国国丈
+  title_eng: State Preceptor of Bhikku Kingdom
+  origin: The mount of the Star of Longevity (寿星) who escaped and posed as a Daoist sage in the kingdom of Bhikku.
+  powers: Convinced the king to harvest the hearts of 1,111 children to brew an immortality elixir
+  weakness: Sun Wukong saved the children and chased the demon until the Star of Longevity arrived to reclaim his mount
+  chapter: Chapters 78-79
+  art:
+    - '   /\\  /\\'
+    - '  (  oo  )'
+    - '   | -- |'
+    - '   | || |'
+    - '    \\||/'
+- name: 玉兔精
+  english: Jade Rabbit Demon
+  title: 天竺假公主
+  title_eng: False Princess of Tianzhu
+  origin: Chang'e's jade rabbit who descended to earth to settle a karmic debt and impersonated the princess of the Tianzhu Kingdom.
+  powers: Skilled in martial arts using a pestle weapon, shape-shifts into a perfect copy of the real princess
+  weakness: Chang'e herself descended from the moon to reclaim the rabbit after Sun Wukong exposed the deception
+  chapter: Chapters 93-95
+  art:
+    - '   (\\()'
+    - '   (o.o )'
+    - '    (\")(")'
+    - '     || ||'
+    - '     *  *'
+- name: 金翅大鹏
+  english: Golden-Winged Great Roc
+  title: 大鹏金翅
+  title_eng: Great Peng of Golden Wings
+  origin: Born from a cosmic phoenix egg, he is the nephew of the Buddha and the fastest creature in all of creation.
+  powers: Flies at inconceivable speed, possesses strength that overwhelms even Sun Wukong, and commands the demons of Lion Camel Ridge
+  weakness: Only Buddha himself could subdue him; the Roc was made to serve as a dharma protector atop Buddha's throne
+  chapter: Chapters 74-77
+  art:
+    - '   __/V\__'
+    - '  / /   \ \'
+    - ' / / o o \ \'
+    - ' \=\  ^  /=/'
+    - '   \\===//'
+- name: 金鱼精
+  english: Goldfish Demon
+  title: 灵感大王
+  title_eng: Great King of Spiritual Touch
+  origin: A goldfish that lived in the lotus pond of Guanyin's temple and achieved demon form by absorbing the light of moonlit scriptures.
+  powers: Controls the waters of the Heaven-Reaching River, creates floods, and demands child sacrifices
+  weakness: Guanyin arrived with a bamboo basket and recaptured her escaped fish with a simple scoop
+  chapter: Chapters 47-49
+  art:
+    - '    ,<><,'
+    - '   / o  o\'
+    - '  (  ><  )'
+    - '   \~~~~/>'
+    - '    ``--'''
+- name: 黄眉怪
+  english: Yellow Brow Demon
+  title: 黄眉大王
+  title_eng: Great King Yellow Brow
+  origin: A page boy who served under Maitreya Buddha and stole his master's golden cymbals and human-skin bag before fleeing to earth.
+  powers: Traps enemies in the human-skin bag and crushes them between the golden cymbals; created a false Buddhist paradise
+  weakness: Maitreya Buddha arrived in disguise as a melon farmer and lured the demon back into captivity
+  chapter: Chapters 65-66
+  art:
+    - '    _O_'
+    - '   /o o\\'
+    - '  | === |'
+    - '  |\\_//|'
+    - '   \\|_|/'
+- name: 白毛鼠精
+  english: White-Haired Rat Demon
+  title: 半截观音
+  title_eng: Half-Length Guanyin
+  origin: A rat spirit who once stole food from the Buddha's lamp and was spared execution by Li Jing, then posed as a kidnapped maiden in Pitfall Cave.
+  powers: Transforms into a beautiful woman to seduce Tang Sanzang, and impersonates a half-bodied Guanyin shrine
+  weakness: Heavenly King Li Jing and Prince Nezha arrived to arrest their wayward adopted daughter and returned her to heaven
+  chapter: Chapters 80-83
+  art:
+    - '    ()()'
+    - '   (o.o )'
+    - '    |>|'
+    - '   /| |\'
+    - '    ~  ~'
+- name: 九头虫
+  english: Nine-Headed Bug
+  title: 九头驸马
+  title_eng: Nine-Headed Prince Consort
+  origin: A nine-headed bird demon who married a dragon princess of Biyou Palace and stole the Buddha's relic from the Jinguang Temple.
+  powers: Possesses nine heads that are nearly impossible to sever permanently, each capable of biting and spitting poison
+  weakness: Erlang Shen's celestial hound bit off one head; the injured demon fled and was never fully captured, one of the few to escape
+  chapter: Chapters 62-63
+  art:
+    - '  ooo/|\ooo'
+    - '   \o-o-o/'
+    - '    |===|'
+    - '    /| |\'
+    - '   / | | \'
+- name: 如来佛祖
+  english: Buddha
+  title: 如来佛祖
+  title_eng: Tathagata Buddha
+  origin: The supreme Buddha who trapped Sun Wukong under Five Elements Mountain and ordained the Journey to the West as a test of faith.
+  powers: Infinite wisdom and cosmic power; his palm can become a mountain, his perception encompasses all universes
+  weakness: He is not a demon to be defeated but the final judge; the pilgrims earn his scriptures through 81 tribulations of devotion
+  chapter: Chapters 7, 98-100
+  art:
+    - '     _'
+    - '    /.\'
+    - '   / . \'
+    - '  ( -o- )'
+    - '   \___/'

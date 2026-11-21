@@ -1,7 +1,5 @@
 557 internal/confusables/confusables.go
-584 internal/journey/dialogue.go
 667 internal/journey/journey_test.go
-595 internal/journey/tribulations.go
 1169 internal/mnemonic/mnemonic.go
 579 internal/phonetic/phonetic.go
 636 internal/ui/journey/journey.go

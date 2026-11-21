@@ -1,0 +1,405 @@
+- number: 1
+  name: 金蝉遭贬
+  english: Banishment of Golden Cicada
+  desc: The Golden Cicada, a disciple of the Buddha, is banished from paradise for inattention during a sermon and condemned to ten reincarnations in the mortal world.
+  location: 灵山
+- number: 2
+  name: 出胎几杀
+  english: Nearly Killed at Birth
+  desc: The infant Chen Xuanzang is marked for death when bandits murder his father and seize his mother on the road to his father's government post.
+  location: 洪江
+- number: 3
+  name: 满月抛江
+  english: Cast into the River at Full Moon
+  desc: His mother sets the newborn adrift on a wooden plank in the Yangtze to save him from the bandit Liu Hong, tying a letter of blood to his swaddling clothes.
+  location: 长江
+- number: 4
+  name: 寻亲报冤
+  english: Seeking Parents, Avenging Wrongs
+  desc: The young monk discovers his true origins, finds his mother, and brings the murderer Liu Hong to justice, reuniting the broken family.
+  location: 江州
+- number: 5
+  name: 出城逢虎
+  english: Encountering a Tiger Outside the City
+  desc: Tang Sanzang is nearly devoured by a fierce tiger shortly after departing the gates of Chang'an on his westward pilgrimage.
+  location: 长安
+- number: 6
+  name: 落坑折从
+  english: Falling into a Pit, Losing Followers
+  desc: The pilgrim stumbles into a demon pit in the wilderness, and his two attendants are seized and eaten by mountain demons.
+  location: 巩州
+- number: 7
+  name: 双叉岭上
+  english: On Twin Fork Ridge
+  desc: Three demon kings — a tiger, a bear, and a bull — ambush Tang Sanzang on Twin Fork Ridge, but the planet Venus intervenes to save him.
+  location: 双叉岭
+- number: 8
+  name: 两界山头
+  english: At Two Boundary Mountain
+  desc: Tang Sanzang arrives at Five Elements Mountain and frees Sun Wukong from his five-hundred-year imprisonment beneath the Buddha's seal.
+  location: 两界山
+- number: 9
+  name: 陡涧换马
+  english: Exchanging the Horse at Steep Ravine
+  desc: The White Dragon Prince swallows the pilgrim's horse whole in the rapids of Eagle Grief Stream and is subdued by Guanyin to become the new mount.
+  location: 蛇盘山鹰愁涧
+- number: 10
+  name: 夜被火烧
+  english: Burned in the Night
+  desc: The greedy abbot of Guanyin Temple sets fire to the meditation hall at midnight, hoping to steal Tang Sanzang's precious kasaya robe in the blaze.
+  location: 观音禅院
+- number: 11
+  name: 失却袈裟
+  english: Losing the Kasaya Robe
+  desc: The Black Bear Demon steals the kasaya from the burning temple, and Sun Wukong must enlist Guanyin's help to recover the sacred garment.
+  location: 黑风山
+- number: 12
+  name: 收降八戒
+  english: Subduing Zhu Bajie
+  desc: At Gao Village, Sun Wukong battles the pig demon who has taken a farmer's daughter as his bride, and Zhu Bajie joins the pilgrimage as the second disciple.
+  location: 高老庄
+- number: 13
+  name: 黄风怪阻
+  english: Obstructed by the Yellow Wind Demon
+  desc: The Yellow Wind Demon, a marten spirit, conjures a devastating sandstorm that blinds Sun Wukong and blocks the pilgrims' path through Yellow Wind Ridge.
+  location: 黄风岭
+- number: 14
+  name: 请求灵吉
+  english: Seeking Lingji Bodhisattva's Aid
+  desc: Sun Wukong travels to find Lingji Bodhisattva, who subdues the Yellow Wind Demon with the Settling Wind Pill and a golden dragon staff.
+  location: 小须弥山
+- number: 15
+  name: 流沙难渡
+  english: Unable to Cross the Flowing Sands
+  desc: The pilgrims reach the vast Flowing Sands River where a fearsome water demon attacks anyone who tries to cross, defeating Zhu Bajie in battle.
+  location: 流沙河
+- number: 16
+  name: 收得沙僧
+  english: Recruiting Sha Wujing
+  desc: With Guanyin's guidance, the river demon Sha Wujing recognizes his destined master and joins the pilgrimage as the third disciple, ferrying them across on his skull-necklace raft.
+  location: 流沙河
+- number: 17
+  name: 四圣显化
+  english: The Four Saints Test the Pilgrims
+  desc: Four bodhisattvas disguise themselves as a wealthy widow and her daughters to test the pilgrims' resolve, and Zhu Bajie falls for the trap and is tied to a tree all night.
+  location: 四圣试禅心
+- number: 18
+  name: 五庄观中
+  english: At Five Villages Temple
+  desc: The pilgrims stop at the temple of Immortal Zhen Yuan, where the legendary ginseng fruit tree bears fruit shaped like human infants every nine thousand years.
+  location: 万寿山五庄观
+- number: 19
+  name: 难活人参
+  english: Trouble with the Ginseng Fruit Tree
+  desc: Sun Wukong topples the sacred ginseng fruit tree in anger after Zhen Yuan's disciples accuse the pilgrims of stealing fruit, and must seek Guanyin to restore it.
+  location: 万寿山五庄观
+- number: 20
+  name: 贬退心猿
+  english: Banishing the Mind-Monkey
+  desc: Tang Sanzang recites the headband-tightening spell and banishes Sun Wukong for killing bandits, leaving the pilgrimage without its strongest protector.
+  location: 白虎岭
+- number: 21
+  name: 黑松林失散
+  english: Separated in Black Pine Forest
+  desc: Without Sun Wukong, the pilgrims are ambushed in the dark Black Pine Forest and Tang Sanzang is captured by the Yellow Robe Demon.
+  location: 黑松林
+- number: 22
+  name: 宝象国捉僧
+  english: The Monk Seized in Precious Image Kingdom
+  desc: The Yellow Robe Demon brings Tang Sanzang to the Kingdom of Precious Image, where the stolen princess begs for rescue and the monk is imprisoned.
+  location: 宝象国
+- number: 23
+  name: 金銮殿变虎
+  english: Transformed into a Tiger at the Golden Hall
+  desc: The Yellow Robe Demon uses sorcery to transform Tang Sanzang into a tiger at the royal court, leaving the disciples scrambling to save their master.
+  location: 宝象国
+- number: 24
+  name: 平顶山逢魔
+  english: Meeting Demons at Flat-Top Mountain
+  desc: The Gold Horn and Silver Horn Kings, wielding five powerful magic treasures, lure the pilgrims into traps on Flat-Top Mountain.
+  location: 平顶山
+- number: 25
+  name: 莲花洞高悬
+  english: Dangling in Lotus Cave
+  desc: Sun Wukong is captured and hung upside down in Lotus Cave, where the demon kings plot to steam and eat Tang Sanzang using their magical gourds.
+  location: 莲花洞
+- number: 26
+  name: 乌鸡国救主
+  english: Rescuing the King of Crow-Cock Kingdom
+  desc: The true king of Crow-Cock Kingdom appears as a ghost to Tang Sanzang, murdered and impersonated by a lion demon who has ruled in his place for three years.
+  location: 乌鸡国
+- number: 27
+  name: 被魔化身
+  english: Impersonated by a Demon
+  desc: The lion demon, a mount of Manjusri Bodhisattva, has perfectly assumed the dead king's form and even his queen cannot tell the difference.
+  location: 乌鸡国
+- number: 28
+  name: 号山逢大圣
+  english: Meeting the Great Sage at Fire-Cloud Cave
+  desc: Red Boy, the son of the Bull Demon King, blocks the path at Mount Hao, spewing samadhi true fire that even Sun Wukong's powers cannot extinguish.
+  location: 号山
+- number: 29
+  name: 风摄圣僧
+  english: The Holy Monk Swept Away by Wind
+  desc: Red Boy creates a whirlwind that snatches Tang Sanzang away from his disciples and carries the monk to Fire-Cloud Cave for the demons' feast.
+  location: 号山枯松涧
+- number: 30
+  name: 心猿遭害
+  english: The Mind-Monkey Nearly Destroyed
+  desc: Sun Wukong is overwhelmed by Red Boy's samadhi fire, collapsing unconscious in a river, and must be revived by Zhu Bajie before seeking Guanyin's intervention.
+  location: 号山枯松涧
+- number: 31
+  name: 请圣降妖
+  english: Requesting a Saint to Subdue the Demon
+  desc: Sun Wukong begs Guanyin for help, and she traps Red Boy with heavenly swords and a golden cuff, converting him into the boy attendant Sudhana.
+  location: 南海落伽山
+- number: 32
+  name: 黑河沼陷
+  english: Sinking in the Black River Marsh
+  desc: A dragon demon capsizes the pilgrims' boat on the Black River, dragging Tang Sanzang to an underwater palace where the monster plans to eat him.
+  location: 黑水河
+- number: 33
+  name: 搬运车迟
+  english: Hauling Carts at Cart-Slow Kingdom
+  desc: The pilgrims discover that Buddhist monks have been enslaved to haul carts while three Daoist imposters rule Cart-Slow Kingdom with fake miracles.
+  location: 车迟国
+- number: 34
+  name: 大赌输赢
+  english: The Great Wager
+  desc: Sun Wukong challenges the three Daoist sorcerers to contests of prayer, meditation, and magical combat before the king to expose their fraud.
+  location: 车迟国
+- number: 35
+  name: 祈雨凤仙
+  english: Praying for Rain at Phoenix-Immortal Prefecture
+  desc: The Tiger, Deer, and Ram demons compete against Sun Wukong in rain-summoning, head-severing, and oil-boiling contests, each ending in the demons' destruction.
+  location: 车迟国
+- number: 36
+  name: 失落兵器
+  english: Losing the Weapons
+  desc: A leopard demon steals the pilgrims' weapons in the night, forcing Sun Wukong to track the thief to a hidden mountain lair before the pilgrims can continue.
+  location: 金平府
+- number: 37
+  name: 会赴龙华
+  english: Attending the Dragon Flower Assembly
+  desc: Three rhinoceros demons disguise themselves as Buddhas at a lantern festival, abducting Tang Sanzang under the pretense of a sacred Dragon Flower gathering.
+  location: 金平府
+- number: 38
+  name: 天竺招婚
+  english: Marriage Proposal in India
+  desc: A jade rabbit spirit, escaped from the Moon Palace, impersonates the princess of India and tries to force Tang Sanzang into marriage through a ball-tossing ceremony.
+  location: 天竺国
+- number: 39
+  name: 路逢大河
+  english: Encountering a Great River on the Road
+  desc: The pilgrims reach the vast Heaven-Reaching River, eight hundred li wide and impossibly deep, with no bridge or ferry in sight.
+  location: 通天河
+- number: 40
+  name: 身落天河
+  english: Falling into the Heavenly River
+  desc: A goldfish demon that escaped from Guanyin's lotus pond shatters the ice beneath the pilgrims, plunging Tang Sanzang into the frozen river and dragging him below.
+  location: 通天河
+- number: 41
+  name: 鱼篮现身
+  english: Guanyin Appears with the Fish Basket
+  desc: Guanyin Bodhisattva arrives at the riverbank with a bamboo fish basket and recaptures her wayward goldfish spirit, freeing Tang Sanzang from the underwater lair.
+  location: 通天河
+- number: 42
+  name: 金兜山遇怪
+  english: Meeting the Monster at Golden Pocket Mountain
+  desc: The Azure Bull Demon, mount of Laozi himself, wields a diamond bracelet that swallows every weapon and magical treasure thrown against it.
+  location: 金兜山
+- number: 43
+  name: 普天神难伏
+  english: No Deity in Heaven Can Subdue It
+  desc: Sun Wukong rallies heavenly warriors and the thunder gods, but none can overcome the Azure Bull Demon's diamond bracelet until Laozi descends to reclaim his runaway mount.
+  location: 金兜山
+- number: 44
+  name: 问佛根源
+  english: Questioning the Buddha's Origins
+  desc: The pilgrims learn the deeper karmic connections between the demons they face and the celestial beings of heaven, revealing that many monsters are wayward immortals.
+  location: 西行路上
+- number: 45
+  name: 吃水遭毒
+  english: Poisoned by Drinking Water
+  desc: Tang Sanzang and Zhu Bajie drink from the Motherhood River in the Kingdom of Women and become magically pregnant, writhing in agony until Sun Wukong fetches abortion water from the Miscarriage Spring.
+  location: 西梁女国
+- number: 46
+  name: 西梁国留婚
+  english: Detained for Marriage in the Western Liang Kingdom
+  desc: The queen of the all-female kingdom falls in love with Tang Sanzang and insists he stay as her royal consort, trapping the pilgrims in a web of courtly protocol.
+  location: 西梁女国
+- number: 47
+  name: 琵琶洞受苦
+  english: Suffering in Pipa Cave
+  desc: The Scorpion Demoness kidnaps Tang Sanzang to Pipa Cave and poisons Sun Wukong with her tail stinger, which even the Monkey King's iron body cannot withstand.
+  location: 毒敌山琵琶洞
+- number: 48
+  name: 再贬心猿
+  english: Banishing the Mind-Monkey Again
+  desc: Tang Sanzang drives Sun Wukong away a second time after the monkey kills more bandits, and the pilgrim is left vulnerable on the road without his champion.
+  location: 西行路上
+- number: 49
+  name: 难辨猕猴
+  english: Unable to Distinguish the Macaque
+  desc: The Six-Eared Macaque assumes Sun Wukong's perfect likeness, beating Tang Sanzang unconscious and stealing the scriptures, and no power in heaven or earth can tell the two apart until the Buddha himself intervenes.
+  location: 花果山
+- number: 50
+  name: 路阻火焰山
+  english: Blocked by the Flaming Mountains
+  desc: The road ahead is consumed by the raging Flaming Mountains, whose fires stretch eight hundred li and cannot be quenched by any ordinary means.
+  location: 火焰山
+- number: 51
+  name: 求取芭蕉扇
+  english: Seeking the Banana Leaf Fan
+  desc: Sun Wukong confronts Princess Iron Fan for the Banana Leaf Fan, but she blows him eighty thousand li away with a single wave and he must devise cunning new strategies.
+  location: 翠云山芭蕉洞
+- number: 52
+  name: 收缚魔王
+  english: Capturing and Binding the Demon King
+  desc: Sun Wukong battles the Bull Demon King across land and sky, and only with Nezha and the heavenly host does he finally subdue the great bull and claim the true fan.
+  location: 火焰山
+- number: 53
+  name: 祭赛国宝
+  english: The Treasure of Sacrifice Kingdom
+  desc: Nine-Headed Insects steal the Buddha-light sarira from the Golden Light Temple's pagoda, framing the resident monks and darkening the kingdom's sacred treasure.
+  location: 祭赛国
+- number: 54
+  name: 金光寺鬼
+  english: The Ghost of Golden Light Temple
+  desc: Sun Wukong discovers the stolen relics in the dragon palace beneath Scattered-Chill Abyss and battles the nine-headed bird demon to restore the temple's light.
+  location: 祭赛国金光寺
+- number: 55
+  name: 拯救疲癃
+  english: Rescuing the Afflicted
+  desc: The pilgrims arrive at a city where the king has fallen gravely ill, and Sun Wukong disguises himself as a physician to diagnose and cure the ruler's mysterious ailment.
+  location: 朱紫国
+- number: 56
+  name: 取宝比丘
+  english: Retrieving the Treasure at Bhikku Kingdom
+  desc: A deer demon posing as a national preceptor convinces the king of Bhikku to harvest the hearts of eleven hundred children for an elixir of immortality.
+  location: 比丘国
+- number: 57
+  name: 小子城中
+  english: In the City of Little Children
+  desc: Sun Wukong hides the eleven hundred children in a safe place and confronts the deer demon and his fox-spirit consort to save the kingdom's young.
+  location: 比丘国
+- number: 58
+  name: 降妖取后
+  english: Subduing the Demon, Retrieving the Queen
+  desc: Sun Wukong defeats the sorcerer who has bewitched the king of Bhikku, restores the rightful queen, and the Star of Longevity reclaims his runaway deer mount.
+  location: 比丘国
+- number: 59
+  name: 七情迷没
+  english: Lost in the Seven Passions
+  desc: Seven spider demons lure the pilgrims into their bathhouse trap with bewitching beauty, binding them in silken webs spun from their navels.
+  location: 盘丝洞
+- number: 60
+  name: 多目遭伤
+  english: Wounded by the Hundred-Eyed Demon
+  desc: The centipede demon, patron of the spider sisters, unleashes blinding golden light from his thousand eyes, injuring Sun Wukong until the Vairocana mother goddess intervenes.
+  location: 黄花观
+- number: 61
+  name: 路阻狮驼
+  english: Blocked at Lion Camel Ridge
+  desc: Three immensely powerful demon kings — a lion, an elephant, and a great roc — command fifty thousand demons at Lion Camel Ridge, the most fearsome stronghold on the westward road.
+  location: 狮驼岭
+- number: 62
+  name: 怪分三色
+  english: Three Demons of Different Colors
+  desc: The azure lion swallows Sun Wukong whole, the white elephant captures the pilgrims with his trunk, and the golden roc soars beyond the reach of heaven itself.
+  location: 狮驼洞
+- number: 63
+  name: 城里遇灾
+  english: Disaster in the City
+  desc: The three demon kings have slaughtered the entire population of Lion Camel City, filling a pond with human remains, and the pilgrims discover the horrifying truth within the walls.
+  location: 狮驼国
+- number: 64
+  name: 请佛收魔
+  english: Requesting the Buddha to Subdue the Demons
+  desc: Sun Wukong flies to the Buddha himself for aid, and the golden roc is revealed to be an ancestor of the Buddha's own mother, subdued only by the Buddha's personal intervention.
+  location: 狮驼国
+- number: 65
+  name: 比丘救子
+  english: Saving the Children of Bhikku
+  desc: The pilgrims ensure the eleven hundred children are safely returned to their families throughout the kingdom after the deer demon's plot is fully dismantled.
+  location: 比丘国
+- number: 66
+  name: 辨认真邪
+  english: Distinguishing True from False
+  desc: A shape-shifting demon impersonates a member of the pilgrim band, and the travelers must discern the real companion from the impostor before it is too late.
+  location: 西行路上
+- number: 67
+  name: 松林救怪
+  english: Rescuing the Monster in the Pine Forest
+  desc: Tang Sanzang's compassion leads him to help a seemingly helpless creature in the pine forest, only for it to reveal its demonic nature and attack.
+  location: 荆棘岭
+- number: 68
+  name: 僧房卧病
+  english: Falling Ill in the Monastery
+  desc: Tang Sanzang collapses with a grave fever at a remote monastery, and Sun Wukong must find medicine while protecting his master from lurking demons.
+  location: 西行路上
+- number: 69
+  name: 无底洞深
+  english: The Bottomless Cave
+  desc: The Rat Demon, goddaughter of Heavenly King Li, drags Tang Sanzang into the Bottomless Cave to force him into marriage, and even Sun Wukong struggles to navigate its endless tunnels.
+  location: 陷空山无底洞
+- number: 70
+  name: 灭法国难
+  english: Tribulation in the Kingdom of Dharma-Destruction
+  desc: The king of Dharma-Destruction has vowed to kill ten thousand monks, and Tang Sanzang is the last one needed to complete the murderous tally.
+  location: 灭法国
+- number: 71
+  name: 隐雾山遇妖
+  english: Meeting Demons at Hidden-Mist Mountain
+  desc: A leopard demon on Hidden-Mist Mountain transforms into a damsel in distress to lure Tang Sanzang into a trap, nearly succeeding before Sun Wukong sees through the disguise.
+  location: 隐雾山
+- number: 72
+  name: 凌云渡脱胎
+  english: Shedding the Mortal Body at Cloud-Reaching Ford
+  desc: At the crossing before Spirit Mountain, Tang Sanzang steps onto a bottomless boat, watches his own mortal corpse float away downstream, and is reborn in a purified body.
+  location: 凌云渡
+- number: 73
+  name: 竹节山遭难
+  english: Disaster at Bamboo-Joint Mountain
+  desc: Pangolin and serpent demons attack the pilgrims on the wooded slopes of Bamboo-Joint Mountain, testing their endurance so close to the journey's end.
+  location: 竹节山
+- number: 74
+  name: 玄英洞受苦
+  english: Suffering in Dark-Spirit Cave
+  desc: Three rhinoceros demons in Dark-Spirit Cave wield elemental powers of cold and darkness, capturing the pilgrims in a blizzard of supernatural ice.
+  location: 玄英洞
+- number: 75
+  name: 赶捉犀牛
+  english: Chasing and Capturing the Rhinoceroses
+  desc: Sun Wukong rallies the Four Wood Star Officials to hunt down the three rhinoceros demons, pursuing them across frozen rivers and mountain gorges.
+  location: 玄英洞
+- number: 76
+  name: 天竺收玉兔
+  english: Capturing the Jade Rabbit in India
+  desc: The Jade Rabbit escapes the Moon Palace and impersonates the princess of India; Chang'e descends from the moon to reclaim her wayward pet.
+  location: 天竺国
+- number: 77
+  name: 铜台府监禁
+  english: Imprisoned at Bronze Terrace Prefecture
+  desc: The pilgrims are falsely accused of murder and thrown into the dungeons of Bronze Terrace Prefecture, where corrupt officials plot to confiscate their scriptures.
+  location: 铜台府
+- number: 78
+  name: 凌云渡脱凡
+  english: Transcending Mortality at Cloud-Reaching Ford
+  desc: The pilgrims cross the Cloud-Reaching Ford on the Boatman of No-Bottom's vessel, leaving behind the final traces of their earthly existence.
+  location: 凌云渡
+- number: 79
+  name: 路经十万八千里
+  english: Traversing One Hundred and Eight Thousand Li
+  desc: The full distance of the westward pilgrimage is completed as the travelers cover the last stretch of the one hundred and eight thousand li road to Spirit Mountain.
+  location: 灵山
+- number: 80
+  name: 波生极乐天
+  english: Waves Rise at the Paradise of Ultimate Bliss
+  desc: A turtle ferry in the heavenly river tilts the pilgrims into the water, soaking the wordless sutras and forcing them to dry the scriptures on a rock — the final, eighty-first trial imposed by fate.
+  location: 通天河
+- number: 81
+  name: 取经回大唐
+  english: Returning to the Great Tang with the Sutras
+  desc: Having endured all eighty-one tribulations, Tang Sanzang and his disciples deliver the true Buddhist sutras to Emperor Taizong and are rewarded with Buddhahood by the Tathagata.
+  location: 长安
