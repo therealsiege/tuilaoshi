@@ -49,7 +49,7 @@ func TestGenerateDistractorsExcludesOtherRightAnswers(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := generateDistractors(tt.target, []model.Card{tt.target, tt.other}, tt.category, 3)
+			got := generateDistractors(tt.target, newDeck([]model.Card{tt.target, tt.other}), tt.category, 3)
 			if excluded := len(got) == 0; excluded != tt.wantExcl {
 				t.Errorf("distractors = %v, want excluded = %v", got, tt.wantExcl)
 			}
