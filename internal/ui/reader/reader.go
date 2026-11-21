@@ -1,4 +1,5 @@
-// Package reader shows the wiki's readings word by word: move through the
+// Package reader shows the wiki's readings and dialogue episodes word by
+// word: move through the
 // text to see each word's pinyin and meaning, and mark the ones you didn't
 // know so they come back for review.
 package reader
@@ -10,11 +11,19 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	"github.com/therealsiege/tuilaoshi/internal/segment"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
+
+// item is one entry in the reading list: a wiki reading or an episode.
+type item struct {
+	title, tag string
+	page       *model.Page
+	episode    *model.Episode
+}
 
 // place is the position of a word token: its line and index in that line.
 type place struct{ line, tok int }
@@ -24,7 +33,7 @@ type Model struct {
 	store *wiki.Store
 	gkeys ui.GlobalKeys
 
-	readings   []model.Page
+	items      []item
 	listCursor int
 
 	open   bool // reading a text rather than choosing one
@@ -33,10 +42,12 @@ type Model struct {
 	words  []place // every selectable word, in reading order
 	cursor int     // index into words
 
-	decks  map[string][]model.Card // drillable cards by Chinese, for glosses and scheduling
-	vocab  map[string][]model.Card // the open reading's own vocabulary table
-	marked map[string]bool         // words marked as not known this visit
-	status string                  // result of the last mark
+	decks       map[string][]model.Card // drillable cards by Chinese, for glosses and scheduling
+	vocab       map[string][]model.Card // the open reading's own vocabulary table
+	marked      map[string]bool         // words marked as not known this visit
+	english     []string                // each line's translation, when known
+	showEnglish bool                    // show the current line's translation
+	status      string                  // result of the last mark
 
 	loadErr, saveErr error
 	width, height    int
@@ -63,13 +74,21 @@ func (m Model) Open() bool { return m.open }
 func (m Model) Refresh() Model {
 	readings, readErr := m.store.ListPagesByType("reading")
 	cards, cardsErr := m.store.DrillableCards()
-	m.readings, m.loadErr = readings, errors.Join(readErr, cardsErr)
+	private, privErr := m.store.PrivateEpisodes()
+	m.loadErr = errors.Join(readErr, cardsErr, privErr)
+	m.items = nil
+	for i := range readings {
+		m.items = append(m.items, item{title: readings[i].Title, tag: readings[i].Level, page: &readings[i]})
+	}
+	for i := range private {
+		m.items = append(m.items, item{title: private[i].Title, tag: "your episode", episode: &private[i]})
+	}
 	m.decks = map[string][]model.Card{}
 	for _, c := range cards {
 		m.decks[c.Chinese] = append(m.decks[c.Chinese], c)
 	}
 	m.open, m.saveErr, m.status = false, nil, ""
-	if m.listCursor >= len(m.readings) {
+	if m.listCursor >= len(m.items) {
 		m.listCursor = 0
 	}
 	return m
@@ -94,7 +113,7 @@ func (m Model) OpenText(title string, lines []string, vocab []model.Card) Model 
 	for w := range m.vocab {
 		known[w] = true
 	}
-	m.title, m.lines, m.words = title, nil, nil
+	m.title, m.lines, m.words, m.english, m.showEnglish = title, nil, nil, nil, false
 	for _, l := range lines {
 		toks := segment.Split(l, known)
 		for i, t := range toks {
@@ -106,6 +125,30 @@ func (m Model) OpenText(title string, lines []string, vocab []model.Card) Model 
 	}
 	m.open, m.cursor, m.marked, m.status = true, 0, map[string]bool{}, ""
 	return m
+}
+
+// OpenEpisode opens a dialogue: each line reads "Speaker：line", glossed by
+// the story glossary (names) and the decks, with its translation behind e.
+func (m Model) OpenEpisode(ep model.Episode) Model {
+	lines := make([]string, len(ep.Lines))
+	english := make([]string, len(ep.Lines))
+	for i, l := range ep.Lines {
+		lines[i], english[i] = l.Chinese, l.English
+		if l.Speaker != "" {
+			lines[i] = l.Speaker + "：" + l.Chinese
+		}
+	}
+	m = m.OpenText(ep.Title, lines, journey.StoryGlossary())
+	m.english = english
+	return m
+}
+
+// currentEnglish is the translation of the selected word's line, if any.
+func (m Model) currentEnglish() string {
+	if len(m.words) == 0 || len(m.english) == 0 {
+		return ""
+	}
+	return m.english[m.words[m.cursor].line]
 }
 
 // current returns the selected word, or "" when the text has none.
@@ -156,10 +199,14 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		switch {
 		case key.Matches(k, m.gkeys.Up) && m.listCursor > 0:
 			m.listCursor--
-		case key.Matches(k, m.gkeys.Down) && m.listCursor < len(m.readings)-1:
+		case key.Matches(k, m.gkeys.Down) && m.listCursor < len(m.items)-1:
 			m.listCursor++
-		case key.Matches(k, m.gkeys.Enter) && len(m.readings) > 0:
-			m = m.openReading(m.readings[m.listCursor])
+		case key.Matches(k, m.gkeys.Enter) && len(m.items) > 0:
+			if it := m.items[m.listCursor]; it.page != nil {
+				m = m.openReading(*it.page)
+			} else {
+				m = m.OpenEpisode(*it.episode)
+			}
 		}
 		return m, nil
 	}
@@ -178,6 +225,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.cursor = m.lineStart(-1)
 	case key.Matches(k, m.gkeys.Enter):
 		m = m.mark()
+	case k.String() == "e":
+		m.showEnglish = !m.showEnglish
 	}
 	return m, nil
 }

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/therealsiege/tuilaoshi/internal/ui"
+	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 func (m Model) View() string {
@@ -26,12 +27,12 @@ func (m Model) View() string {
 
 func (m Model) viewList() string {
 	var b strings.Builder
-	if len(m.readings) == 0 {
-		b.WriteString(ui.MutedStyle.Render("  No readings in wiki/readings yet."))
+	if len(m.items) == 0 {
+		b.WriteString(ui.MutedStyle.Render("  No readings or episodes yet."))
 		b.WriteString("\n")
 	}
-	for i, p := range m.readings {
-		line := fmt.Sprintf("%s  %s", p.Title, ui.MutedStyle.Render(p.Level))
+	for i, it := range m.items {
+		line := fmt.Sprintf("%s  %s", it.title, ui.MutedStyle.Render(it.tag))
 		if i == m.listCursor {
 			b.WriteString(ui.SelectedStyle.Render("▸ " + line))
 		} else {
@@ -40,6 +41,8 @@ func (m Model) viewList() string {
 		b.WriteString("\n")
 	}
 	b.WriteString("\n")
+	b.WriteString(ui.MutedStyle.Render("  Add your own episodes: .srt or .txt subtitle files in wiki/" + wiki.PrivateEpisodesDir + " (kept private)."))
+	b.WriteString("\n\n")
 	b.WriteString(ui.HelpStyle.Render("  ↑↓ choose · enter read · esc back"))
 	return b.String()
 }
@@ -124,6 +127,13 @@ func (m Model) viewGloss() string {
 		fmt.Fprintf(&b, "\n    %s  %s", ui.PinyinStyle.Render(c.Pinyin), c.English)
 	}
 	b.WriteString("\n")
+	if en := m.currentEnglish(); en != "" {
+		if m.showEnglish {
+			b.WriteString(ui.MutedStyle.Render("  "+en) + "\n")
+		} else {
+			b.WriteString(ui.MutedStyle.Render("  e: show this line in English") + "\n")
+		}
+	}
 	if m.status != "" {
 		b.WriteString(ui.MutedStyle.Render("  " + m.status))
 		b.WriteString("\n")

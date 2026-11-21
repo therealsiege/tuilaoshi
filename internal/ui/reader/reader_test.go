@@ -48,8 +48,8 @@ func openRestaurant(t *testing.T) Model {
 	t.Helper()
 	store := uitest.Wiki(t, map[string]string{"readings/restaurant.md": restaurant, "vocabulary/food.md": food})
 	m := New(store).SetSize(80, 30).Refresh()
-	if m.loadErr != nil || len(m.readings) != 1 {
-		t.Fatalf("readings %d, err %v", len(m.readings), m.loadErr)
+	if m.loadErr != nil || len(m.items) != 1 {
+		t.Fatalf("items %d, err %v", len(m.items), m.loadErr)
 	}
 	uitest.Golden(t, "list", m.View())
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
@@ -109,5 +109,29 @@ func TestMarkingWordSchedulesItForTomorrow(t *testing.T) {
 	m = press(m, tea.KeyEnter)
 	if !strings.Contains(m.status, "not in your decks") {
 		t.Errorf("status %q, want a note that the word isn't in the decks", m.status)
+	}
+}
+
+func TestPrivateEpisodeReadsAsDialogue(t *testing.T) {
+	srt := "1\n00:00:01,000 --> 00:00:02,000\n孙悟空：师父，有妖怪！\nMaster, a demon!\n\n2\n00:00:03,000 --> 00:00:04,000\n菜单在这里。\n"
+	store := uitest.Wiki(t, map[string]string{"private/episodes/ep01.srt": srt, "vocabulary/food.md": food})
+	m := New(store).SetSize(80, 30).Refresh()
+	if len(m.items) != 1 || m.items[0].tag != "your episode" {
+		t.Fatalf("items %+v; want the private episode", m.items)
+	}
+	m = press(m, tea.KeyEnter)
+	if !m.Open() || m.current() != "孙悟空" {
+		t.Fatalf("opened %v at %q; want the speaker, glossed from the story glossary", m.Open(), m.current())
+	}
+	if v := m.View(); !strings.Contains(v, "Sūn Wùkōng") || !strings.Contains(v, "e: show this line in English") {
+		t.Errorf("episode view:\n%s", v)
+	}
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("e")})
+	if !strings.Contains(m.View(), "Master, a demon!") {
+		t.Errorf("e didn't show the line's English:\n%s", m.View())
+	}
+	m = press(m, tea.KeyDown) // the next line has no translation
+	if strings.Contains(m.View(), "Master, a demon!") || m.current() != "菜单" {
+		t.Errorf("line 2: at %q\n%s", m.current(), m.View())
 	}
 }

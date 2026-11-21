@@ -17,3 +17,6 @@ wiki/images/
 
 # Claude Flow
 .claude-flow/
+
+# Learner-supplied material from shows they own; never committed (the repo is public)
+wiki/private/
