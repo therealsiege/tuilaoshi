@@ -57,6 +57,10 @@ type Battle struct {
 	startEffects Effects // as the battle began, for rematches
 	struck       bool    // the player has landed a hit (for FirstStrike)
 	Event        string  // what an ability did on the last answer, for the log
+
+	// Radicals maps characters to their radical ("火 (fire)") so answers can
+	// show how a word's characters carry its meaning.
+	Radicals map[string]string
 }
 
 // Accuracy returns the percentage of questions answered correctly.
@@ -71,6 +75,7 @@ func (b *Battle) Accuracy() int {
 func (b *Battle) Rematch(cards []model.Card) *Battle {
 	r := &Battle{Player: b.Player, Enemy: b.Enemy, State: BattleIntro, Listening: b.Listening, Writing: b.Writing}
 	r.SetEffects(b.startEffects)
+	r.Radicals = b.Radicals
 	r.Player.HP = r.Player.MaxHP
 	r.Enemy.HP = r.Enemy.MaxHP
 	r.Question = r.GenerateQuestion(cards)

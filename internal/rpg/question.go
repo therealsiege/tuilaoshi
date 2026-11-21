@@ -8,10 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/therealsiege/tuilaoshi/internal/confusables"
 	"github.com/therealsiege/tuilaoshi/internal/model"
-	"github.com/therealsiege/tuilaoshi/internal/segment"
-	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 // CombatQuestion is a multiple-choice question generated from wiki cards.
@@ -27,6 +24,7 @@ type CombatQuestion struct {
 	Card     model.Card // the card being tested, for saving the result
 	Accepted []string   // typed answers a "write" question takes
 	Pieces   []string   // shuffled words an "order" question is built from
+	Hints    []string   // how the word's characters carry its meaning, e.g. "灯 ← 火 (fire)"
 }
 
 // CorrectAnswer returns the text of the correct choice, or the word itself
@@ -73,7 +71,7 @@ func (b *Battle) GenerateQuestion(cards []model.Card) *CombatQuestion {
 
 	var best *CombatQuestion
 	for i := 0; i < questionAttempts; i++ {
-		q := b.buildQuestion(d.cards[rand.Intn(len(d.cards))], d)
+		q := b.buildQuestion(pickTarget(d.cards, clock()), d)
 		if q == nil {
 			continue
 		}
@@ -83,6 +81,9 @@ func (b *Battle) GenerateQuestion(cards []model.Card) *CombatQuestion {
 		if completeness(best) == distractorCount+1 {
 			break
 		}
+	}
+	if best != nil {
+		best.Hints = b.meaningHints(best.Card.Chinese)
 	}
 	return best
 }
@@ -396,54 +397,6 @@ func acceptedWritings(card model.Card, d deck) []string {
 	return accepted
 }
 
-// An "order" sentence must split into this many words: enough to be a
-// puzzle, few enough for the 1-9 keys.
-const (
-	minPieces = 3
-	maxPieces = 9
-)
-
-// orderQuestion asks the player to rebuild one of card's example sentences
-// from its shuffled words, or returns nil when none fits. The sentence is
-// split by the offline segmenter; grading compares the rebuilt text, so a
-// word split in two only makes one more piece.
-func (b *Battle) orderQuestion(card model.Card, d deck) *CombatQuestion {
-	for _, i := range rand.Perm(len(card.Examples)) {
-		zh, en, ok := wiki.ParseExample(card.Examples[i])
-		if !ok {
-			continue
-		}
-		var pieces []string
-		for _, t := range segment.Split(zh, d.known) {
-			if t.Word {
-				pieces = append(pieces, t.Text)
-			}
-		}
-		if len(pieces) < minPieces || len(pieces) > maxPieces {
-			continue
-		}
-		target := strings.Join(pieces, "")
-		shuffled := append([]string{}, pieces...)
-		for try := 0; try < 10 && strings.Join(shuffled, "") == target; try++ {
-			rand.Shuffle(len(shuffled), func(i, j int) { shuffled[i], shuffled[j] = shuffled[j], shuffled[i] })
-		}
-		if strings.Join(shuffled, "") == target {
-			continue // every order reads the same, e.g. repeated words
-		}
-		return &CombatQuestion{
-			Prompt:   "Put the words in order: " + en,
-			Category: "order",
-			Damage:   b.damage() + writeBonus,
-			Chinese:  target,
-			English:  en,
-			Card:     card,
-			Accepted: []string{target},
-			Pieces:   shuffled,
-		}
-	}
-	return nil
-}
-
 // writePrompt asks for card in Chinese, with its pinyin unless the enemy
 // blinds the player.
 func (b *Battle) writePrompt(card model.Card) string {
@@ -451,40 +404,4 @@ func (b *Battle) writePrompt(card model.Card) string {
 		return "Write in Chinese: " + card.English
 	}
 	return fmt.Sprintf("Write in Chinese: %s (%s)", card.English, card.Pinyin)
-}
-
-// lookAlikes maps each character to those commonly confused with it by sight.
-var lookAlikes = func() map[string][]string {
-	m := map[string][]string{}
-	for _, p := range confusables.Pairs() {
-		if p.Category != "visual" {
-			continue
-		}
-		for _, a := range p.Chars {
-			for _, b := range p.Chars {
-				if a.Hanzi != b.Hanzi {
-					m[a.Hanzi] = append(m[a.Hanzi], b.Hanzi)
-				}
-			}
-		}
-	}
-	return m
-}()
-
-// resemblance scores how much a wrong answer looks like the right one:
-// a known look-alike character, then shared characters, then equal length.
-func resemblance(answer, other string) int {
-	score := 0
-	if slices.Contains(lookAlikes[answer], other) {
-		score += 10
-	}
-	for _, r := range other {
-		if strings.ContainsRune(answer, r) {
-			score += 3
-		}
-	}
-	if len([]rune(answer)) == len([]rune(other)) {
-		score++
-	}
-	return score
 }

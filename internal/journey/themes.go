@@ -128,3 +128,38 @@ func hsk(level string) int {
 	}
 	return 7
 }
+
+// RadicalIndex maps each character with a page to its radical, written
+// "火 (fire)", for explaining words through their characters.
+func RadicalIndex(pages []model.Page) map[string]string {
+	idx := map[string]string{}
+	for _, p := range pages {
+		r := []rune(strings.TrimSpace(p.Radical))
+		if p.Type != "character" || p.Character == "" || len(r) == 0 {
+			continue
+		}
+		rad := string(r[0])
+		if gloss := strings.TrimSpace(string(r[1:])); gloss != "" {
+			rad += " " + gloss
+		}
+		idx[p.Character] = rad
+	}
+	return idx
+}
+
+// WordProgress is how many of a stage's words the learner has learned.
+type WordProgress struct {
+	Learned, Total int
+}
+
+// StageProgress counts the learned words among those a stage's battle uses.
+func StageProgress(s Stage, pages []model.Page, cards []model.Card) WordProgress {
+	var wp WordProgress
+	for _, c := range StageCards(s, pages, cards) {
+		wp.Total++
+		if c.ReviewInterval >= content.Progression.LearningInterval {
+			wp.Learned++
+		}
+	}
+	return wp
+}

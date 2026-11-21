@@ -3,6 +3,7 @@ package rpg
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
@@ -83,5 +84,37 @@ func TestRevealLeavesTheRightAnswerAndOneWrong(t *testing.T) {
 	}
 	if b.Reveal() {
 		t.Error("a second reveal worked with none left")
+	}
+}
+
+func TestPickTargetFavoursWordsThatNeedPractice(t *testing.T) {
+	now := time.Date(2026, 11, 21, 12, 0, 0, 0, time.UTC)
+	reviewed := now.AddDate(0, 0, -3)
+	cards := []model.Card{
+		{ID: "due", LastReviewed: reviewed, ReviewInterval: 2, NextReview: now.AddDate(0, 0, -1)},
+		{ID: "shaky", LastReviewed: reviewed, ReviewInterval: 4, NextReview: now.AddDate(0, 0, 1)},
+		{ID: "new"},
+		{ID: "settled", LastReviewed: reviewed, ReviewInterval: 30, NextReview: now.AddDate(0, 0, 27)},
+	}
+	counts := map[string]int{}
+	for i := 0; i < 16000; i++ {
+		counts[pickTarget(cards, now).ID]++
+	}
+	if counts["due"] <= counts["shaky"] || counts["shaky"] <= counts["new"] || counts["new"] <= counts["settled"] {
+		t.Errorf("picks %v; want due > shaky > new > settled", counts)
+	}
+	if counts["settled"] == 0 {
+		t.Error("settled words never come up")
+	}
+}
+
+func TestMeaningHintsExplainCharacters(t *testing.T) {
+	b := testBattle(testDeck())
+	b.Radicals = map[string]string{"灯": "火 (fire)", "笼": "⺮ (bamboo)", "火": "火 (fire)"}
+	if got := b.meaningHints("灯笼"); len(got) != 2 || got[0] != "灯 ← 火 (fire)" {
+		t.Errorf("hints for 灯笼 = %v", got)
+	}
+	if got := b.meaningHints("火"); len(got) != 0 {
+		t.Errorf("火 is its own radical, got hints %v", got)
 	}
 }

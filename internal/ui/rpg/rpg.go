@@ -86,6 +86,7 @@ type Model struct {
 	// Abilities in play, as the intro describes them, and the answer timer
 	// of a burning enemy: qseq numbers questions so stale ticks are ignored.
 	abilities []string
+	words     journey.WordProgress // learned words of the stage's theme
 	deadline  time.Time
 	qseq      int
 	now       func() time.Time
@@ -143,6 +144,7 @@ func (m Model) Refresh() Model {
 	// coming stage's words.
 	if s := m.next; s != nil {
 		m.cards = journey.StageCards(*s, pages, cards)
+		m.words = journey.StageProgress(*s, pages, cards)
 	}
 	switch {
 	case m.stage != nil && m.stage.Boss != nil:
@@ -160,6 +162,9 @@ func (m Model) Refresh() Model {
 	}
 	m.setQuestionKinds()
 	m.applyAbilities(cleared)
+	if m.battle != nil {
+		m.battle.Radicals = journey.RadicalIndex(pages)
+	}
 	m.state = stateIntro
 	m.log = nil
 	m.animTicks = 0

@@ -100,3 +100,32 @@ func TestThemeMatchesRadical(t *testing.T) {
 		}
 	}
 }
+
+func TestRadicalIndexNormalizes(t *testing.T) {
+	idx := RadicalIndex([]model.Page{
+		{Type: "character", Character: "灯", Radical: "火 (fire)"},
+		{Type: "character", Character: "打", Radical: "扌(hand)"},
+		{Type: "vocabulary", Character: "x", Radical: "y"},
+	})
+	if idx["灯"] != "火 (fire)" || idx["打"] != "扌 (hand)" || len(idx) != 2 {
+		t.Errorf("index %v", idx)
+	}
+}
+
+func TestStageProgressCountsLearnedWords(t *testing.T) {
+	var pages []model.Page
+	var cards []model.Card
+	for i := 0; i < MinStageWords; i++ {
+		path := string(rune('a'+i)) + ".md"
+		pages = append(pages, model.Page{Path: path, Level: "HSK1"})
+		c := model.Card{ID: path, Chinese: string(rune(0x706B + i)), English: "fire"}
+		if i < 3 {
+			c.ReviewInterval = content.Progression.LearningInterval
+		}
+		cards = append(cards, c)
+	}
+	s := Stage{Tribulation: Tribulation{Number: 1}, Words: Theme{Keywords: []string{"fire"}}}
+	if got := StageProgress(s, pages, cards); got != (WordProgress{Learned: 3, Total: MinStageWords}) {
+		t.Errorf("progress %+v", got)
+	}
+}

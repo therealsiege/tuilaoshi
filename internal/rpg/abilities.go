@@ -2,8 +2,11 @@ package rpg
 
 import (
 	"math/rand"
+	"slices"
+	"strings"
 	"time"
 
+	"github.com/therealsiege/tuilaoshi/internal/confusables"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 )
 
@@ -94,4 +97,40 @@ func (b *Battle) Reveal() bool {
 	}
 	b.Selected = 0
 	return true
+}
+
+// lookAlikes maps each character to those commonly confused with it by sight.
+var lookAlikes = func() map[string][]string {
+	m := map[string][]string{}
+	for _, p := range confusables.Pairs() {
+		if p.Category != "visual" {
+			continue
+		}
+		for _, a := range p.Chars {
+			for _, b := range p.Chars {
+				if a.Hanzi != b.Hanzi {
+					m[a.Hanzi] = append(m[a.Hanzi], b.Hanzi)
+				}
+			}
+		}
+	}
+	return m
+}()
+
+// resemblance scores how much a wrong answer looks like the right one:
+// a known look-alike character, then shared characters, then equal length.
+func resemblance(answer, other string) int {
+	score := 0
+	if slices.Contains(lookAlikes[answer], other) {
+		score += 10
+	}
+	for _, r := range other {
+		if strings.ContainsRune(answer, r) {
+			score += 3
+		}
+	}
+	if len([]rune(answer)) == len([]rune(other)) {
+		score++
+	}
+	return score
 }

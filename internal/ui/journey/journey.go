@@ -149,7 +149,7 @@ func (m Model) renderJourney() string {
 		b.WriteString(ui.ChineseStyle.Render(tribTitle))
 		b.WriteString("\n")
 		b.WriteString(ui.MutedStyle.Render("  " + current.Desc))
-		b.WriteString("\n\n")
+		b.WriteString("\n" + m.renderStageWords() + "\n")
 	}
 
 	// Cultivation Rank section

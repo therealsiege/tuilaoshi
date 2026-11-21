@@ -80,8 +80,9 @@ type State struct {
 	Companions   []Companion
 	Bosses       []Boss
 	NextBoss     *Boss
-	Stage        *Stage // the stage being worked on; nil once all are cleared
-	Counts       Counts // characters being learned and mastered, which open stages
+	Stage        *Stage       // the stage being worked on; nil once all are cleared
+	Counts       Counts       // characters being learned and mastered, which open stages
+	StageWords   WordProgress // learned words of the current stage's theme
 	Artifacts    []Artifact
 	Quests       []Quest
 	Achievements []Achievement
@@ -152,11 +153,21 @@ func Calculate(store *wiki.Store) (State, error) {
 
 	progress := Pilgrimage(pages, cleared)
 
+	var stageWords WordProgress
+	if s := CurrentStage(stages); s != nil {
+		cards, err := store.DrillableCards()
+		if err != nil {
+			return State{}, err
+		}
+		stageWords = StageProgress(*s, pages, cards)
+	}
+
 	return State{
 		Rank:         calculateRank(mastered),
 		Progress:     progress,
 		Stage:        CurrentStage(stages),
 		Counts:       counts,
+		StageWords:   stageWords,
 		Companions:   buildCompanions(cleared),
 		Bosses:       bosses,
 		NextBoss:     nextBoss,

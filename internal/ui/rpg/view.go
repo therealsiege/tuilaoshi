@@ -159,7 +159,11 @@ func renderWordDetail(q *rpgengine.CombatQuestion) string {
 	if len(parts) == 0 {
 		return ""
 	}
-	return "      " + strings.Join(parts, "  ") + "\n"
+	out := "      " + strings.Join(parts, "  ") + "\n"
+	if len(q.Hints) > 0 {
+		out += ui.MutedStyle.Render("      部首 "+strings.Join(q.Hints, " · ")) + "\n"
+	}
+	return out
 }
 
 func (m Model) viewVictory() string {
@@ -363,7 +367,7 @@ func (m Model) renderStakes() string {
 			}
 		}
 		b.WriteString(ui.WarningStyle.Render("  Win to clear this tribulation."))
-		b.WriteString(ui.MutedStyle.Render("  Words: " + m.stage.Words.Name))
+		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("  Words: %s · %d/%d learned", m.stage.Words.Name, m.words.Learned, m.words.Total)))
 	case m.next != nil:
 		b.WriteString(ui.WarningStyle.Render("  A demon blocks your path! (practice)"))
 		need := journey.NeedText(*m.next, m.counts)

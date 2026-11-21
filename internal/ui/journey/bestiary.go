@@ -136,3 +136,14 @@ func (m Model) renderBestiary() string {
 
 	return b.String()
 }
+
+// renderStageWords shows how much of the current stage's vocabulary theme is
+// learned, as a line ending in a newline (empty once the journey is done).
+func (m Model) renderStageWords() string {
+	s := m.state.Stage
+	if s == nil {
+		return ""
+	}
+	w := m.state.StageWords
+	return ui.MutedStyle.Render(fmt.Sprintf("  Words: %s · %d/%d learned", s.Words.Name, w.Learned, w.Total)) + "\n"
+}
