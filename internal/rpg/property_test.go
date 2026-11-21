@@ -26,7 +26,7 @@ func rightAnswers(q *CombatQuestion, pool []model.Card) []string {
 				ok = k.Chinese == q.Chinese && k.Pinyin != "" && normalizePinyin(k.Pinyin) == normalizePinyin(choice)
 			case "reading": // prompt shows q.English; choices are Chinese
 				ok = k.Chinese == choice && k.English != "" && sharesGloss(k.English, q.English)
-			case "character": // prompt shows q.Pinyin; choices are Chinese
+			case "character", "listening": // prompt shows or speaks q.Pinyin; choices are Chinese
 				ok = k.Chinese == choice && k.Pinyin != "" && normalizePinyin(k.Pinyin) == normalizePinyin(q.Pinyin)
 			}
 			if ok {
@@ -82,7 +82,9 @@ func TestQuestionsHaveExactlyOneRightAnswer(t *testing.T) {
 	asked := 0
 	for i := 0; i < 5000; i++ {
 		pool := collidingPool(r)
-		q := testBattle(pool).GenerateQuestion(pool)
+		b := testBattle(pool)
+		b.Listening = r.Intn(2) == 0
+		q := b.GenerateQuestion(pool)
 		if q == nil {
 			continue // no unambiguous question exists for this pool
 		}
@@ -108,6 +110,7 @@ func TestRealWikiQuestionsHaveExactlyOneRightAnswer(t *testing.T) {
 	}
 	pool := filterUsableCards(cards)
 	b := testBattle(pool)
+	b.Listening = true
 	for i := 0; i < 300; i++ {
 		q := b.GenerateQuestion(pool)
 		if q == nil {

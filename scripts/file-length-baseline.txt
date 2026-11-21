@@ -5,5 +5,4 @@
 595 internal/journey/tribulations.go
 1169 internal/mnemonic/mnemonic.go
 579 internal/phonetic/phonetic.go
-680 internal/ui/drill/drill.go
 636 internal/ui/journey/journey.go

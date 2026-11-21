@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 )
 
 const fishAPIBase = "https://api.fish.audio"
@@ -60,27 +61,39 @@ type ttsProsody struct {
 	Volume int     `json:"volume"`
 }
 
-// Client is a Fish Audio TTS client.
+// Client is a Fish Audio TTS client. Without an API key it falls back to
+// the macOS say command, when there is one.
 type Client struct {
 	apiKey     string
 	httpClient *http.Client
 	zhVoice    Voice
 	enVoice    Voice
+	sayPath    string // macOS say, the fallback when apiKey is empty
 }
+
+// systemVoices are the macOS say voices used without a Fish Audio key.
+var systemVoices = map[string]string{"zh": "Tingting", "en": "Samantha"}
 
 // New creates a TTS client. Reads FISH_AUDIO_API_KEY from env.
 func New() *Client {
-	return &Client{
+	c := &Client{
 		apiKey:     os.Getenv("FISH_AUDIO_API_KEY"),
 		httpClient: &http.Client{},
 		zhVoice:    VoiceJiaLan,
 		enVoice:    VoiceSarah,
 	}
+	if runtime.GOOS == "darwin" {
+		if p, err := exec.LookPath("say"); err == nil {
+			c.sayPath = p
+		}
+	}
+	return c
 }
 
-// Available reports whether the TTS client has an API key configured.
+// Available reports whether the client can speak: a Fish Audio key, or
+// macOS say as the fallback.
 func (c *Client) Available() bool {
-	return c.apiKey != ""
+	return c.apiKey != "" || c.sayPath != ""
 }
 
 // SetChineseVoice selects the Chinese voice to use.
@@ -102,6 +115,16 @@ func (c *Client) Speak(text, lang string) error {
 		return fmt.Errorf("FISH_AUDIO_API_KEY not set")
 	}
 	if text == "" {
+		return nil
+	}
+	if c.apiKey == "" {
+		voice := systemVoices["zh"]
+		if lang == "en" {
+			voice = systemVoices["en"]
+		}
+		if out, err := exec.Command(c.sayPath, "-v", voice, text).CombinedOutput(); err != nil {
+			return fmt.Errorf("say: %v: %s", err, strings.TrimSpace(string(out)))
+		}
 		return nil
 	}
 

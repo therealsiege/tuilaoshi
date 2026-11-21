@@ -14,7 +14,7 @@ type CombatQuestion struct {
 	Prompt   string     // the question text (e.g. "What does 书 mean?")
 	Choices  []string   // 4-5 answer options
 	Correct  int        // index of correct answer
-	Category string     // "reading", "meaning", "pinyin", "character"
+	Category string     // "reading", "meaning", "pinyin", "character", "listening"
 	Damage   int        // damage dealt on correct answer
 	Chinese  string     // the Chinese text being tested
 	Pinyin   string     // pinyin of the tested item
@@ -66,6 +66,9 @@ func (b *Battle) GenerateQuestion(cards []model.Card) *CombatQuestion {
 // answers exist for the category chosen.
 func (b *Battle) buildQuestion(card model.Card, d deck) *CombatQuestion {
 	categories := availableCategories(card)
+	if b.Listening && card.Chinese != "" && card.Pinyin != "" {
+		categories = append(categories, "listening")
+	}
 	if len(categories) == 0 {
 		return nil
 	}
@@ -84,6 +87,9 @@ func (b *Battle) buildQuestion(card model.Card, d deck) *CombatQuestion {
 		correctAnswer = card.Chinese
 	case "character":
 		prompt = fmt.Sprintf("Which character is pronounced %s?", card.Pinyin)
+		correctAnswer = card.Chinese
+	case "listening": // the character question, spoken instead of shown
+		prompt = "Which word did you hear? (r replays)"
 		correctAnswer = card.Chinese
 	}
 
@@ -173,7 +179,7 @@ func generateDistractors(card model.Card, d deck, category string, count int) []
 		correctAnswer = card.English
 	case "pinyin":
 		correctAnswer = card.Pinyin
-	case "reading", "character":
+	case "reading", "character", "listening":
 		correctAnswer = card.Chinese
 	}
 
@@ -191,7 +197,7 @@ func generateDistractors(card model.Card, d deck, category string, count int) []
 			val = c.English
 		case "pinyin":
 			val = c.Pinyin
-		case "reading", "character":
+		case "reading", "character", "listening":
 			val = c.Chinese
 		}
 		if val == "" || seen[val] {
@@ -240,7 +246,7 @@ func couldBeRight(card model.Card, val, category string, d deck) bool {
 				return true
 			}
 		}
-	case "character":
+	case "character", "listening": // homophones sound alike, so they can't be told apart
 		for _, k := range d.byChinese[val] {
 			if k.Pinyin == "" || normalizePinyin(k.Pinyin) == normalizePinyin(card.Pinyin) {
 				return true

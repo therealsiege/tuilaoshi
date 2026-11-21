@@ -2,6 +2,7 @@ package rpg
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
@@ -63,5 +64,28 @@ func TestBossEntryFindsBestiaryArt(t *testing.T) {
 		if e := journey.BossEntry(b); e.Art == "" {
 			t.Errorf("boss %s %s has no bestiary entry", b.Name, b.English)
 		}
+	}
+}
+
+func TestListeningQuestionsOnlyWhenAudioWorks(t *testing.T) {
+	count := func(listening bool) int {
+		b := testBattle(testDeck())
+		b.Listening = listening
+		n := 0
+		for i := 0; i < 300; i++ {
+			if q := b.GenerateQuestion(testDeck()); q != nil && q.Category == "listening" {
+				n++
+				if strings.Contains(q.Prompt, q.Chinese) || strings.Contains(q.Prompt, q.Pinyin) {
+					t.Fatalf("listening prompt gives the answer away: %q", q.Prompt)
+				}
+			}
+		}
+		return n
+	}
+	if n := count(false); n != 0 {
+		t.Errorf("%d listening questions without audio", n)
+	}
+	if n := count(true); n == 0 {
+		t.Error("no listening questions with audio available")
 	}
 }

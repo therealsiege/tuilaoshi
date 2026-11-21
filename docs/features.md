@@ -7,7 +7,7 @@ Every screen, how to reach it from the dashboard, and what tests it. A test
 |-----|--------|--------------|------|-------|
 | — | Dashboard | Wiki counts, items due, today's progress, cultivation rank | `internal/ui/dashboard` | — |
 | `d` | Drill 练习 | Flashcards graded by Claude; modes: recognition, production, listening, sentence, random | `internal/ui/drill` | screen snapshots (mode picker, prompt) |
-| `f` | Battle 战斗 | Turn-based fight against a demon; right answers deal damage, results save to word schedules | `internal/ui/rpg`, `internal/rpg` | snapshots (intro, fighting), [state chart](battle-states.md) transitions, save/reschedule tests, one-right-answer property test (random decks + real wiki) |
+| `f` | Battle 战斗 | Turn-based fight against a demon from the chapters reached; `b` challenges an unlocked boss; listening questions when audio works (`r` replays); results save to word schedules | `internal/ui/rpg`, `internal/rpg` | snapshots (intro, fighting), [state chart](battle-states.md) transitions, save/reschedule tests, one-right-answer property test (random decks + real wiki) |
 | `b` | Browse 览 | Page list with rendered markdown | `internal/ui/browser` | — |
 | `/` | Search 找 | Browse, filtered by search | `internal/ui/browser` | — |
 | `c` | Chat 话 | Conversation with the Claude tutor; Chinese replies are spoken | `internal/ui/chat` | — |
@@ -21,7 +21,7 @@ Every screen, how to reach it from the dashboard, and what tests it. A test
 Shared pieces:
 
 - Saving progress: `wiki.Store.RecordReview` is the only path that writes review schedules; session files go through `internal/wiki/sessions.go`. Tests in `internal/wiki`.
-- Speech: `ui.SpeakCmd` (Fish Audio, `FISH_AUDIO_API_KEY`); failures show as "Audio failed".
+- Speech: `ui.SpeakCmd` (Fish Audio with `FISH_AUDIO_API_KEY`, otherwise macOS `say -v Tingting`); `ctrl+r` replays in drill and review; failures show as "Audio failed".
 - Pinyin input: `internal/ui/input`; syllable validation tests.
 
 Recordings (`make recordings`, needs `brew install vhs`; tapes in `docs/tapes`, played on a copy of the wiki):

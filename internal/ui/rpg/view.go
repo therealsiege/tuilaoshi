@@ -17,6 +17,7 @@ func (m Model) View() string {
 	b.WriteString(ui.Header("BATTLE  战斗"))
 	b.WriteString("\n\n")
 	b.WriteString(ui.LoadError(m.loadErr))
+	b.WriteString(ui.AudioError(m.ttsErr))
 
 	if m.battle == nil {
 		b.WriteString(ui.MutedStyle.Render("  No battle loaded. Press esc to return."))

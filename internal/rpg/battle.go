@@ -45,11 +45,12 @@ type Battle struct {
 	Combo       int // consecutive correct answers
 	MaxCombo    int
 	XPEarned    int
-	DamageDealt int // last damage dealt
-	DamageTaken int // last damage taken
-	TotalDealt  int // damage dealt across the whole battle
-	Answered    int // questions answered
-	CorrectHits int // questions answered correctly
+	DamageDealt int  // last damage dealt
+	DamageTaken int  // last damage taken
+	TotalDealt  int  // damage dealt across the whole battle
+	Answered    int  // questions answered
+	CorrectHits int  // questions answered correctly
+	Listening   bool // audio works, so some questions are heard rather than read
 }
 
 // Accuracy returns the percentage of questions answered correctly.
@@ -62,7 +63,7 @@ func (b *Battle) Accuracy() int {
 
 // Rematch returns a fresh battle against the same enemy.
 func (b *Battle) Rematch(cards []model.Card) *Battle {
-	r := &Battle{Player: b.Player, Enemy: b.Enemy, State: BattleIntro}
+	r := &Battle{Player: b.Player, Enemy: b.Enemy, State: BattleIntro, Listening: b.Listening}
 	r.Player.HP = r.Player.MaxHP
 	r.Enemy.HP = r.Enemy.MaxHP
 	r.Question = r.GenerateQuestion(cards)

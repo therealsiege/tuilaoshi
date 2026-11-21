@@ -9,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	rpgengine "github.com/therealsiege/tuilaoshi/internal/rpg"
@@ -39,6 +40,8 @@ type animTickMsg struct{}
 // Model is the RPG battle view model.
 type Model struct {
 	store  *wiki.Store
+	tts    *audio.Client
+	ttsErr error // why the last speech failed
 	gkeys  ui.GlobalKeys
 	battle *rpgengine.Battle
 	cards  []model.Card
@@ -73,9 +76,10 @@ type logEntry struct {
 }
 
 // New creates a new RPG battle model.
-func New(store *wiki.Store) Model {
+func New(store *wiki.Store, tts *audio.Client) Model {
 	return Model{
 		store: store,
+		tts:   tts,
 		gkeys: ui.DefaultGlobalKeys(),
 		state: stateIntro,
 	}
@@ -107,6 +111,7 @@ func (m Model) Refresh() Model {
 	}
 	// Demons come from the chapters the pilgrimage has reached.
 	m.battle = rpgengine.NewRandomBattle(m.cards, m.mastered, journey.Pilgrimage(pages).Percent)
+	m.setListening()
 	m.state = stateIntro
 	m.log = nil
 	m.animTicks = 0
@@ -118,8 +123,24 @@ func (m Model) Refresh() Model {
 func (m Model) challengeBoss() Model {
 	m.cards = rpgengine.WeakCards(m.cards)
 	m.battle = rpgengine.NewBossBattle(m.cards, journey.BossEntry(*m.boss), m.mastered)
+	m.setListening()
 	m.bossFight = true
 	return m
+}
+
+// setListening asks for spoken questions when audio works.
+func (m *Model) setListening() {
+	if m.battle != nil {
+		m.battle.Listening = m.tts != nil && m.tts.Available()
+	}
+}
+
+// speakQuestion plays a listening question's word; nil for other questions.
+func (m Model) speakQuestion() tea.Cmd {
+	if q := m.battle.Question; q != nil && q.Category == "listening" {
+		return ui.SpeakCmd(m.tts, q.Chinese, "zh")
+	}
+	return nil
 }
 
 // Leave saves the battle's results when the player flees mid-fight.
@@ -187,6 +208,10 @@ func (m *Model) saveSession() {
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case ui.SpeechDoneMsg:
+		m.ttsErr = msg.Err
+		return m, nil
+
 	case animTickMsg:
 		// A tick can outlive its attack if the player flees and starts a new battle.
 		if m.state != statePlayerAttack {
@@ -215,7 +240,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.battle.State = rpgengine.BattlePlayerTurn
 				q := m.battle.GenerateQuestion(m.cards)
 				m.battle.Question = q
-				return m, nil
+				return m, m.speakQuestion()
 			}
 
 		case stateFighting:
@@ -238,7 +263,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 		case stateDefeat:
 			if key.Matches(msg, m.gkeys.Enter) || msg.Type == tea.KeySpace {
-				return m.rematch(), nil
+				m = m.rematch()
+				return m, m.speakQuestion()
 			}
 		}
 	}
@@ -263,6 +289,8 @@ func (m Model) handleFightingKey(msg tea.KeyMsg) (Model, tea.Cmd) {
 		}
 	case key.Matches(msg, m.gkeys.Enter):
 		return m.submitAnswer()
+	case msg.String() == "r":
+		return m, m.speakQuestion()
 	default:
 		// Number keys 1-5 for direct selection.
 		if s := msg.String(); len(s) == 1 && s[0] >= '1' && s[0] <= '5' {
@@ -336,7 +364,7 @@ func (m Model) nextTurn() (Model, tea.Cmd) {
 	m.battle.Selected = 0
 	q := m.battle.GenerateQuestion(m.cards)
 	m.battle.Question = q
-	return m, nil
+	return m, m.speakQuestion()
 }
 
 // tickAfter returns a Cmd that sends animTickMsg after a delay.

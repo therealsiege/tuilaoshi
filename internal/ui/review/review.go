@@ -149,6 +149,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.input, cmd = m.input.Update(msg)
 				return m, cmd
 			}
+			if msg.Type == tea.KeyCtrlR {
+				return m, ui.SpeakCmd(m.tts, m.items[m.cursor].Chinese, "zh")
+			}
 
 			if key.Matches(msg, m.gkeys.Enter) {
 				answer := m.input.Value()
@@ -285,7 +288,7 @@ func (m Model) View() string {
 			b.WriteString("\n\n")
 			b.WriteString("  " + m.input.View())
 			b.WriteString("\n\n")
-			b.WriteString(ui.HelpStyle.Render("  enter submit · ctrl+space toggle input · esc back"))
+			b.WriteString(ui.HelpStyle.Render("  enter submit · ctrl+space toggle input · ctrl+r replay · esc back"))
 		}
 
 	case stateEval:

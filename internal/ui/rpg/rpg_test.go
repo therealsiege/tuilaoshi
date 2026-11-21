@@ -30,7 +30,7 @@ func storeModel(t *testing.T) Model {
 		t.Fatal(err)
 	}
 
-	m := New(wiki.NewStore(dir)).Refresh()
+	m := New(wiki.NewStore(dir), nil).Refresh()
 	if m.battle == nil || len(m.cards) != 4 {
 		t.Fatalf("battle not loaded from wiki: %d cards", len(m.cards))
 	}

@@ -25,3 +25,14 @@ func TestReviewScreens(t *testing.T) {
 	}
 	uitest.Golden(t, "prompt", m.View())
 }
+
+func TestReviewCtrlRStaysOnCard(t *testing.T) {
+	store := uitest.Wiki(t, map[string]string{"characters/shu1.md": uitest.OverdueCharacter})
+	m := New(store, claude.New(), nil, input.NewDict())
+	m, _ = m.Update(loadDueMsg{})
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyCtrlR})
+	if m.state != stateDrill || m.input.Value() != "" {
+		t.Errorf("ctrl+r changed the drill: state %v, input %q", m.state, m.input.Value())
+	}
+}
