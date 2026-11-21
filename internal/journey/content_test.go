@@ -52,23 +52,51 @@ func TestBestiaryEntriesAreComplete(t *testing.T) {
 func TestBossesResolveAndEscalate(t *testing.T) {
 	prev := 0
 	for _, b := range content.Bosses {
-		if b.Required <= prev {
-			t.Errorf("boss %s needs %d characters, not more than the boss before (%d)", b.Name, b.Required, prev)
+		if b.Stage <= prev || TribulationAt(b.Stage) == nil {
+			t.Errorf("boss %s is at stage %d, which doesn't exist or isn't after the boss before (%d)", b.Name, b.Stage, prev)
 		}
-		prev = b.Required
+		prev = b.Stage
 		if e := BossEntry(b); e.Art == "" {
 			t.Errorf("boss %s %s has no bestiary entry with art", b.Name, b.English)
 		}
 	}
 }
 
-func TestCompanionsUnlockInOrder(t *testing.T) {
-	if len(content.Companions) == 0 || content.Companions[0].UnlockAt != 0 {
-		t.Fatal("the first companion must travel from the start")
+func TestCompanionsJoinInStoryOrder(t *testing.T) {
+	if len(content.Companions) == 0 || content.Companions[0].Stage != 1 {
+		t.Fatal("the first companion must travel from stage 1")
 	}
 	for i := 1; i < len(content.Companions); i++ {
-		if content.Companions[i].UnlockAt <= content.Companions[i-1].UnlockAt {
-			t.Errorf("companion %s unlocks no later than %s", content.Companions[i].Name, content.Companions[i-1].Name)
+		if content.Companions[i].Stage <= content.Companions[i-1].Stage {
+			t.Errorf("companion %s joins no later than %s", content.Companions[i].Name, content.Companions[i-1].Name)
+		}
+	}
+}
+
+func TestStagesUnlockGraduallyAndNameRealDemons(t *testing.T) {
+	onStage := map[string]bool{}
+	prev := -1
+	for _, tr := range content.Tribulations {
+		if tr.Unlock < prev {
+			t.Errorf("tribulation %d unlocks at %d characters, fewer than the one before (%d)", tr.Number, tr.Unlock, prev)
+		}
+		prev = tr.Unlock
+		if tr.Demon != "" {
+			if BestiaryLookup(tr.Demon) == nil {
+				t.Errorf("tribulation %d names demon %s, who is not in the bestiary", tr.Number, tr.Demon)
+			}
+			onStage[tr.Demon] = true
+		}
+	}
+	if content.Tribulations[0].Unlock != 0 {
+		t.Error("the first tribulation must be open from the start")
+	}
+	for _, b := range content.Bosses {
+		onStage[BossEntry(b).Name] = true
+	}
+	for _, d := range content.Bestiary {
+		if !onStage[d.Name] {
+			t.Errorf("demon %s is never met on any stage", d.Name)
 		}
 	}
 }

@@ -5,13 +5,12 @@ transition against the battle model. Regenerate with `make golden`.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Intro : open battle (a demon from the chapters reached)
-    Intro --> Intro : b, when the next boss is unlocked (boss fight)
+    [*] --> Intro : open battle (the open stage's demon or boss, else practice)
     Intro --> Fighting : enter / space
     Fighting --> PlayerAttack : right answer
     Fighting --> EnemyAttack : wrong answer
     PlayerAttack --> Fighting : animation ends, enemy alive
-    PlayerAttack --> Victory : animation ends, enemy HP 0 (saves)
+    PlayerAttack --> Victory : animation ends, enemy HP 0 (saves; clears the stage)
     EnemyAttack --> Fighting : enter / space, player alive
     EnemyAttack --> Defeat : enter / space, player HP 0 (saves)
     Defeat --> Fighting : enter / space (rematch)

@@ -60,17 +60,7 @@ func (m Model) viewIntro() string {
 	b.WriteString(ui.MutedStyle.Render(enemy.Name))
 	b.WriteString("\n\n")
 
-	switch {
-	case m.bossFight:
-		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  BOSS! It will test your weakest words. Theme: %s", m.boss.Theme)))
-	default:
-		b.WriteString(ui.WarningStyle.Render("  A demon blocks your path!"))
-	}
-	b.WriteString("\n\n")
-	if m.boss != nil && !m.bossFight {
-		fmt.Fprintf(&b, "  %s  challenge boss %s %s instead (unlocked)\n\n",
-			ui.ChineseStyle.Render("[b]"), ui.ChineseStyle.Render(m.boss.Name), m.boss.English)
-	}
+	b.WriteString(m.renderStakes())
 	b.WriteString(ui.HelpStyle.Render("  enter/space begin battle  |  esc flee"))
 
 	return b.String()
@@ -171,8 +161,8 @@ func (m Model) viewVictory() string {
 
 	fmt.Fprintf(&b, "  %s defeated!\n\n",
 		ui.ChineseStyle.Render(m.battle.Enemy.Chinese))
-	if m.bossFight {
-		b.WriteString(ui.WarningStyle.Render("  Boss beaten! The road west opens."))
+	if m.stage != nil {
+		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  Tribulation %d cleared! The road west opens.", m.stage.Number)))
 		b.WriteString("\n\n")
 	}
 
@@ -344,4 +334,27 @@ func comboLabel(combo int) string {
 	default:
 		return ""
 	}
+}
+
+// renderStakes says what the battle is for: clearing the open stage (a
+// boss's, maybe), or practice while the next stage still needs mastery.
+func (m Model) renderStakes() string {
+	var b strings.Builder
+	switch {
+	case m.stage != nil:
+		fmt.Fprintf(&b, "  %s %s %s\n", ui.MutedStyle.Render(fmt.Sprintf("Tribulation %d ·", m.stage.Number)),
+			ui.ChineseStyle.Render(m.stage.Name), m.stage.English)
+		if m.stage.Boss != nil {
+			b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  BOSS! It will test your weakest words. Theme: %s", m.stage.Boss.Theme)))
+			b.WriteString("\n")
+		}
+		b.WriteString(ui.WarningStyle.Render("  Win to clear this tribulation."))
+	case m.next != nil:
+		b.WriteString(ui.WarningStyle.Render("  A demon blocks your path! (practice)"))
+		fmt.Fprintf(&b, "\n  %s", ui.MutedStyle.Render(fmt.Sprintf("Master %d more characters to open tribulation %d, %s.",
+			m.next.Unlock-m.mastered, m.next.Number, m.next.English)))
+	default:
+		b.WriteString(ui.WarningStyle.Render("  All 81 tribulations cleared. Practice freely."))
+	}
+	return b.String() + "\n\n"
 }

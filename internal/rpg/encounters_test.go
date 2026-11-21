@@ -10,22 +10,23 @@ import (
 )
 
 func TestReachedDemonsGrowWithProgress(t *testing.T) {
-	start, end := ReachedDemons(0), ReachedDemons(100)
+	stages := journey.Stages(0, nil)
+	start, end := ReachedDemons(stages, 1), ReachedDemons(stages, 81)
 	if len(start) == 0 {
 		t.Fatal("a new learner meets no demons")
 	}
 	if len(end) != len(journey.Bestiary()) {
-		t.Errorf("full progress reaches %d demons, want all %d", len(end), len(journey.Bestiary()))
+		t.Errorf("the whole pilgrimage reaches %d demons, want all %d", len(end), len(journey.Bestiary()))
 	}
 	for _, d := range start {
-		if n := parseChapterNumber(d.Chapter); n > openChapters {
+		if n := parseChapterNumber(d.Chapter); n > openChapters && d.Name != stages[0].Opponent.Name {
 			t.Errorf("%s (chapter %d) met before reaching it", d.English, n)
 		}
 	}
 	prev := 0
-	for p := 0.0; p <= 100; p += 10 {
-		if n := len(ReachedDemons(p)); n < prev {
-			t.Errorf("progress %.0f%% reaches %d demons, fewer than before (%d)", p, n, prev)
+	for current := 1; current <= 81; current++ {
+		if n := len(ReachedDemons(stages, current)); n < prev {
+			t.Errorf("stage %d reaches %d demons, fewer than before (%d)", current, n, prev)
 		} else {
 			prev = n
 		}

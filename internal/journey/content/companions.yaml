@@ -1,36 +1,37 @@
 - name: 唐僧
+  stage: 1
   english: Tang Sanzang
   emoji: '@'
   role: Guides your journey
 - name: 孙悟空
+  stage: 8
   english: Sun Wukong
   emoji: M
   role: Battles difficult characters
-  unlock_at: 50
   ability: 火眼金睛
   ability_desc: Reveals mnemonic decompositions for difficult characters
   ability_icon: ◎
+- name: 白龙马
+  stage: 9
+  english: Bai Longma
+  emoji: H
+  role: Speeds up learning
+  ability: 日行千里
+  ability_desc: 'Speeds up journey: progress counts double on review days'
+  ability_icon: »
 - name: 猪八戒
+  stage: 12
   english: Zhu Bajie
   emoji: P
   role: Helps with radicals
-  unlock_at: 200
   ability: 懒人有懒福
   ability_desc: 'Reduces streak penalty: mistakes only reset half the streak'
   ability_icon: "~"
 - name: 沙悟净
+  stage: 16
   english: Sha Wujing
   emoji: S
   role: Organizes reviews
-  unlock_at: 500
   ability: 勤勤恳恳
   ability_desc: 'Marks items for review: highlights characters due for review'
   ability_icon: ·
-- name: 白龙马
-  english: Bai Longma
-  emoji: H
-  role: Speeds up learning
-  unlock_at: 1000
-  ability: 日行千里
-  ability_desc: 'Speeds up journey: progress counts double on review days'
-  ability_icon: »

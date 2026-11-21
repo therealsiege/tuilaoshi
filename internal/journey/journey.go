@@ -35,7 +35,7 @@ type Companion struct {
 	Emoji       string `yaml:"emoji,omitempty"` // Simple ASCII representation
 	Role        string `yaml:"role,omitempty"`  // What they help with in the app
 	Unlocked    bool   `yaml:"-"`
-	UnlockAt    int    `yaml:"unlock_at,omitempty"`    // Characters needed to unlock
+	Stage       int    `yaml:"stage"`                  // tribulation at which they join the party
 	Ability     string `yaml:"ability,omitempty"`      // ability name
 	AbilityDesc string `yaml:"ability_desc,omitempty"` // what the ability does
 	AbilityIcon string `yaml:"ability_icon,omitempty"` // single ASCII char
@@ -45,10 +45,11 @@ type Companion struct {
 type Boss struct {
 	Name     string `yaml:"name,omitempty"` // Chinese name
 	English  string `yaml:"english,omitempty"`
-	Theme    string `yaml:"theme,omitempty"`    // What type of characters
-	Required int    `yaml:"required,omitempty"` // Characters mastered to unlock the fight
-	Unlocked bool   `yaml:"-"`                  // enough characters mastered to challenge it
-	Defeated bool   `yaml:"-"`                  // beaten in battle (recorded in wiki/bosses.yaml)
+	Theme    string `yaml:"theme,omitempty"` // What type of characters
+	Stage    int    `yaml:"stage"`           // tribulation where it is fought
+	Required int    `yaml:"-"`               // characters mastered to open that stage
+	Unlocked bool   `yaml:"-"`               // enough characters mastered to challenge it
+	Defeated bool   `yaml:"-"`               // beaten in battle (recorded in wiki/bosses.yaml)
 }
 
 // Artifact is a collectible power-up earned through study.
@@ -78,6 +79,7 @@ type State struct {
 	Companions   []Companion
 	Bosses       []Boss
 	NextBoss     *Boss
+	Stage        *Stage // the stage being worked on; nil once all are cleared
 	Artifacts    []Artifact
 	Quests       []Quest
 	Achievements []Achievement
@@ -115,24 +117,26 @@ func Calculate(store *wiki.Store) (State, error) {
 
 	streak := store.Streak()
 
-	victories, err := store.BossVictories()
+	cleared, err := store.ClearedStages()
 	if err != nil {
 		return State{}, err
 	}
-	bosses := Bosses(mastered, victories)
+	bosses := Bosses(mastered, cleared)
 	nextBoss := NextBoss(bosses)
+	stages := Stages(mastered, cleared)
 
 	// totalReviewed and daysStudied are not yet tracked — pass 0 for now.
 	// Achievements depending on those metrics will simply show as unearned.
 	totalReviewed := 0
 	daysStudied := 0
 
-	progress := Pilgrimage(pages)
+	progress := Pilgrimage(pages, cleared)
 
 	return State{
 		Rank:         calculateRank(mastered),
 		Progress:     progress,
-		Companions:   buildCompanions(mastered),
+		Stage:        CurrentStage(stages),
+		Companions:   buildCompanions(cleared),
 		Bosses:       bosses,
 		NextBoss:     nextBoss,
 		Artifacts:    buildArtifacts(mastered, streak),
@@ -194,18 +198,9 @@ func calculateRank(mastered int) Rank {
 	}
 }
 
-func calculateProgress(mastered, totalChars int) Progress {
-	// Calculate tribulation (1-81)
-	tribulation := 1
-	if totalChars > 0 {
-		tribulation = (mastered * 81) / totalChars
-		if tribulation < 1 {
-			tribulation = 1
-		}
-		if tribulation > 81 {
-			tribulation = 81
-		}
-	}
+// calculateProgress places the learner at tribulation (the current stage)
+// with cleared stages behind them.
+func calculateProgress(tribulation, cleared, mastered, totalChars int) Progress {
 
 	// Journey waypoints
 	locations := []struct {
@@ -235,13 +230,7 @@ func calculateProgress(mastered, totalChars int) Progress {
 		}
 	}
 
-	percent := 0.0
-	if totalChars > 0 {
-		percent = (float64(mastered) / float64(totalChars)) * 100.0
-		if percent > 100.0 {
-			percent = 100.0
-		}
-	}
+	percent := float64(cleared) / float64(len(content.Tribulations)) * 100.0
 
 	return Progress{
 		Tribulation: tribulation,
@@ -253,10 +242,13 @@ func calculateProgress(mastered, totalChars int) Progress {
 	}
 }
 
-func buildCompanions(mastered int) []Companion {
+// buildCompanions marks who has joined: each companion joins when the
+// stage of their story is cleared (Tang Sanzang travels from the start).
+func buildCompanions(cleared map[int]string) []Companion {
 	companions := append([]Companion{}, content.Companions...)
 	for i := range companions {
-		companions[i].Unlocked = mastered >= companions[i].UnlockAt
+		_, done := cleared[companions[i].Stage]
+		companions[i].Unlocked = companions[i].Stage <= 1 || done
 	}
 	return companions
 }

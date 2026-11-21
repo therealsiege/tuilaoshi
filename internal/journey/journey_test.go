@@ -1,7 +1,6 @@
 package journey
 
 import (
-	"math"
 	"testing"
 )
 
@@ -194,342 +193,99 @@ func TestCalculateRank(t *testing.T) {
 
 func TestCalculateProgress(t *testing.T) {
 	tests := []struct {
-		name       string
-		mastered   int
-		totalChars int
-		wantTrib   int
-		wantLoc    string
-		wantLocEn  string
-		wantPct    float64
+		trib, cleared int
+		wantLoc       string
+		wantPct       float64
 	}{
-		// Zero-total edge case
-		{
-			name:       "zero total chars defaults to tribulation 1 at Chang'an",
-			mastered:   0,
-			totalChars: 0,
-			wantTrib:   1,
-			wantLoc:    "长安",
-			wantLocEn:  "Chang'an (Capital)",
-			wantPct:    0.0,
-		},
-		// Starting out
-		{
-			name:       "zero mastered with chars starts at Chang'an",
-			mastered:   0,
-			totalChars: 1000,
-			wantTrib:   1,
-			wantLoc:    "长安",
-			wantLocEn:  "Chang'an (Capital)",
-			wantPct:    0.0,
-		},
-		// Low progress
-		{
-			name:       "small progress still at Chang'an",
-			mastered:   1,
-			totalChars: 1000,
-			wantTrib:   1,
-			wantLoc:    "长安",
-			wantLocEn:  "Chang'an (Capital)",
-			wantPct:    0.1,
-		},
-		// Tribulation exactly at location boundaries
-		{
-			name:       "tribulation 10 reaches Twin Fork Ridge",
-			mastered:   1000,
-			totalChars: 8100,
-			wantTrib:   10,
-			wantLoc:    "双叉岭",
-			wantLocEn:  "Twin Fork Ridge",
-			wantPct:    (1000.0 / 8100.0) * 100.0,
-		},
-		{
-			name:       "tribulation 20 reaches Five Elements Mountain",
-			mastered:   2000,
-			totalChars: 8100,
-			wantTrib:   20,
-			wantLoc:    "五行山",
-			wantLocEn:  "Five Elements Mountain",
-			wantPct:    (2000.0 / 8100.0) * 100.0,
-		},
-		{
-			name:       "tribulation 30 reaches Guanyin Temple",
-			mastered:   3000,
-			totalChars: 8100,
-			wantTrib:   30,
-			wantLoc:    "观音院",
-			wantLocEn:  "Guanyin Temple",
-			wantPct:    (3000.0 / 8100.0) * 100.0,
-		},
-		{
-			name:       "tribulation 40 reaches Gao Village",
-			mastered:   4000,
-			totalChars: 8100,
-			wantTrib:   40,
-			wantLoc:    "高老庄",
-			wantLocEn:  "Gao Village",
-			wantPct:    (4000.0 / 8100.0) * 100.0,
-		},
-		{
-			name:       "tribulation 50 reaches Flowing Sands River",
-			mastered:   5000,
-			totalChars: 8100,
-			wantTrib:   50,
-			wantLoc:    "流沙河",
-			wantLocEn:  "Flowing Sands River",
-			wantPct:    (5000.0 / 8100.0) * 100.0,
-		},
-		{
-			name:       "tribulation 60 reaches Flaming Mountains",
-			mastered:   6000,
-			totalChars: 8100,
-			wantTrib:   60,
-			wantLoc:    "火焰山",
-			wantLocEn:  "Flaming Mountains",
-			wantPct:    (6000.0 / 8100.0) * 100.0,
-		},
-		{
-			name:       "tribulation 70 reaches Heaven-Reaching River",
-			mastered:   7000,
-			totalChars: 8100,
-			wantTrib:   70,
-			wantLoc:    "通天河",
-			wantLocEn:  "Heaven-Reaching River",
-			wantPct:    (7000.0 / 8100.0) * 100.0,
-		},
-		{
-			name:       "tribulation 80 reaches Spirit Mountain",
-			mastered:   8000,
-			totalChars: 8100,
-			wantTrib:   80,
-			wantLoc:    "灵山",
-			wantLocEn:  "Spirit Mountain",
-			wantPct:    (8000.0 / 8100.0) * 100.0,
-		},
-		// Full completion
-		{
-			name:       "complete journey reaches Great Thunder Monastery",
-			mastered:   8100,
-			totalChars: 8100,
-			wantTrib:   81,
-			wantLoc:    "大雷音寺",
-			wantLocEn:  "Great Thunder Monastery",
-			wantPct:    100.0,
-		},
-		// Tribulation clamped at 81
-		{
-			name:       "mastered exceeding total clamps tribulation at 81",
-			mastered:   9000,
-			totalChars: 8100,
-			wantTrib:   81,
-			wantLoc:    "大雷音寺",
-			wantLocEn:  "Great Thunder Monastery",
-			wantPct:    100.0,
-		},
-		// Mid-journey
-		{
-			name:       "half mastered gives midpoint tribulation",
-			mastered:   500,
-			totalChars: 1000,
-			wantTrib:   40,
-			wantLoc:    "高老庄",
-			wantLocEn:  "Gao Village",
-			wantPct:    50.0,
-		},
-		// Percent capped at 100 when mastered > total
-		{
-			name:       "percent capped at 100",
-			mastered:   1200,
-			totalChars: 1000,
-			wantTrib:   81,
-			wantLoc:    "大雷音寺",
-			wantLocEn:  "Great Thunder Monastery",
-			wantPct:    100.0,
-		},
+		{1, 0, "长安", 0},
+		{10, 9, "双叉岭", 9.0 / 81 * 100},
+		{50, 49, "流沙河", 49.0 / 81 * 100},
+		{81, 81, "大雷音寺", 100},
 	}
-
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := calculateProgress(tt.mastered, tt.totalChars)
-			if got.Tribulation != tt.wantTrib {
-				t.Errorf("Tribulation = %d, want %d", got.Tribulation, tt.wantTrib)
-			}
-			if got.Location != tt.wantLoc {
-				t.Errorf("Location = %q, want %q", got.Location, tt.wantLoc)
-			}
-			if got.LocationEn != tt.wantLocEn {
-				t.Errorf("LocationEn = %q, want %q", got.LocationEn, tt.wantLocEn)
-			}
-			if got.Mastered != tt.mastered {
-				t.Errorf("Mastered = %d, want %d", got.Mastered, tt.mastered)
-			}
-			if got.TotalChars != tt.totalChars {
-				t.Errorf("TotalChars = %d, want %d", got.TotalChars, tt.totalChars)
-			}
-			if math.Abs(got.Percent-tt.wantPct) > 0.01 {
-				t.Errorf("Percent = %f, want %f", got.Percent, tt.wantPct)
-			}
-		})
+		got := calculateProgress(tt.trib, tt.cleared, 0, 0)
+		if got.Tribulation != tt.trib || got.Location != tt.wantLoc || got.Percent != tt.wantPct {
+			t.Errorf("progress(%d, %d cleared) = %+v, want %s at %.1f%%", tt.trib, tt.cleared, got, tt.wantLoc, tt.wantPct)
+		}
 	}
 }
 
-func TestBuildCompanions(t *testing.T) {
-	tests := []struct {
-		name     string
-		mastered int
-		want     []bool // unlocked state for each of the 5 companions
-	}{
-		{
-			name:     "zero mastered unlocks only Tang Sanzang",
-			mastered: 0,
-			want:     []bool{true, false, false, false, false},
-		},
-		{
-			name:     "49 mastered still only Tang Sanzang",
-			mastered: 49,
-			want:     []bool{true, false, false, false, false},
-		},
-		{
-			name:     "50 mastered unlocks Sun Wukong",
-			mastered: 50,
-			want:     []bool{true, true, false, false, false},
-		},
-		{
-			name:     "199 mastered still two companions",
-			mastered: 199,
-			want:     []bool{true, true, false, false, false},
-		},
-		{
-			name:     "200 mastered unlocks Zhu Bajie",
-			mastered: 200,
-			want:     []bool{true, true, true, false, false},
-		},
-		{
-			name:     "499 mastered still three companions",
-			mastered: 499,
-			want:     []bool{true, true, true, false, false},
-		},
-		{
-			name:     "500 mastered unlocks Sha Wujing",
-			mastered: 500,
-			want:     []bool{true, true, true, true, false},
-		},
-		{
-			name:     "999 mastered still four companions",
-			mastered: 999,
-			want:     []bool{true, true, true, true, false},
-		},
-		{
-			name:     "1000 mastered unlocks all companions",
-			mastered: 1000,
-			want:     []bool{true, true, true, true, true},
-		},
-		{
-			name:     "large number keeps all unlocked",
-			mastered: 5000,
-			want:     []bool{true, true, true, true, true},
-		},
+// clearedThrough marks stages 1..n cleared.
+func clearedThrough(n int) map[int]string {
+	c := map[int]string{}
+	for i := 1; i <= n; i++ {
+		c[i] = "2026-11-21"
 	}
+	return c
+}
 
-	companionNames := []string{"唐僧", "孙悟空", "猪八戒", "沙悟净", "白龙马"}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := buildCompanions(tt.mastered)
-			if len(got) != 5 {
-				t.Fatalf("got %d companions, want 5", len(got))
-			}
-			for i, c := range got {
-				if c.Unlocked != tt.want[i] {
-					t.Errorf("companion %s (%s) Unlocked = %v, want %v",
-						c.Name, c.English, c.Unlocked, tt.want[i])
-				}
-				if c.Name != companionNames[i] {
-					t.Errorf("companion[%d].Name = %q, want %q", i, c.Name, companionNames[i])
-				}
-			}
-		})
+func TestStagesOpenByMasteryAndClearByWinning(t *testing.T) {
+	stages := Stages(0, nil)
+	if len(stages) != 81 || stages[0].Status != StageOpen || stages[1].Status != StageLocked {
+		t.Fatalf("new learner: stage 1 %v, stage 2 %v; want stage 1 open, the rest locked", stages[0].Status, stages[1].Status)
+	}
+	// Mastery alone doesn't skip ahead: stage 2 waits for stage 1's win.
+	if s := Stages(9999, nil); s[1].Status != StageLocked {
+		t.Error("stage 2 opened before stage 1 was cleared")
+	}
+	s := Stages(stages[1].Unlock, clearedThrough(1))
+	if s[0].Status != StageCleared || s[1].Status != StageOpen || CurrentStage(s).Number != 2 {
+		t.Errorf("after clearing 1 with stage 2's mastery: %v %v, current %d", s[0].Status, s[1].Status, CurrentStage(s).Number)
+	}
+	if s := Stages(stages[1].Unlock-1, clearedThrough(1)); s[1].Status != StageLocked {
+		t.Error("stage 2 opened without its mastery")
+	}
+	if CurrentStage(Stages(9999, clearedThrough(81))) != nil {
+		t.Error("a finished pilgrimage still has a current stage")
 	}
 }
 
-func TestBuildCompanionsFields(t *testing.T) {
-	companions := buildCompanions(0)
-
-	expected := []struct {
-		name     string
-		english  string
-		emoji    string
-		unlockAt int
-	}{
-		{"唐僧", "Tang Sanzang", "@", 0},
-		{"孙悟空", "Sun Wukong", "M", 50},
-		{"猪八戒", "Zhu Bajie", "P", 200},
-		{"沙悟净", "Sha Wujing", "S", 500},
-		{"白龙马", "Bai Longma", "H", 1000},
+func TestStageOpponents(t *testing.T) {
+	stages := Stages(0, nil)
+	for _, s := range stages {
+		if s.Opponent.Name == "" {
+			t.Errorf("stage %d has no opponent", s.Number)
+		}
+		if s.Boss != nil && s.Opponent.Name != BossEntry(*s.Boss).Name {
+			t.Errorf("boss stage %d fights %s, not its boss %s", s.Number, s.Opponent.Name, s.Boss.Name)
+		}
 	}
+	if stages[19].Opponent.Name != "白骨精" || stages[20].Opponent.Name != "白骨精" {
+		t.Errorf("stage 20 %s, stage 21 %s; want White Bone Demon carried forward", stages[19].Opponent.Name, stages[20].Opponent.Name)
+	}
+}
 
-	for i, e := range expected {
-		c := companions[i]
-		if c.English != e.english {
-			t.Errorf("companion[%d].English = %q, want %q", i, c.English, e.english)
+func TestCompanionsJoinAtTheirStage(t *testing.T) {
+	joined := func(c []Companion) (names []string) {
+		for _, x := range c {
+			if x.Unlocked {
+				names = append(names, x.Name)
+			}
 		}
-		if c.Emoji != e.emoji {
-			t.Errorf("companion[%d].Emoji = %q, want %q", i, c.Emoji, e.emoji)
-		}
-		if c.UnlockAt != e.unlockAt {
-			t.Errorf("companion[%d].UnlockAt = %d, want %d", i, c.UnlockAt, e.unlockAt)
-		}
-		if c.Role == "" {
-			t.Errorf("companion[%d].Role is empty", i)
-		}
+		return names
+	}
+	if got := joined(buildCompanions(nil)); len(got) != 1 || got[0] != "唐僧" {
+		t.Errorf("at the start: %v, want only Tang Sanzang", got)
+	}
+	if got := joined(buildCompanions(clearedThrough(12))); len(got) != 4 {
+		t.Errorf("after stage 12: %v, want Tang, Wukong, the horse and Bajie", got)
 	}
 }
 
 func TestBosses(t *testing.T) {
-	thresholds := []int{100, 250, 500, 800, 1200, 1800, 2500, 4000}
-	for _, mastered := range []int{0, 99, 100, 249, 250, 500, 800, 1200, 1800, 2500, 4000, 10000} {
-		got := Bosses(mastered, map[string]string{"混世魔王": "2026-11-01"})
-		if len(got) != len(thresholds) {
-			t.Fatalf("got %d bosses, want %d", len(got), len(thresholds))
+	for _, b := range Bosses(0, clearedThrough(8)) {
+		if b.Required != TribulationAt(b.Stage).Unlock {
+			t.Errorf("%s needs %d characters, not its stage's %d", b.English, b.Required, TribulationAt(b.Stage).Unlock)
 		}
-		for i, b := range got {
-			if b.Required != thresholds[i] {
-				t.Errorf("boss[%d].Required = %d, want %d", i, b.Required, thresholds[i])
-			}
-			if want := mastered >= thresholds[i]; b.Unlocked != want {
-				t.Errorf("mastered %d: %s Unlocked = %v, want %v", mastered, b.English, b.Unlocked, want)
-			}
-			if want := i == 0; b.Defeated != want {
-				t.Errorf("mastered %d: %s Defeated = %v, want %v (only victories count)", mastered, b.English, b.Defeated, want)
-			}
+		if want := b.Stage <= 8; b.Defeated != want {
+			t.Errorf("%s (stage %d) Defeated = %v after clearing stages 1-8", b.English, b.Stage, b.Defeated)
 		}
 	}
-}
-
-func TestNextBossIsFirstUnbeaten(t *testing.T) {
-	tests := []struct {
-		victories   []string
-		wantEnglish string // "" for none left
-	}{
-		{nil, "Havoc Monster"},
-		{[]string{"混世魔王"}, "White Bone Demon"},
-		{[]string{"白骨精"}, "Havoc Monster"}, // order matters, not the set
-		{[]string{"混世魔王", "白骨精", "红孩儿", "蜘蛛精", "金角大王", "牛魔王", "金翅大鹏", "如来佛祖"}, ""},
+	if next := NextBoss(Bosses(0, clearedThrough(8))); next == nil || next.Name != "白骨精" {
+		t.Errorf("next boss after stage 8 = %v, want White Bone Demon", next)
 	}
-	for _, tt := range tests {
-		v := map[string]string{}
-		for _, name := range tt.victories {
-			v[name] = "2026-11-01"
-		}
-		got := NextBoss(Bosses(99999, v))
-		if tt.wantEnglish == "" {
-			if got != nil {
-				t.Errorf("victories %v: next boss %q, want none", tt.victories, got.English)
-			}
-			continue
-		}
-		if got == nil || got.English != tt.wantEnglish {
-			t.Errorf("victories %v: next boss %v, want %s", tt.victories, got, tt.wantEnglish)
-		}
+	if NextBoss(Bosses(0, clearedThrough(81))) != nil {
+		t.Error("a boss is left after every stage is cleared")
 	}
 }
 

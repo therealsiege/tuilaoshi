@@ -8,26 +8,35 @@ import (
 )
 
 // openChapters of the novel's 100 are open before any progress, so a new
-// learner still meets a few demons.
+// learner's practice battles still meet a few demons.
 const openChapters = 20
 
-// ReachedDemons returns the demons whose chapter the pilgrimage has reached:
-// the open chapters plus the rest of the novel in proportion to journey
-// progress (percent, 0-100).
-func ReachedDemons(percent float64) []journey.BestiaryEntry {
-	reached := openChapters + int(percent*(100-openChapters)/100)
+// ReachedDemons returns the demons met on stages up to current, plus those
+// from the novel's open chapters, for practice battles.
+func ReachedDemons(stages []journey.Stage, current int) []journey.BestiaryEntry {
+	seen := map[string]bool{}
 	var demons []journey.BestiaryEntry
-	for _, d := range journey.Bestiary() {
-		if parseChapterNumber(d.Chapter) <= reached {
+	add := func(d journey.BestiaryEntry) {
+		if !seen[d.Name] {
+			seen[d.Name] = true
 			demons = append(demons, d)
+		}
+	}
+	for _, d := range journey.Bestiary() {
+		if parseChapterNumber(d.Chapter) <= openChapters {
+			add(d)
+		}
+	}
+	for _, s := range stages {
+		if s.Number <= current {
+			add(s.Opponent)
 		}
 	}
 	return demons
 }
 
-// NewRandomBattle creates a battle against a demon the pilgrimage has reached.
-func NewRandomBattle(cards []model.Card, masteredCount int, percent float64) *Battle {
-	demons := ReachedDemons(percent)
+// NewRandomBattle creates a practice battle against one of demons.
+func NewRandomBattle(cards []model.Card, masteredCount int, demons []journey.BestiaryEntry) *Battle {
 	if len(demons) == 0 {
 		return nil
 	}

@@ -224,15 +224,14 @@ func (m Model) renderCultivationMeter() string {
 	tribLine := ui.MutedStyle.Render(fmt.Sprintf("  Tribulation %d: %s",
 		progress.Tribulation, progress.Location))
 
-	// Line 5: Next boss encounter (if any)
-	bossLine := ""
-	if m.journeyState.NextBoss != nil {
-		boss := m.journeyState.NextBoss
-		bossLine = fmt.Sprintf("  Next boss: %s %s",
-			ui.ChineseStyle.Render(boss.Name),
-			ui.MutedStyle.Render(boss.English))
-		if boss.Unlocked {
-			bossLine += ui.WarningStyle.Render("  unlocked: f, then b")
+	// Line 5: what the current stage needs
+	bossLine := ui.SuccessStyle.Render("  All 81 tribulations cleared")
+	if s := m.journeyState.Stage; s != nil {
+		bossLine = fmt.Sprintf("  Next: %s %s", ui.ChineseStyle.Render(s.Opponent.Name), ui.MutedStyle.Render(s.Opponent.English))
+		if s.Status == journey.StageOpen {
+			bossLine += ui.WarningStyle.Render("  ready: f to fight")
+		} else {
+			bossLine += ui.MutedStyle.Render(fmt.Sprintf("  master %d more", s.Unlock-progress.Mastered))
 		}
 	}
 

@@ -72,11 +72,10 @@ type Model struct {
 	loadErr  error // why the wiki could not be read for this battle
 	totalXP  int   // lifetime XP, read back after saving
 
-	// The next unbeaten boss, when enough characters are mastered to
-	// challenge it from the intro; bossFight is set once challenged.
-	boss      *journey.Boss
-	bossFight bool
-	mastered  int // the journey's mastered count, which scales player stats
+	// The stage this battle can clear, or nil for a practice battle; next
+	// is the stage being worked on (nil once all are cleared).
+	stage, next *journey.Stage
+	mastered    int // the journey's mastered count, which scales player stats
 }
 
 type logEntry struct {
@@ -115,31 +114,34 @@ func (m Model) SetSize(w, h int) Model {
 func (m Model) Refresh() Model {
 	cards, cardsErr := m.store.DrillableCards()
 	pages, pagesErr := m.store.ListPages()
-	victories, bossErr := m.store.BossVictories()
+	cleared, clearedErr := m.store.ClearedStages()
 	m.cards = cards
-	m.loadErr = errors.Join(cardsErr, pagesErr, bossErr)
+	m.loadErr = errors.Join(cardsErr, pagesErr, clearedErr)
 	m.mastered = journey.CountMastered(pages)
-	m.boss, m.bossFight = nil, false
-	if next := journey.NextBoss(journey.Bosses(m.mastered, victories)); next != nil && next.Unlocked {
-		m.boss = next
+	stages := journey.Stages(m.mastered, cleared)
+	m.stage, m.next = nil, journey.CurrentStage(stages)
+	if m.next != nil && m.next.Status == journey.StageOpen {
+		m.stage = m.next
 	}
-	// Demons come from the chapters the pilgrimage has reached.
-	m.battle = rpgengine.NewRandomBattle(m.cards, m.mastered, journey.Pilgrimage(pages).Percent)
+	switch {
+	case m.stage != nil && m.stage.Boss != nil:
+		// Bosses quiz the learner's weakest words.
+		m.cards = rpgengine.WeakCards(m.cards)
+		m.battle = rpgengine.NewBossBattle(m.cards, m.stage.Opponent, m.mastered)
+	case m.stage != nil:
+		m.battle = rpgengine.NewBattle(m.cards, m.stage.Opponent, "", m.mastered)
+	default:
+		reached := len(stages)
+		if m.next != nil {
+			reached = m.next.Number
+		}
+		m.battle = rpgengine.NewRandomBattle(m.cards, m.mastered, rpgengine.ReachedDemons(stages, reached))
+	}
 	m.setQuestionKinds()
 	m.state = stateIntro
 	m.log = nil
 	m.animTicks = 0
 	return m.startSession()
-}
-
-// challengeBoss swaps the road demon for the unlocked boss, which quizzes
-// the learner's weakest words.
-func (m Model) challengeBoss() Model {
-	m.cards = rpgengine.WeakCards(m.cards)
-	m.battle = rpgengine.NewBossBattle(m.cards, journey.BossEntry(*m.boss), m.mastered)
-	m.setQuestionKinds()
-	m.bossFight = true
-	return m
 }
 
 // setQuestionKinds asks for spoken questions when audio works, and typed
@@ -224,8 +226,8 @@ func (m *Model) saveSession() {
 		m.saveErr = err
 		return
 	}
-	if m.bossFight && m.battle.PlayerWon() {
-		if err := m.store.RecordBossVictory(m.boss.Name, time.Now()); err != nil {
+	if m.stage != nil && m.battle.PlayerWon() {
+		if err := m.store.RecordStageCleared(m.stage.Number, time.Now()); err != nil {
 			m.saveErr = err
 			return
 		}
@@ -260,9 +262,6 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 		switch m.state {
 		case stateIntro:
-			if msg.String() == "b" && m.boss != nil && !m.bossFight {
-				return m.challengeBoss(), nil
-			}
 			if key.Matches(msg, m.gkeys.Enter) || msg.Type == tea.KeySpace {
 				m.state = stateFighting
 				m.battle.State = rpgengine.BattlePlayerTurn

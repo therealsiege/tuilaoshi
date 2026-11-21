@@ -220,15 +220,10 @@ func (m Model) renderJourney() string {
 	b.WriteString("\n")
 
 	// Progress summary
-	completed := trib - 1
-	if completed < 0 {
-		completed = 0
-	}
-	progressText := fmt.Sprintf("  %d / 81 tribulations completed  \u00b7  %d/%d characters mastered (%.0f%%)",
-		completed,
+	progressText := fmt.Sprintf("  %.0f%% of the 81 tribulations cleared  \u00b7  %d/%d characters mastered",
+		m.state.Progress.Percent,
 		m.state.Progress.Mastered,
-		m.state.Progress.TotalChars,
-		m.state.Progress.Percent)
+		m.state.Progress.TotalChars)
 	b.WriteString(ui.MutedStyle.Render(progressText))
 	b.WriteString("\n\n")
 
@@ -304,7 +299,7 @@ func (m Model) renderParty() string {
 			b.WriteString(ui.MutedStyle.Render(companion.Emoji + " "))
 			b.WriteString(ui.MutedStyle.Render(companion.Name + " · " + companion.English))
 			b.WriteString("\n")
-			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     Unlock at %d characters", companion.UnlockAt)))
+			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     Joins at tribulation %d", companion.Stage)))
 			if companion.Ability != "" {
 				b.WriteString("\n")
 				b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     %s %s: %s",
@@ -362,13 +357,13 @@ func (m Model) renderBosses() string {
 					b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     Need %d more characters", remaining)))
 				} else {
 					b.WriteString("\n")
-					b.WriteString(ui.WarningStyle.Render("     Unlocked! Fight it: f, then b"))
+					b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("     Unlocked! Fight it at tribulation %d (f)", boss.Stage)))
 				}
 			} else {
 				b.WriteString(ui.MutedStyle.Render("○ "))
 				b.WriteString(ui.MutedStyle.Render(boss.Name + " · " + boss.English))
 				b.WriteString("\n")
-				b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     Unlock at %d characters · Theme: %s", boss.Required, boss.Theme)))
+				b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("     Tribulation %d · %d characters · Theme: %s", boss.Stage, boss.Required, boss.Theme)))
 			}
 		}
 		b.WriteString("\n")
