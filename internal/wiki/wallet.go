@@ -47,30 +47,46 @@ func (s *Store) Earn(w Wallet) error {
 // payForSession pays a copper coin for each card answered right in a
 // session just saved, once per card per day, so repeating easy words earns
 // nothing; and the daily bonus the first time today's answers reach the goal.
+//
+// Which words have paid is shared by every journey (study.yaml); the coins
+// go to the journey being played.
 func (s *Store) payForSession(sess model.Session) error {
+	study, err := s.readStudy()
+	if err != nil {
+		return err
+	}
 	rec, err := s.readJourney()
 	if err != nil {
 		return err
 	}
 	now := time.Now()
 	today := now.Format(dateFmt)
-	if rec.PaidDay != today {
+	if study.PaidDay != today {
 		// The day's first session: shields cover any days missed since the last.
-		s.shieldGap(&rec, now)
-		rec.PaidDay, rec.PaidCards = today, nil
+		s.shieldGap(&study, now)
+		study.PaidDay, study.PaidCards = today, nil
 	}
 	pay := Wallet{}
 	for _, it := range sess.Items {
-		if it.Correct && !slices.Contains(rec.PaidCards, it.CardID) {
-			rec.PaidCards = append(rec.PaidCards, it.CardID)
+		if it.Correct && !slices.Contains(study.PaidCards, it.CardID) {
+			study.PaidCards = append(study.PaidCards, it.CardID)
 			pay.Tongqian++
 		}
 	}
-	tally(&rec, today, sess.Type+"_right", pay.Tongqian)
-	if rec.DailyPaid != today && s.TodayStats().CardsReviewed >= DailyGoal {
-		pay.Tongqian += dailyBonus + min(s.Streak(), streakBonusCap)
-		rec.DailyPaid = today
+	tally(&study, &rec, today, sess.Type+"_right", pay.Tongqian)
+	if study.DailyPaid != today {
+		// Write first so the stats below count this session.
+		if err := s.writeStudy(study); err != nil {
+			return err
+		}
+		if s.TodayStats().CardsReviewed >= DailyGoal {
+			pay.Tongqian += dailyBonus + min(s.Streak(), streakBonusCap)
+			study.DailyPaid = today
+		}
 	}
 	rec.Coins.Tongqian += pay.Tongqian
+	if err := s.writeStudy(study); err != nil {
+		return err
+	}
 	return s.writeJourney(rec)
 }

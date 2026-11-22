@@ -21,12 +21,12 @@ func TestBountiesChangeDailyAndPayOnce(t *testing.T) {
 		t.Error("the same bounties every day")
 	}
 
-	rec := journeyRecord{}
+	rec, game := studyRecord{}, journeyRecord{}
 	today := "2026-11-22"
 	bounties := BountiesFor(today)
 	for i, b := range bounties {
-		tally(&rec, today, b.ID, b.Target)
-		tally(&rec, today, b.ID, b.Target) // met twice, paid once
+		tally(&rec, &game, today, b.ID, b.Target)
+		tally(&rec, &game, today, b.ID, b.Target) // met twice, paid once
 		if want := i + 1; len(rec.BountiesPaid) != want {
 			t.Fatalf("after %d bounties, %d paid", want, len(rec.BountiesPaid))
 		}
@@ -35,10 +35,10 @@ func TestBountiesChangeDailyAndPayOnce(t *testing.T) {
 	for _, b := range bounties {
 		pay += b.Pay
 	}
-	if rec.Coins.Tongqian != pay || rec.Shields != 1 {
-		t.Errorf("all bounties met: %d copper (want %d), %d shields (want 1)", rec.Coins.Tongqian, pay, rec.Shields)
+	if game.Coins.Tongqian != pay || rec.Shields != 1 {
+		t.Errorf("all bounties met: %d copper (want %d), %d shields (want 1)", game.Coins.Tongqian, pay, rec.Shields)
 	}
-	tally(&rec, "2026-11-23", bounties[0].ID, 1)
+	tally(&rec, &game, "2026-11-23", bounties[0].ID, 1)
 	if len(rec.BountiesPaid) != 0 || rec.Tally[bounties[0].ID] != 1 {
 		t.Errorf("a new day should start fresh: %+v", rec)
 	}
@@ -51,7 +51,7 @@ func TestShieldCoversAMissedDay(t *testing.T) {
 	if err := store.WriteSession(answers(now.AddDate(0, 0, -2), 1, 0)); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.writeJourney(journeyRecord{Shields: 1}); err != nil {
+	if err := store.writeStudy(studyRecord{Shields: 1}); err != nil {
 		t.Fatal(err)
 	}
 	if err := store.WriteSession(answers(now, 1, 0)); err != nil {
@@ -63,7 +63,7 @@ func TestShieldCoversAMissedDay(t *testing.T) {
 	if _, shields, err := store.Bounties(time.Now()); err != nil || shields != 0 {
 		t.Errorf("shields left %d %v, want 0", shields, err)
 	}
-	if err := os.Remove(filepath.Join(store.Dir, journeyFile)); err != nil {
+	if err := os.Remove(filepath.Join(store.Dir, studyFile)); err != nil {
 		t.Fatal(err)
 	}
 	if got := store.Streak(); got != 1 {

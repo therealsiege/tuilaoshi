@@ -15,6 +15,10 @@ import (
 type Store struct {
 	Dir string // absolute path to the wiki/ directory
 
+	// Save is the id of the journey being played (see saves.go); empty means
+	// the single journey of wiki/journey.yaml.
+	Save string
+
 	// Parsed pages by relative path, reused while a file's modification time
 	// and size are unchanged, so screens can list the whole wiki cheaply.
 	mu    sync.Mutex

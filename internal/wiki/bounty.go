@@ -56,7 +56,7 @@ type BountyStatus struct {
 // Bounties returns the bounties of now's day with progress, and the
 // streak shields held.
 func (s *Store) Bounties(now time.Time) ([]BountyStatus, int, error) {
-	rec, err := s.readJourney()
+	rec, err := s.readStudy()
 	today := now.Format(dateFmt)
 	var out []BountyStatus
 	for _, b := range BountiesFor(today) {
@@ -71,17 +71,25 @@ func (s *Store) Bounties(now time.Time) ([]BountyStatus, int, error) {
 
 // Tally counts fresh progress toward today's bounties and pays any met.
 func (s *Store) Tally(id string, n int) error {
+	study, err := s.readStudy()
+	if err != nil {
+		return err
+	}
 	rec, err := s.readJourney()
 	if err != nil {
 		return err
 	}
-	tally(&rec, time.Now().Format(dateFmt), id, n)
+	tally(&study, &rec, time.Now().Format(dateFmt), id, n)
+	if err := s.writeStudy(study); err != nil {
+		return err
+	}
 	return s.writeJourney(rec)
 }
 
-// tally adds n to a counter in rec and pays bounties it completes; a day
-// with all bounties met earns a streak shield.
-func tally(rec *journeyRecord, today, id string, n int) {
+// tally adds n to a counter in the study record and pays bounties it
+// completes into the journey's purse; a day with all bounties met earns a
+// streak shield.
+func tally(rec *studyRecord, game *journeyRecord, today, id string, n int) {
 	if n <= 0 {
 		return
 	}
@@ -96,7 +104,7 @@ func tally(rec *journeyRecord, today, id string, n int) {
 	for _, b := range bounties {
 		if rec.Tally[b.ID] >= b.Target && !slices.Contains(rec.BountiesPaid, b.ID) {
 			rec.BountiesPaid = append(rec.BountiesPaid, b.ID)
-			rec.Coins.Tongqian += b.Pay
+			game.Coins.Tongqian += b.Pay
 			if len(rec.BountiesPaid) == len(bounties) {
 				rec.Shields = min(rec.Shields+1, maxShields)
 			}
@@ -106,7 +114,7 @@ func tally(rec *journeyRecord, today, id string, n int) {
 
 // shieldGap spends streak shields on the days missed between the last day
 // studied and today, when there are enough to cover them all.
-func (s *Store) shieldGap(rec *journeyRecord, today time.Time) {
+func (s *Store) shieldGap(rec *studyRecord, today time.Time) {
 	studied := map[string]bool{}
 	for _, r := range s.readSessions() {
 		studied[r.Date] = true

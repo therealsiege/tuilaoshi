@@ -86,6 +86,7 @@ const (
 	ViewCollection // enemy and character cards, by set
 	ViewParty      // bonds with the four disciples
 	ViewWorld      // the road west: towns and their side quests
+	ViewTitle      // the opening screen: continue, new or load a journey
 )
 
 // SwitchViewMsg tells the app to change views.

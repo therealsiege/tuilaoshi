@@ -10,26 +10,25 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// journeyFile records the date each journey stage (tribulation 1-81) was
-// cleared by winning its battle.
+// A journey's game state (story, purse, gear, bonds, quests, collection)
+// is kept in a save file, wiki/saves/<id>.yaml, so several journeys can be
+// played; with no save chosen (Store.Save empty) it is wiki/journey.yaml.
+// Study progress is shared by every journey: word schedules live on the
+// pages, and the day's study bookkeeping in study.yaml (see study.go).
 const journeyFile = "journey.yaml"
 
 type journeyRecord struct {
+	Name    string `yaml:"name,omitempty"`    // the journey's name, shown when loading
+	Created string `yaml:"created,omitempty"` // RFC 3339
+	Played  string `yaml:"played,omitempty"`  // last played, RFC 3339
+
 	Cleared      map[int]string    `yaml:"cleared"`
 	Seen         []int             `yaml:"seen,omitempty"` // stages whose story scene has been shown
 	Coins        Wallet            `yaml:"coins,omitempty"`
-	DailyPaid    string            `yaml:"daily_paid,omitempty"`    // the day the daily bonus was last paid
-	PaidDay      string            `yaml:"paid_day,omitempty"`      // the day PaidCards covers
-	PaidCards    []string          `yaml:"paid_cards,omitempty"`    // cards already paid for that day
 	Owned        []string          `yaml:"owned,omitempty"`         // gear bought at the shrine, by id
 	Worn         map[string]string `yaml:"worn,omitempty"`          // slot -> gear id
 	Defeated     []string          `yaml:"defeated,omitempty"`      // enemies beaten at least once, for the collection
 	Claimed      []string          `yaml:"claimed,omitempty"`       // collection sets whose reward has been paid
-	TallyDay     string            `yaml:"tally_day,omitempty"`     // the day Tally counts
-	Tally        map[string]int    `yaml:"tally,omitempty"`         // fresh progress toward today's bounties
-	BountiesPaid []string          `yaml:"bounties_paid,omitempty"` // today's bounties already paid
-	Shields      int               `yaml:"shields,omitempty"`       // streak shields held
-	Shielded     []string          `yaml:"shielded,omitempty"`      // missed days a shield covered
 	Bonds        map[string]int    `yaml:"bonds,omitempty"`         // companion -> bond points
 	TalkDay      string            `yaml:"talk_day,omitempty"`      // the day TalkPoints counts
 	TalkPoints   map[string]int    `yaml:"talk_points,omitempty"`   // bond points from talking today, by companion
@@ -39,9 +38,17 @@ type journeyRecord struct {
 	Nightmares   []string          `yaml:"nightmares,omitempty"`    // bosses beaten in a nightmare rematch
 }
 
+// journeyPath is the file holding the journey being played.
+func (s *Store) journeyPath() string {
+	if s.Save != "" {
+		return filepath.Join(s.Dir, savesDir, s.Save+".yaml")
+	}
+	return filepath.Join(s.Dir, journeyFile)
+}
+
 func (s *Store) readJourney() (journeyRecord, error) {
 	rec := journeyRecord{}
-	data, err := os.ReadFile(filepath.Join(s.Dir, journeyFile))
+	data, err := os.ReadFile(s.journeyPath())
 	if err != nil && !os.IsNotExist(err) {
 		return rec, fmt.Errorf("read journey progress: %w", err)
 	}
@@ -61,7 +68,11 @@ func (s *Store) writeJourney(rec journeyRecord) error {
 	if err != nil {
 		return fmt.Errorf("encode journey progress: %w", err)
 	}
-	return os.WriteFile(filepath.Join(s.Dir, journeyFile), data, 0644)
+	path := s.journeyPath()
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return fmt.Errorf("create saves dir: %w", err)
+	}
+	return os.WriteFile(path, data, 0644)
 }
 
 // ClearedStages returns the date each stage was cleared, by tribulation

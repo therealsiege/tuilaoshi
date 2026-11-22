@@ -188,7 +188,7 @@ func (s *Store) Streak() int {
 		dates[rec.Date] = true
 	}
 	// Days covered by a streak shield count as studied.
-	if j, err := s.readJourney(); err == nil {
+	if j, err := s.readStudy(); err == nil {
 		for _, d := range j.Shielded {
 			dates[d] = true
 		}

@@ -37,7 +37,7 @@ func (m Model) View() string {
 	b.WriteString(m.renderJourney())
 	b.WriteString("\n")
 
-	footer := "  ? help · esc back · q quit"
+	footer := "  ? help · esc journeys · q quit"
 	if m.tts != nil && m.tts.Available() {
 		footer += " · audio on (" + m.tts.ChineseVoice().Name + " / " + m.tts.EnglishVoice().Name + ")"
 	}
