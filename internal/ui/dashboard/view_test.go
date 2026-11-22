@@ -1,0 +1,42 @@
+package dashboard
+
+import (
+	"strings"
+	"testing"
+
+	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
+)
+
+func dashboardFor(t *testing.T, width int) Model {
+	t.Helper()
+	store := uitest.Wiki(t, map[string]string{"characters/shu1.md": uitest.OverdueCharacter})
+	return New(store, nil).SetSize(width, 40).Refresh()
+}
+
+func TestDashboardScreens(t *testing.T) {
+	uitest.Golden(t, "wide", dashboardFor(t, 110).View())
+	uitest.Golden(t, "narrow", dashboardFor(t, 72).View())
+}
+
+func TestStartHereSuggestsOneNextStep(t *testing.T) {
+	m := dashboardFor(t, 110)
+	if v := uitest.Plain(m.renderStartHere()); !strings.Contains(v, "r  Review your 1 due word") {
+		t.Errorf("with a word due: %q", v)
+	}
+	m.due = 0
+	if v := uitest.Plain(m.renderStartHere()); !strings.Contains(v, "f  Clear tribulation 1") {
+		t.Errorf("nothing due, stage 1 open: %q", v)
+	}
+	m.journeyState.Stage = nil
+	if v := uitest.Plain(m.renderStartHere()); !strings.Contains(v, "t  Read & listen") {
+		t.Errorf("nothing due, journey done: %q", v)
+	}
+}
+
+func TestThousands(t *testing.T) {
+	for n, want := range map[int]string{0: "0", 999: "999", 1000: "1,000", 10789: "10,789", 1234567: "1,234,567"} {
+		if got := thousands(n); got != want {
+			t.Errorf("thousands(%d) = %q, want %q", n, got, want)
+		}
+	}
+}

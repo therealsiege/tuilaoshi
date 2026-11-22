@@ -2,13 +2,10 @@ package dashboard
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
@@ -21,7 +18,6 @@ type Model struct {
 	tts          *audio.Client
 	keys         ui.DashboardKeys
 	gkeys        ui.GlobalKeys
-	stats        wiki.ContentStats
 	daily        wiki.DailyStats
 	journeyState journey.State
 	streak       int
@@ -86,180 +82,6 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) View() string {
-	var b strings.Builder
-
-	// Decorative header
-	b.WriteString(ui.Header("推老师 TuīLǎoShī"))
-	b.WriteString("\n\n")
-	b.WriteString(ui.LoadError(m.loadErr))
-
-	// Two-column layout: stats + today's progress
-	statsBox := lipgloss.JoinVertical(lipgloss.Left,
-		ui.SubtitleStyle.Render("  典 Wiki Content"),
-		"",
-		fmt.Sprintf("  字  Characters  %d", m.stats.CharacterPages),
-		fmt.Sprintf("  词  Vocabulary  %d", m.stats.VocabPages),
-		fmt.Sprintf("  文  Grammar     %d", m.stats.GrammarPages),
-		fmt.Sprintf("  读  Readings    %d", m.stats.ReadingPages),
-		"",
-		ui.MutedStyle.Render(fmt.Sprintf("  Total: %d pages", m.stats.TotalPages)),
-	)
-
-	todayBox := lipgloss.JoinVertical(lipgloss.Left,
-		ui.SubtitleStyle.Render("  今 Today's Progress"),
-		"",
-		fmt.Sprintf("  Reviewed: %d cards", m.daily.CardsReviewed),
-		m.accuracyLine(),
-		m.streakLine(),
-	)
-
-	leftCol := ui.BorderStyle.Width(32).Render(statsBox)
-	rightCol := ui.BorderStyle.Width(32).Render(todayBox)
-
-	b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, leftCol, "  ", rightCol))
-	b.WriteString("\n\n")
-
-	// Review status with progress bar
-	if m.due > 0 {
-		dueText := ui.WarningStyle.Render(fmt.Sprintf("  %d items due for review", m.due))
-		b.WriteString(dueText)
-		b.WriteString("\n")
-		reviewed := m.daily.CardsReviewed
-		total := reviewed + m.due
-		b.WriteString("  " + ui.ProgressBar(reviewed, total, 25))
-		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf(" %d/%d", reviewed, total)))
-	} else {
-		dueText := ui.SuccessStyle.Render("  ✓ All reviews complete!")
-		b.WriteString(dueText)
-	}
-	b.WriteString("\n")
-
-	// Cultivation XP meter
-	b.WriteString("\n")
-	b.WriteString(m.renderCultivationMeter())
-	b.WriteString("\n")
-
-	b.WriteString("\n")
-
-	// Navigation
-	b.WriteString(ui.Divider(30))
-	b.WriteString("\n\n")
-	b.WriteString(ui.SubtitleStyle.Render("  Actions"))
-	b.WriteString("\n\n")
-	fmt.Fprintf(&b, "  %s  练 Start a flashcard drill\n", ui.ChineseStyle.Render("[d]"))
-	fmt.Fprintf(&b, "  %s  战 Fight a demon (RPG)\n", ui.ChineseStyle.Render("[f]"))
-	fmt.Fprintf(&b, "  %s  览 Browse wiki pages\n", ui.ChineseStyle.Render("[b]"))
-	fmt.Fprintf(&b, "  %s  话 Chat with tutor\n", ui.ChineseStyle.Render("[c]"))
-	fmt.Fprintf(&b, "  %s  复 Review due items\n", ui.ChineseStyle.Render("[r]"))
-	fmt.Fprintf(&b, "  %s  统 Study statistics\n", ui.ChineseStyle.Render("[s]"))
-	fmt.Fprintf(&b, "  %s  游 Journey to the West\n", ui.ChineseStyle.Render("[j]"))
-	fmt.Fprintf(&b, "  %s  部 Radical explorer\n", ui.ChineseStyle.Render("[x]"))
-	fmt.Fprintf(&b, "  %s  读 Read a text\n", ui.ChineseStyle.Render("[t]"))
-	fmt.Fprintf(&b, "  %s  测 Assess your level\n", ui.ChineseStyle.Render("[a]"))
-	fmt.Fprintf(&b, "  %s  声 Change voice\n", ui.ChineseStyle.Render("[v]"))
-	fmt.Fprintf(&b, "  %s  找 Search wiki\n", ui.ChineseStyle.Render("[/]"))
-	fmt.Fprintf(&b, "  %s  退 Quit\n", ui.ChineseStyle.Render("[q]"))
-	b.WriteString("\n")
-
-	// Footer
-	b.WriteString(ui.Divider(30))
-	b.WriteString("\n")
-	footer := "  tuilaoshi · esc back · ? help"
-	if m.tts != nil && m.tts.Available() {
-		footer += " · " + ui.SuccessStyle.Render("audio on") +
-			" (" + m.tts.ChineseVoice().Name + "/" + m.tts.EnglishVoice().Name + ")"
-	}
-	b.WriteString(ui.MutedStyle.Render(footer))
-
-	return b.String()
-}
-
-func (m Model) accuracyLine() string {
-	if m.daily.CardsReviewed == 0 {
-		return ui.MutedStyle.Render("  Accuracy: --")
-	}
-	pct := float64(m.daily.Correct) / float64(m.daily.CardsReviewed) * 100
-	text := fmt.Sprintf("  Accuracy: %.0f%%", pct)
-	if pct >= 80 {
-		return ui.SuccessStyle.Render(text)
-	} else if pct >= 50 {
-		return ui.WarningStyle.Render(text)
-	}
-	return ui.ErrorStyle.Render(text)
-}
-
-func (m Model) streakLine() string {
-	if m.streak == 0 {
-		return ui.MutedStyle.Render("  Streak:   --")
-	}
-	text := fmt.Sprintf("  Streak:   %d days", m.streak)
-	if m.streak >= 7 {
-		return ui.SuccessStyle.Render(text + " 🔥")
-	}
-	return text
-}
-
-// renderCultivationMeter renders the XP cultivation meter widget.
-func (m Model) renderCultivationMeter() string {
-	rank := m.journeyState.Rank
-	progress := m.journeyState.Progress
-
-	// Line 1: Rank name in Chinese + English
-	rankLine := fmt.Sprintf("  %s %s", ui.ChineseStyle.Render(rank.Name), rank.English)
-
-	// Line 2: Progress bar with percentage toward next rank
-	pct := 0
-	if rank.Required > 0 {
-		pct = rank.Current * 100 / rank.Required
-	}
-	barLine := fmt.Sprintf("  %s %s",
-		ui.ProgressBar(rank.Current, rank.Required, 20),
-		ui.MutedStyle.Render(fmt.Sprintf("%d%%", pct)))
-
-	// Line 3: Characters mastered / next rank threshold
-	charsLine := ui.MutedStyle.Render(fmt.Sprintf("  %d / %d chars", rank.Current, rank.Required))
-
-	// Line 4: Current tribulation and location
-	tribLine := ui.MutedStyle.Render(fmt.Sprintf("  Tribulation %d: %s",
-		progress.Tribulation, progress.Location))
-
-	// Line 5: what the current stage needs
-	bossLine := ui.SuccessStyle.Render("  All 81 tribulations cleared")
-	if s := m.journeyState.Stage; s != nil {
-		bossLine = fmt.Sprintf("  Next: %s %s", ui.ChineseStyle.Render(s.Opponent.Name), ui.MutedStyle.Render(s.Opponent.English))
-		if s.Status == journey.StageOpen {
-			bossLine += ui.WarningStyle.Render("  ready: f to fight")
-		} else {
-			bossLine += ui.MutedStyle.Render("  " + journey.NeedText(*s, m.journeyState.Counts))
-		}
-	}
-
-	lines := []string{
-		ui.SubtitleStyle.Render("  修 Cultivation"),
-		"",
-		rankLine,
-		barLine,
-		charsLine,
-		tribLine,
-	}
-	if m.xp > 0 {
-		lines = append(lines, ui.MutedStyle.Render(fmt.Sprintf("  Battle XP: %d", m.xp)))
-	}
-	if bossLine != "" {
-		lines = append(lines, bossLine)
-	}
-
-	// Companion idle dialogue, rotated by mastered character count
-	if d := journey.RandomDialogue("idle", rank.Current); d != nil {
-		lines = append(lines, "")
-		lines = append(lines, ui.MutedStyle.Render("  "+ui.ChineseStyle.Render(d.Speaker)+": "+d.Line))
-	}
-
-	meter := lipgloss.JoinVertical(lipgloss.Left, lines...)
-	return ui.BorderStyle.Width(66).Render(meter)
-}
-
 // SetSize updates the terminal dimensions.
 func (m Model) SetSize(w, h int) Model {
 	m.width = w
@@ -269,14 +91,13 @@ func (m Model) SetSize(w, h int) Model {
 
 // Refresh reloads data from the wiki store.
 func (m Model) Refresh() Model {
-	var statsErr, dueErr, journeyErr error
-	m.stats, statsErr = m.store.Stats()
+	var dueErr, journeyErr error
 	due, dueErr := wiki.DueItems(m.store, time.Now())
 	m.due = len(due)
 	m.daily = m.store.TodayStats()
 	m.streak = m.store.Streak()
 	m.xp = m.store.TotalXP()
 	m.journeyState, journeyErr = journey.Calculate(m.store)
-	m.loadErr = errors.Join(statsErr, dueErr, journeyErr)
+	m.loadErr = errors.Join(dueErr, journeyErr)
 	return m
 }

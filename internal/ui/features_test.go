@@ -28,3 +28,25 @@ func TestFeatureMapListsDashboardKeys(t *testing.T) {
 		}
 	}
 }
+
+// Every dashboard key must be in the menu, and the menu must name no key
+// the dashboard doesn't handle.
+func TestDashboardMenuMatchesKeys(t *testing.T) {
+	bound := map[string]bool{}
+	keys := reflect.ValueOf(DefaultDashboardKeys())
+	for i := 0; i < keys.NumField(); i++ {
+		if b, ok := keys.Field(i).Interface().(key.Binding); ok {
+			bound[b.Help().Key] = true
+			if MenuLabel(b.Help().Key) == "" {
+				t.Errorf("dashboard key %q (%s) is not in the menu", b.Help().Key, b.Help().Desc)
+			}
+		}
+	}
+	for _, g := range DashboardMenu {
+		for _, it := range g.Items {
+			if !bound[it.Key] {
+				t.Errorf("menu item %q (%s) has no key binding", it.Key, it.Label)
+			}
+		}
+	}
+}

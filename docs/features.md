@@ -5,7 +5,7 @@ Every screen, how to reach it from the dashboard, and what tests it. A test
 
 | Key | Screen | What it does | Code | Tests |
 |-----|--------|--------------|------|-------|
-| — | Dashboard | Wiki counts, items due, today's progress, cultivation rank | `internal/ui/dashboard` | — |
+| — | Dashboard | Today's numbers, one suggested next step, the menu grouped into Study / Journey / More (`ui.DashboardMenu`, also the help screen), and where the journey stands | `internal/ui/dashboard` | screen snapshots (wide, narrow), next-step choice, menu matches key bindings |
 | `d` | Drill 练习 | Flashcards graded by Claude (exact typed Chinese is graded instantly, offline); modes: recognition, production, listening, sentence, random | `internal/ui/drill` | screen snapshots (mode picker, prompt) |
 | `f` | Battle 战斗 | Turn-based fight: a stage's story scene the first time it opens (read word by word, tab to fight), then the open tribulation's demon or boss with that stage's themed words (winning clears the stage), or practice on the coming stage's words while the next stage still needs mastered characters; listening questions when audio works (`r` replays); write questions typed with the pinyin input; order questions (rebuild an example sentence from shuffled words, 1-9 / backspace); demon abilities (blind, disguise, burn, venom) and companion assists (w reveal, shield, first strike, half combo); results save to word schedules | `internal/ui/rpg`, `internal/rpg` | snapshots (intro, fighting), [state chart](battle-states.md) transitions, save/reschedule tests, one-right-answer property test (random decks + real wiki) |
 | `b` | Browse 览 | Page list with rendered markdown | `internal/ui/browser` | — |

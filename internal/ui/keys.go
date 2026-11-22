@@ -167,21 +167,7 @@ func DefaultDashboardKeys() DashboardKeys {
 func HelpText(v View) string {
 	switch v {
 	case ViewDashboard:
-		return "Dashboard Keys\n\n" +
-			"  d  Start drill\n" +
-			"  f  Fight a demon (RPG)\n" +
-			"  b  Browse wiki\n" +
-			"  c  Chat with tutor\n" +
-			"  r  Review due items\n" +
-			"  s  Study statistics\n" +
-			"  j  Journey to the West\n" +
-			"  x  Radical explorer\n" +
-			"  t  Read a text\n" +
-			"  a  Assess your level\n" +
-			"  v  Change voice\n" +
-			"  /  Search wiki\n" +
-			"  ?  Toggle help\n" +
-			"  q  Quit"
+		return menuHelp()
 	case ViewStats:
 		return "Stats Keys\n\n" +
 			"  esc  Back to dashboard\n" +
