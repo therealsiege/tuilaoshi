@@ -1,15 +1,14 @@
+// Package browser lists the wiki's pages, sorted by type and level, with
+// search over titles, pinyin (tones optional), meanings and tags, and shows
+// the selected page as rendered Markdown.
 package browser
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/therealsiege/tuilaoshi/internal/model"
+
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -21,274 +20,212 @@ const (
 	focusContent
 )
 
+// renderCacheSize bounds how many rendered pages are kept.
+const renderCacheSize = 200
+
 // Model is the browser view model.
 type Model struct {
-	store    *wiki.Store
-	pages    []model.Page
-	cursor   int
-	focus    focus
-	viewport viewport.Model
-	rendered string
-	search   string
-	filtered []int // indices into pages
-	width    int
-	height   int
-	gkeys    ui.GlobalKeys
-	loadErr  error // why the wiki could not be read, shown above the list
+	store   *wiki.Store
+	gkeys   ui.GlobalKeys
+	entries []entry
+	shown   []int // indices into entries that match the search
+	cursor  int   // index into shown
+	offset  int   // first shown row visible in the list
+	focus   focus
+
+	searching bool   // typing a search
+	query     string // current search
+
+	viewport  viewport.Model
+	renderer  *glamour.TermRenderer
+	rendererW int
+	rendered  map[string]string // page path -> rendered Markdown, at rendererW
+
+	width, height int
+	loadErr       error
 }
 
 // New creates a new browser model.
 func New(store *wiki.Store) Model {
-	vp := viewport.New(60, 20)
-	return Model{
-		store:    store,
-		viewport: vp,
-		gkeys:    ui.DefaultGlobalKeys(),
-	}
+	return Model{store: store, gkeys: ui.DefaultGlobalKeys(), viewport: viewport.New(60, 20), rendered: map[string]string{}}
 }
 
-func (m Model) Init() tea.Cmd {
-	return func() tea.Msg { return loadPagesMsg{} }
-}
-
-type loadPagesMsg struct{}
-
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case loadPagesMsg:
-		m.pages, m.loadErr = m.store.ListPages()
-		m.resetFilter()
-		if len(m.filtered) > 0 {
-			m.renderCurrentPage()
-		}
-		return m, nil
-
-	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, m.gkeys.Tab):
-			if m.focus == focusList {
-				m.focus = focusContent
-			} else {
-				m.focus = focusList
-			}
-			return m, nil
-
-		case key.Matches(msg, m.gkeys.Up):
-			if m.focus == focusList {
-				if m.cursor > 0 {
-					m.cursor--
-					m.renderCurrentPage()
-				}
-			} else {
-				m.viewport.ScrollUp(1)
-			}
-			return m, nil
-
-		case key.Matches(msg, m.gkeys.Down):
-			if m.focus == focusList {
-				if m.cursor < len(m.filtered)-1 {
-					m.cursor++
-					m.renderCurrentPage()
-				}
-			} else {
-				m.viewport.ScrollDown(1)
-			}
-			return m, nil
-
-		case key.Matches(msg, m.gkeys.Enter):
-			if m.focus == focusList {
-				m.focus = focusContent
-			}
-			return m, nil
-
-		case key.Matches(msg, m.gkeys.Search):
-			// TODO: implement search input
-			return m, nil
-
-		case msg.Type == tea.KeyRunes:
-			// Quick filter by typing
-			if m.focus == focusList {
-				m.search += msg.String()
-				m.applyFilter()
-				m.cursor = 0
-				if len(m.filtered) > 0 {
-					m.renderCurrentPage()
-				}
-				return m, nil
-			}
-
-		case msg.Type == tea.KeyBackspace:
-			if m.focus == focusList && len(m.search) > 0 {
-				m.search = m.search[:len(m.search)-1]
-				m.applyFilter()
-				m.cursor = 0
-				if len(m.filtered) > 0 {
-					m.renderCurrentPage()
-				}
-				return m, nil
-			}
-			if m.focus == focusContent {
-				m.focus = focusList
-				return m, nil
-			}
-		}
-	}
-
-	if m.focus == focusContent {
-		var cmd tea.Cmd
-		m.viewport, cmd = m.viewport.Update(msg)
-		return m, cmd
-	}
-
-	return m, nil
-}
-
-func (m Model) View() string {
-	listWidth := 30
-	if m.width > 0 {
-		listWidth = m.width / 3
-		if listWidth < 20 {
-			listWidth = 20
-		}
-		if listWidth > 40 {
-			listWidth = 40
-		}
-	}
-
-	// Build file list
-	var listItems []string
-	for i, idx := range m.filtered {
-		p := m.pages[idx]
-		name := p.Path
-		if p.Title != "" {
-			name = p.Title
-		}
-		if len(name) > listWidth-4 {
-			name = name[:listWidth-7] + "..."
-		}
-		if i == m.cursor {
-			listItems = append(listItems, ui.SelectedStyle.Render("▸ "+name))
-		} else {
-			listItems = append(listItems, ui.UnselectedStyle.Render("  "+name))
-		}
-	}
-
-	listContent := strings.Join(listItems, "\n")
-	if m.search != "" {
-		listContent = ui.MutedStyle.Render("filter: "+m.search) + "\n\n" + listContent
-	}
-
-	listStyle := ui.BorderStyle
-	contentStyle := ui.BorderStyle
-	if m.focus == focusList {
-		listStyle = ui.ActiveBorderStyle
-	} else {
-		contentStyle = ui.ActiveBorderStyle
-	}
-
-	contentWidth := 60
-	contentHeight := 20
-	if m.width > 0 {
-		contentWidth = m.width - listWidth - 8
-		if contentWidth < 30 {
-			contentWidth = 30
-		}
-	}
-	if m.height > 0 {
-		contentHeight = m.height - 6
-		if contentHeight < 10 {
-			contentHeight = 10
-		}
-	}
-
-	m.viewport.Width = contentWidth - 4
-	m.viewport.Height = contentHeight - 2
-
-	list := listStyle.Width(listWidth).Height(contentHeight).Render(listContent)
-	content := contentStyle.Width(contentWidth).Height(contentHeight).Render(m.viewport.View())
-
-	main := lipgloss.JoinHorizontal(lipgloss.Top, list, content)
-
-	title := ui.TitleStyle.Render("Wiki Browser 浏览")
-	help := ui.HelpStyle.Render("  tab switch pane · ↑↓ navigate · esc back · type to filter")
-
-	return fmt.Sprintf("%s\n%s%s\n%s", title, ui.LoadError(m.loadErr), main, help)
-}
+func (m Model) Init() tea.Cmd { return nil }
 
 // SetSize updates the terminal dimensions.
 func (m Model) SetSize(w, h int) Model {
-	m.width = w
-	m.height = h
+	m.width, m.height = w, h
+	m.layoutViewport()
+	m.showCurrent()
 	return m
 }
 
-// Refresh reloads pages from store.
+// Refresh reloads and indexes the pages, clearing any search.
 func (m Model) Refresh() Model {
-	m.pages, m.loadErr = m.store.ListPages()
-	m.resetFilter()
-	m.cursor = 0
-	if len(m.filtered) > 0 {
-		m.renderCurrentPage()
-	}
+	pages, err := m.store.ListPages()
+	m.loadErr = err
+	m.entries = buildIndex(pages)
+	m.query, m.searching, m.focus = "", false, focusList
+	m.rendered = map[string]string{}
+	m.applySearch()
 	return m
 }
 
-func (m *Model) resetFilter() {
-	m.filtered = make([]int, len(m.pages))
-	for i := range m.pages {
-		m.filtered[i] = i
-	}
-	m.search = ""
+// StartSearch opens the browser with the search box active.
+func (m Model) StartSearch() Model {
+	m.searching, m.focus = true, focusList
+	return m
 }
 
-func (m *Model) applyFilter() {
-	if m.search == "" {
-		m.resetFilter()
-		return
+// Searching reports whether the search box has the keyboard, so esc closes
+// it rather than leaving the browser.
+func (m Model) Searching() bool { return m.searching }
+
+func (m *Model) applySearch() {
+	if m.query == "" {
+		m.shown = make([]int, len(m.entries))
+		for i := range m.shown {
+			m.shown[i] = i
+		}
+	} else {
+		m.shown = match(m.entries, m.query)
 	}
-	m.filtered = nil
-	lower := strings.ToLower(m.search)
-	for i, p := range m.pages {
-		if strings.Contains(strings.ToLower(p.Path), lower) ||
-			strings.Contains(strings.ToLower(p.Title), lower) {
-			m.filtered = append(m.filtered, i)
+	m.cursor, m.offset = 0, 0
+	m.showCurrent()
+}
+
+func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	k, ok := msg.(tea.KeyMsg)
+	if !ok {
+		return m, nil
+	}
+	if m.searching {
+		return m.updateSearch(k)
+	}
+	if m.focus == focusContent {
+		return m.updateContent(k)
+	}
+	switch {
+	case k.String() == "/":
+		m.searching = true
+	case key.Matches(k, m.gkeys.Up):
+		m.move(-1)
+	case key.Matches(k, m.gkeys.Down):
+		m.move(1)
+	case k.Type == tea.KeyPgUp:
+		m.move(-m.listRows())
+	case k.Type == tea.KeyPgDown:
+		m.move(m.listRows())
+	case k.Type == tea.KeyHome || k.String() == "g":
+		m.move(-len(m.shown))
+	case k.Type == tea.KeyEnd || k.String() == "G":
+		m.move(len(m.shown))
+	case key.Matches(k, m.gkeys.Enter) || key.Matches(k, m.gkeys.Tab) || key.Matches(k, m.gkeys.Right):
+		if len(m.shown) > 0 {
+			m.focus = focusContent
 		}
 	}
+	return m, nil
 }
 
-func (m *Model) renderCurrentPage() {
-	if len(m.filtered) == 0 || m.cursor >= len(m.filtered) {
-		m.rendered = ""
+// updateSearch edits the query: every printable key types, arrows still
+// move through the results, enter reads the selected page, esc clears.
+func (m Model) updateSearch(k tea.KeyMsg) (Model, tea.Cmd) {
+	switch k.Type {
+	case tea.KeyRunes, tea.KeySpace:
+		m.query += string(k.Runes)
+		if k.Type == tea.KeySpace {
+			m.query += " "
+		}
+		m.applySearch()
+	case tea.KeyBackspace:
+		if r := []rune(m.query); len(r) > 0 {
+			m.query = string(r[:len(r)-1])
+			m.applySearch()
+		}
+	case tea.KeyUp:
+		m.move(-1)
+	case tea.KeyDown:
+		m.move(1)
+	case tea.KeyEnter:
+		m.searching = false
+		if len(m.shown) > 0 {
+			m.focus = focusContent
+		}
+	case tea.KeyEsc:
+		m.searching, m.query = false, ""
+		m.applySearch()
+	}
+	return m, nil
+}
+
+// updateContent scrolls the page; tab, left or backspace go back to the list.
+func (m Model) updateContent(k tea.KeyMsg) (Model, tea.Cmd) {
+	switch {
+	case key.Matches(k, m.gkeys.Tab) || key.Matches(k, m.gkeys.Left) || k.Type == tea.KeyBackspace:
+		m.focus = focusList
+		return m, nil
+	case k.String() == "/":
+		m.focus, m.searching = focusList, true
+		return m, nil
+	}
+	var cmd tea.Cmd
+	m.viewport, cmd = m.viewport.Update(k)
+	return m, cmd
+}
+
+// move shifts the selection, keeping it inside the visible list window.
+func (m *Model) move(by int) {
+	if len(m.shown) == 0 {
+		return
+	}
+	m.cursor = min(max(m.cursor+by, 0), len(m.shown)-1)
+	rows := m.listRows()
+	if m.cursor < m.offset {
+		m.offset = m.cursor
+	} else if m.cursor >= m.offset+rows {
+		m.offset = m.cursor - rows + 1
+	}
+	m.showCurrent()
+}
+
+// showCurrent renders the selected page into the viewport, from the cache
+// when it has been shown before at this width.
+func (m *Model) showCurrent() {
+	if len(m.shown) == 0 {
 		m.viewport.SetContent("")
 		return
 	}
-
-	page := m.pages[m.filtered[m.cursor]]
-
-	width := 60
-	if m.width > 0 {
-		width = m.width - 40
-		if width < 40 {
-			width = 40
+	p := m.entries[m.shown[m.cursor]].page
+	out, ok := m.rendered[p.Path]
+	if !ok {
+		out = p.Body
+		if r := m.markdown(); r != nil {
+			if s, err := r.Render(p.Body); err == nil {
+				out = s
+			}
 		}
+		if len(m.rendered) >= renderCacheSize {
+			m.rendered = map[string]string{}
+		}
+		m.rendered[p.Path] = out
 	}
-
-	renderer, err := glamour.NewTermRenderer(
-		glamour.WithAutoStyle(),
-		glamour.WithWordWrap(width),
-	)
-	if err != nil {
-		m.viewport.SetContent(page.Body)
-		return
-	}
-
-	rendered, err := renderer.Render(page.Body)
-	if err != nil {
-		m.viewport.SetContent(page.Body)
-		return
-	}
-
-	m.rendered = rendered
-	m.viewport.SetContent(rendered)
+	m.viewport.SetContent(out)
 	m.viewport.GotoTop()
+}
+
+// markdown returns a renderer for the content width, made once per width.
+// It uses a fixed dark style: the "auto" style queries the terminal, which
+// is slow and can hang over mosh.
+func (m *Model) markdown() *glamour.TermRenderer {
+	w := max(m.viewport.Width-2, 20)
+	if m.renderer != nil && m.rendererW == w {
+		return m.renderer
+	}
+	r, err := glamour.NewTermRenderer(glamour.WithStandardStyle("dark"), glamour.WithWordWrap(w))
+	if err != nil {
+		return nil
+	}
+	m.renderer, m.rendererW, m.rendered = r, w, map[string]string{}
+	return r
 }

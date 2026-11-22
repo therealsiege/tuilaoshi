@@ -76,7 +76,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Assess):
 			return m, ui.SwitchTo(ui.ViewAssess)
 		case key.Matches(msg, m.keys.Search):
-			return m, ui.SwitchTo(ui.ViewBrowser)
+			return m, ui.SwitchTo(ui.ViewSearch)
 		}
 	}
 	return m, nil

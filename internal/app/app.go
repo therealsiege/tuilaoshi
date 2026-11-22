@@ -147,6 +147,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ui.ViewBrowser:
 			m.browser = m.browser.Refresh()
 			return m, m.browser.Init()
+		case ui.ViewSearch:
+			m.currentView = ui.ViewBrowser
+			m.browser = m.browser.Refresh().StartSearch()
+			return m, nil
 		case ui.ViewChat:
 			return m, m.chat.Init()
 		case ui.ViewReview:
@@ -211,7 +215,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		// Global back to dashboard (unless input is composing in Chinese mode,
 		// or esc closes an open reading)
-		readingOpen := m.currentView == ui.ViewReading && m.reader.Open()
+		readingOpen := (m.currentView == ui.ViewReading && m.reader.Open()) ||
+			(m.currentView == ui.ViewBrowser && m.browser.Searching())
 		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard && !readingOpen {
 			if !m.isInputComposing() {
 				if m.currentView == ui.ViewBattle {

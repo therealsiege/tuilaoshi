@@ -81,6 +81,7 @@ const (
 	ViewBattle
 	ViewReading
 	ViewAssess
+	ViewSearch // the browser, opened with its search box active
 )
 
 // SwitchViewMsg tells the app to change views.
