@@ -1,13 +1,13 @@
-// Package world is the road west as a map: the towns between the stages,
-// each with a notice board of townsfolk's requests. A request is a short
-// notice or letter in Chinese with a question about it; answering right
-// pays copper once, and a wrong answer closes it until tomorrow, so the
-// reward follows reading rather than guessing.
+// Package world is a town on the road west, entered by walking into it on
+// the region map: its notice board of townsfolk's requests, its inn and its
+// stone. A reading request is a short notice or letter in Chinese with a
+// question about it; answering right pays copper once, and a wrong answer
+// closes it until tomorrow, so the reward follows reading rather than
+// guessing.
 package world
 
 import (
 	"errors"
-	"fmt"
 	"math/rand"
 	"time"
 
@@ -24,22 +24,20 @@ import (
 type screen int
 
 const (
-	screenMap screen = iota
-	screenTown
+	screenTown screen = iota
 	screenQuest
 	screenStone // a town's secret stone (see stone.go)
 )
 
 // Model is the world map view model.
 type Model struct {
-	store   *wiki.Store
-	gkeys   ui.GlobalKeys
-	towns   []journey.Town
-	current int // the stage being worked on; 0 once all are cleared
-	states  map[string]wiki.QuestState
-	screen  screen
-	town    int // cursor on the map, and the town open
-	quest   int // cursor on the notice board, and the quest open
+	store  *wiki.Store
+	gkeys  ui.GlobalKeys
+	towns  []journey.Town
+	states map[string]wiki.QuestState
+	screen screen
+	town   int // cursor on the map, and the town open
+	quest  int // cursor on the notice board, and the quest open
 
 	// The open quest's choices, shuffled, and the answer once given.
 	choices  []string
@@ -52,8 +50,6 @@ type Model struct {
 	input    input.Model
 	grading  bool
 	feedback string
-
-	fromRoad bool // the town was walked into from the region map; esc returns there
 
 	stones []string       // towns whose stone is open
 	hunts  map[string]int // hunts accepted: id -> soldiers beaten
@@ -90,43 +86,23 @@ func (m Model) SetSize(w, h int) Model {
 	return m
 }
 
-// Busy reports whether a town or quest is open, so esc steps back to the
-// map rather than leaving the screen.
-func (m Model) Busy() bool { return m.screen != screenMap }
-
 // OpenTown shows a town walked into from the region map.
 func (m Model) OpenTown(id string) Model {
 	for i, t := range m.towns {
 		if t.ID == id {
-			m.town, m.quest, m.screen, m.fromRoad, m.note = i, 0, screenTown, true, ""
+			m.town, m.quest, m.screen, m.note = i, 0, screenTown, ""
 		}
 	}
 	return m
 }
 
-// Refresh reloads how far the pilgrimage has come and the quests' states.
+// Refresh reloads the quests' states, the stones opened and the hunts.
 func (m Model) Refresh() Model {
-	pages, pagesErr := m.store.ListPages()
-	cleared, clearedErr := m.store.ClearedStages()
 	states, questErr := m.store.Quests(m.now())
 	stones, stoneErr := m.store.StonesOpened()
 	hunts, huntErr := m.store.Hunts()
-	m.loadErr = errors.Join(pagesErr, clearedErr, questErr, stoneErr, huntErr)
-	m.hunts = hunts
-	m.stones = stones
-	m.states = states
-	m.current = 0
-	if s := journey.CurrentStage(journey.Stages(journey.CountProgress(pages), cleared)); s != nil {
-		m.current = s.Number
-	}
-	if m.screen == screenMap {
-		// Start at the furthest town reached.
-		for i, t := range m.towns {
-			if t.Reached(m.current) {
-				m.town = i
-			}
-		}
-	}
+	m.loadErr = errors.Join(questErr, stoneErr, huntErr)
+	m.hunts, m.stones, m.states = hunts, stones, states
 	return m
 }
 
@@ -160,10 +136,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m.answer(k), nil
 	case screenTown:
 		switch {
-		case back && m.fromRoad:
-			return m, ui.SwitchTo(ui.ViewMap)
 		case back:
-			m.screen, m.note = screenMap, ""
+			return m, ui.SwitchTo(ui.ViewMap)
 		case key.Matches(k, m.gkeys.Up):
 			m.quest = max(m.quest-1, 0)
 		case key.Matches(k, m.gkeys.Down):
@@ -182,21 +156,6 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m.rest(), nil
 		}
 		return m, nil
-	}
-	switch {
-	case back:
-		return m, ui.SwitchTo(ui.ViewDashboard)
-	case key.Matches(k, m.gkeys.Up):
-		m.town, m.note = max(m.town-1, 0), ""
-	case key.Matches(k, m.gkeys.Down):
-		m.town, m.note = min(m.town+1, len(m.towns)-1), ""
-	case key.Matches(k, m.gkeys.Enter):
-		t := m.towns[m.town]
-		if !t.Reached(m.current) {
-			m.note = fmt.Sprintf("The road reaches %s at tribulation %d.", t.Name, t.Stage)
-			return m, nil
-		}
-		m.screen, m.quest, m.note = screenTown, 0, ""
 	}
 	return m, nil
 }

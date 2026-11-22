@@ -48,8 +48,9 @@ type Model struct {
 	counts  journey.Counts
 	stage   *journey.Stage // the stage being worked on; nil once all are cleared
 	wallet  wiki.Wallet
-	hp, max int      // the pilgrim's HP on the road, and its most
-	quests  []string // the quest log: hunts under way
+	hp, max int                        // the pilgrim's HP on the road, and its most
+	quests  []string                   // the quest log: hunts under way
+	states  map[string]wiki.QuestState // side quests' states, for the road strip
 	note    string
 
 	width, height int
@@ -78,6 +79,8 @@ func (m Model) Refresh() Model {
 	wallet, walletErr := m.store.Wallet()
 	m.loadErr = errors.Join(pagesErr, clearedErr, placeErr, walletErr)
 	m.cleared, m.wallet = cleared, wallet
+	states, questErr := m.store.Quests(time.Now())
+	m.states, m.loadErr = states, errors.Join(m.loadErr, questErr)
 	m.quests = m.questLog()
 	hp, most, hpErr := rpgview.PilgrimHP(m.store)
 	m.hp, m.max = hp, most
@@ -105,10 +108,7 @@ func (m Model) questLog() []string {
 	if err != nil {
 		return nil
 	}
-	states, err := m.store.Quests(time.Now())
-	if err != nil {
-		return nil
-	}
+	states := m.states
 	var log []string
 	for id, beaten := range hunts {
 		q, town := journey.QuestByID(id)

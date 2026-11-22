@@ -26,7 +26,7 @@ func worldAt(t *testing.T, cleared int) Model {
 	store := uitest.Wiki(t, map[string]string{"journey.yaml": b.String()})
 	m := New(store, nil, nil)
 	m.now = func() time.Time { return day }
-	return m.SetSize(100, 50).Refresh()
+	return m.SetSize(100, 50).Refresh().OpenTown("changan")
 }
 
 func itoa(n int) string { return fmt.Sprint(n) }
@@ -35,17 +35,16 @@ func press(s string) tea.KeyMsg { return tea.KeyMsg{Type: tea.KeyRunes, Runes: [
 
 var enter = tea.KeyMsg{Type: tea.KeyEnter}
 
-func TestRoadScreens(t *testing.T) {
-	m := worldAt(t, 11) // working on stage 12: Chang'an, the temple and Gao Village reached
-	uitest.Golden(t, "road", m.View())
-	m, _ = m.Update(enter)
+func TestTownScreen(t *testing.T) {
+	m := worldAt(t, 11).OpenTown("gao-village")
 	uitest.Golden(t, "town", m.View())
+	if _, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEsc}); cmd == nil {
+		t.Error("esc in town should go back on the road")
+	}
 }
 
 func TestAnsweringARequest(t *testing.T) {
 	m := worldAt(t, 11)
-	m.town = 0 // Chang'an
-	m, _ = m.Update(enter)
 	m, _ = m.Update(enter) // the bun seller's notice
 	if m.screen != screenQuest || strings.Contains(m.View(), "Help wanted") {
 		t.Fatalf("quest not open, or English shown before answering:\n%s", m.View())
@@ -72,18 +71,8 @@ func TestAnsweringARequest(t *testing.T) {
 	}
 }
 
-func TestTownsAheadAreClosed(t *testing.T) {
-	m := worldAt(t, 0)
-	m.town = len(m.towns) - 1
-	m, _ = m.Update(enter)
-	if m.screen != screenMap || !strings.Contains(m.note, "tribulation 79") {
-		t.Errorf("visited a town not yet reached: screen %d, note %q", m.screen, m.note)
-	}
-}
-
 func TestWritingRequestPaysWhenItPasses(t *testing.T) {
 	m := worldAt(t, 11)
-	m.town = 0
 	scores := []int{0, 2}
 	m.grader = func(_ context.Context, task, criteria, answer string) (int, string, error) {
 		if !strings.Contains(task, "招牌") || criteria == "" {
@@ -93,7 +82,6 @@ func TestWritingRequestPaysWhenItPasses(t *testing.T) {
 		scores = scores[1:]
 		return s, "反馈 feedback", nil
 	}
-	m, _ = m.Update(enter)
 	for i, q := range m.towns[0].Quests {
 		if q.Writing() {
 			m.quest = i
@@ -137,8 +125,6 @@ func TestWritingRequestPaysWhenItPasses(t *testing.T) {
 
 func TestStoneOpensToTheIdiomTypedFromMemory(t *testing.T) {
 	m := worldAt(t, 11)
-	m.town = 0 // 长安: 一路平安
-	m, _ = m.Update(enter)
 	if !strings.Contains(m.View(), "old stone") {
 		t.Fatalf("the town doesn't mention its stone:\n%s", m.View())
 	}
@@ -166,8 +152,6 @@ func TestStoneOpensToTheIdiomTypedFromMemory(t *testing.T) {
 
 func TestStoneHintPaysCopper(t *testing.T) {
 	m := worldAt(t, 11)
-	m.town = 0
-	m, _ = m.Update(enter)
 	m, _ = m.Update(press("s"))
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyCtrlH})
 	if !strings.Contains(m.View(), "yí lù píng ān") {
@@ -182,8 +166,6 @@ func TestStoneHintPaysCopper(t *testing.T) {
 
 func TestHuntAcceptBeatAndCollect(t *testing.T) {
 	m := worldAt(t, 11)
-	m.town = 0 // 长安: drive off 特处士 twice
-	m, _ = m.Update(enter)
 	for i, q := range m.towns[0].Quests {
 		if q.Hunting() {
 			m.quest = i

@@ -276,7 +276,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		readingOpen := (m.currentView == ui.ViewReading && m.reader.Open()) ||
 			(m.currentView == ui.ViewBrowser && m.browser.Searching()) ||
 			(m.currentView == ui.ViewParty && m.party.Busy()) ||
-			(m.currentView == ui.ViewWorld && m.world.Busy()) ||
+			m.currentView == ui.ViewWorld ||
 			m.currentView == ui.ViewTitle || m.currentView == ui.ViewMap
 		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard && !readingOpen {
 			if !m.isInputComposing() {

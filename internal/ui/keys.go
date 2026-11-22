@@ -85,7 +85,7 @@ const (
 	ViewShrine     // the Earth God's shrine: gear shop and character sheet
 	ViewCollection // enemy and character cards, by set
 	ViewParty      // bonds with the four disciples
-	ViewWorld      // the road west: towns and their side quests
+	ViewWorld      // a town walked into: notice board, inn, stone
 	ViewTitle      // the opening screen: continue, new or load a journey
 	ViewMap        // walking the region's map: the journey's hub
 )
@@ -117,7 +117,6 @@ type DashboardKeys struct {
 	Shrine   key.Binding
 	Cards    key.Binding
 	Party    key.Binding
-	World    key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -175,10 +174,6 @@ func DefaultDashboardKeys() DashboardKeys {
 			key.WithKeys("p"),
 			key.WithHelp("p", "party"),
 		),
-		World: key.NewBinding(
-			key.WithKeys("w"),
-			key.WithHelp("w", "world"),
-		),
 		Reading: key.NewBinding(
 			key.WithKeys("t"),
 			key.WithHelp("t", "read"),
@@ -211,13 +206,14 @@ func HelpText(v View) string {
 			"  esc    Back to dashboard\n" +
 			"  ?      Toggle help"
 	case ViewWorld:
-		return "Road Keys\n\n" +
-			"  ↑↓     Choose a town / request\n" +
-			"  enter  Visit / read\n" +
+		return "Town Keys\n\n" +
+			"  ↑↓     Choose a request\n" +
+			"  enter  Read / accept / collect\n" +
 			"  1-4    Answer a request\n" +
 			"  s      The town's stone\n" +
-			"  g      Shrine (in a town)\n" +
-			"  esc    Back"
+			"  r      Rest at the inn\n" +
+			"  g      Shrine\n" +
+			"  esc    Back on the road"
 	case ViewParty:
 		return "Party Keys\n\n" +
 			"  ↑↓     Choose a companion\n" +

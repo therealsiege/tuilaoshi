@@ -8,6 +8,7 @@ import (
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
+	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 // ground is how a terrain draws its impassable and wild cells.
@@ -36,7 +37,7 @@ func (m Model) View() string {
 	r := m.region.Region
 	var b strings.Builder
 	b.WriteString(ui.TitleStyle.MarginBottom(0).Render(r.Name+"  "+r.English) + "  " +
-		ui.MutedStyle.Render(fmt.Sprintf("tribulations %d–%d", r.From, r.To)) + "\n")
+		ui.MutedStyle.Render(fmt.Sprintf("region %d of %d · tribulations %d–%d", m.region.Index+1, len(journey.Regions()), r.From, r.To)) + "\n")
 	b.WriteString(ui.LoadError(m.loadErr))
 	grid := m.gridView()
 	side := m.sideView()
@@ -45,12 +46,61 @@ func (m Model) View() string {
 	} else {
 		b.WriteString(grid + "\n" + side)
 	}
-	b.WriteString("\n")
+	b.WriteString("\n" + m.roadStrip() + "\n")
 	if m.note != "" {
 		b.WriteString(ui.WarningStyle.Render("  "+m.note) + "\n")
 	}
 	b.WriteString(ui.HelpStyle.Render("  arrows walk · enter act · c camp (study, party, shrine…) · ? help"))
 	return b.String()
+}
+
+// roadStrip shows the whole road west in one line or two: every town in
+// order, with its requests done for those reached and the tribulation that
+// reaches the rest, and where the pilgrim stands among them.
+func (m Model) roadStrip() string {
+	current := 0 // 0: the pilgrimage is complete
+	if m.stage != nil {
+		current = m.stage.Number
+	}
+	var parts []string
+	here := false
+	for _, t := range journey.Towns() {
+		if !here && !t.Reached(current) {
+			parts = append(parts, ui.WarningStyle.Render(fmt.Sprintf("◆ you, %d", current)))
+			here = true
+		}
+		if !t.Reached(current) {
+			parts = append(parts, ui.MutedStyle.Render(fmt.Sprintf("○ ？？？ %d", t.Stage)))
+			continue
+		}
+		done := 0
+		for _, q := range t.Quests {
+			if m.states[q.ID] == wiki.QuestDone {
+				done++
+			}
+		}
+		count := fmt.Sprintf("%d/%d", done, len(t.Quests))
+		if done < len(t.Quests) {
+			count = ui.WarningStyle.Render(count)
+		}
+		parts = append(parts, "● "+ui.ChineseStyle.Render(t.Name)+" "+count)
+	}
+	width := 100
+	if m.width > 0 {
+		width = m.width - 4
+	}
+	var lines []string
+	line := ui.SubtitleStyle.Render("Road")
+	for _, p := range parts {
+		if lipgloss.Width(line)+3+lipgloss.Width(p) > width {
+			lines = append(lines, line)
+			line = "    "
+		} else {
+			line += ui.MutedStyle.Render(" · ")
+		}
+		line += p
+	}
+	return "  " + strings.Join(append(lines, line), "\n  ")
 }
 
 func (m Model) gridView() string {

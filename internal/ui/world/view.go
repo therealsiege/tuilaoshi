@@ -22,66 +22,12 @@ func (m Model) View() string {
 		} else {
 			b.WriteString(m.questView())
 		}
-	case screenTown:
-		b.WriteString(m.townView())
 	default:
-		b.WriteString(m.mapView())
+		b.WriteString(m.townView())
 	}
 	if m.note != "" {
 		b.WriteString("\n" + ui.WarningStyle.Render("  "+m.note))
 	}
-	return b.String()
-}
-
-// mapView draws the road as a column of towns, marking where the
-// pilgrimage stands between them.
-func (m Model) mapView() string {
-	var b strings.Builder
-	b.WriteString(ui.TitleStyle.MarginBottom(0).Render("西行路 The Road West") + "\n")
-	b.WriteString(ui.MutedStyle.Render("  Towns between the tribulations. Their notice boards hold requests to read and answer.") + "\n\n")
-	b.WriteString(ui.LoadError(m.loadErr))
-	// Connect the towns with a line when the terminal is tall enough.
-	link := m.height == 0 || m.height >= 2*len(m.towns)+10
-	here := false
-	for i, t := range m.towns {
-		reached := t.Reached(m.current)
-		if !here && !reached {
-			b.WriteString("     " + ui.WarningStyle.Render(fmt.Sprintf("◆ you are here, tribulation %d", m.current)) + "\n")
-			if link {
-				b.WriteString("     " + ui.MutedStyle.Render("│") + "\n")
-			}
-			here = true
-		}
-		dot, name := "●", ui.ChineseStyle.Render(t.Name)+" "+t.English
-		if !reached {
-			dot, name = "○", ui.MutedStyle.Render("？？？")
-		}
-		status := ui.MutedStyle.Render(fmt.Sprintf("tribulation %d", t.Stage))
-		if reached {
-			done := 0
-			for _, q := range t.Quests {
-				if m.states[q.ID] == wiki.QuestDone {
-					done++
-				}
-			}
-			status = ui.MutedStyle.Render(fmt.Sprintf("%d/%d requests", done, len(t.Quests)))
-			if done < len(t.Quests) {
-				status = ui.WarningStyle.Render(fmt.Sprintf("%d/%d requests", done, len(t.Quests)))
-			}
-		}
-		marker := "  "
-		if i == m.town {
-			marker = ui.SelectedStyle.UnsetPadding().UnsetMargins().Render("▸ ")
-		}
-		fmt.Fprintf(&b, "   %s%s %s  %s\n", marker, dot, name, status)
-		if link && i < len(m.towns)-1 {
-			b.WriteString("     " + ui.MutedStyle.Render("│") + "\n")
-		}
-	}
-	if !here && m.current != 0 {
-		b.WriteString("     " + ui.WarningStyle.Render(fmt.Sprintf("◆ you are here, tribulation %d", m.current)) + "\n")
-	}
-	b.WriteString("\n" + ui.HelpStyle.Render("  ↑↓ choose a town · enter visit · esc back"))
 	return b.String()
 }
 
@@ -118,7 +64,7 @@ func (m Model) townView() string {
 		fmt.Fprintf(&b, "  %s%s · %s  %s\n", marker, ui.ChineseStyle.Render(q.Title), q.Giver, status)
 	}
 	b.WriteString("\n  " + ui.MutedStyle.Render(fmt.Sprintf("客栈 The inn: a night's rest heals you for %d 铜钱 (r)", wiki.InnPrice)) + "\n")
-	help := "  ↑↓ choose · enter read · r rest at the inn · g the Earth God's shrine · esc the road"
+	help := "  ↑↓ choose · enter read · r rest at the inn · g the Earth God's shrine · esc back on the road"
 	if t.Stone != nil {
 		if slices.Contains(m.stones, t.ID) {
 			b.WriteString("\n  " + ui.MutedStyle.Render("石碑 The roadside stone stands open: ") + ui.ChineseStyle.Render(t.Stone.Idiom) + "\n")
