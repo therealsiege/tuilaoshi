@@ -107,7 +107,8 @@ func (m Model) renderMenu() string {
 // companion's word.
 func (m Model) renderJourney() string {
 	st := m.journeyState
-	line := fmt.Sprintf("  %s  %s %s · Tribulation %d %s", ui.SubtitleStyle.Render("Journey"),
+	line := fmt.Sprintf("  %s  Level %d %s · %s %s · Tribulation %d %s", ui.SubtitleStyle.Render("Journey"),
+		st.Level.N, ui.MutedStyle.Render(fmt.Sprintf("(%d/%d)", st.Level.Into, st.Level.Need)),
 		ui.ChineseStyle.Render(st.Rank.Name), st.Rank.English, st.Progress.Tribulation, st.Progress.Location)
 	if m.xp > 0 {
 		line += fmt.Sprintf(" · %s XP", thousands(m.xp))

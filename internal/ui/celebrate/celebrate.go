@@ -16,6 +16,7 @@ const (
 	StreakMile   = "streak"
 	Achievement  = "achievement"
 	CompanionNew = "companion"
+	LevelUp      = "level_up"
 )
 
 // boxWidth is the inner width of celebration boxes (between the border chars).
@@ -27,8 +28,26 @@ type Celebration struct {
 	Title     string
 	Chinese   string
 	Desc      string
-	Art       string // pre-composed ASCII art lines (no border)
-	ImagePath string // optional path to a celebration image
+	Art       string   // pre-composed ASCII art lines (no border)
+	ImagePath string   // optional path to a celebration image
+	Lines     []string // what the event brought, one per line, under the description
+}
+
+// LevelUpCelebration announces a new level and what it brought.
+func LevelUpCelebration(level int, brought []string) Celebration {
+	art := strings.Join([]string{
+		"          ^",
+		"         ^^^",
+		"        ^^^^^",
+	}, "\n")
+	return Celebration{
+		Event:   LevelUp,
+		Title:   "LEVEL UP",
+		Chinese: fmt.Sprintf("第%d级", level),
+		Desc:    fmt.Sprintf("Level %d", level),
+		Art:     art,
+		Lines:   brought,
+	}
 }
 
 // RankUpCelebration creates a rank-up celebration.
@@ -173,7 +192,7 @@ func (c Celebration) Render() string {
 	case BossDefeated:
 		accentStyle = ui.WarningStyle
 		titleStyle = ui.WarningStyle.Bold(true)
-	case RankUp:
+	case RankUp, LevelUp:
 		accentStyle = ui.SuccessStyle
 		titleStyle = ui.SuccessStyle.Bold(true)
 	case StreakMile:
@@ -241,6 +260,10 @@ func (c Celebration) Render() string {
 	descRendered := accentStyle.Render("    " + c.Desc)
 	b.WriteString(boxLine(borderStyle, descRendered, boxWidth))
 	b.WriteString("\n")
+	for _, line := range c.Lines {
+		b.WriteString(boxLine(borderStyle, ui.MutedStyle.Render("    "+line), boxWidth))
+		b.WriteString("\n")
+	}
 
 	// Bottom border.
 	bot := borderStyle.Render("    " + "\u255A" + strings.Repeat("\u2550", boxWidth) + "\u255D")

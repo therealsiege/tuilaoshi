@@ -76,6 +76,7 @@ type Quest struct {
 // State is the complete gamification state.
 type State struct {
 	Rank         Rank
+	Level        Level
 	Progress     Progress
 	Companions   []Companion
 	Bosses       []Boss
@@ -164,6 +165,7 @@ func Calculate(store *wiki.Store) (State, error) {
 
 	return State{
 		Rank:         calculateRank(mastered),
+		Level:        LevelFor(mastered),
 		Progress:     progress,
 		Stage:        CurrentStage(stages),
 		Counts:       counts,
