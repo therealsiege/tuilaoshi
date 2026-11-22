@@ -113,6 +113,7 @@ func promptFor(d journey.BestiaryEntry) string {
 	}
 	return "A single original character portrait of " + subject +
 		" Style: vivid traditional Chinese ink-and-watercolor painting with bold outlines and strong colors. " +
-		"One full figure, centered, filling most of the frame, against a plain dark background, high contrast so it reads at small sizes. " +
-		"No text, no letters, no borders, no watermark."
+		"One full figure, centered, filling most of the frame, high contrast so it reads at small sizes. " +
+		"The background is a plain, uniformly dark deep indigo or black that fills the whole square canvas to every edge: no paper, no light margins, no parchment. " +
+		"No text, no letters, no seals, no borders, no watermark."
 }

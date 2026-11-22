@@ -20,7 +20,7 @@ func main() {
 	model := flag.String("model", envOr("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image"), "Gemini image model")
 	only := flag.String("only", "", "paint just this demon (Chinese name)")
 	force := flag.Bool("force", false, "repaint portraits that already exist")
-	size := flag.Int("size", 512, "longest side of the saved portrait, in pixels")
+	size := flag.Int("size", 320, "longest side of the saved portrait, in pixels")
 	flag.Parse()
 
 	key := envOr("GEMINI_API_KEY", os.Getenv("GOOGLE_API_KEY"))

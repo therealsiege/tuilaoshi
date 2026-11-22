@@ -96,7 +96,13 @@ func renderChafa(path string, width, height int) string {
 	}
 	// chafa may wrap its output in cursor show/hide codes; views only want the art.
 	s := strings.NewReplacer("\x1b[?25l", "", "\x1b[?25h", "").Replace(string(out))
-	return strings.TrimRight(s, "\n")
+	// End each line with a reset so the art's colors don't bleed into the
+	// next line of the view.
+	lines := strings.Split(strings.TrimRight(s, "\n"), "\n")
+	for i := range lines {
+		lines[i] += "\x1b[0m"
+	}
+	return strings.Join(lines, "\n")
 }
 
 func renderTermimg(path string, width, height int) string {

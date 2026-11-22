@@ -49,7 +49,8 @@ func (m Model) viewIntro() string {
 	enemy := m.battle.Enemy
 
 	// Enemy image or ASCII art.
-	art := imgview.RenderWithFallback(enemy.ImagePath, 40, 15, enemy.Art)
+	w, h := m.portraitSize()
+	art := imgview.RenderWithFallback(enemy.ImagePath, w, h, enemy.Art)
 	for _, line := range strings.Split(art, "\n") {
 		b.WriteString(ui.ErrorStyle.Render("      " + line))
 		b.WriteString("\n")
@@ -377,4 +378,17 @@ func (m Model) renderStakes() string {
 		b.WriteString(ui.WarningStyle.Render("  All 81 tribulations cleared. Practice freely."))
 	}
 	return b.String() + "\n\n"
+}
+
+// portraitSize fits the intro's demon portrait to the terminal: up to 60x24
+// cells, leaving room for the text below it, and never below 30x10.
+func (m Model) portraitSize() (w, h int) {
+	w, h = 60, 24
+	if m.width > 0 {
+		w = min(w, m.width-10)
+	}
+	if m.height > 0 {
+		h = min(h, m.height-20)
+	}
+	return max(w, 30), max(h, 10)
 }

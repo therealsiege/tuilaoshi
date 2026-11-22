@@ -60,3 +60,14 @@ func TestRenderFallsBackWithoutChafa(t *testing.T) {
 		t.Errorf("missing file: %q, want the fallback art", got)
 	}
 }
+
+func TestChafaLinesResetColors(t *testing.T) {
+	if chafaPath == "" {
+		t.Skip("chafa not installed")
+	}
+	for _, l := range strings.Split(Render(testImage(t), 12, 4), "\n") {
+		if !strings.HasSuffix(l, "\x1b[0m") {
+			t.Fatalf("line %q doesn't end with a color reset", l)
+		}
+	}
+}
