@@ -14,6 +14,10 @@ import (
 // when the terminal fits all three.
 const menuColumnWidth = 28
 
+// dailyChunk is how many due words "Start here" suggests reviewing at once,
+// so a large backlog reads as a day's work.
+const dailyChunk = 20
+
 // View shows, top to bottom: today's numbers, one suggested next step, the
 // menu grouped by purpose, and where the journey stands.
 func (m Model) View() string {
@@ -62,7 +66,11 @@ func (m Model) renderStartHere() string {
 	key, what := "t", "Read & listen to something new"
 	switch s := m.journeyState.Stage; {
 	case m.due > 0:
-		key, what = "r", fmt.Sprintf("Review your %s due %s", thousands(m.due), plural(m.due, "word", "words"))
+		if m.due > dailyChunk {
+			key, what = "r", fmt.Sprintf("Review %d of your %s due words", dailyChunk, thousands(m.due))
+		} else {
+			key, what = "r", fmt.Sprintf("Review your %s due %s", thousands(m.due), plural(m.due, "word", "words"))
+		}
 	case s != nil && s.Status == journey.StageOpen:
 		key, what = "f", fmt.Sprintf("Clear tribulation %d: battle %s", s.Number, s.Opponent.Name)
 	}

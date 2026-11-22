@@ -23,6 +23,10 @@ func TestStartHereSuggestsOneNextStep(t *testing.T) {
 	if v := uitest.Plain(m.renderStartHere()); !strings.Contains(v, "r  Review your 1 due word") {
 		t.Errorf("with a word due: %q", v)
 	}
+	m.due = 10789
+	if v := uitest.Plain(m.renderStartHere()); !strings.Contains(v, "r  Review 20 of your 10,789 due words") {
+		t.Errorf("with a backlog: %q", v)
+	}
 	m.due = 0
 	if v := uitest.Plain(m.renderStartHere()); !strings.Contains(v, "f  Clear tribulation 1") {
 		t.Errorf("nothing due, stage 1 open: %q", v)
