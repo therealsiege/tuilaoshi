@@ -112,6 +112,31 @@ func EffectsFor(enemy journey.BestiaryEntry, party []journey.Companion) (Effects
 	return e, lines
 }
 
+// assist records that a party ability helped.
+func (b *Battle) assist(effect string) {
+	if b.Assisted == nil {
+		b.Assisted = map[string]bool{}
+	}
+	b.Assisted[effect] = true
+}
+
+// AddUpgrades applies the upgraded assists of companions whose bond has
+// reached journey.BondUpgradeRank, describing each for the battle intro.
+func AddUpgrades(e *Effects, party []journey.Companion, bonds map[string]int) []string {
+	var lines []string
+	for _, c := range party {
+		b := journey.BondFor(c.Name)
+		if !c.Unlocked || b == nil || journey.BondRankFor(bonds[c.Name]) < journey.BondUpgradeRank {
+			continue
+		}
+		if a, ok := gearAbilities[b.Upgrade]; ok {
+			a.apply(e)
+			lines = append(lines, c.Name+" (bond "+journey.BondRanks[journey.BondUpgradeRank].Name+"): "+a.says)
+		}
+	}
+	return lines
+}
+
 // SetEffects puts effects in play for this battle and its rematches.
 func (b *Battle) SetEffects(e Effects) {
 	b.Effects, b.startEffects = e, e
@@ -125,6 +150,7 @@ func (b *Battle) Reveal() bool {
 		return false
 	}
 	b.Effects.Reveals--
+	b.assist("reveal")
 	wrong := (q.Correct + 1 + rand.Intn(len(q.Choices)-1)) % len(q.Choices)
 	right := q.Choices[q.Correct]
 	if wrong < q.Correct {

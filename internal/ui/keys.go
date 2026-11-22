@@ -84,6 +84,7 @@ const (
 	ViewSearch     // the browser, opened with its search box active
 	ViewShrine     // the Earth God's shrine: gear shop and character sheet
 	ViewCollection // enemy and character cards, by set
+	ViewParty      // bonds with the four disciples
 )
 
 // SwitchViewMsg tells the app to change views.
@@ -112,6 +113,7 @@ type DashboardKeys struct {
 	Battle   key.Binding
 	Shrine   key.Binding
 	Cards    key.Binding
+	Party    key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -165,6 +167,10 @@ func DefaultDashboardKeys() DashboardKeys {
 			key.WithKeys("o"),
 			key.WithHelp("o", "collection"),
 		),
+		Party: key.NewBinding(
+			key.WithKeys("p"),
+			key.WithHelp("p", "party"),
+		),
 		Reading: key.NewBinding(
 			key.WithKeys("t"),
 			key.WithHelp("t", "read"),
@@ -196,6 +202,12 @@ func HelpText(v View) string {
 			"  ↑↓     Select radical\n" +
 			"  esc    Back to dashboard\n" +
 			"  ?      Toggle help"
+	case ViewParty:
+		return "Party Keys\n\n" +
+			"  ↑↓     Choose a companion\n" +
+			"  1-4    Read a bond scene\n" +
+			"  e      Translation (in a scene)\n" +
+			"  esc    Close scene / back"
 	case ViewCollection:
 		return "Collection Keys\n\n" +
 			"  tab    Enemies / characters\n" +

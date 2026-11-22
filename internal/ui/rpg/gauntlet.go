@@ -89,6 +89,7 @@ func (m *Model) payWin(before wiki.Wallet) {
 			m.saveErr = err
 			return
 		}
+		m.bonded = m.creditBonds()
 	}
 	after, err := m.store.Wallet()
 	if err != nil {
@@ -97,6 +98,23 @@ func (m *Model) payWin(before wiki.Wallet) {
 	}
 	m.earned = wiki.Wallet{Tongqian: after.Tongqian - before.Tongqian, Yuanbao: after.Yuanbao - before.Yuanbao}
 	m.wallet = after
+}
+
+// creditBonds gives a bond point to each companion whose assist helped
+// win this fight, and returns their names.
+func (m *Model) creditBonds() []string {
+	var names []string
+	for _, c := range journey.Party(m.cleared) {
+		if !c.Unlocked || c.Effect == "" || !m.battle.Assisted[c.Effect] || journey.BondFor(c.Name) == nil {
+			continue
+		}
+		if err := m.store.AddBond(c.Name, 1); err != nil {
+			m.saveErr = err
+			return names
+		}
+		names = append(names, c.Name)
+	}
+	return names
 }
 
 // onVictoryKey continues the gauntlet, or leaves once the stage is done.
@@ -141,8 +159,12 @@ func (m Model) renderEarned() string {
 	if m.earned.Yuanbao > 0 {
 		got += fmt.Sprintf("  +%d 元宝", m.earned.Yuanbao)
 	}
-	return fmt.Sprintf("  %s   %s\n", ui.WarningStyle.Render(got),
+	out := fmt.Sprintf("  %s   %s\n", ui.WarningStyle.Render(got),
 		ui.MutedStyle.Render(fmt.Sprintf("purse: %d 铜钱 · %d 元宝", m.wallet.Tongqian, m.wallet.Yuanbao)))
+	if len(m.bonded) > 0 {
+		out += ui.ChineseStyle.Render("  Bond +1: "+strings.Join(m.bonded, " · ")) + "\n"
+	}
+	return out
 }
 
 // nextFoeName is who the stage's next fight is against.

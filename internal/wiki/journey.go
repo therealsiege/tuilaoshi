@@ -30,6 +30,7 @@ type journeyRecord struct {
 	BountiesPaid []string          `yaml:"bounties_paid,omitempty"` // today's bounties already paid
 	Shields      int               `yaml:"shields,omitempty"`       // streak shields held
 	Shielded     []string          `yaml:"shielded,omitempty"`      // missed days a shield covered
+	Bonds        map[string]int    `yaml:"bonds,omitempty"`         // companion -> bond points
 }
 
 func (s *Store) readJourney() (journeyRecord, error) {

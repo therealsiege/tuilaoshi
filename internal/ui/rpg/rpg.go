@@ -102,6 +102,7 @@ type Model struct {
 
 	// Coins paid by the last fight, and the wallet after it.
 	earned, wallet wiki.Wallet
+	bonded         []string // companions whose bond the last fight raised
 
 	// Battles adapt to recent accuracy (accuracy percent right).
 	difficulty rpgengine.Difficulty

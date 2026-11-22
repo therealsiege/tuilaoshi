@@ -147,3 +147,25 @@ func TestShakyRecentAnswersMakeBattlesGentler(t *testing.T) {
 		t.Errorf("intro doesn't explain the gentler battle:\n%s", m.View())
 	}
 }
+
+func TestAnAssistThatHelpsRaisesTheBond(t *testing.T) {
+	m := fixedBattle(t)
+	m.stage, m.cleared = nil, map[int]string{8: "2026-11-01"} // 孙悟空 has joined
+	m.applyAbilities(m.cleared)
+	q := m.battle.Question
+	m, _ = enter(m)
+	m.battle.Question = q
+	m = m.reveal()
+	m, _ = right(m)
+	enemyDown(&m)
+	m, _ = animationEnds(m)
+	if len(m.bonded) != 1 || m.bonded[0] != "孙悟空" {
+		t.Fatalf("bonded %v, want 孙悟空 for the reveal", m.bonded)
+	}
+	if bonds, err := m.store.BondPoints(); err != nil || bonds["孙悟空"] != 1 {
+		t.Errorf("bond points %v %v", bonds, err)
+	}
+	if !strings.Contains(m.View(), "Bond +1: 孙悟空") {
+		t.Errorf("victory screen doesn't show the bond:\n%s", m.View())
+	}
+}

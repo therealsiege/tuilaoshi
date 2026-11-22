@@ -35,6 +35,11 @@ func (m *Model) applyAbilities(cleared map[int]string) {
 			m.loadErr = err
 		}
 		m.abilities = append(m.abilities, rpgengine.AddGear(&e, journey.Worn(kit.Worn))...)
+		bonds, err := m.store.BondPoints()
+		if err != nil {
+			m.loadErr = err
+		}
+		m.abilities = append(m.abilities, rpgengine.AddUpgrades(&e, journey.Party(cleared), bonds)...)
 	}
 	if says := m.difficulty.Says(m.accuracy); says != "" {
 		if m.difficulty == rpgengine.Easier {

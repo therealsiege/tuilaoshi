@@ -68,6 +68,10 @@ type Battle struct {
 
 	// Difficulty tunes the question kinds to recent accuracy.
 	Difficulty Difficulty
+
+	// Assisted records the party abilities that helped this battle, by
+	// effect name, so the companions behind them earn bond points.
+	Assisted map[string]bool
 }
 
 // Accuracy returns the percentage of questions answered correctly.
@@ -172,6 +176,7 @@ func (b *Battle) resolve(right bool) (correct bool, dmg int) {
 		}
 		actualDmg += b.Effects.BonusDamage
 		if b.Effects.FirstStrike && !b.struck {
+			b.assist("first_strike")
 			actualDmg *= 2
 			b.Event = "白龙马 carries you in: a double-strength first strike!"
 		}
@@ -194,6 +199,9 @@ func (b *Battle) resolve(right bool) (correct bool, dmg int) {
 
 	// Wrong answer: enemy attacks player.
 	if b.Effects.HalfCombo {
+		if b.Combo > 1 {
+			b.assist("half_combo")
+		}
 		b.Combo /= 2
 	} else {
 		b.Combo = 0
@@ -206,6 +214,7 @@ func (b *Battle) resolve(right bool) (correct bool, dmg int) {
 	enemyDmg += enemyDmg * b.Effects.MissDamage / 100
 	if b.Effects.Shields > 0 {
 		b.Effects.Shields--
+		b.assist("shield")
 		enemyDmg = 0
 		b.Event = "沙悟净 steps in and takes the blow!"
 	}

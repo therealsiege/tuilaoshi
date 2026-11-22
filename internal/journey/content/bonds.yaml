@@ -1,0 +1,216 @@
+# Bonds with the four disciples (Persona-style social links). Bond points
+# come from battles where a companion's assist fired with fresh words, and
+# from talking with them in Chinese. Each bond rank opens one scene; at the
+# rank of 信任 the companion's assist is upgraded (upgrade names a gear
+# ability in internal/rpg/abilities.go). Voices and scenes are original,
+# written for TuiLaoShi from the novel's characters.
+- companion: 孙悟空
+  voice: "Quick, brash and teasing; short sentences; boasts, but sees everything and pushes the learner with little challenges. Calls the learner 小兄弟."
+  upgrade: reveal
+  upgrade_desc: "A second reveal (w) each battle"
+  scenes:
+    - title: 火眼金睛
+      english_title: Fiery Golden Eyes
+      text: |
+        悟空跳到你身边，拍了拍你的肩膀。
+        "喂，你看那片云，像不像一只大猴子？"
+        你看了半天，只看到一片白云。
+        悟空哈哈大笑："你的眼睛还不够亮。多认几个字，眼睛就亮了。"
+        他说，认字跟看妖怪一样，要看清楚每一笔。
+      english: |
+        Wukong leaps to your side and claps you on the shoulder.
+        "Hey, look at that cloud. Doesn't it look like a big monkey?"
+        You stare for a long time and see only a white cloud.
+        Wukong roars with laughter: "Your eyes aren't bright enough yet. Learn more characters and they'll brighten."
+        Reading characters, he says, is like spotting demons: you have to see every stroke clearly.
+    - title: 一根毫毛
+      english_title: A Single Hair
+      text: |
+        晚上大家都睡了，悟空一个人坐在石头上看月亮。
+        你走过去，坐在他旁边。
+        他拔下一根毫毛，吹了一口气，毫毛变成了一支笔。
+        "送给你。每天写十个字，一个也不能少。"
+        你问他为什么对你这么好。他转过头去："谁对你好了？我只是不想再听师父念经。"
+      english: |
+        At night everyone is asleep; Wukong sits alone on a rock, looking at the moon.
+        You walk over and sit beside him.
+        He plucks a single hair, blows on it, and it turns into a brush.
+        "For you. Write ten characters a day, not one fewer."
+        You ask why he's so good to you. He turns away: "Who's being good to you? I just don't want to hear Master's sutras again."
+    - title: 花果山
+      english_title: Flower-Fruit Mountain
+      text: |
+        悟空第一次跟你说起花果山。
+        那里有吃不完的桃子，有成千上万的猴子，还有一条从天上落下来的瀑布。
+        "我离开家很多年了，"他说，"可是我一点儿都不后悔。"
+        他看着西边的路："学东西也是这样。走得越远，越想家，也越不能回头。"
+      english: |
+        For the first time, Wukong tells you about Flower-Fruit Mountain.
+        Peaches you could never finish, monkeys by the thousand, and a waterfall that falls from the sky.
+        "I left home many years ago," he says, "but I don't regret it one bit."
+        He looks down the road west: "Learning is the same. The farther you go, the more you miss home, and the less you can turn back."
+    - title: 不打不相识
+      english_title: Friends Through a Fight
+      text: |
+        一个妖怪拦住了路，你第一个冲了上去。
+        打完以后，你的手还在发抖。
+        悟空没有笑你，只是把金箍棒放在你旁边。
+        "刚才那一下，不错。"
+        这是他第一次夸你。从那天起，他叫你"兄弟"。
+      english: |
+        A demon blocks the road, and you are the first to charge.
+        When it's over, your hands are still shaking.
+        Wukong doesn't laugh at you; he just sets his golden staff down beside you.
+        "That strike just now. Not bad."
+        It's the first time he has praised you. From that day on, he calls you "brother".
+- companion: 白龙马
+  voice: "Quiet, formal and gentle; a dragon prince who speaks rarely and a little literarily, with calm encouragement. Addresses the learner politely as 您 at first, then 你."
+  upgrade: power
+  upgrade_desc: "Every hit deals 3 more damage"
+  scenes:
+    - title: 沉默的马
+      english_title: The Silent Horse
+      text: |
+        白龙马很少说话。
+        每天早上，它都安静地等大家收拾行李。
+        今天你给它带了一把青草。
+        它低下头吃了，然后轻轻地碰了碰你的手。
+        你觉得，这就是它说"谢谢"的方式。
+      english: |
+        The white dragon horse seldom speaks.
+        Every morning it waits quietly while everyone packs.
+        Today you bring it a handful of green grass.
+        It lowers its head to eat, then gently nudges your hand.
+        You feel that this is its way of saying "thank you".
+    - title: 龙宫
+      english_title: The Dragon Palace
+      text: |
+        在一条小河边，白龙马忽然变回了人的样子。
+        他穿着白色的衣服，像一位年轻的王子。
+        "我本来是西海龙王的儿子，"他说，"因为犯了错，才变成了马。"
+        他的声音很平静："走完这条路，我就能还清我的错。"
+      english: |
+        Beside a small river, the white dragon horse suddenly takes human form.
+        Dressed in white, he looks like a young prince.
+        "I was born a son of the Dragon King of the Western Sea," he says. "I became a horse because of a wrong I did."
+        His voice is calm: "When this road is walked, my debt will be paid."
+    - title: 千里之外
+      english_title: A Thousand Li Away
+      text: |
+        下大雨的时候，白龙马驮着你走过泥泞的山路。
+        你问他累不累。
+        "一天走一千里，我不累，"他说，"累的是心里那些放不下的事。"
+        他让你把一个难记的字写在手心里，一边走一边念。
+      english: |
+        In the pouring rain, the white dragon horse carries you along a muddy mountain path.
+        You ask if he is tired.
+        "A thousand li a day does not tire me," he says. "What tires me are the things the heart can't put down."
+        He has you write a hard-to-remember character on your palm and recite it as you go.
+    - title: 真正的名字
+      english_title: His True Name
+      text: |
+        白龙马告诉你他真正的名字：敖烈。
+        "很少有人知道这个名字，"他说，"现在你知道了。"
+        你明白，这是他给你的最大的信任。
+      english: |
+        The white dragon horse tells you his true name: Ao Lie.
+        "Few know this name," he says. "Now you do."
+        You understand this is the greatest trust he could give you.
+- companion: 猪八戒
+  voice: "Warm, lazy and funny; always hungry, complains a lot, very colloquial, full of food words; secretly kind. Calls the learner 好兄弟."
+  upgrade: hp
+  upgrade_desc: "15 more max HP (he shares his rations)"
+  scenes:
+    - title: 半个馒头
+      english_title: Half a Steamed Bun
+      text: |
+        八戒饿了，到处找吃的。
+        你把自己的馒头分给他一半。
+        他一口就吃完了，然后笑着说："好兄弟！以后有好吃的，我也分你一半……大概一半。"
+      english: |
+        Bajie is hungry and hunting everywhere for food.
+        You give him half of your steamed bun.
+        He finishes it in one bite, then grins: "Good brother! From now on when I have something tasty, I'll give you half too... about half."
+    - title: 高老庄
+      english_title: Gao Village
+      text: |
+        八戒又说起了高老庄。
+        "那里的饭菜啊，又香又热，"他叹了口气，"还有我的媳妇。"
+        你问他想不想回去。
+        他想了很久："想。可是师父一个人走不了这么远的路。"
+        说完，他又去找吃的了。
+      english: |
+        Bajie is talking about Gao Village again.
+        "The food there, so fragrant and hot," he sighs, "and my wife."
+        You ask if he wants to go back.
+        He thinks for a long time: "I do. But Master can't walk this far alone."
+        Then he goes off looking for food again.
+    - title: 睡懒觉
+      english_title: Sleeping In
+      text: |
+        天亮了，八戒还在睡觉。
+        你没有叫醒他，而是坐在他旁边读了一个小时的书。
+        他醒了以后，听你读了几个句子，吃惊地说：
+        "你的中文进步得比我吃饭还快！"
+      english: |
+        It's daybreak and Bajie is still asleep.
+        Instead of waking him, you sit beside him and read for an hour.
+        When he wakes and hears you read a few sentences, he says in surprise:
+        "Your Chinese is improving faster than I eat!"
+    - title: 天蓬元帅
+      english_title: Marshal of the Heavenly Canopy
+      text: |
+        八戒第一次认真地讲起从前：他曾经是天上的天蓬元帅，管着十万水兵。
+        "后来喝醉了酒，犯了大错，"他说，"掉到人间，还投错了胎。"
+        他摸摸自己的大耳朵，笑了："可是能跟你们一起走这条路，我觉得也不错。"
+      english: |
+        For the first time Bajie speaks seriously about the past: he was once Marshal of the Heavenly Canopy, commanding a hundred thousand marines.
+        "Then I got drunk and did something terrible," he says, "fell to the mortal world, and was even reborn in the wrong body."
+        He rubs his big ears and smiles: "But getting to walk this road with you all, I think that's not bad."
+- companion: 沙悟净
+  voice: "Steady, humble and practical; speaks plainly and kindly, likes order and small daily habits; patient encouragement. Calls the learner 师弟."
+  upgrade: shield
+  upgrade_desc: "Takes a second enemy hit each battle"
+  scenes:
+    - title: 挑担子
+      english_title: Carrying the Load
+      text: |
+        沙僧总是挑着最重的担子，从来不说累。
+        你想帮他挑一会儿。
+        他把担子交给你，看着你走了几步，说：
+        "慢慢来。一步一步走，路就短了。"
+      english: |
+        Sha Wujing always carries the heaviest load and never says he's tired.
+        You offer to carry it for a while.
+        He hands it to you, watches you take a few steps, and says:
+        "Take it slowly. Walk one step at a time and the road grows short."
+    - title: 流沙河
+      english_title: The River of Flowing Sand
+      text: |
+        过河的时候，沙僧看着河水，很久没有说话。
+        "我在这条河里住了很多年，"他说，"那些日子很长，也很冷。"
+        他告诉你，每天做一点点，再长的日子也会过去。
+      english: |
+        As you cross the river, Sha Wujing gazes at the water and is silent for a long time.
+        "I lived in this river for many years," he says. "Those days were long, and cold."
+        He tells you that if you do a little each day, even the longest days will pass.
+    - title: 记账
+      english_title: Keeping the Ledger
+      text: |
+        晚上，沙僧把今天走了多少路、遇到了哪些妖怪，都整整齐齐地记在本子上。
+        他让你也把今天学的字写进去。
+        "记下来的东西，"他说，"就不会丢。"
+      english: |
+        In the evening Sha Wujing neatly records in his notebook how far you walked today and which demons you met.
+        He asks you to write in the characters you learned today, too.
+        "What is written down," he says, "is never lost."
+    - title: 卷帘大将
+      english_title: The Curtain-Raising General
+      text: |
+        沙僧告诉你，他从前是天宫里的卷帘大将，因为打碎了一只琉璃杯，被罚到人间。
+        "一件小事，改变了一辈子，"他说，"所以我现在做每一件小事，都很认真。"
+        你明白了他为什么那么认真。
+      english: |
+        Sha Wujing tells you he was once the Curtain-Raising General of the Heavenly Palace, banished to the mortal world for breaking a crystal cup.
+        "One small thing changed a whole life," he says. "So now I do every small thing with care."
+        You understand why he is so careful.

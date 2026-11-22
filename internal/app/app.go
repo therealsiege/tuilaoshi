@@ -19,6 +19,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/ui/dashboard"
 	"github.com/therealsiege/tuilaoshi/internal/ui/drill"
 	journeyview "github.com/therealsiege/tuilaoshi/internal/ui/journey"
+	"github.com/therealsiege/tuilaoshi/internal/ui/party"
 	"github.com/therealsiege/tuilaoshi/internal/ui/radicals"
 	"github.com/therealsiege/tuilaoshi/internal/ui/reader"
 	"github.com/therealsiege/tuilaoshi/internal/ui/review"
@@ -50,6 +51,7 @@ type Model struct {
 	radicals  radicals.Model
 	shrine    shrine.Model
 	cards     collection.Model
+	party     party.Model
 	battle    rpgview.Model
 	reader    reader.Model
 	assess    assessment.Model
@@ -108,6 +110,7 @@ func New(wikiDir string) (Model, error) {
 		radicals:      radicals.New(),
 		shrine:        shrine.New(store),
 		cards:         collection.New(store),
+		party:         party.New(store),
 		battle:        rpgview.New(store, ttsClient, dict),
 		reader:        reader.New(store),
 		assess:        assessment.New(store),
@@ -140,6 +143,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.radicals = m.radicals.SetSize(msg.Width, msg.Height)
 		m.shrine = m.shrine.SetSize(msg.Width, msg.Height)
 		m.cards = m.cards.SetSize(msg.Width, msg.Height)
+		m.party = m.party.SetSize(msg.Width, msg.Height)
 		m.battle = m.battle.SetSize(msg.Width, msg.Height)
 		m.reader = m.reader.SetSize(msg.Width, msg.Height)
 		m.assess = m.assess.SetSize(msg.Width, msg.Height)
@@ -187,6 +191,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ui.ViewCollection:
 			m.cards = m.cards.Refresh()
 			return m, m.cards.Init()
+		case ui.ViewParty:
+			m.party = m.party.Refresh()
+			return m, m.party.Init()
 		case ui.ViewBattle:
 			m.battle = m.battle.Refresh()
 			return m, m.battle.Init()
@@ -234,7 +241,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Global back to dashboard (unless input is composing in Chinese mode,
 		// or esc closes an open reading)
 		readingOpen := (m.currentView == ui.ViewReading && m.reader.Open()) ||
-			(m.currentView == ui.ViewBrowser && m.browser.Searching())
+			(m.currentView == ui.ViewBrowser && m.browser.Searching()) ||
+			(m.currentView == ui.ViewParty && m.party.Reading())
 		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard && !readingOpen {
 			if !m.isInputComposing() {
 				if m.currentView == ui.ViewBattle {
@@ -270,6 +278,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.shrine, cmd = m.shrine.Update(msg)
 	case ui.ViewCollection:
 		m.cards, cmd = m.cards.Update(msg)
+	case ui.ViewParty:
+		m.party, cmd = m.party.Update(msg)
 	case ui.ViewBattle:
 		m.battle, cmd = m.battle.Update(msg)
 	case ui.ViewReading:
@@ -304,6 +314,8 @@ func (m Model) View() string {
 		content = m.shrine.View()
 	case ui.ViewCollection:
 		content = m.cards.View()
+	case ui.ViewParty:
+		content = m.party.View()
 	case ui.ViewBattle:
 		content = m.battle.View()
 	case ui.ViewReading:
@@ -338,79 +350,6 @@ func (m Model) isInputComposing() bool {
 		return m.battle.InputComposing()
 	}
 	return false
-}
-
-// checkCelebrations compares current journey state against previous snapshots
-// and triggers a celebration when a rank-up or boss defeat is detected.
-func (m *Model) checkCelebrations() {
-	state, err := journey.Calculate(m.store)
-	if err != nil {
-		return // the screens report read errors; a celebration can wait for the next check
-	}
-
-	// Count currently defeated bosses.
-	bossCount := 0
-	for _, b := range state.Bosses {
-		if b.Defeated {
-			bossCount++
-		}
-	}
-
-	// Boss defeat takes priority (more dramatic).
-	if bossCount > m.prevBossCount {
-		// Find the most recently defeated boss (highest-index defeated one).
-		for i := len(state.Bosses) - 1; i >= 0; i-- {
-			if state.Bosses[i].Defeated {
-				c := celebrate.BossDefeatCelebration(state.Bosses[i].Name, state.Bosses[i].English)
-				m.celebration = &c
-				m.celebrationTTL = 3
-				break
-			}
-		}
-		m.prevBossCount = bossCount
-		m.prevRankName = state.Rank.Name
-		return
-	}
-
-	// Rank change.
-	if state.Rank.Name != m.prevRankName {
-		c := celebrate.RankUpCelebration(state.Rank.Name, state.Rank.English)
-		m.celebration = &c
-		m.celebrationTTL = 3
-		m.prevRankName = state.Rank.Name
-		m.prevBossCount = bossCount
-		return
-	}
-
-	// Level-up, saying what it brought.
-	if state.Level.N > m.prevLevel {
-		c := celebrate.LevelUpCelebration(state.Level.N, levelGains(state, m.prevLevel, m.prevOpenStage))
-		m.celebration = &c
-		m.celebrationTTL = 3
-	}
-
-	// Keep snapshots current even when no celebration fires.
-	m.prevRankName = state.Rank.Name
-	m.prevBossCount = bossCount
-	m.prevLevel = state.Level.N
-	m.prevOpenStage = openStage(state)
-}
-
-// openStage is the number of the stage ready to fight, or 0.
-func openStage(st journey.State) int {
-	if s := st.Stage; s != nil && s.Status == journey.StageOpen {
-		return s.Number
-	}
-	return 0
-}
-
-// levelGains lists what reaching the state's level brought since level from.
-func levelGains(st journey.State, from, openBefore int) []string {
-	gains := []string{fmt.Sprintf("Max HP +%d (now %d)", journey.HPPerLevel*(st.Level.N-from), journey.LevelHP(st.Level.N))}
-	if n := openStage(st); n != 0 && n != openBefore {
-		gains = append(gains, fmt.Sprintf("Tribulation %d is open (f)", n))
-	}
-	return append(gains, fmt.Sprintf("Next level: master %d more", st.Level.Need-st.Level.Into))
 }
 
 func (m Model) renderCelebrationOverlay(base string) string {
