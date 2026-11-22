@@ -81,8 +81,9 @@ const (
 	ViewBattle
 	ViewReading
 	ViewAssess
-	ViewSearch // the browser, opened with its search box active
-	ViewShrine // the Earth God's shrine: gear shop and character sheet
+	ViewSearch     // the browser, opened with its search box active
+	ViewShrine     // the Earth God's shrine: gear shop and character sheet
+	ViewCollection // enemy and character cards, by set
 )
 
 // SwitchViewMsg tells the app to change views.
@@ -110,6 +111,7 @@ type DashboardKeys struct {
 	Assess   key.Binding
 	Battle   key.Binding
 	Shrine   key.Binding
+	Cards    key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -159,6 +161,10 @@ func DefaultDashboardKeys() DashboardKeys {
 			key.WithKeys("g"),
 			key.WithHelp("g", "gear"),
 		),
+		Cards: key.NewBinding(
+			key.WithKeys("o"),
+			key.WithHelp("o", "collection"),
+		),
 		Reading: key.NewBinding(
 			key.WithKeys("t"),
 			key.WithHelp("t", "read"),
@@ -190,6 +196,12 @@ func HelpText(v View) string {
 			"  ↑↓     Select radical\n" +
 			"  esc    Back to dashboard\n" +
 			"  ?      Toggle help"
+	case ViewCollection:
+		return "Collection Keys\n\n" +
+			"  tab    Enemies / characters\n" +
+			"  ↑↓     Choose a set\n" +
+			"  enter  Claim a completed set\n" +
+			"  esc    Back to dashboard"
 	case ViewShrine:
 		return "Shrine Keys\n\n" +
 			"  ↑↓     Choose an item\n" +

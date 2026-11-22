@@ -26,6 +26,7 @@ var DashboardMenu = []MenuGroup{
 		{"f", "Battle the next demon"},
 		{"j", "Journey map"},
 		{"g", "Shrine: gear & coins"},
+		{"o", "Collection cards"},
 		{"s", "My progress"},
 		{"a", "Check my level"},
 	}},

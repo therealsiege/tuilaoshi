@@ -23,6 +23,8 @@ type journeyRecord struct {
 	PaidCards []string          `yaml:"paid_cards,omitempty"` // cards already paid for that day
 	Owned     []string          `yaml:"owned,omitempty"`      // gear bought at the shrine, by id
 	Worn      map[string]string `yaml:"worn,omitempty"`       // slot -> gear id
+	Defeated  []string          `yaml:"defeated,omitempty"`   // enemies beaten at least once, for the collection
+	Claimed   []string          `yaml:"claimed,omitempty"`    // collection sets whose reward has been paid
 }
 
 func (s *Store) readJourney() (journeyRecord, error) {

@@ -65,6 +65,12 @@ func (m *Model) saveSession() {
 		return
 	}
 	m.payWin(before)
+	if m.battle.PlayerWon() {
+		if err := m.store.RecordDefeat(m.battle.Enemy.Chinese); err != nil {
+			m.saveErr = err
+			return
+		}
+	}
 	if m.stage != nil && m.lastFoe() && m.battle.PlayerWon() {
 		if err := m.store.RecordStageCleared(m.stage.Number, time.Now()); err != nil {
 			m.saveErr = err
