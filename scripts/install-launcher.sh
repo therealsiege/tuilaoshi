@@ -27,7 +27,7 @@ cat > "$APP/Contents/Resources/start.sh" <<START
 # Starts TuiLaoShi on $HOST: directly when this is $HOST, otherwise over mosh
 # (or ssh) from another Mac.
 REPO='$REPO'
-if [[ "\$(scutil --get LocalHostName 2>/dev/null)" == '$HOST' ]]; then
+if [[ "\$(/usr/sbin/scutil --get LocalHostName 2>/dev/null)" == '$HOST' ]]; then
   exec "\$REPO/scripts/launch.sh"
 fi
 export PATH="/opt/homebrew/bin:/usr/local/bin:\$PATH"
