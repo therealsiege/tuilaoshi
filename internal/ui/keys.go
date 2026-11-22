@@ -213,6 +213,7 @@ func HelpText(v View) string {
 			"  ↑↓     Choose a town / request\n" +
 			"  enter  Visit / read\n" +
 			"  1-4    Answer a request\n" +
+			"  s      The town's stone\n" +
 			"  g      Shrine (in a town)\n" +
 			"  esc    Back"
 	case ViewParty:

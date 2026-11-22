@@ -27,6 +27,7 @@ const (
 	screenMap screen = iota
 	screenTown
 	screenQuest
+	screenStone // a town's secret stone (see stone.go)
 )
 
 // Model is the world map view model.
@@ -52,6 +53,9 @@ type Model struct {
 	grading  bool
 	feedback string
 
+	stones []string // towns whose stone is open
+	hinted bool     // the open stone's pinyin has been shown
+
 	note          string
 	width, height int
 	loadErr       error
@@ -70,9 +74,9 @@ func New(store *wiki.Store, client *claude.Client, dict *input.Dict) Model {
 	return m
 }
 
-// Typing reports whether a writing request has the keyboard.
+// Typing reports whether a writing request or a stone has the keyboard.
 func (m Model) Typing() bool {
-	return m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing()
+	return m.screen == screenStone || (m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing())
 }
 
 func (m Model) Init() tea.Cmd { return nil }
@@ -92,7 +96,9 @@ func (m Model) Refresh() Model {
 	pages, pagesErr := m.store.ListPages()
 	cleared, clearedErr := m.store.ClearedStages()
 	states, questErr := m.store.Quests(m.now())
-	m.loadErr = errors.Join(pagesErr, clearedErr, questErr)
+	stones, stoneErr := m.store.StonesOpened()
+	m.loadErr = errors.Join(pagesErr, clearedErr, questErr, stoneErr)
+	m.stones = stones
 	m.states = states
 	m.current = 0
 	if s := journey.CurrentStage(journey.Stages(journey.CountProgress(pages), cleared)); s != nil {
@@ -119,6 +125,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	}
 	back := key.Matches(k, m.gkeys.Back)
 	switch m.screen {
+	case screenStone:
+		if back && !m.input.Composing() {
+			m.screen, m.note = screenTown, ""
+			return m.Refresh(), nil
+		}
+		return m.updateStone(k)
 	case screenQuest:
 		if back && !m.input.Composing() {
 			m.screen, m.note = screenTown, ""
@@ -144,6 +156,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, nil
 		case k.String() == "g":
 			return m, ui.SwitchTo(ui.ViewShrine)
+		case k.String() == "s":
+			return m.openStone()
 		}
 		return m, nil
 	}

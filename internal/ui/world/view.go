@@ -2,6 +2,7 @@ package world
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/therealsiege/tuilaoshi/internal/ui"
@@ -11,6 +12,8 @@ import (
 func (m Model) View() string {
 	var b strings.Builder
 	switch m.screen {
+	case screenStone:
+		b.WriteString(m.stoneView())
 	case screenQuest:
 		if m.Typing() {
 			b.WriteString(m.writingView())
@@ -104,7 +107,16 @@ func (m Model) townView() string {
 		}
 		fmt.Fprintf(&b, "  %s%s · %s  %s\n", marker, ui.ChineseStyle.Render(q.Title), q.Giver, status)
 	}
-	b.WriteString("\n" + ui.HelpStyle.Render("  ↑↓ choose · enter read · g the Earth God's shrine · esc the road"))
+	help := "  ↑↓ choose · enter read · g the Earth God's shrine · esc the road"
+	if t.Stone != nil {
+		if slices.Contains(m.stones, t.ID) {
+			b.WriteString("\n  " + ui.MutedStyle.Render("石碑 The roadside stone stands open: ") + ui.ChineseStyle.Render(t.Stone.Idiom) + "\n")
+		} else {
+			b.WriteString("\n  " + ui.MutedStyle.Render("There's an old stone by the road, half covered in moss. (s)") + "\n")
+			help += " · s the stone"
+		}
+	}
+	b.WriteString("\n" + ui.HelpStyle.Render(help))
 	return b.String()
 }
 

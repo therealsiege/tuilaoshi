@@ -39,6 +39,18 @@ func TestTownsAreCompleteAndInRoadOrder(t *testing.T) {
 			}
 		}
 	}
+	for _, town := range content.Towns {
+		s := town.Stone
+		if s == nil {
+			continue
+		}
+		if len([]rune(s.Idiom)) != 4 || s.Pinyin == "" || s.Meaning == "" || s.Clue == "" {
+			t.Errorf("town %s has an incomplete stone %+v", town.ID, s)
+		}
+		if !s.Opens(" "+s.Idiom+"。") || s.Opens(string([]rune(s.Idiom)[:3])) {
+			t.Errorf("stone %s opens wrongly", s.Idiom)
+		}
+	}
 	if len(content.Towns) < 10 {
 		t.Errorf("only %d towns", len(content.Towns))
 	}

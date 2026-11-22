@@ -1,5 +1,10 @@
 package journey
 
+import (
+	"strings"
+	"unicode"
+)
+
 // Town is a stop on the road west with a notice board of side quests.
 type Town struct {
 	ID          string      `yaml:"id"`
@@ -8,6 +13,7 @@ type Town struct {
 	Stage       int         `yaml:"stage"` // reached once this stage is being worked on or cleared
 	Desc        string      `yaml:"desc"`
 	DescEnglish string      `yaml:"desc_english"`
+	Stone       *Stone      `yaml:"stone,omitempty"`
 	Quests      []SideQuest `yaml:"quests"`
 }
 
@@ -40,6 +46,32 @@ func (q SideQuest) Pay(grade int) int {
 		return writePay * grade
 	}
 	return QuestReward * min(grade, 1)
+}
+
+// Stone is a town's secret: an inscription giving a 成语's meaning, a clue
+// and its first character, opened by typing the whole idiom from memory.
+type Stone struct {
+	Idiom   string `yaml:"idiom"`
+	Pinyin  string `yaml:"pinyin"`
+	Meaning string `yaml:"meaning"`
+	Clue    string `yaml:"clue"`
+}
+
+// Opens reports whether typed is the idiom, ignoring spaces and punctuation.
+func (s Stone) Opens(typed string) bool {
+	var b strings.Builder
+	for _, r := range typed {
+		if unicode.Is(unicode.Han, r) {
+			b.WriteRune(r)
+		}
+	}
+	return b.String() == s.Idiom
+}
+
+// Inscription shows the first character and a box for each one hidden.
+func (s Stone) Inscription() string {
+	r := []rune(s.Idiom)
+	return string(r[0]) + strings.Repeat("□", len(r)-1)
 }
 
 // QuestReward is the copper a quest pays, once.

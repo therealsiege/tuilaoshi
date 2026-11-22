@@ -6,12 +6,15 @@
 # shuffled on screen. A wrong answer locks the quest until the next day.
 # Write quests (kind: write) ask for a sentence or two in Chinese, graded
 # by Claude against the criteria; they can be tried again until they pass.
+# A town's stone is a secret: an inscription giving a 成语's meaning and first
+# character; typing the whole idiom from memory opens it.
 - id: changan
   name: 长安
   english: Chang'an
   stage: 5
   desc: "大唐的都城。街上人来人往，卖东西的声音从早到晚。"
   desc_english: "The Tang capital. Crowds come and go, and hawkers call from dawn to dusk."
+  stone: {idiom: 一路平安, pinyin: "yí lù píng ān", meaning: "Safe travels all the way", clue: "Said to every traveller leaving the city gate."}
   quests:
     - id: changan-baker
       giver: 卖馒头的老王
@@ -55,6 +58,7 @@
   stage: 10
   desc: "一座有名的寺院，院里的老和尚收藏了很多袈裟。"
   desc_english: "A famous temple whose old abbot collects cassocks."
+  stone: {idiom: 半途而废, pinyin: "bàn tú ér fèi", meaning: "To give up halfway", clue: "What the old monks warn pilgrims never to do."}
   quests:
     - id: temple-reader
       giver: 小和尚
@@ -98,6 +102,7 @@
   stage: 12
   desc: "一个安静的村子，田里种着麦子，家家户户都养着猪。"
   desc_english: "A quiet village with wheat in the fields and pigs in every yard."
+  stone: {idiom: 好吃懒做, pinyin: "hào chī lǎn zuò", meaning: "Fond of eating and averse to work", clue: "The villagers' words for a certain son-in-law."}
   quests:
     - id: gao-son-in-law
       giver: 高太公
@@ -139,6 +144,7 @@
   stage: 18
   desc: "镇元大仙的道观，后院有一棵人参果树，三千年才开一次花。"
   desc_english: "Master Zhenyuan's Taoist temple. In the back garden grows a manfruit tree that flowers once in three thousand years."
+  stone: {idiom: 火眼金睛, pinyin: "huǒ yǎn jīn jīng", meaning: "Fiery eyes and golden pupils: sharp enough to see through any disguise", clue: "Earned in an alchemist's furnace."}
   quests:
     - id: wuzhuang-fruit
       giver: 清风
@@ -182,6 +188,7 @@
   stage: 22
   desc: "一个富有的国家，国王很想念十三年前不见了的三公主。"
   desc_english: "A wealthy kingdom whose king still misses the third princess, lost thirteen years ago."
+  stone: {idiom: 千里迢迢, pinyin: "qiān lǐ tiáo tiáo", meaning: "From a thousand li away; a long, hard journey", clue: "How far the princess's letter travelled."}
   quests:
     - id: baoxiang-princess
       giver: 王宫的大臣
@@ -223,6 +230,7 @@
   stage: 26
   desc: "三年前这里大旱，一个道士求来了雨，后来成了国王最好的朋友。"
   desc_english: "Three years ago a drought struck; a Taoist brought rain and became the king's closest friend."
+  stone: {idiom: 真假难辨, pinyin: "zhēn jiǎ nán biàn", meaning: "Hard to tell the true from the false", clue: "Two kings, one throne."}
   quests:
     - id: wuji-prince
       giver: 太子
@@ -262,6 +270,7 @@
   stage: 33
   desc: "这里的国王相信道士，和尚们被罚去拉车、搬砖。"
   desc_english: "Here the king trusts Taoists, and the monks are made to haul carts and carry bricks."
+  stone: {idiom: 呼风唤雨, pinyin: "hū fēng huàn yǔ", meaning: "To summon wind and call up rain; to wield great power", clue: "The Taoists' boast before the contest."}
   quests:
     - id: chechi-monks
       giver: 老和尚
@@ -303,6 +312,7 @@
   stage: 45
   desc: "一个只有女人的国家，国王是一位聪明又美丽的女王。"
   desc_english: "A kingdom of women only, ruled by a wise and beautiful queen."
+  stone: {idiom: 一见钟情, pinyin: "yí jiàn zhōng qíng", meaning: "To fall in love at first sight", clue: "What happened to the queen when the monk arrived."}
   quests:
     - id: xiliang-register
       giver: 驿馆的女官
@@ -344,6 +354,7 @@
   stage: 53
   desc: "金光寺的宝塔以前天天发光。三年前，塔上的佛宝不见了。"
   desc_english: "The pagoda of Golden Light Temple used to shine every day, until its Buddha relic vanished three years ago."
+  stone: {idiom: 物归原主, pinyin: "wù guī yuán zhǔ", meaning: "To return a thing to its rightful owner", clue: "What the relic did in the end."}
   quests:
     - id: jisai-monks
       giver: 金光寺的和尚
@@ -383,6 +394,7 @@
   stage: 55
   desc: "国王病了三年，城门上贴满了请医生的皇榜。"
   desc_english: "The king has been ill for three years; royal notices calling for doctors cover the city gates."
+  stone: {idiom: 对症下药, pinyin: "duì zhèng xià yào", meaning: "To prescribe the right medicine for the illness; to fit the remedy to the problem", clue: "How the Monkey King cured the king."}
   quests:
     - id: zhuzi-doctor
       giver: 皇榜
@@ -424,6 +436,7 @@
   stage: 56
   desc: "城里家家户户门口都放着一个鹅笼，笼子里是小孩子。"
   desc_english: "Every house in the city has a goose cage by its door, and a child inside it."
+  stone: {idiom: 舍己救人, pinyin: "shě jǐ jiù rén", meaning: "To give up one's own good to save others", clue: "What the pilgrims did for the children."}
   quests:
     - id: biqiu-children
       giver: 一位老人
@@ -463,6 +476,7 @@
   stage: 70
   desc: "国王发誓要杀一万个和尚，和尚都不敢进城。"
   desc_english: "The king has sworn to kill ten thousand monks; no monk dares enter the city."
+  stone: {idiom: 改邪归正, pinyin: "gǎi xié guī zhèng", meaning: "To give up evil and return to the right path", clue: "What the hairless king did next."}
   quests:
     - id: miefa-inn
       giver: 客店的老板娘
@@ -504,6 +518,7 @@
   stage: 76
   desc: "西天路上的大国，离灵山已经不远了。"
   desc_english: "A great kingdom on the western road, not far now from Vulture Peak."
+  stone: {idiom: 真相大白, pinyin: "zhēn xiàng dà bái", meaning: "The truth comes out at last", clue: "When the false princess was unmasked."}
   quests:
     - id: tianzhu-ball
       giver: 王宫的告示
@@ -543,6 +558,7 @@
   stage: 79
   desc: "佛祖住的地方。经历了八十一难，终于到了。"
   desc_english: "Where the Buddha dwells. After eighty-one ordeals, you have arrived at last."
+  stone: {idiom: 功德圆满, pinyin: "gōng dé yuán mǎn", meaning: "Merit made complete; a task brought to perfect completion", clue: "What the eighty-one ordeals added up to."}
   quests:
     - id: lingshan-ferry
       giver: 接引佛祖

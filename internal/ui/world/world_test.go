@@ -134,3 +134,48 @@ func TestWritingRequestPaysWhenItPasses(t *testing.T) {
 		t.Errorf("enter after passing should return to the board, at %d", m.screen)
 	}
 }
+
+func TestStoneOpensToTheIdiomTypedFromMemory(t *testing.T) {
+	m := worldAt(t, 11)
+	m.town = 0 // 长安: 一路平安
+	m, _ = m.Update(enter)
+	if !strings.Contains(m.View(), "old stone") {
+		t.Fatalf("the town doesn't mention its stone:\n%s", m.View())
+	}
+	m, _ = m.Update(press("s"))
+	if m.screen != screenStone || !strings.Contains(m.View(), "一□□□") || strings.Contains(m.View(), "yí lù") {
+		t.Fatalf("stone screen:\n%s", m.View())
+	}
+	m, _ = m.Update(press("一路"))
+	m, _ = m.Update(enter)
+	if m.answered > 0 || !strings.Contains(m.note, "stays shut") {
+		t.Fatalf("half the idiom opened the stone: %q", m.note)
+	}
+	m, _ = m.Update(press("平安"))
+	m, _ = m.Update(enter)
+	w, err := m.store.Wallet()
+	if err != nil || w.Yuanbao != 1 || !strings.Contains(m.View(), "slides open") {
+		t.Fatalf("opened unaided: purse %+v %v\n%s", w, err, m.View())
+	}
+	m, _ = m.Update(enter)
+	m, _ = m.Update(press("s"))
+	if m.screen != screenTown || !strings.Contains(m.note, "already") {
+		t.Errorf("an open stone reopened: screen %d, note %q", m.screen, m.note)
+	}
+}
+
+func TestStoneHintPaysCopper(t *testing.T) {
+	m := worldAt(t, 11)
+	m.town = 0
+	m, _ = m.Update(enter)
+	m, _ = m.Update(press("s"))
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyCtrlH})
+	if !strings.Contains(m.View(), "yí lù píng ān") {
+		t.Fatalf("hint not shown:\n%s", m.View())
+	}
+	m, _ = m.Update(press("一路平安"))
+	m, _ = m.Update(enter)
+	if w, err := m.store.Wallet(); err != nil || w.Yuanbao != 0 || w.Tongqian != stoneHintPay {
+		t.Errorf("opened with the hint: purse %+v %v", w, err)
+	}
+}

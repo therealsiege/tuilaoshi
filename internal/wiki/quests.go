@@ -55,3 +55,21 @@ func (s *Store) FailQuest(id string, now time.Time) error {
 	rec.QuestsLocked[id] = now.Format(dateFmt)
 	return s.writeJourney(rec)
 }
+
+// StonesOpened returns the towns whose stone has been opened.
+func (s *Store) StonesOpened() ([]string, error) {
+	rec, err := s.readJourney()
+	return rec.Stones, err
+}
+
+// OpenStone records a town's stone opened and pays its reward, once.
+func (s *Store) OpenStone(town string, reward Wallet) error {
+	rec, err := s.readJourney()
+	if err != nil || slices.Contains(rec.Stones, town) {
+		return err
+	}
+	rec.Stones = append(rec.Stones, town)
+	rec.Coins.Tongqian += reward.Tongqian
+	rec.Coins.Yuanbao += reward.Yuanbao
+	return s.writeJourney(rec)
+}
