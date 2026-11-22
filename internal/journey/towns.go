@@ -32,16 +32,42 @@ type SideQuest struct {
 	Question     string   `yaml:"question"`
 	Choices      []string `yaml:"choices"`
 	Criteria     string   `yaml:"criteria,omitempty"` // what a written answer must do
+	Target       string   `yaml:"target,omitempty"`   // hunt: the soldier to beat
+	Count        int      `yaml:"count,omitempty"`    // hunt: how many times
+}
+
+// Hunting reports whether the quest sends the pilgrim after a soldier.
+func (q SideQuest) Hunting() bool { return q.Kind == "hunt" }
+
+// QuestByID finds a side quest and its town.
+func QuestByID(id string) (*SideQuest, *Town) {
+	for i := range content.Towns {
+		for j := range content.Towns[i].Quests {
+			if content.Towns[i].Quests[j].ID == id {
+				return &content.Towns[i].Quests[j], &content.Towns[i]
+			}
+		}
+	}
+	return nil, nil
 }
 
 // Writing reports whether the quest asks for writing rather than an answer.
 func (q SideQuest) Writing() bool { return q.Kind == "write" }
+
+// A hunt pays a base and more for each soldier beaten.
+const (
+	huntPay     = 20
+	huntPayEach = 10
+)
 
 // writePay is the copper a written request pays per grade point (1-2).
 const writePay = 20
 
 // Pay is what the quest pays for an answer graded grade (reading: 1 if right).
 func (q SideQuest) Pay(grade int) int {
+	if q.Hunting() {
+		return huntPay + huntPayEach*q.Count
+	}
 	if q.Writing() {
 		return writePay * grade
 	}

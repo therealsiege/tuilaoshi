@@ -179,3 +179,37 @@ func TestStoneHintPaysCopper(t *testing.T) {
 		t.Errorf("opened with the hint: purse %+v %v", w, err)
 	}
 }
+
+func TestHuntAcceptBeatAndCollect(t *testing.T) {
+	m := worldAt(t, 11)
+	m.town = 0 // 长安: drive off 特处士 twice
+	m, _ = m.Update(enter)
+	for i, q := range m.towns[0].Quests {
+		if q.Hunting() {
+			m.quest = i
+		}
+	}
+	m, _ = m.Update(enter)
+	if !strings.Contains(m.View(), "特处士") || !strings.Contains(m.View(), "enter accept") {
+		t.Fatalf("hunt screen:\n%s", m.View())
+	}
+	m, _ = m.Update(enter)
+	if m.screen != screenTown || !strings.Contains(m.View(), "hunting 0/2") {
+		t.Fatalf("after accepting:\n%s", m.View())
+	}
+	for i := 0; i < 3; i++ {
+		if err := m.store.AddKill("changan-hunt", 2); err != nil {
+			t.Fatal(err)
+		}
+	}
+	m = m.Refresh()
+	if !strings.Contains(m.View(), "★ collect") {
+		t.Fatalf("a finished hunt isn't ready to collect:\n%s", m.View())
+	}
+	m, _ = m.Update(enter)
+	m, _ = m.Update(enter)
+	w, err := m.store.Wallet()
+	if err != nil || w.Tongqian != 40 || m.states["changan-hunt"] != wiki.QuestDone {
+		t.Errorf("collecting: purse %+v %v, state %v", w, err, m.states["changan-hunt"])
+	}
+}

@@ -73,3 +73,41 @@ func (s *Store) OpenStone(town string, reward Wallet) error {
 	rec.Coins.Yuanbao += reward.Yuanbao
 	return s.writeJourney(rec)
 }
+
+// Hunts returns the hunt quests accepted and how many of their soldiers
+// have been beaten, by quest id.
+func (s *Store) Hunts() (map[string]int, error) {
+	rec, err := s.readJourney()
+	if rec.Hunts == nil {
+		rec.Hunts = map[string]int{}
+	}
+	return rec.Hunts, err
+}
+
+// AcceptHunt takes on a hunt quest.
+func (s *Store) AcceptHunt(id string) error {
+	rec, err := s.readJourney()
+	if err != nil {
+		return err
+	}
+	if rec.Hunts == nil {
+		rec.Hunts = map[string]int{}
+	}
+	if _, ok := rec.Hunts[id]; !ok {
+		rec.Hunts[id] = 0
+	}
+	return s.writeJourney(rec)
+}
+
+// AddKill counts a soldier beaten toward a hunt, up to need.
+func (s *Store) AddKill(id string, need int) error {
+	rec, err := s.readJourney()
+	if err != nil {
+		return err
+	}
+	if n, ok := rec.Hunts[id]; ok && n < need {
+		rec.Hunts[id] = n + 1
+		return s.writeJourney(rec)
+	}
+	return nil
+}

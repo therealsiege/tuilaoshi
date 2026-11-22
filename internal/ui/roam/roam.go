@@ -10,6 +10,8 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"sort"
+	"time"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -46,7 +48,8 @@ type Model struct {
 	counts  journey.Counts
 	stage   *journey.Stage // the stage being worked on; nil once all are cleared
 	wallet  wiki.Wallet
-	hp, max int // the pilgrim's HP on the road, and its most
+	hp, max int      // the pilgrim's HP on the road, and its most
+	quests  []string // the quest log: hunts under way
 	note    string
 
 	width, height int
@@ -75,6 +78,7 @@ func (m Model) Refresh() Model {
 	wallet, walletErr := m.store.Wallet()
 	m.loadErr = errors.Join(pagesErr, clearedErr, placeErr, walletErr)
 	m.cleared, m.wallet = cleared, wallet
+	m.quests = m.questLog()
 	hp, most, hpErr := rpgview.PilgrimHP(m.store)
 	m.hp, m.max = hp, most
 	m.loadErr = errors.Join(m.loadErr, hpErr)
@@ -93,6 +97,32 @@ func (m Model) Refresh() Model {
 	}
 	m.note = ""
 	return m
+}
+
+// questLog lists the hunts under way: target, progress and where to report.
+func (m Model) questLog() []string {
+	hunts, err := m.store.Hunts()
+	if err != nil {
+		return nil
+	}
+	states, err := m.store.Quests(time.Now())
+	if err != nil {
+		return nil
+	}
+	var log []string
+	for id, beaten := range hunts {
+		q, town := journey.QuestByID(id)
+		if q == nil || states[id] == wiki.QuestDone {
+			continue
+		}
+		line := fmt.Sprintf("%s %d/%d", q.Target, beaten, q.Count)
+		if beaten >= q.Count {
+			line = fmt.Sprintf("%s done: back to %s", q.Target, town.Name)
+		}
+		log = append(log, line)
+	}
+	sort.Strings(log)
+	return log
 }
 
 // save records where the pilgrim stands.

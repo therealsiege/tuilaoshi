@@ -55,8 +55,9 @@ type Model struct {
 
 	fromRoad bool // the town was walked into from the region map; esc returns there
 
-	stones []string // towns whose stone is open
-	hinted bool     // the open stone's pinyin has been shown
+	stones []string       // towns whose stone is open
+	hunts  map[string]int // hunts accepted: id -> soldiers beaten
+	hinted bool           // the open stone's pinyin has been shown
 
 	note          string
 	width, height int
@@ -109,7 +110,9 @@ func (m Model) Refresh() Model {
 	cleared, clearedErr := m.store.ClearedStages()
 	states, questErr := m.store.Quests(m.now())
 	stones, stoneErr := m.store.StonesOpened()
-	m.loadErr = errors.Join(pagesErr, clearedErr, questErr, stoneErr)
+	hunts, huntErr := m.store.Hunts()
+	m.loadErr = errors.Join(pagesErr, clearedErr, questErr, stoneErr, huntErr)
+	m.hunts = hunts
 	m.stones = stones
 	m.states = states
 	m.current = 0
@@ -150,6 +153,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		}
 		if m.Typing() {
 			return m.updateWriting(k)
+		}
+		if m.towns[m.town].Quests[m.quest].Hunting() {
+			return m.updateHunt(k)
 		}
 		return m.answer(k), nil
 	case screenTown:
@@ -207,6 +213,9 @@ func (m Model) openQuest() Model {
 		return m
 	}
 	m.screen, m.answered, m.note, m.feedback = screenQuest, -1, "", ""
+	if q.Hunting() {
+		return m
+	}
 	if q.Writing() {
 		m.input.Reset()
 		return m

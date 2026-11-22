@@ -141,6 +141,9 @@ func (m Model) sideView() string {
 	}
 	b.WriteString("\n" + m.hpBar() + "\n")
 	b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("%d 铜钱 · %d 元宝", m.wallet.Tongqian, m.wallet.Yuanbao)) + "\n\n")
+	if len(m.quests) > 0 {
+		b.WriteString(ui.SubtitleStyle.Render("Hunts") + "\n" + strings.Join(m.quests, "\n") + "\n\n")
+	}
 	g := ground[m.region.Region.Terrain]
 	legend := []string{
 		playerStyle.Render("@") + " you",

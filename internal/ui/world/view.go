@@ -17,6 +17,8 @@ func (m Model) View() string {
 	case screenQuest:
 		if m.Typing() {
 			b.WriteString(m.writingView())
+		} else if m.towns[m.town].Quests[m.quest].Hunting() {
+			b.WriteString(m.huntView())
 		} else {
 			b.WriteString(m.questView())
 		}
@@ -94,6 +96,14 @@ func (m Model) townView() string {
 		status := ui.WarningStyle.Render(fmt.Sprintf("read · +%d 铜钱", q.Pay(1)))
 		if q.Writing() {
 			status = ui.WarningStyle.Render(fmt.Sprintf("write · up to +%d 铜钱", q.Pay(2)))
+		}
+		if q.Hunting() && m.states[q.ID] != wiki.QuestDone {
+			status = ui.WarningStyle.Render(fmt.Sprintf("hunt · +%d 铜钱", q.Pay(1)))
+			if taken, beaten := m.huntState(q); taken && beaten >= q.Count {
+				status = ui.SuccessStyle.Render("★ collect")
+			} else if taken {
+				status = ui.MutedStyle.Render(fmt.Sprintf("hunting %d/%d", beaten, q.Count))
+			}
 		}
 		switch m.states[q.ID] {
 		case wiki.QuestDone:

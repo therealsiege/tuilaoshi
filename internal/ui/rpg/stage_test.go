@@ -271,3 +271,33 @@ func TestSparringNeverClearsATribulation(t *testing.T) {
 		t.Fatalf("sparring picked up tribulation %d", m.stage.Number)
 	}
 }
+
+func TestRoadWinsCountTowardHunts(t *testing.T) {
+	store := stageWiki(t, 0, 4)
+	if err := store.AcceptHunt("changan-hunt"); err != nil {
+		t.Fatal(err)
+	}
+	var bull journey.Soldier
+	for _, s := range journey.Soldiers() {
+		if s.Name == "特处士" {
+			bull = s
+		}
+	}
+	win := func(m Model) {
+		t.Helper()
+		m, _ = enter(m)
+		m, _ = right(m)
+		enemyDown(&m)
+		if m, _ = animationEnds(m); m.state != stateVictory {
+			t.Fatalf("state %s, want victory", stateNames[m.state])
+		}
+	}
+	win(New(store, nil, nil).Encounter(bull))
+	sparred := New(store, nil, nil).Spar()
+	sparred.battle = rpgengine.NewSoldierBattle(sparred.cards, bull, 0)
+	win(sparred) // sparring at camp doesn't count
+	hunts, err := store.Hunts()
+	if err != nil || hunts["changan-hunt"] != 1 {
+		t.Errorf("hunt progress %v %v, want 1 from the road win only", hunts, err)
+	}
+}

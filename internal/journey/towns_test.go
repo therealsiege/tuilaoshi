@@ -21,6 +21,20 @@ func TestTownsAreCompleteAndInRoadOrder(t *testing.T) {
 			if q.Giver == "" || q.GiverEnglish == "" || q.Title == "" || q.Text == "" || q.English == "" {
 				t.Errorf("quest %s is incomplete", q.ID)
 			}
+			if q.Hunting() {
+				r := content.Regions[RegionOf(town.Stage)]
+				s := EnemyLookup(q.Target)
+				served := false
+				for _, sol := range content.Soldiers {
+					if sol.Name == q.Target && sol.From <= r.To && r.From <= sol.To {
+						served = true
+					}
+				}
+				if s == nil || !served || q.Count < 1 || q.Count > 3 {
+					t.Errorf("hunt %s targets %q x%d, not a soldier of %s", q.ID, q.Target, q.Count, r.ID)
+				}
+				continue
+			}
 			if q.Writing() {
 				if q.Criteria == "" || q.Question != "" || len(q.Choices) > 0 {
 					t.Errorf("writing quest %s needs criteria and no question", q.ID)

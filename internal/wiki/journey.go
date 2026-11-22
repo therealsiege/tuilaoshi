@@ -35,6 +35,7 @@ type journeyRecord struct {
 	QuestsDone   []string          `yaml:"quests_done,omitempty"`   // side quests completed
 	QuestsLocked map[string]string `yaml:"quests_locked,omitempty"` // quest id -> the day it was failed
 	Stones       []string          `yaml:"stones,omitempty"`        // town stones opened, by town id
+	Hunts        map[string]int    `yaml:"hunts,omitempty"`         // hunt quests accepted: id -> soldiers beaten
 	Nightmares   []string          `yaml:"nightmares,omitempty"`    // bosses beaten in a nightmare rematch
 	Region       string            `yaml:"region,omitempty"`        // where the pilgrim stands: region id and cell
 	X            int               `yaml:"x,omitempty"`

@@ -97,6 +97,9 @@ func (m *Model) payWin(before wiki.Wallet) {
 		m.saveErr = err
 		return
 	}
+	if m.road && m.battle.PlayerWon() {
+		m.creditHunts()
+	}
 	if pay.Tongqian > 0 {
 		if err := m.store.Tally("battle_won", 1); err != nil {
 			m.saveErr = err
@@ -128,6 +131,23 @@ func (m *Model) creditBonds() []string {
 		names = append(names, c.Name)
 	}
 	return names
+}
+
+// creditHunts counts a soldier beaten on the road toward any hunt quest
+// after it.
+func (m *Model) creditHunts() {
+	hunts, err := m.store.Hunts()
+	if err != nil {
+		m.saveErr = err
+		return
+	}
+	for id := range hunts {
+		if q, _ := journey.QuestByID(id); q != nil && q.Target == m.battle.Enemy.Chinese {
+			if err := m.store.AddKill(id, q.Count); err != nil {
+				m.saveErr = err
+			}
+		}
+	}
 }
 
 // onVictoryKey continues the gauntlet, or leaves once the stage is done.

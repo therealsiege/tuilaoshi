@@ -6,6 +6,9 @@
 # shuffled on screen. A wrong answer locks the quest until the next day.
 # Write quests (kind: write) ask for a sentence or two in Chinese, graded
 # by Claude against the criteria; they can be tried again until they pass.
+# Hunt quests (kind: hunt) send the pilgrim after one of the region's
+# soldiers: accept at the notice board, beat the target count times on the
+# road, then come back to collect.
 # A town's stone is a secret: an inscription giving a 成语's meaning and first
 # character; typing the whole idiom from memory opens it.
 - id: changan
@@ -52,6 +55,15 @@
       text: 请帮我写一个招牌，告诉客人本店的馒头又大又便宜。
       english: "Please write me a shop sign telling customers our buns are big and cheap."
       criteria: "A short shop sign saying the buns are big and cheap."
+    - id: changan-hunt
+      kind: hunt
+      giver: 猎户老张
+      giver_english: "Old Zhang the hunter"
+      title: 赶走野牛精
+      text: 城外双叉岭上，有个叫特处士的野牛精，常常拦路吃人。请你帮我把它赶走两次，让它不敢再回来。
+      english: "On Double Fork Ridge outside the city, an ox spirit called the Bull Hermit keeps waylaying travellers. Please drive it off twice so it won't dare come back."
+      target: 特处士
+      count: 2
 - id: guanyin-temple
   name: 观音禅院
   english: Guanyin Chan Temple
@@ -96,6 +108,15 @@
       text: 请给师父写一句话，告诉他你明天早上来给他读经。
       english: "Please write Master a line telling him you'll come tomorrow morning to read sutras to him."
       criteria: "One sentence telling the master the learner will come tomorrow morning to read sutras."
+    - id: temple-hunt
+      kind: hunt
+      giver: 看门的和尚
+      giver_english: "The temple's gatekeeper"
+      title: 六贼
+      text: 路上的强盗耳听怒，听见一句话就发火，已经打伤了好几个香客。请你去教训他两次。
+      english: "The robber Ear-Hears-Rage flies into a fury at a single word and has hurt several pilgrims on the road. Please teach him a lesson twice."
+      target: 耳听怒
+      count: 2
 - id: gao-village
   name: 高老庄
   english: Gao Village
@@ -138,6 +159,15 @@
       text: 请给我女儿写一张字条，告诉她不要担心，你们会帮忙。
       english: "Please write my daughter a note telling her not to worry, you will help."
       criteria: "A note to the daughter: don't worry, we will help."
+    - id: gao-hunt
+      kind: hunt
+      giver: 高太公的长工
+      giver_english: "Master Gao's farmhand"
+      title: 黑风洞的小妖
+      text: 黑风洞的小妖天天来村里偷鸡偷猪。请你打退三个，大家就能睡个好觉了。
+      english: "Imps from Black Wind Cave come to the village every day to steal chickens and pigs. Drive off three, and everyone can sleep soundly."
+      target: 黑风洞小妖
+      count: 3
 - id: wuzhuang
   name: 五庄观
   english: Wuzhuang Temple
@@ -182,6 +212,15 @@
       text: 请留下你的名字，再写一句你想对师父说的话。
       english: "Please leave your name, and write one sentence you'd like to say to Master."
       criteria: "The learner's name and one sentence addressed to the temple's master."
+    - id: wuzhuang-hunt
+      kind: hunt
+      giver: 清风
+      giver_english: "Clear Breeze, a temple boy"
+      title: 巡风的小妖
+      text: 黄风岭的巡风小妖总在观外偷看，好像在找人参果。请你赶走三个。
+      english: "The Wind-Watch Imps of Yellow Wind Ridge keep peering in at the temple, as if looking for the manfruit. Please drive off three."
+      target: 巡风小妖
+      count: 3
 - id: baoxiang
   name: 宝象国
   english: Kingdom of Baoxiang
@@ -224,6 +263,15 @@
       text: 请写一句话，说说你在路上听到的三公主的消息。
       english: "Please write a sentence about news of the third princess you heard on the road."
       criteria: "One sentence reporting news of the princess, for example that she was seen at Bowl Mountain."
+    - id: baoxiang-hunt
+      kind: hunt
+      giver: 驿站的老板
+      giver_english: "The post-station keeper"
+      title: 碗子山的小妖
+      text: 碗子山的小妖抢了驿站的马。请你打退三个，把路上的客人保护好。
+      english: "Imps from Bowl Mountain stole the post station's horses. Drive off three and keep travellers on the road safe."
+      target: 碗子山小妖
+      count: 3
 - id: wuji
   name: 乌鸡国
   english: Kingdom of Wuji
@@ -264,6 +312,15 @@
       text: 请帮我给母后写一句安慰的话。
       english: "Please help me write a line of comfort to my mother the queen."
       criteria: "A sentence comforting the queen."
+    - id: wuji-hunt
+      kind: hunt
+      giver: 太子的侍卫
+      giver_english: "The crown prince's guard"
+      title: 精细鬼的葫芦
+      text: 有个叫精细鬼的小妖拿着一个怪葫芦，叫谁的名字谁就被装进去。请你打败他两次。
+      english: "An imp called the Cunning Imp carries a strange gourd that swallows anyone whose name it calls. Please defeat him twice."
+      target: 精细鬼
+      count: 2
 - id: chechi
   name: 车迟国
   english: Kingdom of Cart Slow
@@ -306,6 +363,15 @@
       text: 请写一句鼓励我们的话。
       english: "Please write a line of encouragement for us."
       criteria: "A sentence encouraging the enslaved monks."
+    - id: chechi-hunt
+      kind: hunt
+      giver: 老和尚
+      giver_english: "An old monk"
+      title: 羊力大仙
+      text: 羊力大仙在油锅里洗澡，还逼和尚们烧火。请你打败他一次，替我们出口气。
+      english: "The Goat Strength Immortal bathes in boiling oil and makes the monks stoke the fire. Defeat him once and give us some relief."
+      target: 羊力大仙
+      count: 1
 - id: xiliang
   name: 西梁女国
   english: Women's Kingdom of Western Liang
@@ -348,6 +414,15 @@
       text: 请写一句话，说明你从哪里来，要到哪里去。
       english: "Please write a sentence saying where you come from and where you are going."
       criteria: "One sentence saying where the learner comes from and where they are going."
+    - id: xiliang-hunt
+      kind: hunt
+      giver: 摆渡的老婆婆
+      giver_english: "The old ferrywoman"
+      title: 如意真仙
+      text: 如意真仙守着落胎泉，不让人取水。请你打败他一次。
+      english: "The Immortal As-You-Wish guards the Abortion Spring and lets no one draw water. Please defeat him once."
+      target: 如意真仙
+      count: 1
 - id: jisai
   name: 祭赛国
   english: Kingdom of Jisai
@@ -388,6 +463,15 @@
       text: 请写一句话，告诉国王佛宝是谁偷的。
       english: "Please write a sentence telling the king who stole the relic."
       criteria: "A sentence telling the king who stole the relic (the Nine-Headed Bug and the dragons of Green Wave Pool), or at least that the monks did not."
+    - id: jisai-hunt
+      kind: hunt
+      giver: 金光寺的和尚
+      giver_english: "A monk of Golden Light Temple"
+      title: 塔上的小妖
+      text: 塔顶上有个叫奔波儿灞的鲇鱼精在偷看。请你抓住他两次，问出佛宝的下落。
+      english: "A catfish spirit called Benbo'erba is spying from the top of the pagoda. Catch him twice and find out where the relic went."
+      target: 奔波儿灞
+      count: 2
 - id: zhuzi
   name: 朱紫国
   english: Kingdom of Zhuzi
@@ -430,6 +514,15 @@
       text: 请写一句话，告诉客人下雨的时候怎么接无根水。
       english: "Please write a sentence telling customers how to collect rootless water when it rains."
       criteria: "A sentence explaining how to catch rainwater before it touches the ground (e.g. with a bowl)."
+    - id: zhuzi-hunt
+      kind: hunt
+      giver: 药铺的伙计
+      giver_english: "An apothecary's assistant"
+      title: 偷药的黑鱼精
+      text: 灞波儿奔偷走了药铺里最好的药。请你打败他两次，把药拿回来。
+      english: "Babo'erben stole the shop's best medicine. Defeat him twice and bring the medicine back."
+      target: 灞波儿奔
+      count: 2
 - id: biqiu
   name: 比丘国
   english: Kingdom of Biqiu
@@ -470,6 +563,15 @@
       text: 请写一句话，安慰笼子里的孩子们。
       english: "Please write a sentence to comfort the children in the cages."
       criteria: "A sentence comforting the children."
+    - id: biqiu-hunt
+      kind: hunt
+      giver: 一位老人
+      giver_english: "An old man"
+      title: 荆棘岭的松树精
+      text: 荆棘岭上的十八公把过路的人留下来作诗，一留就是一夜。请你打败他一次，把路打通。
+      english: "On the Thorn Ridge, Elder Eighteen keeps passers-by up all night making poems. Defeat him once and clear the road."
+      target: 十八公
+      count: 1
 - id: miefa
   name: 灭法国
   english: Dharma-Destroying Kingdom
@@ -512,6 +614,15 @@
       text: 请写一句话，说你今天晚上想住什么样的房间。
       english: "Please write a sentence saying what kind of room you want tonight."
       criteria: "A sentence requesting a room for tonight, with some detail of what kind."
+    - id: miefa-hunt
+      kind: hunt
+      giver: 客店的老板娘
+      giver_english: "The innkeeper"
+      title: 南山大王
+      text: 隐雾山的南山大王是个豹子精，抓了很多樵夫。请你打败他一次。
+      english: "The King of the Southern Hill on Mist-Hidden Mountain is a leopard spirit who has caught many woodcutters. Please defeat him once."
+      target: 南山大王
+      count: 1
 - id: tianzhu
   name: 天竺国
   english: Kingdom of Tianzhu
@@ -552,6 +663,15 @@
       text: 请写一句话，告诉国王真正的公主在布金寺。
       english: "Please write a sentence telling the king the real princess is at Bujin Temple."
       criteria: "A sentence telling the king the real princess is at Bujin Temple."
+    - id: tianzhu-hunt
+      kind: hunt
+      giver: 金平府的官员
+      giver_english: "An official of Jinping Prefecture"
+      title: 假佛
+      text: 每年元宵节，辟寒大王都假扮成佛来偷灯油。请你打败他一次，揭穿他。
+      english: "Every Lantern Festival, Great King Cold-Repeller poses as a Buddha to steal the lamp oil. Defeat him once and expose him."
+      target: 辟寒大王
+      count: 1
 - id: lingshan
   name: 灵山
   english: Vulture Peak
