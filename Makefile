@@ -1,4 +1,4 @@
-.PHONY: build run test fmt check lint golden recordings launcher clean
+.PHONY: build run test fmt check lint golden recordings launcher demonart clean
 
 GOLANGCI_LINT = go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 
@@ -40,6 +40,11 @@ recordings:
 # Put TuiLaoShi.app on the Desktop (double-click to start the tutor).
 launcher:
 	./scripts/install-launcher.sh
+
+# Paint demon portraits with Gemini Flash Image (GEMINI_API_KEY in ~/.config/tuilaoshi/env).
+# Pass ARGS, e.g. make demonart ARGS="-only 白骨精 -force".
+demonart:
+	zsh -c 'source ~/.config/tuilaoshi/env 2>/dev/null; go run ./cmd/demonart $(ARGS)'
 
 clean:
 	rm -f cmd/mandarin/mandarin

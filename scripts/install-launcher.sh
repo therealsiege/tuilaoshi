@@ -23,8 +23,13 @@ end tell'
   CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o "$WORK/amd64" ./cmd/mandarin)
 lipo -create -output "$RES/tuilaoshi" "$WORK/arm64" "$WORK/amd64"
 
-# A snapshot of the wiki (private episodes included) to seed other Macs.
+# A snapshot of the wiki (private episodes included) to seed other Macs, and
+# the demon portraits.
 rsync -a --delete --exclude '.DS_Store' "$REPO/wiki/" "$RES/wiki/"
+if [[ -d "$REPO/assets/images" ]]; then
+  mkdir -p "$RES/assets"
+  rsync -a --delete --exclude '.DS_Store' "$REPO/assets/images/" "$RES/assets/images/"
+fi
 
 # API keys, private to the user: the app lives in their iCloud Desktop, never the repo.
 if [[ -f "$HOME/.config/tuilaoshi/env" ]]; then
@@ -47,6 +52,7 @@ mkdir -p "\$DATA/wiki"
 /usr/bin/rsync -a --ignore-existing "\$RES/wiki/" "\$DATA/wiki/"
 [[ -f "\$RES/env" ]] && source "\$RES/env"
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+cd "\$RES"   # portraits are found at assets/images/... from here
 printf '\e[8;45;120t'   # ask the terminal for 120x45
 exec "\$RES/tuilaoshi" -wiki "\$DATA/wiki"
 START

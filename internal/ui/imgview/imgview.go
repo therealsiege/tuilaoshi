@@ -1,12 +1,17 @@
-// Package imgview wraps go-termimg for rendering images in the TUI.
-// It auto-detects the best terminal protocol (Kitty, Sixel, iTerm2)
-// and falls back to Unicode halfblocks. All functions are safe to call
-// with missing files — they return empty strings on failure.
+// Package imgview renders images in the TUI. It prefers chafa, which turns
+// an image into colored Unicode art that works in any terminal and inside
+// Bubble Tea views, and falls back to go-termimg. Results are cached, since
+// views redraw often. All functions are safe to call with missing files;
+// they return empty strings on failure.
 package imgview
 
 import (
+	"fmt"
 	"os"
+	"os/exec"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/blacktop/go-termimg"
 )
@@ -14,7 +19,17 @@ import (
 var (
 	detectedProto     termimg.Protocol
 	detectedProtoOnce sync.Once
+
+	cacheMu sync.Mutex
+	cache   = map[cacheKey]string{}
 )
+
+// cacheKey identifies a rendering: the file as last modified, at a size.
+type cacheKey struct {
+	path          string
+	mod           time.Time
+	width, height int
+}
 
 func detectProto() termimg.Protocol {
 	detectedProtoOnce.Do(func() {
@@ -30,15 +45,61 @@ func Available() bool {
 	return p == termimg.Kitty || p == termimg.ITerm2 || p == termimg.Sixel
 }
 
-// Render renders an image file to a string for use in a Bubble Tea View().
-// Returns empty string if the file doesn't exist or rendering fails.
+// chafaPath is the chafa binary, or "" when it isn't installed; tests replace it.
+var chafaPath = func() string {
+	p, err := exec.LookPath("chafa")
+	if err != nil {
+		return ""
+	}
+	return p
+}()
+
+// Render renders an image file to a string for use in a Bubble Tea View(),
+// at most width columns by height rows. Returns empty string if the file
+// doesn't exist or rendering fails.
 func Render(path string, width, height int) string {
 	if path == "" {
 		return ""
 	}
-	if _, err := os.Stat(path); err != nil {
+	info, err := os.Stat(path)
+	if err != nil {
 		return ""
 	}
+	key := cacheKey{path, info.ModTime(), width, height}
+	cacheMu.Lock()
+	out, ok := cache[key]
+	cacheMu.Unlock()
+	if ok {
+		return out
+	}
+	if chafaPath != "" {
+		out = renderChafa(path, width, height)
+	}
+	if out == "" {
+		out = renderTermimg(path, width, height)
+	}
+	cacheMu.Lock()
+	cache[key] = out
+	cacheMu.Unlock()
+	return out
+}
+
+// renderChafa draws the image as colored Unicode symbols, which Bubble Tea
+// can lay out like any text.
+func renderChafa(path string, width, height int) string {
+	// Name the symbols: chafa guesses from TERM and falls back to ASCII
+	// under terminals it doesn't know (tmux, mosh).
+	out, err := exec.Command(chafaPath, "--format", "symbols", "--symbols", "block+border+space",
+		"--colors", "full", "--size", fmt.Sprintf("%dx%d", width, height), "--animate", "off", path).Output()
+	if err != nil {
+		return ""
+	}
+	// chafa may wrap its output in cursor show/hide codes; views only want the art.
+	s := strings.NewReplacer("\x1b[?25l", "", "\x1b[?25h", "").Replace(string(out))
+	return strings.TrimRight(s, "\n")
+}
+
+func renderTermimg(path string, width, height int) string {
 	img, err := termimg.Open(path)
 	if err != nil {
 		return ""
