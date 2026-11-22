@@ -10,7 +10,7 @@ import (
 
 // answers makes a session with right answers and misses, started at.
 func answers(at time.Time, right, wrong int) model.Session {
-	sess := model.Session{StartedAt: at, EndedAt: at, Type: "drill", CardsTotal: right + wrong, CardsCorrect: right}
+	sess := model.Session{StartedAt: at, EndedAt: at, Type: "practice", CardsTotal: right + wrong, CardsCorrect: right}
 	for i := 0; i < right+wrong; i++ {
 		sess.Items = append(sess.Items, model.SessionItem{CardID: fmt.Sprintf("c%d-%d", at.UnixNano(), i), Correct: i < right})
 	}

@@ -52,8 +52,11 @@ func (s *Store) payForSession(sess model.Session) error {
 	if err != nil {
 		return err
 	}
-	today := time.Now().Format(dateFmt)
+	now := time.Now()
+	today := now.Format(dateFmt)
 	if rec.PaidDay != today {
+		// The day's first session: shields cover any days missed since the last.
+		s.shieldGap(&rec, now)
 		rec.PaidDay, rec.PaidCards = today, nil
 	}
 	pay := Wallet{}
@@ -63,12 +66,10 @@ func (s *Store) payForSession(sess model.Session) error {
 			pay.Tongqian++
 		}
 	}
+	tally(&rec, today, sess.Type+"_right", pay.Tongqian)
 	if rec.DailyPaid != today && s.TodayStats().CardsReviewed >= DailyGoal {
 		pay.Tongqian += dailyBonus + min(s.Streak(), streakBonusCap)
 		rec.DailyPaid = today
-	}
-	if pay == (Wallet{}) {
-		return nil
 	}
 	rec.Coins.Tongqian += pay.Tongqian
 	return s.writeJourney(rec)

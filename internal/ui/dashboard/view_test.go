@@ -3,6 +3,7 @@ package dashboard
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
 )
@@ -10,7 +11,9 @@ import (
 func dashboardFor(t *testing.T, width int) Model {
 	t.Helper()
 	store := uitest.Wiki(t, map[string]string{"characters/shu1.md": uitest.OverdueCharacter})
-	return New(store, nil).SetSize(width, 40).Refresh()
+	m := New(store, nil)
+	m.now = func() time.Time { return time.Date(2026, 11, 22, 9, 0, 0, 0, time.Local) } // fixes the day's bounties
+	return m.SetSize(width, 40).Refresh()
 }
 
 func TestDashboardScreens(t *testing.T) {

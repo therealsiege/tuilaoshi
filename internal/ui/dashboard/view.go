@@ -67,7 +67,28 @@ func (m Model) renderPurse() string {
 	if left := wiki.DailyGoal - m.daily.CardsReviewed; left > 0 {
 		purse += ui.MutedStyle.Render(fmt.Sprintf("   %d more %s today for the daily bonus", left, plural(left, "answer", "answers")))
 	}
-	return "  " + ui.SubtitleStyle.Render("Purse") + "  " + ui.WarningStyle.Render(purse)
+	return "  " + ui.SubtitleStyle.Render("Purse") + "  " + ui.WarningStyle.Render(purse) + "\n" + m.renderBounties()
+}
+
+// renderBounties lists today's bounties with progress, one per line.
+func (m Model) renderBounties() string {
+	var b strings.Builder
+	for i, bt := range m.bounties {
+		label := "        "
+		if i == 0 {
+			label = ui.SubtitleStyle.Render("Bounties")
+		}
+		status := ui.MutedStyle.Render(fmt.Sprintf("%d/%d", bt.Have, bt.Target))
+		if bt.Done {
+			status = ui.SuccessStyle.Render("✓")
+		}
+		fmt.Fprintf(&b, "  %s  %s %s %s\n", label, status, bt.Text, ui.MutedStyle.Render(fmt.Sprintf("+%d 铜钱", bt.Pay)))
+	}
+	note := "all three earn a streak shield"
+	if m.shields > 0 {
+		note += fmt.Sprintf(" · %d %s held", m.shields, plural(m.shields, "shield", "shields"))
+	}
+	return b.String() + "            " + ui.MutedStyle.Render(note)
 }
 
 // renderStartHere suggests one next step: due reviews first, then the open

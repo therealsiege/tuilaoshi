@@ -187,6 +187,12 @@ func (s *Store) Streak() int {
 	for _, rec := range s.readSessions() {
 		dates[rec.Date] = true
 	}
+	// Days covered by a streak shield count as studied.
+	if j, err := s.readJourney(); err == nil {
+		for _, d := range j.Shielded {
+			dates[d] = true
+		}
+	}
 
 	day := time.Now()
 	// Allow streak to start from today or yesterday

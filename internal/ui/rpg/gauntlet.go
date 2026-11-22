@@ -80,6 +80,12 @@ func (m *Model) payWin(before wiki.Wallet) {
 		m.saveErr = err
 		return
 	}
+	if pay.Tongqian > 0 {
+		if err := m.store.Tally("battle_won", 1); err != nil {
+			m.saveErr = err
+			return
+		}
+	}
 	after, err := m.store.Wallet()
 	if err != nil {
 		m.saveErr = err

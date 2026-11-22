@@ -15,16 +15,21 @@ import (
 const journeyFile = "journey.yaml"
 
 type journeyRecord struct {
-	Cleared   map[int]string    `yaml:"cleared"`
-	Seen      []int             `yaml:"seen,omitempty"` // stages whose story scene has been shown
-	Coins     Wallet            `yaml:"coins,omitempty"`
-	DailyPaid string            `yaml:"daily_paid,omitempty"` // the day the daily bonus was last paid
-	PaidDay   string            `yaml:"paid_day,omitempty"`   // the day PaidCards covers
-	PaidCards []string          `yaml:"paid_cards,omitempty"` // cards already paid for that day
-	Owned     []string          `yaml:"owned,omitempty"`      // gear bought at the shrine, by id
-	Worn      map[string]string `yaml:"worn,omitempty"`       // slot -> gear id
-	Defeated  []string          `yaml:"defeated,omitempty"`   // enemies beaten at least once, for the collection
-	Claimed   []string          `yaml:"claimed,omitempty"`    // collection sets whose reward has been paid
+	Cleared      map[int]string    `yaml:"cleared"`
+	Seen         []int             `yaml:"seen,omitempty"` // stages whose story scene has been shown
+	Coins        Wallet            `yaml:"coins,omitempty"`
+	DailyPaid    string            `yaml:"daily_paid,omitempty"`    // the day the daily bonus was last paid
+	PaidDay      string            `yaml:"paid_day,omitempty"`      // the day PaidCards covers
+	PaidCards    []string          `yaml:"paid_cards,omitempty"`    // cards already paid for that day
+	Owned        []string          `yaml:"owned,omitempty"`         // gear bought at the shrine, by id
+	Worn         map[string]string `yaml:"worn,omitempty"`          // slot -> gear id
+	Defeated     []string          `yaml:"defeated,omitempty"`      // enemies beaten at least once, for the collection
+	Claimed      []string          `yaml:"claimed,omitempty"`       // collection sets whose reward has been paid
+	TallyDay     string            `yaml:"tally_day,omitempty"`     // the day Tally counts
+	Tally        map[string]int    `yaml:"tally,omitempty"`         // fresh progress toward today's bounties
+	BountiesPaid []string          `yaml:"bounties_paid,omitempty"` // today's bounties already paid
+	Shields      int               `yaml:"shields,omitempty"`       // streak shields held
+	Shielded     []string          `yaml:"shielded,omitempty"`      // missed days a shield covered
 }
 
 func (s *Store) readJourney() (journeyRecord, error) {
