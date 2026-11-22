@@ -88,9 +88,11 @@ func Render(path string, width, height int) string {
 // can lay out like any text.
 func renderChafa(path string, width, height int) string {
 	// Name the symbols: chafa guesses from TERM and falls back to ASCII
-	// under terminals it doesn't know (tmux, mosh).
-	out, err := exec.Command(chafaPath, "--format", "symbols", "--symbols", "block+border+space",
-		"--colors", "full", "--size", fmt.Sprintf("%dx%d", width, height), "--animate", "off", path).Output()
+	// under terminals it doesn't know (tmux, mosh). Every shape except
+	// letters, digits and double-width glyphs gives the sharpest picture
+	// that still lines up; work 9 is chafa's most careful matching.
+	out, err := exec.Command(chafaPath, "--format", "symbols", "--symbols", "all-ascii-latin-alnum-wide",
+		"--work", "9", "--colors", "full", "--size", fmt.Sprintf("%dx%d", width, height), "--animate", "off", path).Output()
 	if err != nil {
 		return ""
 	}

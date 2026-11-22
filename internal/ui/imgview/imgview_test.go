@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 )
 
 func testImage(t *testing.T) string {
@@ -68,6 +71,24 @@ func TestChafaLinesResetColors(t *testing.T) {
 	for _, l := range strings.Split(Render(testImage(t), 12, 4), "\n") {
 		if !strings.HasSuffix(l, "\x1b[0m") {
 			t.Fatalf("line %q doesn't end with a color reset", l)
+		}
+	}
+}
+
+func TestChafaArtStaysWithinItsWidth(t *testing.T) {
+	if chafaPath == "" {
+		t.Skip("chafa not installed")
+	}
+	path := filepath.Join("..", "..", "..", "assets", "images", "demons", "红孩儿.png")
+	if _, err := os.Stat(path); err != nil {
+		t.Skip("no portraits")
+	}
+	for _, l := range strings.Split(Render(path, 44, 22), "\n") {
+		if w := lipgloss.Width(l); w > 44 {
+			t.Fatalf("line is %d columns, wider than 44: %q", w, l)
+		}
+		if strings.IndexFunc(ansi.Strip(l), func(r rune) bool { return r < 128 && r != ' ' }) >= 0 {
+			t.Fatalf("line has ASCII characters: %q", ansi.Strip(l))
 		}
 	}
 }
