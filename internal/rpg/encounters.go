@@ -81,3 +81,19 @@ func WeakCards(cards []model.Card) []model.Card {
 	}
 	return weak
 }
+
+// Nightmare rematches make a beaten boss half as strong again, hitting harder.
+const (
+	nightmareHPPercent   = 150
+	nightmareAttackBonus = 5
+)
+
+// NewNightmareBattle creates a rematch against a beaten boss, stronger than
+// before; callers pass the learner's weakest words as cards.
+func NewNightmareBattle(cards []model.Card, boss journey.BestiaryEntry, masteredCount int) *Battle {
+	b := NewBossBattle(cards, boss, masteredCount)
+	b.Enemy.HP = b.Enemy.HP * nightmareHPPercent / 100
+	b.Enemy.MaxHP = b.Enemy.HP
+	b.Enemy.Attack += nightmareAttackBonus
+	return b
+}

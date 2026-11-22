@@ -36,6 +36,7 @@ type journeyRecord struct {
 	QuestsDone   []string          `yaml:"quests_done,omitempty"`   // side quests completed
 	QuestsLocked map[string]string `yaml:"quests_locked,omitempty"` // quest id -> the day it was failed
 	Stones       []string          `yaml:"stones,omitempty"`        // town stones opened, by town id
+	Nightmares   []string          `yaml:"nightmares,omitempty"`    // bosses beaten in a nightmare rematch
 }
 
 func (s *Store) readJourney() (journeyRecord, error) {

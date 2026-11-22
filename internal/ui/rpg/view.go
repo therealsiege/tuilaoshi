@@ -67,7 +67,13 @@ func (m Model) viewIntro() string {
 	b.WriteString(m.renderStakes())
 	b.WriteString(m.renderGauntlet())
 	b.WriteString(m.renderAbilities())
-	b.WriteString(ui.HelpStyle.Render("  enter/space begin battle  |  esc flee"))
+	help := "  enter/space begin battle  |  esc flee"
+	if m.nightmare == nil {
+		if boss := m.nightmareBoss(); boss != nil {
+			help += "  |  n nightmare rematch: " + boss.Name
+		}
+	}
+	b.WriteString(ui.HelpStyle.Render(help))
 
 	return b.String()
 }
@@ -380,6 +386,8 @@ func (m Model) renderStakes() string {
 			b.WriteString(ui.WarningStyle.Render("  Fight through to the demon to clear this tribulation."))
 		}
 		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("  Words: %s · %d/%d learned", m.stage.Words.Name, m.words.Learned, m.words.Total)))
+	case m.nightmare != nil:
+		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  梦魇 Nightmare: %s returns, half as strong again, asking only your weakest words.", m.nightmare.Name)))
 	case m.next != nil:
 		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  %s blocks your path! (practice)", m.foeKind())))
 		need := journey.NeedText(*m.next, m.counts)

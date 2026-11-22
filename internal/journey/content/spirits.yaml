@@ -1,0 +1,75 @@
+# Hidden spirits, one per radical family. A spirit wakes once enough of its
+# family's characters are mastered (spirits.go: SpiritWakes), then may appear
+# in practice battles, where every question uses that family's characters.
+# Beating it the first time pays a silver ingot. Drawn from Chinese
+# folklore and the novel's own motifs (public domain); portraits are painted
+# by cmd/demonart into assets/images/spirits/.
+- radical: 氵
+  name: 河伯
+  english: Hebo, Earl of the River
+  chapter: "Chapter 22"
+  origin: "The old god of the Yellow River, who once demanded a bride each year until a wise magistrate threw his priests into the water."
+  powers: "Raises the river over its banks"
+  abilities: [venom]
+- radical: 木
+  name: 古树精
+  english: The Thousand-Year Tree Spirit
+  chapter: "Chapter 64"
+  origin: "A tree so old its roots remember the first emperors; it speaks in the creak of its branches."
+  powers: "Roots that bind and branches that strike from above"
+- radical: 口
+  name: 应声虫
+  english: The Echo Bug
+  chapter: "Chapter 30"
+  origin: "A tiny creature that lives in a man's belly and repeats every word he says, until it is starved out by a word it cannot say."
+  powers: "Repeats your words back to you, twisted"
+  abilities: [disguise]
+- radical: 扌
+  name: 空空儿
+  english: Kongkong'er the Phantom Thief
+  chapter: "Chapter 40"
+  origin: "A thief from the old tales so quick no one ever saw his hands; he strikes once, and if he misses, he is gone a thousand li."
+  powers: "Hands faster than sight"
+  abilities: [burn]
+- radical: 艹
+  name: 牡丹花妖
+  english: The Peony Spirit
+  chapter: "Chapter 64"
+  origin: "A peony that bloomed so long in a scholar's garden that it learned to walk at night and recite his poems."
+  powers: "Petals that cloud the eyes with perfume"
+  abilities: [blind]
+- radical: 心
+  name: 心猿
+  english: The Mind-Monkey
+  chapter: "Chapter 58"
+  origin: "The restless mind itself, the monkey that the novel says every pilgrim must tame before reaching the West."
+  powers: "Never still; leaps from thought to thought"
+  abilities: [disguise]
+- radical: 日
+  name: 金乌
+  english: The Golden Crow of the Sun
+  chapter: "Chapter 70"
+  origin: "The three-legged crow that lives in the sun; once there were ten, until the archer Yi shot nine from the sky."
+  powers: "Sunfire that scorches the ground"
+  abilities: [burn]
+- radical: 火
+  name: 火鸦
+  english: The Fire Crow
+  chapter: "Chapter 41"
+  origin: "A crow of living flame said to fly ahead of great fires, sent to burn the fields of those who offend Heaven."
+  powers: "Wings of flame"
+  abilities: [burn]
+- radical: 亻
+  name: 画皮鬼
+  english: The Painted Skin
+  chapter: "Chapter 27"
+  origin: "A ghost from the old strange tales who paints a beautiful human skin each night and wears it to deceive."
+  powers: "A face that is not its own"
+  abilities: [disguise]
+- radical: 讠
+  name: 鹦鹉精
+  english: The Parrot Spirit
+  chapter: "Chapter 42"
+  origin: "A parrot that learned so many human words it forgot it was a bird, and now argues with travellers in their own tongue."
+  powers: "Talks back in your own words"
+  abilities: [venom]

@@ -41,6 +41,9 @@ func (m *Model) applyAbilities(cleared map[int]string) {
 		}
 		m.abilities = append(m.abilities, rpgengine.AddUpgrades(&e, journey.Party(cleared), bonds)...)
 	}
+	if m.spirit != nil {
+		m.abilities = append(m.abilities, "A hidden spirit, drawn out by your mastery of "+m.spirit.Radical+": every question uses "+m.spirit.Radical+" characters")
+	}
 	if says := m.difficulty.Says(m.accuracy); says != "" {
 		if m.difficulty == rpgengine.Easier {
 			e.Reveals++

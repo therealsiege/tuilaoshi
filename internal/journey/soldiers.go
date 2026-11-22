@@ -83,7 +83,7 @@ func Gauntlet(n int, rng *rand.Rand) []Soldier {
 	return []Soldier{first, rest[rng.Intn(len(rest))]}
 }
 
-// EnemyLookup finds a demon or soldier by Chinese name, or returns nil.
+// EnemyLookup finds a demon, soldier or spirit by Chinese name, or returns nil.
 func EnemyLookup(name string) *BestiaryEntry {
 	if d := BestiaryLookup(name); d != nil {
 		return d
@@ -91,6 +91,11 @@ func EnemyLookup(name string) *BestiaryEntry {
 	for i := range content.Soldiers {
 		if content.Soldiers[i].Name == name {
 			return &content.Soldiers[i].BestiaryEntry
+		}
+	}
+	for i := range content.Spirits {
+		if content.Spirits[i].Name == name {
+			return &content.Spirits[i].BestiaryEntry
 		}
 	}
 	return nil

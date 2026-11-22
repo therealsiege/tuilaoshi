@@ -31,6 +31,7 @@ type Content struct {
 	Gear         []Gear
 	Bonds        []Bond
 	Towns        []Town
+	Spirits      []Spirit
 }
 
 // Progression sets which characters count toward opening a stage.
@@ -72,6 +73,7 @@ func LoadContent() (Content, error) {
 		{"gear", &c.Gear},
 		{"bonds", &c.Bonds},
 		{"towns", &c.Towns},
+		{"spirits", &c.Spirits},
 	}
 	for _, f := range files {
 		data, err := contentFS.ReadFile("content/" + f.name + ".yaml")
@@ -98,5 +100,6 @@ func LoadContent() (Content, error) {
 			s.ImagePath = fmt.Sprintf("assets/images/soldiers/%s.png", s.Name)
 		}
 	}
+	loadSpirits(&c)
 	return c, nil
 }

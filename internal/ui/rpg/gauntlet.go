@@ -80,6 +80,19 @@ func (m *Model) payWin(before wiki.Wallet) {
 	if m.stage != nil && m.stage.Boss != nil && m.lastFoe() && m.battle.PlayerWon() {
 		pay.Yuanbao = 1
 	}
+	if m.spirit != nil && m.battle.PlayerWon() {
+		pay.Yuanbao = 1 // a spirit appears only until it is first beaten
+	}
+	if m.nightmare != nil && m.battle.PlayerWon() {
+		first, err := m.store.RecordNightmare(m.nightmare.Name)
+		if err != nil {
+			m.saveErr = err
+			return
+		}
+		if first {
+			pay.Yuanbao = 1
+		}
+	}
 	if err := m.store.Earn(pay); err != nil {
 		m.saveErr = err
 		return
@@ -177,6 +190,9 @@ func (m Model) nextFoeName() string {
 
 // foeKind says what kind of enemy this is, for the practice intro.
 func (m Model) foeKind() string {
+	if m.spirit != nil {
+		return "A hidden spirit"
+	}
 	switch m.battle.Rank {
 	case journey.RankMinion:
 		return "A demon's underling"

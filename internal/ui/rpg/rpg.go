@@ -107,6 +107,11 @@ type Model struct {
 	// Battles adapt to recent accuracy (accuracy percent right).
 	difficulty rpgengine.Difficulty
 	accuracy   int
+
+	// spirit is the hidden spirit fought in this practice battle, if any.
+	spirit *journey.Spirit
+	// nightmare is the beaten boss brought back in a nightmare rematch, if any.
+	nightmare *journey.Boss
 }
 
 type logEntry struct {
@@ -161,7 +166,7 @@ func (m Model) Refresh() Model {
 		m.cards = journey.StageCards(*s, pages, cards)
 		m.words = journey.StageProgress(*s, pages, cards)
 	}
-	m.gauntlet, m.foe, m.cleared = nil, 0, cleared
+	m.gauntlet, m.foe, m.cleared, m.nightmare = nil, 0, cleared, nil
 	if m.store != nil {
 		pct, answered := m.store.RecentAccuracy(rpgengine.RecentAnswers)
 		m.accuracy, m.difficulty = pct, rpgengine.DifficultyFor(pct, answered)
@@ -173,6 +178,7 @@ func (m Model) Refresh() Model {
 			m.cards = rpgengine.WeakCards(m.cards)
 		}
 		m.startGauntlet()
+	case m.meetSpirit(pages, cards):
 	default:
 		reached := len(stages)
 		if m.next != nil {
@@ -232,6 +238,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 		switch m.state {
 		case stateIntro:
+			if msg.String() == "n" && m.nightmare == nil && m.nightmareBoss() != nil {
+				return m.startNightmare(), nil
+			}
 			if key.Matches(msg, m.gkeys.Enter) || msg.Type == tea.KeySpace {
 				m.state = stateFighting
 				m.battle.State = rpgengine.BattlePlayerTurn

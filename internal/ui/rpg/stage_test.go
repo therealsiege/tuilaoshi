@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	rpgengine "github.com/therealsiege/tuilaoshi/internal/rpg"
@@ -167,5 +169,61 @@ func TestAnAssistThatHelpsRaisesTheBond(t *testing.T) {
 	}
 	if !strings.Contains(m.View(), "Bond +1: 孙悟空") {
 		t.Errorf("victory screen doesn't show the bond:\n%s", m.View())
+	}
+}
+
+func TestMasteredFamilyWakesItsSpirit(t *testing.T) {
+	pages := map[string]string{}
+	for i := 0; i < journey.SpiritWakes+2; i++ {
+		ch := string(rune(0x6C5F + i))
+		pages[fmt.Sprintf("characters/w%d.md", i)] = fmt.Sprintf(
+			"---\ntype: character\nreview_interval: 7\n---\n\n# %s\n\n- **Character**: %s\n- **Pinyin**: p%d\n- **Meaning**: water word %d\n- **Radical**: 氵(water)\n", ch, ch, i, i)
+	}
+	pages["journey.yaml"] = "cleared: {1: \"2026-11-01\", 2: \"2026-11-01\"}\n" // stage 3 needs 16: practice
+	defer func(roll func() int) { spiritRoll = roll }(spiritRoll)
+	spiritRoll = func() int { return 0 }
+	m := skipScene(New(uitest.Wiki(t, pages), nil, nil).Refresh())
+	if m.spirit == nil || m.battle.Enemy.Chinese != "河伯" {
+		t.Fatalf("no spirit: enemy %s", m.battle.Enemy.Chinese)
+	}
+	if v := m.View(); !strings.Contains(v, "hidden spirit") || !strings.Contains(v, "氵 characters") {
+		t.Errorf("intro doesn't announce the spirit:\n%s", v)
+	}
+	m, _ = enter(m)
+	m, _ = right(m)
+	enemyDown(&m)
+	m, _ = animationEnds(m)
+	if m.earned.Yuanbao != 1 {
+		t.Errorf("beating the spirit paid %+v, want an ingot", m.earned)
+	}
+	again := skipScene(New(m.store, nil, nil).Refresh())
+	if again.spirit != nil {
+		t.Error("a beaten spirit appeared again")
+	}
+}
+
+func TestNightmareRematchOfABeatenBoss(t *testing.T) {
+	m := skipScene(New(stageWiki(t, 0, 8), nil, nil).Refresh()) // boss of stage 8 beaten; practice now
+	if m.stage != nil || !strings.Contains(m.View(), "n nightmare rematch") {
+		t.Fatalf("practice intro doesn't offer a nightmare:\n%s", m.View())
+	}
+	normal := m.battle.Enemy.MaxHP
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("n")})
+	if m.nightmare == nil || m.battle.Enemy.Chinese != m.nightmare.Name || m.battle.Enemy.MaxHP <= normal {
+		t.Fatalf("nightmare: %v, enemy %s HP %d", m.nightmare, m.battle.Enemy.Chinese, m.battle.Enemy.MaxHP)
+	}
+	if !strings.Contains(m.View(), "梦魇") {
+		t.Errorf("intro doesn't say nightmare:\n%s", m.View())
+	}
+	for i := 0; i < 2; i++ {
+		m, _ = enter(m)
+		m, _ = right(m)
+		enemyDown(&m)
+		m, _ = animationEnds(m)
+		if want := 1 - i; m.earned.Yuanbao != want {
+			t.Errorf("nightmare win %d paid %d ingots, want %d", i+1, m.earned.Yuanbao, want)
+		}
+		m = m.rematch()
+		m.state = stateIntro
 	}
 }
