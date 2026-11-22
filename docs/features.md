@@ -30,3 +30,5 @@ Recordings (`make recordings`, needs `brew install vhs`; tapes in `docs/tapes`, 
 [battle](recordings/battle.gif), [journey](recordings/journey.gif).
 
 Journey content (tribulations, demons, bosses, companions, lore, dialogue, vocabulary themes, story scenes, dialogue episodes, demon and companion abilities) is data in `internal/journey/content/*.yaml`, embedded in the binary; `internal/journey/content_test.go` validates it as a whole, so adding a demon or lore passage is a YAML-only change.
+
+Launching: `make launcher` puts TuiLaoShi.app on the Desktop; it opens the tutor in Terminal via `scripts/launch.sh`, which rebuilds if the code changed and reads optional API keys from `~/.config/tuilaoshi/env`.

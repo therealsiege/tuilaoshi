@@ -1,4 +1,4 @@
-.PHONY: build run test fmt check lint golden recordings clean
+.PHONY: build run test fmt check lint golden recordings launcher clean
 
 GOLANGCI_LINT = go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 
@@ -36,6 +36,10 @@ golden:
 # Record docs/recordings/*.gif from docs/tapes (needs vhs: brew install vhs).
 recordings:
 	@for t in docs/tapes/*.tape; do vhs "$$t" || exit 1; done
+
+# Put TuiLaoShi.app on the Desktop (double-click to start the tutor).
+launcher:
+	./scripts/install-launcher.sh
 
 clean:
 	rm -f cmd/mandarin/mandarin

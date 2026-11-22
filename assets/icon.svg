@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="#C54B3C"/>
+  <rect x="104" y="104" width="816" height="816" rx="170" fill="none" stroke="#D4A017" stroke-width="16"/>
+  <text x="512" y="700" font-size="600" text-anchor="middle" fill="#D4A017" font-family="PingFang SC, Hiragino Sans GB, STHeiti">推</text>
+</svg>
