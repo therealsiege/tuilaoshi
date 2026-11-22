@@ -26,6 +26,7 @@ import (
 	rpgview "github.com/therealsiege/tuilaoshi/internal/ui/rpg"
 	"github.com/therealsiege/tuilaoshi/internal/ui/shrine"
 	"github.com/therealsiege/tuilaoshi/internal/ui/stats"
+	"github.com/therealsiege/tuilaoshi/internal/ui/world"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
@@ -52,6 +53,7 @@ type Model struct {
 	shrine    shrine.Model
 	cards     collection.Model
 	party     party.Model
+	world     world.Model
 	battle    rpgview.Model
 	reader    reader.Model
 	assess    assessment.Model
@@ -111,6 +113,7 @@ func New(wikiDir string) (Model, error) {
 		shrine:        shrine.New(store),
 		cards:         collection.New(store),
 		party:         party.New(store, claudeClient, dict),
+		world:         world.New(store),
 		battle:        rpgview.New(store, ttsClient, dict),
 		reader:        reader.New(store),
 		assess:        assessment.New(store),
@@ -144,6 +147,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.shrine = m.shrine.SetSize(msg.Width, msg.Height)
 		m.cards = m.cards.SetSize(msg.Width, msg.Height)
 		m.party = m.party.SetSize(msg.Width, msg.Height)
+		m.world = m.world.SetSize(msg.Width, msg.Height)
 		m.battle = m.battle.SetSize(msg.Width, msg.Height)
 		m.reader = m.reader.SetSize(msg.Width, msg.Height)
 		m.assess = m.assess.SetSize(msg.Width, msg.Height)
@@ -194,6 +198,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ui.ViewParty:
 			m.party = m.party.Refresh()
 			return m, m.party.Init()
+		case ui.ViewWorld:
+			m.world = m.world.Refresh()
+			return m, m.world.Init()
 		case ui.ViewBattle:
 			m.battle = m.battle.Refresh()
 			return m, m.battle.Init()
@@ -243,7 +250,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// or esc closes an open reading)
 		readingOpen := (m.currentView == ui.ViewReading && m.reader.Open()) ||
 			(m.currentView == ui.ViewBrowser && m.browser.Searching()) ||
-			(m.currentView == ui.ViewParty && m.party.Busy())
+			(m.currentView == ui.ViewParty && m.party.Busy()) ||
+			(m.currentView == ui.ViewWorld && m.world.Busy())
 		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard && !readingOpen {
 			if !m.isInputComposing() {
 				if m.currentView == ui.ViewBattle {
@@ -281,6 +289,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.cards, cmd = m.cards.Update(msg)
 	case ui.ViewParty:
 		m.party, cmd = m.party.Update(msg)
+	case ui.ViewWorld:
+		m.world, cmd = m.world.Update(msg)
 	case ui.ViewBattle:
 		m.battle, cmd = m.battle.Update(msg)
 	case ui.ViewReading:
@@ -317,6 +327,8 @@ func (m Model) View() string {
 		content = m.cards.View()
 	case ui.ViewParty:
 		content = m.party.View()
+	case ui.ViewWorld:
+		content = m.world.View()
 	case ui.ViewBattle:
 		content = m.battle.View()
 	case ui.ViewReading:

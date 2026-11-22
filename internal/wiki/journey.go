@@ -33,6 +33,8 @@ type journeyRecord struct {
 	Bonds        map[string]int    `yaml:"bonds,omitempty"`         // companion -> bond points
 	TalkDay      string            `yaml:"talk_day,omitempty"`      // the day TalkPoints counts
 	TalkPoints   map[string]int    `yaml:"talk_points,omitempty"`   // bond points from talking today, by companion
+	QuestsDone   []string          `yaml:"quests_done,omitempty"`   // side quests completed
+	QuestsLocked map[string]string `yaml:"quests_locked,omitempty"` // quest id -> the day it was failed
 }
 
 func (s *Store) readJourney() (journeyRecord, error) {

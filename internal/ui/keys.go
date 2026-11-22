@@ -85,6 +85,7 @@ const (
 	ViewShrine     // the Earth God's shrine: gear shop and character sheet
 	ViewCollection // enemy and character cards, by set
 	ViewParty      // bonds with the four disciples
+	ViewWorld      // the road west: towns and their side quests
 )
 
 // SwitchViewMsg tells the app to change views.
@@ -114,6 +115,7 @@ type DashboardKeys struct {
 	Shrine   key.Binding
 	Cards    key.Binding
 	Party    key.Binding
+	World    key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -171,6 +173,10 @@ func DefaultDashboardKeys() DashboardKeys {
 			key.WithKeys("p"),
 			key.WithHelp("p", "party"),
 		),
+		World: key.NewBinding(
+			key.WithKeys("w"),
+			key.WithHelp("w", "world"),
+		),
 		Reading: key.NewBinding(
 			key.WithKeys("t"),
 			key.WithHelp("t", "read"),
@@ -202,6 +208,13 @@ func HelpText(v View) string {
 			"  ↑↓     Select radical\n" +
 			"  esc    Back to dashboard\n" +
 			"  ?      Toggle help"
+	case ViewWorld:
+		return "Road Keys\n\n" +
+			"  ↑↓     Choose a town / request\n" +
+			"  enter  Visit / read\n" +
+			"  1-4    Answer a request\n" +
+			"  g      Shrine (in a town)\n" +
+			"  esc    Back"
 	case ViewParty:
 		return "Party Keys\n\n" +
 			"  ↑↓     Choose a companion\n" +

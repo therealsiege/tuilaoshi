@@ -1,0 +1,464 @@
+# Towns on the road west: places to stop between the gauntlets. A town is
+# reached once its stage is the one being worked on or behind it. Each has
+# a notice board of side quests from townsfolk. Notices and letters are
+# original, written for TuiLaoShi around the novel's places. Read quests
+# ask one question about the text; the right choice is written first and
+# shuffled on screen. A wrong answer locks the quest until the next day.
+- id: changan
+  name: 长安
+  english: Chang'an
+  stage: 5
+  desc: "大唐的都城。街上人来人往，卖东西的声音从早到晚。"
+  desc_english: "The Tang capital. Crowds come and go, and hawkers call from dawn to dusk."
+  quests:
+    - id: changan-baker
+      giver: 卖馒头的老王
+      giver_english: Old Wang the bun seller
+      title: 招人
+      text: |
+        招人：本店每天早上五点开门，需要一个帮忙做馒头的人。
+        会算账的优先。工资每天三十个铜钱，包午饭。
+        有意者请到东市找老王。
+      english: |
+        Help wanted: this shop opens at five every morning and needs someone to help make buns.
+        Those who can keep accounts are preferred. Pay is thirty copper cash a day, lunch included.
+        If interested, find Old Wang at the East Market.
+      question: 这个工作每天给多少钱？
+      choices: [三十个铜钱, 五个铜钱, 一个元宝, 不给钱，只包午饭]
+    - id: changan-gate
+      giver: 守城的士兵
+      giver_english: A gate guard
+      title: 城门告示
+      text: |
+        城门每天晚上九点关，早上六点开。
+        出城的人请带好通关文牒。
+        没有文牒的，不能出城。
+      english: |
+        The city gates close at nine every night and open at six in the morning.
+        Anyone leaving the city must carry travel papers.
+        Without papers, you may not leave.
+      question: 没有通关文牒会怎么样？
+      choices: [不能出城, 要多交钱, 只能晚上出城, 可以跟士兵一起出城]
+- id: guanyin-temple
+  name: 观音禅院
+  english: Guanyin Chan Temple
+  stage: 10
+  desc: "一座有名的寺院，院里的老和尚收藏了很多袈裟。"
+  desc_english: "A famous temple whose old abbot collects cassocks."
+  quests:
+    - id: temple-reader
+      giver: 小和尚
+      giver_english: A young monk
+      title: 请人读经
+      text: |
+        师父的眼睛不好，看不清楚字了。
+        他想请人每天给他读半个小时的经。
+        如果您愿意帮忙，寺里会给您准备斋饭和一间干净的客房。
+      english: |
+        Master's eyes are poor; he can no longer read the characters clearly.
+        He would like someone to read sutras to him for half an hour each day.
+        If you are willing to help, the temple will prepare vegetarian meals and a clean guest room for you.
+      question: 为什么师父需要人帮忙？
+      choices: [他的眼睛不好, 他太忙了, 他不认识字, 他生病了，不能说话]
+    - id: temple-kitchen
+      giver: 厨房的师傅
+      giver_english: The temple cook
+      title: 今天的晚饭
+      text: |
+        今天晚饭：青菜豆腐汤、米饭、炒蘑菇。
+        因为昨天下雨，山上的路不好走，所以没有新鲜的水果。
+        请大家原谅。
+      english: |
+        Tonight's dinner: greens and tofu soup, rice, fried mushrooms.
+        Because it rained yesterday and the mountain paths are bad, there is no fresh fruit.
+        Please forgive us.
+      question: 今天为什么没有水果？
+      choices: [下雨了，山路不好走, 水果太贵了, 和尚不吃水果, 水果都被吃完了]
+- id: gao-village
+  name: 高老庄
+  english: Gao Village
+  stage: 12
+  desc: "一个安静的村子，田里种着麦子，家家户户都养着猪。"
+  desc_english: "A quiet village with wheat in the fields and pigs in every yard."
+  quests:
+    - id: gao-son-in-law
+      giver: 高太公
+      giver_english: Old Master Gao
+      title: 找女婿
+      text: |
+        各位客人：我女儿的婚事让全家人都很担心。
+        如果有人能帮我们找到那个每天晚上来、天亮就走的女婿，
+        我们愿意送上二十两银子。
+      english: |
+        Dear guests: my daughter's marriage has the whole family worried.
+        If anyone can help us find the son-in-law who comes every night and leaves at dawn,
+        we will gladly give twenty taels of silver.
+      question: 高太公要找谁？
+      choices: [晚上来、天亮走的女婿, 偷银子的小偷, 走丢了的女儿, 一位医生]
+    - id: gao-wheat
+      giver: 村长
+      giver_english: The village head
+      title: 村口告示
+      text: |
+        春天到了，请大家不要把猪放进麦田里。
+        谁家的猪吃了别人的麦子，就要赔一斗米。
+      english: |
+        Spring is here; please don't let pigs into the wheat fields.
+        Whoever's pig eats someone else's wheat must pay back a dou of rice.
+      question: 如果你家的猪吃了别人的麦子，要怎么办？
+      choices: [赔一斗米, 把猪送给别人, 给别人种麦子, 不用管]
+- id: wuzhuang
+  name: 五庄观
+  english: Wuzhuang Temple
+  stage: 18
+  desc: "镇元大仙的道观，后院有一棵人参果树，三千年才开一次花。"
+  desc_english: "Master Zhenyuan's Taoist temple. In the back garden grows a manfruit tree that flowers once in three thousand years."
+  quests:
+    - id: wuzhuang-fruit
+      giver: 清风
+      giver_english: Clear Breeze, a temple boy
+      title: 后院告示
+      text: |
+        人参果树是本观的宝贝，请客人不要进后院。
+        果子掉在地上就会钻进土里，
+        所以只能用金击子打，用丝帕接。
+      english: |
+        The manfruit tree is this temple's treasure; guests please keep out of the back garden.
+        A fruit that falls to the ground burrows into the earth,
+        so it may only be knocked down with a golden rod and caught in a silk cloth.
+      question: 为什么人参果不能掉在地上？
+      choices: [它会钻进土里, 它会摔破, 地上有虫子, 它会变成石头]
+    - id: wuzhuang-master
+      giver: 明月
+      giver_english: Bright Moon, a temple boy
+      title: 留言
+      text: |
+        师父去上清天听讲了，要十天以后才回来。
+        这几天来的客人，请留下名字。
+        等师父回来，我们一定告诉他。
+      english: |
+        Master has gone to the Heaven of Supreme Purity to hear a lecture and won't be back for ten days.
+        Guests who come in the meantime, please leave your names.
+        When Master returns, we will be sure to tell him.
+      question: 师父什么时候回来？
+      choices: [十天以后, 明天, 三千年以后, 不知道]
+- id: baoxiang
+  name: 宝象国
+  english: Kingdom of Baoxiang
+  stage: 22
+  desc: "一个富有的国家，国王很想念十三年前不见了的三公主。"
+  desc_english: "A wealthy kingdom whose king still misses the third princess, lost thirteen years ago."
+  quests:
+    - id: baoxiang-princess
+      giver: 王宫的大臣
+      giver_english: A palace minister
+      title: 寻找公主
+      text: |
+        三公主十三年前在一个月夜赏花的时候不见了。
+        谁能带来公主的消息，国王一定重重地感谢他。
+      english: |
+        The third princess vanished thirteen years ago while admiring flowers on a moonlit night.
+        Whoever brings news of the princess will be richly rewarded by the king.
+      question: 三公主是什么时候不见的？
+      choices: [十三年前赏花的时候, 去年打仗的时候, 昨天晚上, 她出嫁的那天]
+    - id: baoxiang-road
+      giver: 驿站的老板
+      giver_english: The post-station keeper
+      title: 过路须知
+      text: |
+        从宝象国往西三百里，有一座碗子山。
+        山里有妖怪，请过路的客人结伴同行，
+        不要一个人走夜路。
+      english: |
+        Three hundred li west of Baoxiang stands Bowl Mountain.
+        There are demons in the mountain; travellers please go in company
+        and don't walk the road alone at night.
+      question: 这个告示提醒客人什么？
+      choices: [不要一个人走夜路, 不要去宝象国, 山里有好吃的果子, 晚上要早点儿睡]
+- id: wuji
+  name: 乌鸡国
+  english: Kingdom of Wuji
+  stage: 26
+  desc: "三年前这里大旱，一个道士求来了雨，后来成了国王最好的朋友。"
+  desc_english: "Three years ago a drought struck; a Taoist brought rain and became the king's closest friend."
+  quests:
+    - id: wuji-prince
+      giver: 太子
+      giver_english: The crown prince
+      title: 太子的信
+      text: |
+        母后说，这三年来父王对她冷冰冰的，好像变了一个人。
+        我不敢问父王，只好请客人帮我想想办法。
+      english: |
+        Mother says that for three years Father has been cold to her, as if he were a different man.
+        I dare not ask Father, so I must ask our guests to help me think of something.
+      question: 太子为什么担心？
+      choices: [父王好像变了一个人, 母后生病了, 国家没有粮食, 他要去很远的地方]
+    - id: wuji-well
+      giver: 花园的老园丁
+      giver_english: The old palace gardener
+      title: 井边的牌子
+      text: |
+        御花园里的这口井，已经三年没有人用了。
+        井很深，请小心，不要靠近。
+      english: |
+        No one has used this well in the royal garden for three years.
+        It is very deep; please be careful and keep away.
+      question: 关于这口井，哪句话是对的？
+      choices: [三年没有人用了, 井水很甜, 每天都有人打水, 井不深]
+- id: chechi
+  name: 车迟国
+  english: Kingdom of Cart Slow
+  stage: 33
+  desc: "这里的国王相信道士，和尚们被罚去拉车、搬砖。"
+  desc_english: "Here the king trusts Taoists, and the monks are made to haul carts and carry bricks."
+  quests:
+    - id: chechi-monks
+      giver: 老和尚
+      giver_english: An old monk
+      title: 求救信
+      text: |
+        我们五百个和尚，已经被罚做了二十年的苦工。
+        每天天不亮就开始干活，晚上很晚才能休息。
+        如果有人能救我们，我们愿意一辈子为他念经。
+      english: |
+        We five hundred monks have been sentenced to hard labour for twenty years.
+        Every day we start work before dawn and rest only late at night.
+        If anyone can save us, we will chant sutras for them all our lives.
+      question: 和尚们做了多少年苦工？
+      choices: [二十年, 五百年, 两年, 二十天]
+    - id: chechi-rain
+      giver: 城门的官员
+      giver_english: A gate official
+      title: 明天求雨
+      text: |
+        明天上午，国师要在城外求雨。
+        全城百姓都可以去看。请大家带好伞。
+      english: |
+        Tomorrow morning the State Preceptor will pray for rain outside the city.
+        Everyone in the city may come to watch. Please bring an umbrella.
+      question: 明天上午国师要做什么？
+      choices: [求雨, 搬砖, 出城打猎, 念经]
+- id: xiliang
+  name: 西梁女国
+  english: Women's Kingdom of Western Liang
+  stage: 45
+  desc: "一个只有女人的国家，国王是一位聪明又美丽的女王。"
+  desc_english: "A kingdom of women only, ruled by a wise and beautiful queen."
+  quests:
+    - id: xiliang-register
+      giver: 驿馆的女官
+      giver_english: An official at the guesthouse
+      title: 外国客人须知
+      text: |
+        本国没有男人。
+        外国来的客人，请先到驿馆登记，
+        再去王宫换通关文牒。
+      english: |
+        There are no men in this kingdom.
+        Visitors from abroad please register at the guesthouse first,
+        then go to the palace to have your travel papers stamped.
+      question: 外国客人先要做什么？
+      choices: [去驿馆登记, 去王宫见女王, 去河边喝水, 马上出城]
+    - id: xiliang-river
+      giver: 摆渡的老婆婆
+      giver_english: The old ferrywoman
+      title: 河边的牌子
+      text: |
+        这是子母河。
+        河水不能随便喝！喝了以后会有很奇怪的事。
+      english: |
+        This is the River of Mother and Child.
+        Don't drink the water carelessly! Very strange things happen to those who do.
+      question: 关于子母河的水，牌子上说什么？
+      choices: [不能随便喝, 很好喝, 可以治病, 只能晚上喝]
+- id: jisai
+  name: 祭赛国
+  english: Kingdom of Jisai
+  stage: 53
+  desc: "金光寺的宝塔以前天天发光。三年前，塔上的佛宝不见了。"
+  desc_english: "The pagoda of Golden Light Temple used to shine every day, until its Buddha relic vanished three years ago."
+  quests:
+    - id: jisai-monks
+      giver: 金光寺的和尚
+      giver_english: A monk of Golden Light Temple
+      title: 冤枉
+      text: |
+        宝塔上的佛宝被偷了以后，国王以为是我们偷的，把我们关了起来。
+        我们是冤枉的，求客人帮我们找到真正的小偷。
+      english: |
+        After the relic was stolen from the pagoda, the king thought we had taken it and locked us up.
+        We are innocent. We beg our guests to help us find the real thief.
+      question: 国王为什么把和尚关起来？
+      choices: [他以为和尚偷了佛宝, 和尚没有念经, 和尚打破了宝塔, 和尚想离开祭赛国]
+    - id: jisai-sweep
+      giver: 扫塔的老人
+      giver_english: The old pagoda sweeper
+      title: 扫塔须知
+      text: |
+        宝塔一共十三层。
+        晚上上塔扫塔的客人，请带好扫帚和灯。
+      english: |
+        The pagoda has thirteen storeys in all.
+        Guests sweeping the pagoda at night, please bring a broom and a lamp.
+      question: 晚上去扫塔要带什么？
+      choices: [扫帚和灯, 佛宝, 很多铜钱, 吃的东西]
+- id: zhuzi
+  name: 朱紫国
+  english: Kingdom of Zhuzi
+  stage: 55
+  desc: "国王病了三年，城门上贴满了请医生的皇榜。"
+  desc_english: "The king has been ill for three years; royal notices calling for doctors cover the city gates."
+  quests:
+    - id: zhuzi-doctor
+      giver: 皇榜
+      giver_english: A royal notice
+      title: 求医
+      text: |
+        国王得了重病，吃了很多药也没有好。
+        天下的医生，谁能治好国王的病，
+        国王愿意把一半的国家送给他。
+      english: |
+        The king is gravely ill, and much medicine has not cured him.
+        To any doctor in the world who can cure the king,
+        the king will give half his kingdom.
+      question: 谁能治好国王的病，会得到什么？
+      choices: [一半的国家, 三十个铜钱, 一匹白马, 一本医书]
+    - id: zhuzi-water
+      giver: 药铺的伙计
+      giver_english: An apothecary's assistant
+      title: 药铺告示
+      text: |
+        本店的药很全，可是没有无根水。
+        要用无根水的客人，请等下雨的时候自己去接。
+      english: |
+        This shop has every medicine, but no rootless water.
+        Customers who need rootless water, please collect it yourselves when it rains.
+      question: 无根水要怎么得到？
+      choices: [下雨的时候自己接, 在药铺买, 去河边打, 跟国王要]
+- id: biqiu
+  name: 比丘国
+  english: Kingdom of Biqiu
+  stage: 56
+  desc: "城里家家户户门口都放着一个鹅笼，笼子里是小孩子。"
+  desc_english: "Every house in the city has a goose cage by its door, and a child inside it."
+  quests:
+    - id: biqiu-children
+      giver: 一位老人
+      giver_english: An old man
+      title: 救救孩子
+      text: |
+        国王听了国丈的话，要用一千一百一十一个小孩子的心做药。
+        我们的孩子都被关在笼子里。求求你们，救救他们！
+      english: |
+        On the word of his father-in-law, the king wants to make medicine from the hearts of 1,111 children.
+        Our children are all shut in cages. We beg you, save them!
+      question: 孩子们为什么被关在笼子里？
+      choices: [国王要用他们的心做药, 他们太调皮了, 外面在下大雨, 他们生病了]
+    - id: biqiu-curfew
+      giver: 城门的士兵
+      giver_english: A gate soldier
+      title: 晚上不能出门
+      text: |
+        从今天起，城里的人晚上不能出门。
+        有事的人，请白天去办。
+      english: |
+        From today on, no one in the city may go out at night.
+        Anyone with business, please see to it in the daytime.
+      question: 从今天起，晚上可以出门吗？
+      choices: [不可以, 可以, 只有孩子可以, 带灯就可以]
+- id: miefa
+  name: 灭法国
+  english: Dharma-Destroying Kingdom
+  stage: 70
+  desc: "国王发誓要杀一万个和尚，和尚都不敢进城。"
+  desc_english: "The king has sworn to kill ten thousand monks; no monk dares enter the city."
+  quests:
+    - id: miefa-inn
+      giver: 客店的老板娘
+      giver_english: The innkeeper
+      title: 客店广告
+      text: |
+        本店客房很干净，有大床，也有大柜子。
+        晚上不想被人看见的客人，可以睡在柜子里。
+      english: |
+        Our guest rooms are very clean, with big beds and big chests too.
+        Guests who'd rather not be seen at night may sleep in a chest.
+      question: 不想被人看见的客人可以睡在哪里？
+      choices: [柜子里, 大床上, 门外, 马棚里]
+    - id: miefa-hair
+      giver: 王宫的太监
+      giver_english: A palace eunuch
+      title: 怪事
+      text: |
+        昨天晚上，国王、王后和大臣们睡了一觉，
+        醒来以后，头发都没有了！
+        大家都不知道是谁做的。
+      english: |
+        Last night the king, the queen and the ministers went to sleep,
+        and when they woke, all their hair was gone!
+        No one knows who did it.
+      question: 昨天晚上发生了什么事？
+      choices: [大家的头发都没有了, 王宫着火了, 国王不见了, 和尚进城了]
+- id: tianzhu
+  name: 天竺国
+  english: Kingdom of Tianzhu
+  stage: 76
+  desc: "西天路上的大国，离灵山已经不远了。"
+  desc_english: "A great kingdom on the western road, not far now from Vulture Peak."
+  quests:
+    - id: tianzhu-ball
+      giver: 王宫的告示
+      giver_english: A palace notice
+      title: 抛绣球
+      text: |
+        公主要在十字街头抛绣球招亲。
+        被绣球打中的人，就是公主的丈夫。
+      english: |
+        The princess will throw an embroidered ball at the crossroads to choose a husband.
+        Whoever the ball strikes will be the princess's husband.
+      question: 谁会成为公主的丈夫？
+      choices: [被绣球打中的人, 最有钱的人, 国王选的人, 跑得最快的人]
+    - id: tianzhu-temple
+      giver: 布金寺的老和尚
+      giver_english: The old abbot of Bujin Temple
+      title: 夜里的哭声
+      text: |
+        一年前的夜里，我在后院听见一个女孩子在哭。
+        她说自己是天竺国的公主，被一阵风吹到了这里。
+      english: |
+        One night a year ago, I heard a girl crying in the back courtyard.
+        She said she was the princess of Tianzhu, blown here by a gust of wind.
+      question: 那个女孩子说自己是谁？
+      choices: [天竺国的公主, 寺里的和尚, 卖花的姑娘, 月亮上的仙女]
+- id: lingshan
+  name: 灵山
+  english: Vulture Peak
+  stage: 79
+  desc: "佛祖住的地方。经历了八十一难，终于到了。"
+  desc_english: "Where the Buddha dwells. After eighty-one ordeals, you have arrived at last."
+  quests:
+    - id: lingshan-ferry
+      giver: 接引佛祖
+      giver_english: The Buddha who receives pilgrims
+      title: 凌云渡
+      text: |
+        这里没有桥，只有一条没有底的船。
+        上了船，旧的自己就留在水里了。
+      english: |
+        There is no bridge here, only a boat with no bottom.
+        Board it, and your old self stays behind in the water.
+      question: 上了船以后会怎么样？
+      choices: [旧的自己留在水里, 船会沉下去, 要付很多钱, 会回到长安]
+    - id: lingshan-library
+      giver: 藏经阁的守门人
+      giver_english: The keeper of the sutra library
+      title: 取经须知
+      text: |
+        取经的人，请先在门口等候。
+        经书很多，请耐心等待阿傩、伽叶两位尊者。
+      english: |
+        Pilgrims seeking scriptures, please wait at the door first.
+        There are many scriptures; please wait patiently for the two venerables, Ananda and Kasyapa.
+      question: 取经的人先要做什么？
+      choices: [在门口等候, 马上进去, 给尊者写信, 回大唐]

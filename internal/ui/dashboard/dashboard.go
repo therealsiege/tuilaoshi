@@ -82,6 +82,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, ui.SwitchTo(ui.ViewCollection)
 		case key.Matches(msg, m.keys.Party):
 			return m, ui.SwitchTo(ui.ViewParty)
+		case key.Matches(msg, m.keys.World):
+			return m, ui.SwitchTo(ui.ViewWorld)
 		case key.Matches(msg, m.keys.Reading):
 			return m, ui.SwitchTo(ui.ViewReading)
 		case key.Matches(msg, m.keys.Assess):
