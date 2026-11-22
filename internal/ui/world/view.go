@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -13,7 +12,11 @@ func (m Model) View() string {
 	var b strings.Builder
 	switch m.screen {
 	case screenQuest:
-		b.WriteString(m.questView())
+		if m.Typing() {
+			b.WriteString(m.writingView())
+		} else {
+			b.WriteString(m.questView())
+		}
 	case screenTown:
 		b.WriteString(m.townView())
 	default:
@@ -85,7 +88,10 @@ func (m Model) townView() string {
 	b.WriteString(ui.MutedStyle.Render("  "+t.DescEnglish) + "\n\n")
 	b.WriteString(ui.SubtitleStyle.Render("  告示栏 Notice board") + "\n")
 	for i, q := range t.Quests {
-		status := ui.WarningStyle.Render(fmt.Sprintf("+%d 铜钱", journey.QuestReward))
+		status := ui.WarningStyle.Render(fmt.Sprintf("read · +%d 铜钱", q.Pay(1)))
+		if q.Writing() {
+			status = ui.WarningStyle.Render(fmt.Sprintf("write · up to +%d 铜钱", q.Pay(2)))
+		}
 		switch m.states[q.ID] {
 		case wiki.QuestDone:
 			status = ui.SuccessStyle.Render("✓ done")
@@ -128,7 +134,7 @@ func (m Model) questView() string {
 	}
 	b.WriteString("\n")
 	if m.answered == m.right {
-		b.WriteString(ui.SuccessStyle.Render(fmt.Sprintf("  Right! %s pays you %d 铜钱.", q.Giver, journey.QuestReward)) + "\n")
+		b.WriteString(ui.SuccessStyle.Render(fmt.Sprintf("  Right! %s pays you %d 铜钱.", q.Giver, q.Pay(1))) + "\n")
 	} else {
 		b.WriteString(ui.WarningStyle.Render("  Not quite. Come back tomorrow and read it again.") + "\n")
 	}

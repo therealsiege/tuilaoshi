@@ -11,10 +11,13 @@ type Town struct {
 	Quests      []SideQuest `yaml:"quests"`
 }
 
-// SideQuest is a townsperson's request: read their notice or letter and answer
-// a question about it. Choices are written right answer first.
+// SideQuest is a townsperson's request: read their notice or letter and
+// answer a question about it (choices written right answer first), or,
+// for kind "write", write what they ask for in Chinese, graded by Claude
+// against the criteria.
 type SideQuest struct {
 	ID           string   `yaml:"id"`
+	Kind         string   `yaml:"kind,omitempty"` // "" (read) or "write"
 	Giver        string   `yaml:"giver"`
 	GiverEnglish string   `yaml:"giver_english"`
 	Title        string   `yaml:"title"`
@@ -22,6 +25,21 @@ type SideQuest struct {
 	English      string   `yaml:"english"`
 	Question     string   `yaml:"question"`
 	Choices      []string `yaml:"choices"`
+	Criteria     string   `yaml:"criteria,omitempty"` // what a written answer must do
+}
+
+// Writing reports whether the quest asks for writing rather than an answer.
+func (q SideQuest) Writing() bool { return q.Kind == "write" }
+
+// writePay is the copper a written request pays per grade point (1-2).
+const writePay = 20
+
+// Pay is what the quest pays for an answer graded grade (reading: 1 if right).
+func (q SideQuest) Pay(grade int) int {
+	if q.Writing() {
+		return writePay * grade
+	}
+	return QuestReward * min(grade, 1)
 }
 
 // QuestReward is the copper a quest pays, once.

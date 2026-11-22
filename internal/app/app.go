@@ -113,7 +113,7 @@ func New(wikiDir string) (Model, error) {
 		shrine:        shrine.New(store),
 		cards:         collection.New(store),
 		party:         party.New(store, claudeClient, dict),
-		world:         world.New(store),
+		world:         world.New(store, claudeClient, dict),
 		battle:        rpgview.New(store, ttsClient, dict),
 		reader:        reader.New(store),
 		assess:        assessment.New(store),
@@ -225,7 +225,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		// Help toggle from anywhere
-		typing := m.currentView == ui.ViewChat || (m.currentView == ui.ViewParty && m.party.Busy())
+		typing := m.currentView == ui.ViewChat || (m.currentView == ui.ViewParty && m.party.Busy()) ||
+			(m.currentView == ui.ViewWorld && m.world.Typing())
 		if key.Matches(msg, m.keys.Help) && !typing {
 			m.showHelp = !m.showHelp
 			return m, nil

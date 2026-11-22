@@ -14,8 +14,10 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/claude"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
+	"github.com/therealsiege/tuilaoshi/internal/ui/input"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
@@ -44,14 +46,33 @@ type Model struct {
 	answered int // -1 until answered
 	now      func() time.Time
 
+	// Writing requests: the answer box, and Claude's grade (see write.go).
+	grader   Grader
+	input    input.Model
+	grading  bool
+	feedback string
+
 	note          string
 	width, height int
 	loadErr       error
 }
 
-// New creates a world map model.
-func New(store *wiki.Store) Model {
-	return Model{store: store, gkeys: ui.DefaultGlobalKeys(), towns: journey.Towns(), now: time.Now}
+// New creates a world map model; with no Claude client, writing requests
+// can be read but not graded.
+func New(store *wiki.Store, client *claude.Client, dict *input.Dict) Model {
+	in := input.NewWithDict(dict)
+	in.SetPlaceholder("write in Chinese: type pinyin, then pick characters")
+	in.SetCharLimit(200)
+	m := Model{store: store, gkeys: ui.DefaultGlobalKeys(), towns: journey.Towns(), now: time.Now, input: in}
+	if client != nil {
+		m.grader = client.GradeWriting
+	}
+	return m
+}
+
+// Typing reports whether a writing request has the keyboard.
+func (m Model) Typing() bool {
+	return m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing()
 }
 
 func (m Model) Init() tea.Cmd { return nil }
@@ -89,6 +110,9 @@ func (m Model) Refresh() Model {
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	if g, ok := msg.(gradeMsg); ok {
+		return m.onGrade(g), nil
+	}
 	k, ok := msg.(tea.KeyMsg)
 	if !ok {
 		return m, nil
@@ -96,9 +120,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	back := key.Matches(k, m.gkeys.Back)
 	switch m.screen {
 	case screenQuest:
-		if back {
+		if back && !m.input.Composing() {
 			m.screen, m.note = screenTown, ""
 			return m.Refresh(), nil
+		}
+		if m.Typing() {
+			return m.updateWriting(k)
 		}
 		return m.answer(k), nil
 	case screenTown:
@@ -110,7 +137,11 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case key.Matches(k, m.gkeys.Down):
 			m.quest = min(m.quest+1, len(m.towns[m.town].Quests)-1)
 		case key.Matches(k, m.gkeys.Enter):
-			return m.openQuest(), nil
+			m = m.openQuest()
+			if m.Typing() {
+				return m, m.input.Focus()
+			}
+			return m, nil
 		case k.String() == "g":
 			return m, ui.SwitchTo(ui.ViewShrine)
 		}
@@ -145,6 +176,11 @@ func (m Model) openQuest() Model {
 		m.note = "Not today: read it again tomorrow."
 		return m
 	}
+	m.screen, m.answered, m.note, m.feedback = screenQuest, -1, "", ""
+	if q.Writing() {
+		m.input.Reset()
+		return m
+	}
 	rng := rand.New(rand.NewSource(m.now().UnixNano()))
 	order := rng.Perm(len(q.Choices))
 	m.choices = make([]string, len(q.Choices))
@@ -154,7 +190,6 @@ func (m Model) openQuest() Model {
 			m.right = i
 		}
 	}
-	m.screen, m.answered, m.note = screenQuest, -1, ""
 	return m
 }
 
@@ -175,7 +210,7 @@ func (m Model) answer(k tea.KeyMsg) Model {
 	q := m.towns[m.town].Quests[m.quest]
 	var err error
 	if m.answered == m.right {
-		err = m.store.FinishQuest(q.ID, wiki.Wallet{Tongqian: journey.QuestReward})
+		err = m.store.FinishQuest(q.ID, wiki.Wallet{Tongqian: q.Pay(1)})
 	} else {
 		err = m.store.FailQuest(q.ID, m.now())
 	}

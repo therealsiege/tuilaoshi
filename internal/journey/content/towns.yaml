@@ -4,6 +4,8 @@
 # original, written for TuiLaoShi around the novel's places. Read quests
 # ask one question about the text; the right choice is written first and
 # shuffled on screen. A wrong answer locks the quest until the next day.
+# Write quests (kind: write) ask for a sentence or two in Chinese, graded
+# by Claude against the criteria; they can be tried again until they pass.
 - id: changan
   name: 长安
   english: Chang'an
@@ -39,6 +41,14 @@
         Without papers, you may not leave.
       question: 没有通关文牒会怎么样？
       choices: [不能出城, 要多交钱, 只能晚上出城, 可以跟士兵一起出城]
+    - id: changan-sign
+      kind: write
+      giver: 卖馒头的老王
+      giver_english: "Old Wang the bun seller"
+      title: 写招牌
+      text: 请帮我写一个招牌，告诉客人本店的馒头又大又便宜。
+      english: "Please write me a shop sign telling customers our buns are big and cheap."
+      criteria: "A short shop sign saying the buns are big and cheap."
 - id: guanyin-temple
   name: 观音禅院
   english: Guanyin Chan Temple
@@ -74,6 +84,14 @@
         Please forgive us.
       question: 今天为什么没有水果？
       choices: [下雨了，山路不好走, 水果太贵了, 和尚不吃水果, 水果都被吃完了]
+    - id: temple-note
+      kind: write
+      giver: 小和尚
+      giver_english: "A young monk"
+      title: 给师父的字条
+      text: 请给师父写一句话，告诉他你明天早上来给他读经。
+      english: "Please write Master a line telling him you'll come tomorrow morning to read sutras to him."
+      criteria: "One sentence telling the master the learner will come tomorrow morning to read sutras."
 - id: gao-village
   name: 高老庄
   english: Gao Village
@@ -107,6 +125,14 @@
         Whoever's pig eats someone else's wheat must pay back a dou of rice.
       question: 如果你家的猪吃了别人的麦子，要怎么办？
       choices: [赔一斗米, 把猪送给别人, 给别人种麦子, 不用管]
+    - id: gao-note
+      kind: write
+      giver: 高太公
+      giver_english: "Old Master Gao"
+      title: 给女儿的字条
+      text: 请给我女儿写一张字条，告诉她不要担心，你们会帮忙。
+      english: "Please write my daughter a note telling her not to worry, you will help."
+      criteria: "A note to the daughter: don't worry, we will help."
 - id: wuzhuang
   name: 五庄观
   english: Wuzhuang Temple
@@ -142,6 +168,14 @@
         When Master returns, we will be sure to tell him.
       question: 师父什么时候回来？
       choices: [十天以后, 明天, 三千年以后, 不知道]
+    - id: wuzhuang-name
+      kind: write
+      giver: 明月
+      giver_english: "Bright Moon, a temple boy"
+      title: 留下名字
+      text: 请留下你的名字，再写一句你想对师父说的话。
+      english: "Please leave your name, and write one sentence you'd like to say to Master."
+      criteria: "The learner's name and one sentence addressed to the temple's master."
 - id: baoxiang
   name: 宝象国
   english: Kingdom of Baoxiang
@@ -175,6 +209,14 @@
         and don't walk the road alone at night.
       question: 这个告示提醒客人什么？
       choices: [不要一个人走夜路, 不要去宝象国, 山里有好吃的果子, 晚上要早点儿睡]
+    - id: baoxiang-news
+      kind: write
+      giver: 王宫的大臣
+      giver_english: "A palace minister"
+      title: 公主的消息
+      text: 请写一句话，说说你在路上听到的三公主的消息。
+      english: "Please write a sentence about news of the third princess you heard on the road."
+      criteria: "One sentence reporting news of the princess, for example that she was seen at Bowl Mountain."
 - id: wuji
   name: 乌鸡国
   english: Kingdom of Wuji
@@ -206,6 +248,14 @@
         It is very deep; please be careful and keep away.
       question: 关于这口井，哪句话是对的？
       choices: [三年没有人用了, 井水很甜, 每天都有人打水, 井不深]
+    - id: wuji-comfort
+      kind: write
+      giver: 太子
+      giver_english: "The crown prince"
+      title: 安慰母后
+      text: 请帮我给母后写一句安慰的话。
+      english: "Please help me write a line of comfort to my mother the queen."
+      criteria: "A sentence comforting the queen."
 - id: chechi
   name: 车迟国
   english: Kingdom of Cart Slow
@@ -239,6 +289,14 @@
         Everyone in the city may come to watch. Please bring an umbrella.
       question: 明天上午国师要做什么？
       choices: [求雨, 搬砖, 出城打猎, 念经]
+    - id: chechi-hope
+      kind: write
+      giver: 老和尚
+      giver_english: "An old monk"
+      title: 鼓励的话
+      text: 请写一句鼓励我们的话。
+      english: "Please write a line of encouragement for us."
+      criteria: "A sentence encouraging the enslaved monks."
 - id: xiliang
   name: 西梁女国
   english: Women's Kingdom of Western Liang
@@ -272,6 +330,14 @@
         Don't drink the water carelessly! Very strange things happen to those who do.
       question: 关于子母河的水，牌子上说什么？
       choices: [不能随便喝, 很好喝, 可以治病, 只能晚上喝]
+    - id: xiliang-papers
+      kind: write
+      giver: 驿馆的女官
+      giver_english: "An official at the guesthouse"
+      title: 登记
+      text: 请写一句话，说明你从哪里来，要到哪里去。
+      english: "Please write a sentence saying where you come from and where you are going."
+      criteria: "One sentence saying where the learner comes from and where they are going."
 - id: jisai
   name: 祭赛国
   english: Kingdom of Jisai
@@ -303,6 +369,14 @@
         Guests sweeping the pagoda at night, please bring a broom and a lamp.
       question: 晚上去扫塔要带什么？
       choices: [扫帚和灯, 佛宝, 很多铜钱, 吃的东西]
+    - id: jisai-thief
+      kind: write
+      giver: 金光寺的和尚
+      giver_english: "A monk of Golden Light Temple"
+      title: 告诉国王
+      text: 请写一句话，告诉国王佛宝是谁偷的。
+      english: "Please write a sentence telling the king who stole the relic."
+      criteria: "A sentence telling the king who stole the relic (the Nine-Headed Bug and the dragons of Green Wave Pool), or at least that the monks did not."
 - id: zhuzi
   name: 朱紫国
   english: Kingdom of Zhuzi
@@ -336,6 +410,14 @@
         Customers who need rootless water, please collect it yourselves when it rains.
       question: 无根水要怎么得到？
       choices: [下雨的时候自己接, 在药铺买, 去河边打, 跟国王要]
+    - id: zhuzi-rain
+      kind: write
+      giver: 药铺的伙计
+      giver_english: "An apothecary's assistant"
+      title: 写说明
+      text: 请写一句话，告诉客人下雨的时候怎么接无根水。
+      english: "Please write a sentence telling customers how to collect rootless water when it rains."
+      criteria: "A sentence explaining how to catch rainwater before it touches the ground (e.g. with a bowl)."
 - id: biqiu
   name: 比丘国
   english: Kingdom of Biqiu
@@ -367,6 +449,14 @@
         Anyone with business, please see to it in the daytime.
       question: 从今天起，晚上可以出门吗？
       choices: [不可以, 可以, 只有孩子可以, 带灯就可以]
+    - id: biqiu-comfort
+      kind: write
+      giver: 一位老人
+      giver_english: "An old man"
+      title: 安慰孩子
+      text: 请写一句话，安慰笼子里的孩子们。
+      english: "Please write a sentence to comfort the children in the cages."
+      criteria: "A sentence comforting the children."
 - id: miefa
   name: 灭法国
   english: Dharma-Destroying Kingdom
@@ -400,6 +490,14 @@
         No one knows who did it.
       question: 昨天晚上发生了什么事？
       choices: [大家的头发都没有了, 王宫着火了, 国王不见了, 和尚进城了]
+    - id: miefa-room
+      kind: write
+      giver: 客店的老板娘
+      giver_english: "The innkeeper"
+      title: 订房间
+      text: 请写一句话，说你今天晚上想住什么样的房间。
+      english: "Please write a sentence saying what kind of room you want tonight."
+      criteria: "A sentence requesting a room for tonight, with some detail of what kind."
 - id: tianzhu
   name: 天竺国
   english: Kingdom of Tianzhu
@@ -431,6 +529,14 @@
         She said she was the princess of Tianzhu, blown here by a gust of wind.
       question: 那个女孩子说自己是谁？
       choices: [天竺国的公主, 寺里的和尚, 卖花的姑娘, 月亮上的仙女]
+    - id: tianzhu-king
+      kind: write
+      giver: 布金寺的老和尚
+      giver_english: "The old abbot of Bujin Temple"
+      title: 给国王的信
+      text: 请写一句话，告诉国王真正的公主在布金寺。
+      english: "Please write a sentence telling the king the real princess is at Bujin Temple."
+      criteria: "A sentence telling the king the real princess is at Bujin Temple."
 - id: lingshan
   name: 灵山
   english: Vulture Peak
@@ -462,3 +568,11 @@
         There are many scriptures; please wait patiently for the two venerables, Ananda and Kasyapa.
       question: 取经的人先要做什么？
       choices: [在门口等候, 马上进去, 给尊者写信, 回大唐]
+    - id: lingshan-lesson
+      kind: write
+      giver: 藏经阁的守门人
+      giver_english: "The keeper of the sutra library"
+      title: 这一路
+      text: 请写一句话，说说这一路上你学到了什么。
+      english: "Please write a sentence about what you learned on this road."
+      criteria: "A sentence reflecting on what the learner learned on the journey."

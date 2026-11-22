@@ -3,6 +3,7 @@ package claude
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/anthropics/anthropic-sdk-go"
@@ -127,6 +128,46 @@ func (c *Client) ChatAs(ctx context.Context, system string, history []ChatMessag
 	}
 
 	return extractText(msg), nil
+}
+
+const writingSystemPrompt = `You grade a short piece of Chinese writing by a learner reactivating rusty university Mandarin (around HSK3-4). Be fair and encouraging, not picky about style.
+
+Respond in this exact format:
+SCORE: 0-2 (2 = does the task in understandable Chinese; 1 = mostly does it, or has errors that obscure meaning; 0 = doesn't do the task, or isn't Chinese)
+FEEDBACK: one or two short sentences in English, with a corrected or more natural version in Chinese if there were mistakes.`
+
+// GradeWriting grades a learner's Chinese for a task against criteria,
+// returning a 0-2 score and feedback.
+func (c *Client) GradeWriting(ctx context.Context, task, criteria, answer string) (int, string, error) {
+	prompt := fmt.Sprintf("Task given to the learner: %s\nWhat the answer must do: %s\nLearner's answer: %s", task, criteria, answer)
+	msg, err := c.client.Messages.New(ctx, anthropic.MessageNewParams{
+		Model:     drillModel,
+		MaxTokens: 300,
+		System:    []anthropic.TextBlockParam{{Text: writingSystemPrompt}},
+		Messages:  []anthropic.MessageParam{anthropic.NewUserMessage(anthropic.NewTextBlock(prompt))},
+	})
+	if err != nil {
+		return 0, "", fmt.Errorf("claude writing grade: %w", err)
+	}
+	score, feedback := ParseWritingGrade(extractText(msg))
+	return score, feedback, nil
+}
+
+// ParseWritingGrade reads the SCORE and FEEDBACK lines of a writing grade.
+func ParseWritingGrade(response string) (score int, feedback string) {
+	for _, line := range strings.Split(response, "\n") {
+		line = strings.TrimSpace(line)
+		if v, ok := strings.CutPrefix(line, "SCORE:"); ok {
+			if n, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && n >= 0 && n <= 2 {
+				score = n
+			}
+		} else if v, ok := strings.CutPrefix(line, "FEEDBACK:"); ok {
+			feedback = strings.TrimSpace(v)
+		} else if feedback != "" && line != "" {
+			feedback += " " + line
+		}
+	}
+	return score, feedback
 }
 
 // Explain requests a grammar or usage explanation.

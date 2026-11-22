@@ -1,6 +1,7 @@
 package world
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -23,7 +24,7 @@ func worldAt(t *testing.T, cleared int) Model {
 		b.WriteString("    " + itoa(i) + ": \"2026-11-01\"\n")
 	}
 	store := uitest.Wiki(t, map[string]string{"journey.yaml": b.String()})
-	m := New(store)
+	m := New(store, nil, nil)
 	m.now = func() time.Time { return day }
 	return m.SetSize(100, 50).Refresh()
 }
@@ -77,5 +78,59 @@ func TestTownsAheadAreClosed(t *testing.T) {
 	m, _ = m.Update(enter)
 	if m.screen != screenMap || !strings.Contains(m.note, "tribulation 79") {
 		t.Errorf("visited a town not yet reached: screen %d, note %q", m.screen, m.note)
+	}
+}
+
+func TestWritingRequestPaysWhenItPasses(t *testing.T) {
+	m := worldAt(t, 11)
+	m.town = 0
+	scores := []int{0, 2}
+	m.grader = func(_ context.Context, task, criteria, answer string) (int, string, error) {
+		if !strings.Contains(task, "招牌") || criteria == "" {
+			t.Errorf("grader got task %q, criteria %q", task, criteria)
+		}
+		s := scores[0]
+		scores = scores[1:]
+		return s, "反馈 feedback", nil
+	}
+	m, _ = m.Update(enter)
+	for i, q := range m.towns[0].Quests {
+		if q.Writing() {
+			m.quest = i
+		}
+	}
+	m, _ = m.Update(enter)
+	if !m.Typing() {
+		t.Fatal("the writing request didn't open for typing")
+	}
+	m, _ = m.Update(press("q")) // typing q must not quit or leave
+	m.input.Reset()
+	for _, r := range "dabianyi" {
+		m, _ = m.Update(press(string(r)))
+	}
+	send := func() {
+		t.Helper()
+		var cmd tea.Cmd
+		m, cmd = m.Update(enter)
+		for m.input.Composing() && cmd == nil { // pick the first candidate, then send
+			m, cmd = m.Update(enter)
+		}
+		if cmd == nil {
+			t.Fatal("nothing sent")
+		}
+		m, _ = m.Update(cmd())
+	}
+	send()
+	if m.answered > 0 || !strings.Contains(m.View(), "Not yet") {
+		t.Fatalf("a failing answer passed:\n%s", m.View())
+	}
+	send()
+	w, err := m.store.Wallet()
+	if err != nil || w.Tongqian != 40 || !strings.Contains(m.View(), "pays you 40") {
+		t.Fatalf("a passing answer: purse %+v %v\n%s", w, err, m.View())
+	}
+	m, _ = m.Update(enter)
+	if m.screen != screenTown {
+		t.Errorf("enter after passing should return to the board, at %d", m.screen)
 	}
 }
