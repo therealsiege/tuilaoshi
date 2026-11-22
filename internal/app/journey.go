@@ -20,5 +20,13 @@ func (m Model) startJourney() (tea.Model, tea.Cmd) {
 			}
 		}
 	}
-	return m, ui.SwitchTo(ui.ViewDashboard)
+	m.world = m.world.Refresh()
+	return m, ui.SwitchTo(ui.ViewMap)
+}
+
+// enterTown opens a town the pilgrim walked into.
+func (m Model) enterTown(id string) (tea.Model, tea.Cmd) {
+	m.currentView = ui.ViewWorld
+	m.world = m.world.Refresh().OpenTown(id)
+	return m, nil
 }

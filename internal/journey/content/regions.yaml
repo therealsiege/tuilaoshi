@@ -1,0 +1,28 @@
+# The road west as regions to walk (see regionmap.go): each covers stages
+# from..to, drawn as a tile map with its towns on the path, a marker for
+# each tribulation, and the last one as the demon's lair. Terrain picks the
+# map's look: mountain, forest, river, desert, fire, palace, cave.
+- {id: lingshan-origins, name: 灵山与江州, english: "Vulture Peak to Jiangzhou", from: 1, to: 4, terrain: river}
+- {id: changan, name: 长安城外, english: "Beyond Chang'an", from: 5, to: 7, terrain: forest}
+- {id: liangjie, name: 两界山, english: "Mountain of Two Frontiers", from: 8, to: 10, terrain: mountain}
+- {id: heifeng, name: 黑风山, english: "Black Wind Mountain", from: 11, to: 12, terrain: forest}
+- {id: huangfeng, name: 黄风岭, english: "Yellow Wind Ridge", from: 13, to: 19, terrain: desert}
+- {id: baihu, name: 白虎岭, english: "White Tiger Ridge", from: 20, to: 23, terrain: mountain}
+- {id: pingding, name: 平顶山, english: "Flat-Top Mountain", from: 24, to: 27, terrain: mountain}
+- {id: haoshan, name: 号山, english: "Mount Hao", from: 28, to: 31, terrain: fire}
+- {id: heishui, name: 黑水河, english: "Black River", from: 32, to: 34, terrain: river}
+- {id: chechi, name: 车迟国, english: "Kingdom of Cart Slow", from: 35, to: 38, terrain: palace}
+- {id: tongtian, name: 通天河, english: "River of Heaven", from: 39, to: 41, terrain: river}
+- {id: jindou, name: 金兜山, english: "Golden Helmet Mountain", from: 42, to: 43, terrain: cave}
+- {id: xiliang, name: 西梁女国, english: "Women's Kingdom", from: 44, to: 46, terrain: palace}
+- {id: dudi, name: 毒敌山, english: "Poison Foe Mountain", from: 47, to: 49, terrain: cave}
+- {id: huoyan, name: 火焰山, english: "Flaming Mountain", from: 50, to: 52, terrain: fire}
+- {id: jisai, name: 祭赛国, english: "Kingdom of Jisai", from: 53, to: 55, terrain: palace}
+- {id: biqiu, name: 比丘国与荆棘岭, english: "Biqiu and the Thorn Ridge", from: 56, to: 58, terrain: forest}
+- {id: pansi, name: 盘丝洞, english: "Silk Web Cave", from: 59, to: 60, terrain: cave}
+- {id: shituo, name: 狮驼岭, english: "Lion-Camel Ridge", from: 61, to: 65, terrain: mountain}
+- {id: xiaoleiyin, name: 小雷音寺, english: "Lesser Thunderclap Temple", from: 66, to: 68, terrain: forest}
+- {id: wudi, name: 无底洞与灭法国, english: "Bottomless Cave and Miefa", from: 69, to: 72, terrain: cave}
+- {id: yuhua, name: 玉华州, english: "Jade Flower Prefecture", from: 73, to: 75, terrain: palace}
+- {id: tianzhu, name: 天竺国, english: "Kingdom of Tianzhu", from: 76, to: 78, terrain: desert}
+- {id: lingshan, name: 灵山, english: "Vulture Peak", from: 79, to: 81, terrain: mountain}

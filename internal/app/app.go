@@ -23,6 +23,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/ui/radicals"
 	"github.com/therealsiege/tuilaoshi/internal/ui/reader"
 	"github.com/therealsiege/tuilaoshi/internal/ui/review"
+	"github.com/therealsiege/tuilaoshi/internal/ui/roam"
 	rpgview "github.com/therealsiege/tuilaoshi/internal/ui/rpg"
 	"github.com/therealsiege/tuilaoshi/internal/ui/shrine"
 	"github.com/therealsiege/tuilaoshi/internal/ui/stats"
@@ -56,6 +57,7 @@ type Model struct {
 	party     party.Model
 	world     world.Model
 	title     title.Model
+	roam      roam.Model
 	battle    rpgview.Model
 	reader    reader.Model
 	assess    assessment.Model
@@ -105,6 +107,7 @@ func New(wikiDir string) (Model, error) {
 		keys:          ui.DefaultGlobalKeys(),
 		currentView:   ui.ViewTitle,
 		title:         title.New(store, dict).Refresh(),
+		roam:          roam.New(store),
 		dashboard:     dashboard.New(store, ttsClient),
 		drill:         drill.New(store, claudeClient, ttsClient, dict),
 		browser:       browser.New(store),
@@ -149,6 +152,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.party = m.party.SetSize(msg.Width, msg.Height)
 		m.world = m.world.SetSize(msg.Width, msg.Height)
 		m.title = m.title.SetSize(msg.Width, msg.Height)
+		m.roam = m.roam.SetSize(msg.Width, msg.Height)
 		m.battle = m.battle.SetSize(msg.Width, msg.Height)
 		m.reader = m.reader.SetSize(msg.Width, msg.Height)
 		m.assess = m.assess.SetSize(msg.Width, msg.Height)
@@ -156,6 +160,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case title.StartedMsg:
 		return m.startJourney()
+	case roam.EnterTownMsg:
+		return m.enterTown(msg.Town)
+	case roam.FightMsg:
+		return m, ui.SwitchTo(ui.ViewBattle)
 
 	case ui.SwitchViewMsg:
 		m.currentView = msg.Target
@@ -207,6 +215,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, m.world.Init()
 		case ui.ViewTitle:
 			m.title = m.title.Refresh()
+			return m, nil
+		case ui.ViewMap:
+			m.roam = m.roam.Refresh()
+			m.checkCelebrations()
 			return m, nil
 		case ui.ViewBattle:
 			m.battle = m.battle.Refresh()
@@ -261,11 +273,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			(m.currentView == ui.ViewBrowser && m.browser.Searching()) ||
 			(m.currentView == ui.ViewParty && m.party.Busy()) ||
 			(m.currentView == ui.ViewWorld && m.world.Busy()) ||
-			m.currentView == ui.ViewTitle
+			m.currentView == ui.ViewTitle || m.currentView == ui.ViewMap
 		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard && !readingOpen {
 			if !m.isInputComposing() {
 				if m.currentView == ui.ViewBattle {
+					// Fleeing a battle returns to the road it was fought on.
 					m.battle = m.battle.Leave()
+					return m, ui.SwitchTo(ui.ViewMap)
 				}
 				m.currentView = ui.ViewDashboard
 				m.dashboard = m.dashboard.Refresh()
@@ -303,6 +317,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.world, cmd = m.world.Update(msg)
 	case ui.ViewTitle:
 		m.title, cmd = m.title.Update(msg)
+	case ui.ViewMap:
+		m.roam, cmd = m.roam.Update(msg)
 	case ui.ViewBattle:
 		m.battle, cmd = m.battle.Update(msg)
 	case ui.ViewReading:
@@ -343,6 +359,8 @@ func (m Model) View() string {
 		content = m.world.View()
 	case ui.ViewTitle:
 		content = m.title.View()
+	case ui.ViewMap:
+		content = m.roam.View()
 	case ui.ViewBattle:
 		content = m.battle.View()
 	case ui.ViewReading:

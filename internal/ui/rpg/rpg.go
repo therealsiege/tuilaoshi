@@ -233,7 +233,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		}
 		// Global escape: flee battle.
 		if key.Matches(msg, m.gkeys.Back) {
-			return m, ui.SwitchTo(ui.ViewDashboard)
+			return m, ui.SwitchTo(ui.ViewMap)
 		}
 
 		switch m.state {

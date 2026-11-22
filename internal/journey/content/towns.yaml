@@ -267,7 +267,7 @@
 - id: chechi
   name: 车迟国
   english: Kingdom of Cart Slow
-  stage: 33
+  stage: 35
   desc: "这里的国王相信道士，和尚们被罚去拉车、搬砖。"
   desc_english: "Here the king trusts Taoists, and the monks are made to haul carts and carry bricks."
   stone: {idiom: 呼风唤雨, pinyin: "hū fēng huàn yǔ", meaning: "To summon wind and call up rain; to wield great power", clue: "The Taoists' boast before the contest."}

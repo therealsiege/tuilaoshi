@@ -87,6 +87,7 @@ const (
 	ViewParty      // bonds with the four disciples
 	ViewWorld      // the road west: towns and their side quests
 	ViewTitle      // the opening screen: continue, new or load a journey
+	ViewMap        // walking the region's map: the journey's hub
 )
 
 // SwitchViewMsg tells the app to change views.

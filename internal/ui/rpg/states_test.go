@@ -117,10 +117,10 @@ func TestBattleTransitions(t *testing.T) {
 			m, cmd := tr.act(m)
 			if tr.to == outside {
 				if cmd == nil {
-					t.Fatal("no command; want switch to dashboard")
+					t.Fatal("no command; want switch to the map")
 				}
-				if msg, ok := cmd().(ui.SwitchViewMsg); !ok || msg.Target != ui.ViewDashboard {
-					t.Fatalf("got %#v, want switch to dashboard", cmd())
+				if msg, ok := cmd().(ui.SwitchViewMsg); !ok || msg.Target != ui.ViewMap {
+					t.Fatalf("got %#v, want switch to the map", cmd())
 				}
 				return
 			}

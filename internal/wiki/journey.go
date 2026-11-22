@@ -36,6 +36,10 @@ type journeyRecord struct {
 	QuestsLocked map[string]string `yaml:"quests_locked,omitempty"` // quest id -> the day it was failed
 	Stones       []string          `yaml:"stones,omitempty"`        // town stones opened, by town id
 	Nightmares   []string          `yaml:"nightmares,omitempty"`    // bosses beaten in a nightmare rematch
+	Region       string            `yaml:"region,omitempty"`        // where the pilgrim stands: region id and cell
+	X            int               `yaml:"x,omitempty"`
+	Y            int               `yaml:"y,omitempty"`
+	HP           int               `yaml:"hp,omitempty"` // health on the road; 0 means full
 }
 
 // journeyPath is the file holding the journey being played.

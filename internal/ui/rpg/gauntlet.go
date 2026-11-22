@@ -133,7 +133,7 @@ func (m *Model) creditBonds() []string {
 // onVictoryKey continues the gauntlet, or leaves once the stage is done.
 func (m Model) onVictoryKey() (Model, tea.Cmd) {
 	if m.lastFoe() {
-		return m, ui.SwitchTo(ui.ViewDashboard)
+		return m, ui.SwitchTo(ui.ViewMap)
 	}
 	return m.nextFoe(), nil
 }

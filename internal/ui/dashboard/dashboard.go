@@ -59,6 +59,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.gkeys.Back):
+			return m, ui.SwitchTo(ui.ViewMap) // back on the road
+		case msg.String() == "T":
 			return m, ui.SwitchTo(ui.ViewTitle) // switch journeys
 		case key.Matches(msg, m.keys.Drill):
 			return m, ui.SwitchTo(ui.ViewDrill)

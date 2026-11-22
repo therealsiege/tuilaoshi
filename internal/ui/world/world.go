@@ -53,6 +53,8 @@ type Model struct {
 	grading  bool
 	feedback string
 
+	fromRoad bool // the town was walked into from the region map; esc returns there
+
 	stones []string // towns whose stone is open
 	hinted bool     // the open stone's pinyin has been shown
 
@@ -90,6 +92,16 @@ func (m Model) SetSize(w, h int) Model {
 // Busy reports whether a town or quest is open, so esc steps back to the
 // map rather than leaving the screen.
 func (m Model) Busy() bool { return m.screen != screenMap }
+
+// OpenTown shows a town walked into from the region map.
+func (m Model) OpenTown(id string) Model {
+	for i, t := range m.towns {
+		if t.ID == id {
+			m.town, m.quest, m.screen, m.fromRoad, m.note = i, 0, screenTown, true, ""
+		}
+	}
+	return m
+}
 
 // Refresh reloads how far the pilgrimage has come and the quests' states.
 func (m Model) Refresh() Model {
@@ -142,6 +154,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m.answer(k), nil
 	case screenTown:
 		switch {
+		case back && m.fromRoad:
+			return m, ui.SwitchTo(ui.ViewMap)
 		case back:
 			m.screen, m.note = screenMap, ""
 		case key.Matches(k, m.gkeys.Up):

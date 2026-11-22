@@ -23,8 +23,8 @@ const dailyChunk = 20
 // menu grouped by purpose, and where the journey stands.
 func (m Model) View() string {
 	var b strings.Builder
-	b.WriteString(ui.TitleStyle.MarginBottom(0).Render("  推老师 TuīLǎoShī"))
-	b.WriteString(ui.MutedStyle.Render("  Mandarin tutor"))
+	b.WriteString(ui.TitleStyle.MarginBottom(0).Render("  营地 Camp"))
+	b.WriteString(ui.MutedStyle.Render("  study by the fire, then back on the road (esc)"))
 	b.WriteString("\n\n")
 	b.WriteString(ui.LoadError(m.loadErr))
 
@@ -37,7 +37,7 @@ func (m Model) View() string {
 	b.WriteString(m.renderJourney())
 	b.WriteString("\n")
 
-	footer := "  ? help · esc journeys · q quit"
+	footer := "  ? help · esc back on the road · T journeys · q quit"
 	if m.tts != nil && m.tts.Available() {
 		footer += " · audio on (" + m.tts.ChineseVoice().Name + " / " + m.tts.EnglishVoice().Name + ")"
 	}
