@@ -205,6 +205,7 @@ func HelpText(v View) string {
 	case ViewParty:
 		return "Party Keys\n\n" +
 			"  ↑↓     Choose a companion\n" +
+			"  t      Talk in Chinese (raises the bond)\n" +
 			"  1-4    Read a bond scene\n" +
 			"  e      Translation (in a scene)\n" +
 			"  esc    Close scene / back"

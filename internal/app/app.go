@@ -110,7 +110,7 @@ func New(wikiDir string) (Model, error) {
 		radicals:      radicals.New(),
 		shrine:        shrine.New(store),
 		cards:         collection.New(store),
-		party:         party.New(store),
+		party:         party.New(store, claudeClient, dict),
 		battle:        rpgview.New(store, ttsClient, dict),
 		reader:        reader.New(store),
 		assess:        assessment.New(store),
@@ -218,7 +218,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		// Help toggle from anywhere
-		if key.Matches(msg, m.keys.Help) && m.currentView != ui.ViewChat {
+		typing := m.currentView == ui.ViewChat || (m.currentView == ui.ViewParty && m.party.Busy())
+		if key.Matches(msg, m.keys.Help) && !typing {
 			m.showHelp = !m.showHelp
 			return m, nil
 		}
@@ -242,7 +243,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// or esc closes an open reading)
 		readingOpen := (m.currentView == ui.ViewReading && m.reader.Open()) ||
 			(m.currentView == ui.ViewBrowser && m.browser.Searching()) ||
-			(m.currentView == ui.ViewParty && m.party.Reading())
+			(m.currentView == ui.ViewParty && m.party.Busy())
 		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard && !readingOpen {
 			if !m.isInputComposing() {
 				if m.currentView == ui.ViewBattle {

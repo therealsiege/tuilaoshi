@@ -99,6 +99,11 @@ func (c *Client) EvaluateDrill(ctx context.Context, card model.Card, userAnswer 
 
 // Chat sends a message in a conversational Mandarin practice session.
 func (c *Client) Chat(ctx context.Context, history []ChatMessage, userMessage string) (string, error) {
+	return c.ChatAs(ctx, tutorSystemPrompt, history, userMessage)
+}
+
+// ChatAs is Chat with another system prompt, such as a companion's voice.
+func (c *Client) ChatAs(ctx context.Context, system string, history []ChatMessage, userMessage string) (string, error) {
 	var messages []anthropic.MessageParam
 	for _, h := range history {
 		if h.Role == "user" {
@@ -113,7 +118,7 @@ func (c *Client) Chat(ctx context.Context, history []ChatMessage, userMessage st
 		Model:     chatModel,
 		MaxTokens: 1024,
 		System: []anthropic.TextBlockParam{
-			{Text: tutorSystemPrompt},
+			{Text: system},
 		},
 		Messages: messages,
 	})

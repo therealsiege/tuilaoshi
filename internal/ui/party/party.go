@@ -10,8 +10,10 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/claude"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
+	"github.com/therealsiege/tuilaoshi/internal/ui/input"
 	"github.com/therealsiege/tuilaoshi/internal/ui/reader"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -39,14 +41,26 @@ type Model struct {
 	sceneOf     journey.BondScene
 	showEnglish bool
 
+	// An open conversation, if any (see talk.go).
+	talk   *talk
+	talker Talker
+	input  input.Model
+
 	note          string
 	width, height int
 	loadErr       error
 }
 
-// New creates a party model.
-func New(store *wiki.Store) Model {
-	return Model{store: store, gkeys: ui.DefaultGlobalKeys()}
+// New creates a party model; with no Claude client, talking is off.
+func New(store *wiki.Store, client *claude.Client, dict *input.Dict) Model {
+	in := input.NewWithDict(dict)
+	in.SetPlaceholder("reply in Chinese: type pinyin, then pick characters")
+	in.SetCharLimit(200)
+	m := Model{store: store, gkeys: ui.DefaultGlobalKeys(), input: in}
+	if client != nil {
+		m.talker = client.ChatAs
+	}
+	return m
 }
 
 func (m Model) Init() tea.Cmd { return nil }
@@ -57,9 +71,9 @@ func (m Model) SetSize(w, h int) Model {
 	return m
 }
 
-// Reading reports whether a scene is open, so esc closes it rather than
-// leaving the screen.
-func (m Model) Reading() bool { return m.reading }
+// Busy reports whether a scene or conversation is open, so esc closes it
+// rather than leaving the screen.
+func (m Model) Busy() bool { return m.reading || m.talk != nil }
 
 // Refresh reloads the party and bond points.
 func (m Model) Refresh() Model {
@@ -78,12 +92,20 @@ func (m Model) Refresh() Model {
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	if r, ok := msg.(talkReplyMsg); ok {
+		return m.onReply(r), nil
+	}
 	k, ok := msg.(tea.KeyMsg)
 	if !ok {
 		return m, nil
 	}
-	if m.reading {
+	switch {
+	case m.talk != nil:
+		return m.updateTalk(k)
+	case m.reading:
 		return m.updateScene(k)
+	case k.String() == "t":
+		return m.startTalk()
 	}
 	switch {
 	case key.Matches(k, m.gkeys.Back):

@@ -13,12 +13,15 @@ import (
 const listWidth = 34
 
 func (m Model) View() string {
-	if m.reading {
+	switch {
+	case m.talk != nil:
+		return m.talkView()
+	case m.reading:
 		return m.sceneView()
 	}
 	var b strings.Builder
 	b.WriteString(ui.TitleStyle.MarginBottom(0).Render("师徒 Party & Bonds") + "\n")
-	b.WriteString(ui.MutedStyle.Render("  Bonds grow when a companion's assist helps you win with words you're still recalling.") + "\n\n")
+	b.WriteString(ui.MutedStyle.Render("  Bonds grow by talking in Chinese (t) and when a companion's assist helps you win with fresh words.") + "\n\n")
 	b.WriteString(ui.LoadError(m.loadErr))
 	list, detail := m.listView(), m.detailView()
 	if m.width == 0 || m.width >= listWidth+50 {
@@ -30,7 +33,7 @@ func (m Model) View() string {
 	if m.note != "" {
 		b.WriteString(ui.WarningStyle.Render("  "+m.note) + "\n")
 	}
-	b.WriteString(ui.HelpStyle.Render("  ↑↓ companion · 1-4 read a bond scene · esc back"))
+	b.WriteString(ui.HelpStyle.Render("  ↑↓ companion · t talk in Chinese · 1-4 read a bond scene · esc back"))
 	return b.String()
 }
 

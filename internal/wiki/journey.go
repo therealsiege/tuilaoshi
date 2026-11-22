@@ -31,6 +31,8 @@ type journeyRecord struct {
 	Shields      int               `yaml:"shields,omitempty"`       // streak shields held
 	Shielded     []string          `yaml:"shielded,omitempty"`      // missed days a shield covered
 	Bonds        map[string]int    `yaml:"bonds,omitempty"`         // companion -> bond points
+	TalkDay      string            `yaml:"talk_day,omitempty"`      // the day TalkPoints counts
+	TalkPoints   map[string]int    `yaml:"talk_points,omitempty"`   // bond points from talking today, by companion
 }
 
 func (s *Store) readJourney() (journeyRecord, error) {
