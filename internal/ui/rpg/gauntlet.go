@@ -48,8 +48,8 @@ func (m Model) nextFoe() Model {
 	hp := m.battle.Player.HP
 	m.foe++
 	m.battle = m.stageBattle()
-	m.battle.Player.HP = min(hp+m.battle.Player.MaxHP*restShare/100, m.battle.Player.MaxHP)
 	m.applyAbilities(m.cleared)
+	m.battle.Player.HP = min(hp+m.battle.Player.MaxHP*restShare/100, m.battle.Player.MaxHP)
 	m.setQuestionKinds()
 	m.battle.Radicals = m.radicals
 	m.state = stateIntro

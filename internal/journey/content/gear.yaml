@@ -1,0 +1,108 @@
+# The Earth God's shrine (土地庙) sells gear for 铜钱 and 元宝. Gear changes
+# how battles play (effect names are registered in internal/rpg/abilities.go)
+# and never touches review schedules. An item is on the shelf once stage
+# `opens` is cleared (0: from the start). One item per slot is worn.
+- id: peach-staff
+  name: 桃木杖
+  english: Peach-Wood Staff
+  slot: weapon
+  effect: power
+  desc: "Peach wood wards off demons; every right answer hits a little harder."
+  price: {tongqian: 80}
+- id: iron-cudgel
+  name: 镔铁棍
+  english: Wrought-Iron Cudgel
+  slot: weapon
+  effect: power2
+  desc: "Forged at Yellow Wind Ridge's foot; right answers hit much harder."
+  price: {tongqian: 250}
+  opens: 13
+- id: quelling-staff
+  name: 降魔杵
+  english: Demon-Subduing Pestle
+  slot: weapon
+  effect: power3
+  desc: "A temple guardian's pestle; right answers hit hardest of all."
+  price: {tongqian: 500, yuanbao: 1}
+  opens: 39
+- id: monk-robe
+  name: 粗布僧衣
+  english: Coarse Monk's Robe
+  slot: robe
+  effect: hp
+  desc: "Plain cloth, patched twice; a little more health."
+  price: {tongqian: 60}
+- id: tiger-kilt
+  name: 虎皮裙
+  english: Tiger-Skin Kilt
+  slot: robe
+  effect: hp2
+  desc: "Cut from a mountain tiger, the way the Monkey King wore his; more health."
+  price: {tongqian: 250}
+  opens: 8
+- id: brocade-cassock
+  name: 锦襕袈裟
+  english: Brocade Cassock
+  slot: robe
+  effect: hp3
+  desc: "Like the cassock the Black Bear stole; much more health."
+  price: {tongqian: 400, yuanbao: 1}
+  opens: 11
+- id: rain-hat
+  name: 斗笠
+  english: Bamboo Rain Hat
+  slot: hat
+  effect: slow_burn
+  desc: "Shade from the fire: six more seconds against burning foes."
+  price: {tongqian: 50}
+- id: vairocana-hat
+  name: 毗卢帽
+  english: Vairocana Hat
+  slot: hat
+  effect: half_combo
+  desc: "Tang Sanzang's crown of the Buddha's teaching: a miss only halves your combo."
+  price: {tongqian: 300}
+  opens: 31
+- id: talisman
+  name: 护身符
+  english: Paper Talisman
+  slot: charm
+  effect: shield
+  desc: "A yellow paper charm that takes one enemy hit."
+  price: {tongqian: 120}
+- id: wind-pill
+  name: 定风丹
+  english: Wind-Calming Pill
+  slot: charm
+  effect: clear_sight
+  desc: "The pill that stilled the Yellow Wind: blinding foes can't hide the pinyin."
+  price: {tongqian: 300}
+  opens: 13
+- id: demon-mirror
+  name: 照妖镜
+  english: Demon-Revealing Mirror
+  slot: charm
+  effect: reveal
+  desc: "Heaven's mirror that shows a demon's true form: one more reveal (w) each battle."
+  price: {yuanbao: 2}
+  opens: 25
+- id: title-queller
+  name: 降妖人
+  english: Demon Queller
+  slot: title
+  desc: "For one who has fought through a boss."
+  price: {yuanbao: 1}
+- id: title-scholar
+  name: 识字先生
+  english: Master of Letters
+  slot: title
+  desc: "For one whose characters have come back to them."
+  price: {yuanbao: 2}
+  opens: 20
+- id: title-seeker
+  name: 取经人
+  english: Scripture Seeker
+  slot: title
+  desc: "For one who has crossed the Flaming Mountains on the road west."
+  price: {yuanbao: 3}
+  opens: 52

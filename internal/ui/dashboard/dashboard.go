@@ -72,6 +72,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, ui.SwitchTo(ui.ViewRadicals)
 		case key.Matches(msg, m.keys.Battle):
 			return m, ui.SwitchTo(ui.ViewBattle)
+		case key.Matches(msg, m.keys.Shrine):
+			return m, ui.SwitchTo(ui.ViewShrine)
 		case key.Matches(msg, m.keys.Reading):
 			return m, ui.SwitchTo(ui.ViewReading)
 		case key.Matches(msg, m.keys.Assess):

@@ -28,6 +28,7 @@ type Content struct {
 	Story        storyBook
 	Episodes     episodeBook
 	Soldiers     []Soldier
+	Gear         []Gear
 }
 
 // Progression sets which characters count toward opening a stage.
@@ -66,6 +67,7 @@ func LoadContent() (Content, error) {
 		{"scenes", &c.Story},
 		{"episodes", &c.Episodes},
 		{"soldiers", &c.Soldiers},
+		{"gear", &c.Gear},
 	}
 	for _, f := range files {
 		data, err := contentFS.ReadFile("content/" + f.name + ".yaml")

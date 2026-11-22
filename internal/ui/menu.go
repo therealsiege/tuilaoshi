@@ -25,6 +25,7 @@ var DashboardMenu = []MenuGroup{
 	{"Journey", []MenuItem{
 		{"f", "Battle the next demon"},
 		{"j", "Journey map"},
+		{"g", "Shrine: gear & coins"},
 		{"s", "My progress"},
 		{"a", "Check my level"},
 	}},

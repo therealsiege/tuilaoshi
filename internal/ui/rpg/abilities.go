@@ -29,7 +29,16 @@ func (m *Model) applyAbilities(cleared map[int]string) {
 	}
 	var e rpgengine.Effects
 	e, m.abilities = rpgengine.EffectsFor(enemy, journey.Party(cleared))
+	if m.store != nil {
+		kit, err := m.store.Kit()
+		if err != nil {
+			m.loadErr = err
+		}
+		m.abilities = append(m.abilities, rpgengine.AddGear(&e, journey.Worn(kit.Worn))...)
+	}
 	m.battle.SetEffects(e)
+	m.battle.Player.MaxHP += e.BonusHP
+	m.battle.Player.HP = m.battle.Player.MaxHP
 }
 
 func (m Model) clock() time.Time {

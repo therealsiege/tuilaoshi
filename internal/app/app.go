@@ -22,6 +22,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/ui/reader"
 	"github.com/therealsiege/tuilaoshi/internal/ui/review"
 	rpgview "github.com/therealsiege/tuilaoshi/internal/ui/rpg"
+	"github.com/therealsiege/tuilaoshi/internal/ui/shrine"
 	"github.com/therealsiege/tuilaoshi/internal/ui/stats"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -46,6 +47,7 @@ type Model struct {
 	stats     stats.Model
 	journey   journeyview.Model
 	radicals  radicals.Model
+	shrine    shrine.Model
 	battle    rpgview.Model
 	reader    reader.Model
 	assess    assessment.Model
@@ -100,6 +102,7 @@ func New(wikiDir string) (Model, error) {
 		stats:         stats.New(store),
 		journey:       journeyview.New(store),
 		radicals:      radicals.New(),
+		shrine:        shrine.New(store),
 		battle:        rpgview.New(store, ttsClient, dict),
 		reader:        reader.New(store),
 		assess:        assessment.New(store),
@@ -128,6 +131,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.stats = m.stats.SetSize(msg.Width, msg.Height)
 		m.journey = m.journey.SetSize(msg.Width, msg.Height)
 		m.radicals = m.radicals.SetSize(msg.Width, msg.Height)
+		m.shrine = m.shrine.SetSize(msg.Width, msg.Height)
 		m.battle = m.battle.SetSize(msg.Width, msg.Height)
 		m.reader = m.reader.SetSize(msg.Width, msg.Height)
 		m.assess = m.assess.SetSize(msg.Width, msg.Height)
@@ -169,6 +173,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ui.ViewRadicals:
 			m.radicals = m.radicals.Refresh()
 			return m, m.radicals.Init()
+		case ui.ViewShrine:
+			m.shrine = m.shrine.Refresh()
+			return m, m.shrine.Init()
 		case ui.ViewBattle:
 			m.battle = m.battle.Refresh()
 			return m, m.battle.Init()
@@ -248,6 +255,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.journey, cmd = m.journey.Update(msg)
 	case ui.ViewRadicals:
 		m.radicals, cmd = m.radicals.Update(msg)
+	case ui.ViewShrine:
+		m.shrine, cmd = m.shrine.Update(msg)
 	case ui.ViewBattle:
 		m.battle, cmd = m.battle.Update(msg)
 	case ui.ViewReading:
@@ -278,6 +287,8 @@ func (m Model) View() string {
 		content = m.journey.View()
 	case ui.ViewRadicals:
 		content = m.radicals.View()
+	case ui.ViewShrine:
+		content = m.shrine.View()
 	case ui.ViewBattle:
 		content = m.battle.View()
 	case ui.ViewReading:

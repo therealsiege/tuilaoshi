@@ -89,7 +89,7 @@ func (b *Battle) Rematch(cards []model.Card) *Battle {
 
 // NewBattle creates a battle against a specific demon.
 func NewBattle(cards []model.Card, demon journey.BestiaryEntry, playerRank string, masteredCount int) *Battle {
-	playerHP := 100 + masteredCount/10
+	playerHP := PlayerHP(masteredCount)
 	playerAtk := 15 + masteredCount/50
 	playerDef := 5
 
@@ -166,6 +166,7 @@ func (b *Battle) resolve(right bool) (correct bool, dmg int) {
 		if actualDmg < 5 {
 			actualDmg = 5
 		}
+		actualDmg += b.Effects.BonusDamage
 		if b.Effects.FirstStrike && !b.struck {
 			actualDmg *= 2
 			b.Event = "白龙马 carries you in: a double-strength first strike!"
@@ -279,3 +280,6 @@ func parseChapterNumber(chapter string) int {
 
 	return 50 // default to mid-range
 }
+
+// PlayerHP is the player's max HP before gear: it grows with mastered characters.
+func PlayerHP(masteredCount int) int { return 100 + masteredCount/10 }

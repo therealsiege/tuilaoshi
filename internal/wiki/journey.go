@@ -15,12 +15,14 @@ import (
 const journeyFile = "journey.yaml"
 
 type journeyRecord struct {
-	Cleared   map[int]string `yaml:"cleared"`
-	Seen      []int          `yaml:"seen,omitempty"` // stages whose story scene has been shown
-	Coins     Wallet         `yaml:"coins,omitempty"`
-	DailyPaid string         `yaml:"daily_paid,omitempty"` // the day the daily bonus was last paid
-	PaidDay   string         `yaml:"paid_day,omitempty"`   // the day PaidCards covers
-	PaidCards []string       `yaml:"paid_cards,omitempty"` // cards already paid for that day
+	Cleared   map[int]string    `yaml:"cleared"`
+	Seen      []int             `yaml:"seen,omitempty"` // stages whose story scene has been shown
+	Coins     Wallet            `yaml:"coins,omitempty"`
+	DailyPaid string            `yaml:"daily_paid,omitempty"` // the day the daily bonus was last paid
+	PaidDay   string            `yaml:"paid_day,omitempty"`   // the day PaidCards covers
+	PaidCards []string          `yaml:"paid_cards,omitempty"` // cards already paid for that day
+	Owned     []string          `yaml:"owned,omitempty"`      // gear bought at the shrine, by id
+	Worn      map[string]string `yaml:"worn,omitempty"`       // slot -> gear id
 }
 
 func (s *Store) readJourney() (journeyRecord, error) {

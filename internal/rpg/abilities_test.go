@@ -118,3 +118,28 @@ func TestMeaningHintsExplainCharacters(t *testing.T) {
 		t.Errorf("火 is its own radical, got hints %v", got)
 	}
 }
+
+func TestGearIsRegisteredAndApplies(t *testing.T) {
+	for _, g := range journey.AllGear() {
+		if g.Slot == "title" {
+			if g.Effect != "" {
+				t.Errorf("title %s has an effect", g.ID)
+			}
+			continue
+		}
+		if !KnownGearEffect(g.Effect) {
+			t.Errorf("gear %s has unknown effect %q", g.ID, g.Effect)
+		}
+	}
+	e, _ := EffectsFor(journey.BestiaryEntry{Name: "黄风怪", Abilities: []string{"blind", "burn"}}, nil)
+	lines := AddGear(&e, []journey.Gear{*journey.GearByID("wind-pill"), *journey.GearByID("rain-hat"), *journey.GearByID("peach-staff")})
+	if e.HidePinyin || e.TimeLimit != 18*time.Second || e.BonusDamage != 3 || len(lines) != 3 {
+		t.Errorf("gear against a blinding, burning demon: %+v %v", e, lines)
+	}
+	b := NewBattle(nil, journey.BestiaryEntry{Name: "x", Chapter: "Chapter 1"}, "", 0)
+	b.SetEffects(e)
+	b.Question = &CombatQuestion{Damage: 20}
+	if _, dmg := b.resolve(true); dmg != 20-b.Enemy.Defense/2+3 {
+		t.Errorf("hit with a staff dealt %d", dmg)
+	}
+}

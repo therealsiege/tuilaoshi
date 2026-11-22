@@ -22,6 +22,8 @@ type Effects struct {
 	HalfCombo   bool          // a miss halves the combo instead of resetting it
 	Shields     int           // enemy hits blocked outright
 	FirstStrike bool          // the first hit of the battle deals double damage
+	BonusDamage int           // added to every hit (gear)
+	BonusHP     int           // added to the player's max HP (gear)
 }
 
 // ability is one registered ability: what it does and how the intro says it.
@@ -42,6 +44,41 @@ var companionAbilities = map[string]ability{
 	"half_combo":   {"a miss only halves your combo", func(e *Effects) { e.HalfCombo = true }},
 	"shield":       {"blocks the first enemy hit", func(e *Effects) { e.Shields++ }},
 	"first_strike": {"your first hit deals double damage", func(e *Effects) { e.FirstStrike = true }},
+}
+
+// gearAbilities are what worn gear does; they apply after the enemy's, so
+// gear can soften them.
+var gearAbilities = map[string]ability{
+	"power":       {"+3 damage on every hit", func(e *Effects) { e.BonusDamage += 3 }},
+	"power2":      {"+6 damage on every hit", func(e *Effects) { e.BonusDamage += 6 }},
+	"power3":      {"+10 damage on every hit", func(e *Effects) { e.BonusDamage += 10 }},
+	"hp":          {"+15 max HP", func(e *Effects) { e.BonusHP += 15 }},
+	"hp2":         {"+30 max HP", func(e *Effects) { e.BonusHP += 30 }},
+	"hp3":         {"+50 max HP", func(e *Effects) { e.BonusHP += 50 }},
+	"slow_burn":   {"six more seconds against burning foes", func(e *Effects) { e.TimeLimit += min(e.TimeLimit, 6*time.Second) }},
+	"half_combo":  {"a miss only halves your combo", func(e *Effects) { e.HalfCombo = true }},
+	"shield":      {"blocks one enemy hit", func(e *Effects) { e.Shields++ }},
+	"reveal":      {"one more reveal (w)", func(e *Effects) { e.Reveals++ }},
+	"clear_sight": {"blinding foes can't hide the pinyin", func(e *Effects) { e.HidePinyin = false }},
+}
+
+// KnownGearEffect reports whether name is a registered gear ability.
+func KnownGearEffect(name string) bool {
+	_, ok := gearAbilities[name]
+	return ok
+}
+
+// AddGear applies worn gear on top of effects already set, and describes
+// each piece for the battle intro.
+func AddGear(e *Effects, worn []journey.Gear) []string {
+	var lines []string
+	for _, g := range worn {
+		if a, ok := gearAbilities[g.Effect]; ok {
+			a.apply(e)
+			lines = append(lines, g.Name+": "+a.says)
+		}
+	}
+	return lines
 }
 
 // KnownAbility reports whether name is a registered demon (demon true) or

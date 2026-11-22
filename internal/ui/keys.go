@@ -82,6 +82,7 @@ const (
 	ViewReading
 	ViewAssess
 	ViewSearch // the browser, opened with its search box active
+	ViewShrine // the Earth God's shrine: gear shop and character sheet
 )
 
 // SwitchViewMsg tells the app to change views.
@@ -108,6 +109,7 @@ type DashboardKeys struct {
 	Reading  key.Binding
 	Assess   key.Binding
 	Battle   key.Binding
+	Shrine   key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -153,6 +155,10 @@ func DefaultDashboardKeys() DashboardKeys {
 			key.WithKeys("f"),
 			key.WithHelp("f", "fight"),
 		),
+		Shrine: key.NewBinding(
+			key.WithKeys("g"),
+			key.WithHelp("g", "gear"),
+		),
 		Reading: key.NewBinding(
 			key.WithKeys("t"),
 			key.WithHelp("t", "read"),
@@ -184,6 +190,11 @@ func HelpText(v View) string {
 			"  ↑↓     Select radical\n" +
 			"  esc    Back to dashboard\n" +
 			"  ?      Toggle help"
+	case ViewShrine:
+		return "Shrine Keys\n\n" +
+			"  ↑↓     Choose an item\n" +
+			"  enter  Buy, put on or take off\n" +
+			"  esc    Back to dashboard"
 	case ViewBattle:
 		return "Battle Keys\n\n" +
 			"  ↑↓     Navigate choices\n" +
