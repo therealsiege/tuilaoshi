@@ -36,6 +36,12 @@ func (m *Model) applyAbilities(cleared map[int]string) {
 		}
 		m.abilities = append(m.abilities, rpgengine.AddGear(&e, journey.Worn(kit.Worn))...)
 	}
+	if says := m.difficulty.Says(m.accuracy); says != "" {
+		if m.difficulty == rpgengine.Easier {
+			e.Reveals++
+		}
+		m.abilities = append(m.abilities, says)
+	}
 	m.battle.SetEffects(e)
 	m.battle.Player.MaxHP += e.BonusHP
 	m.battle.Player.HP = m.battle.Player.MaxHP

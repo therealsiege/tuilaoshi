@@ -65,6 +65,9 @@ type Battle struct {
 	// Rank is the enemy's: a soldier rank, RankDemon or RankBoss. It sets
 	// the copper cash a win pays.
 	Rank string
+
+	// Difficulty tunes the question kinds to recent accuracy.
+	Difficulty Difficulty
 }
 
 // Accuracy returns the percentage of questions answered correctly.
@@ -81,6 +84,7 @@ func (b *Battle) Rematch(cards []model.Card) *Battle {
 	r.SetEffects(b.startEffects)
 	r.Radicals = b.Radicals
 	r.Rank = b.Rank
+	r.Difficulty = b.Difficulty
 	r.Player.HP = r.Player.MaxHP
 	r.Enemy.HP = r.Enemy.MaxHP
 	r.Question = r.GenerateQuestion(cards)

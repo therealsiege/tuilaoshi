@@ -102,6 +102,10 @@ type Model struct {
 
 	// Coins paid by the last fight, and the wallet after it.
 	earned, wallet wiki.Wallet
+
+	// Battles adapt to recent accuracy (accuracy percent right).
+	difficulty rpgengine.Difficulty
+	accuracy   int
 }
 
 type logEntry struct {
@@ -157,6 +161,10 @@ func (m Model) Refresh() Model {
 		m.words = journey.StageProgress(*s, pages, cards)
 	}
 	m.gauntlet, m.foe, m.cleared = nil, 0, cleared
+	if m.store != nil {
+		pct, answered := m.store.RecentAccuracy(rpgengine.RecentAnswers)
+		m.accuracy, m.difficulty = pct, rpgengine.DifficultyFor(pct, answered)
+	}
 	switch {
 	case m.stage != nil:
 		if m.stage.Boss != nil {

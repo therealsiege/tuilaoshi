@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
+	"github.com/therealsiege/tuilaoshi/internal/model"
+	rpgengine "github.com/therealsiege/tuilaoshi/internal/rpg"
 	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -123,5 +126,24 @@ func TestReplayingAnEasyPracticeWinPaysNothing(t *testing.T) {
 	again.store = m.store
 	if again = win(again); again.earned != (wiki.Wallet{}) {
 		t.Errorf("the same word won again paid %+v, want nothing", again.earned)
+	}
+}
+
+func TestShakyRecentAnswersMakeBattlesGentler(t *testing.T) {
+	store := stageWiki(t, 0, 0)
+	sess := model.Session{StartedAt: time.Now(), EndedAt: time.Now(), Type: "drill"}
+	for i := 0; i < 30; i++ {
+		sess.Items = append(sess.Items, model.SessionItem{CardID: fmt.Sprint(i), Correct: i < 15})
+	}
+	sess.CardsTotal, sess.CardsCorrect = 30, 15
+	if err := store.WriteSession(sess); err != nil {
+		t.Fatal(err)
+	}
+	m := skipScene(New(store, nil, nil).Refresh())
+	if m.difficulty != rpgengine.Easier || m.battle.Difficulty != rpgengine.Easier || m.battle.Effects.Reveals == 0 {
+		t.Fatalf("after 50%% right: difficulty %d, battle %d, reveals %d", m.difficulty, m.battle.Difficulty, m.battle.Effects.Reveals)
+	}
+	if !strings.Contains(m.View(), "50% right") {
+		t.Errorf("intro doesn't explain the gentler battle:\n%s", m.View())
 	}
 }

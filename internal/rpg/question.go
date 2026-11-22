@@ -113,6 +113,7 @@ func (b *Battle) buildQuestion(card model.Card, d deck) *CombatQuestion {
 	if b.Effects.HidePinyin {
 		categories = slices.DeleteFunc(categories, func(c string) bool { return c == "pinyin" || c == "character" })
 	}
+	categories = b.Difficulty.tune(categories)
 	if len(categories) == 0 {
 		return nil
 	}

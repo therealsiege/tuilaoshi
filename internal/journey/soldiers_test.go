@@ -57,3 +57,19 @@ func TestGauntletRisesInRank(t *testing.T) {
 		}
 	}
 }
+
+func TestReinforceAddsTheStrongestSpare(t *testing.T) {
+	rng := rand.New(rand.NewSource(2))
+	g := Reinforce(26, Gauntlet(26, rng), rng) // Flat-Top: imps, elites and the old fox
+	if len(g) != gauntletSize+1 {
+		t.Fatalf("reinforced gauntlet has %d soldiers", len(g))
+	}
+	for i := 1; i < len(g); i++ {
+		if RankOrder(g[i].Rank) < RankOrder(g[i-1].Rank) {
+			t.Errorf("out of rank order: %s then %s", g[i-1].Name, g[i].Name)
+		}
+	}
+	if g := Reinforce(80, nil, rng); len(g) != 0 {
+		t.Errorf("a stage without soldiers was reinforced: %v", g)
+	}
+}

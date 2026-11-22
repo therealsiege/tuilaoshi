@@ -95,3 +95,23 @@ func EnemyLookup(name string) *BestiaryEntry {
 	}
 	return nil
 }
+
+// Reinforce adds to a gauntlet one more of stage n's soldiers, of the
+// highest rank not already in it, keeping the order weakest first. It
+// returns the gauntlet unchanged when the stage has no one left to send.
+func Reinforce(n int, gauntlet []Soldier, rng *rand.Rand) []Soldier {
+	var spare []Soldier
+	for _, s := range SoldiersAt(n) {
+		if !slices.ContainsFunc(gauntlet, func(g Soldier) bool { return g.Name == s.Name }) {
+			spare = append(spare, s)
+		}
+	}
+	if len(spare) == 0 {
+		return gauntlet
+	}
+	top := RankOrder(spare[len(spare)-1].Rank)
+	strongest := slices.DeleteFunc(spare, func(s Soldier) bool { return RankOrder(s.Rank) != top })
+	out := append(slices.Clone(gauntlet), strongest[rng.Intn(len(strongest))])
+	slices.SortStableFunc(out, func(a, b Soldier) int { return RankOrder(a.Rank) - RankOrder(b.Rank) })
+	return out
+}

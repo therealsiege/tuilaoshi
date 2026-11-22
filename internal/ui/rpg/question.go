@@ -12,6 +12,7 @@ func (m *Model) setQuestionKinds() {
 	if m.battle != nil {
 		m.battle.Listening = m.tts != nil && m.tts.Available()
 		m.battle.Writing = m.writing
+		m.battle.Difficulty = m.difficulty
 	}
 }
 

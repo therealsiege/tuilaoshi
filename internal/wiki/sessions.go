@@ -234,3 +234,18 @@ func (s *Store) TotalXP() int {
 	}
 	return total
 }
+
+// RecentAccuracy is the share of right answers, in percent, over about the
+// last n answers (whole sessions, newest first), and how many that was.
+func (s *Store) RecentAccuracy(n int) (pct, answered int) {
+	recs := s.readSessions() // in file-name order, oldest first
+	correct := 0
+	for i := len(recs) - 1; i >= 0 && answered < n; i-- {
+		answered += recs[i].Answers
+		correct += recs[i].Correct
+	}
+	if answered == 0 {
+		return 0, 0
+	}
+	return correct * 100 / answered, answered
+}

@@ -23,7 +23,11 @@ const restShare = 25
 
 // startGauntlet lines up the stage's soldiers and starts the first fight.
 func (m *Model) startGauntlet() {
-	m.gauntlet = journey.Gauntlet(m.stage.Number, rand.New(rand.NewSource(time.Now().UnixNano())))
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+	m.gauntlet = journey.Gauntlet(m.stage.Number, rng)
+	if m.difficulty == rpgengine.Harder {
+		m.gauntlet = journey.Reinforce(m.stage.Number, m.gauntlet, rng)
+	}
 	m.foe = 0
 	m.battle = m.stageBattle()
 }
