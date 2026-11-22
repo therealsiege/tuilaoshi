@@ -9,20 +9,32 @@ package roam
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
+	rpgview "github.com/therealsiege/tuilaoshi/internal/ui/rpg"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 // EnterTownMsg asks the app to open a town's screen.
 type EnterTownMsg struct{ Town string }
 
-// FightMsg asks the app to start the battle for the tribulation stood on.
+// FightMsg asks the app to start the battle for the tribulation faced.
 type FightMsg struct{}
+
+// EncounterMsg asks the app to start a fight with a soldier met on wild ground.
+type EncounterMsg struct{ Soldier journey.Soldier }
+
+// encounterChance is the chance, in percent, that a step onto wild ground
+// meets one of the region's clans; the road itself is safe.
+const encounterChance = 12
+
+// encounterRoll draws 0-99 against encounterChance; tests fix it.
+var encounterRoll = func() int { return rand.Intn(100) }
 
 // Model is the walking map.
 type Model struct {
@@ -34,6 +46,7 @@ type Model struct {
 	counts  journey.Counts
 	stage   *journey.Stage // the stage being worked on; nil once all are cleared
 	wallet  wiki.Wallet
+	hp, max int // the pilgrim's HP on the road, and its most
 	note    string
 
 	width, height int
@@ -62,6 +75,9 @@ func (m Model) Refresh() Model {
 	wallet, walletErr := m.store.Wallet()
 	m.loadErr = errors.Join(pagesErr, clearedErr, placeErr, walletErr)
 	m.cleared, m.wallet = cleared, wallet
+	hp, most, hpErr := rpgview.PilgrimHP(m.store)
+	m.hp, m.max = hp, most
+	m.loadErr = errors.Join(m.loadErr, hpErr)
 	m.counts = journey.CountProgress(pages)
 	m.stage = journey.CurrentStage(journey.Stages(m.counts, cleared))
 	if i := journey.RegionByID(place.Region); i >= 0 {
@@ -129,6 +145,12 @@ func (m Model) step(dx, dy int) (Model, tea.Cmd) {
 	if t, ok := m.region.Towns[to]; ok {
 		id := t.ID
 		return m, func() tea.Msg { return EnterTownMsg{Town: id} }
+	}
+	if m.region.At(to) == journey.TileWild && encounterRoll() < encounterChance {
+		if s, ok := m.region.Region.Encounter(rand.New(rand.NewSource(rand.Int63()))); ok {
+			m.note = s.Name + " " + s.English + " leaps out of the undergrowth!"
+			return m, func() tea.Msg { return EncounterMsg{Soldier: s} }
+		}
 	}
 	return m, nil
 }

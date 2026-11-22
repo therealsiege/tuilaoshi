@@ -47,6 +47,7 @@ func (s *Store) Earn(w Wallet) error {
 // payForSession pays a copper coin for each card answered right in a
 // session just saved, once per card per day, so repeating easy words earns
 // nothing; and the daily bonus the first time today's answers reach the goal.
+// Each of those fresh answers also heals the pilgrim's wounds.
 //
 // Which words have paid is shared by every journey (study.yaml); the coins
 // go to the journey being played.
@@ -73,7 +74,8 @@ func (s *Store) payForSession(sess model.Session) error {
 			pay.Tongqian++
 		}
 	}
-	tally(&study, &rec, today, sess.Type+"_right", pay.Tongqian)
+	fresh := pay.Tongqian
+	tally(&study, &rec, today, sess.Type+"_right", fresh)
 	if study.DailyPaid != today {
 		// Write first so the stats below count this session.
 		if err := s.writeStudy(study); err != nil {
@@ -84,6 +86,7 @@ func (s *Store) payForSession(sess model.Session) error {
 			study.DailyPaid = today
 		}
 	}
+	rec.Wounds = max(rec.Wounds-studyHeal*fresh, 0) // recall restores the pilgrim
 	rec.Coins.Tongqian += pay.Tongqian
 	if err := s.writeStudy(study); err != nil {
 		return err

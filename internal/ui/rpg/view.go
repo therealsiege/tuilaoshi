@@ -388,6 +388,9 @@ func (m Model) renderStakes() string {
 		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("  Words: %s · %d/%d learned", m.stage.Words.Name, m.words.Learned, m.words.Total)))
 	case m.nightmare != nil:
 		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  梦魇 Nightmare: %s returns, half as strong again, asking only your weakest words.", m.nightmare.Name)))
+	case m.next != nil && m.next.Status == journey.StageOpen && !m.road:
+		b.WriteString(ui.WarningStyle.Render("  Sparring at camp (practice)."))
+		fmt.Fprintf(&b, "\n  %s", ui.MutedStyle.Render(fmt.Sprintf("Tribulation %d, %s, waits on the road: walk to its red marker.", m.next.Number, m.next.English)))
 	case m.next != nil:
 		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  %s blocks your path! (practice)", m.foeKind())))
 		need := journey.NeedText(*m.next, m.counts)

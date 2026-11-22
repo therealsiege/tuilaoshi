@@ -11,6 +11,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	rpgengine "github.com/therealsiege/tuilaoshi/internal/rpg"
+	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -40,7 +41,7 @@ func stageWiki(t *testing.T, mastered, cleared int) *wiki.Store {
 }
 
 func TestWinningOpenStageClearsIt(t *testing.T) {
-	m := skipScene(New(stageWiki(t, 0, 0), nil, nil).Refresh())
+	m := skipScene(New(stageWiki(t, 0, 0), nil, nil).RoadFight())
 	if m.stage == nil || m.stage.Number != 1 || len(m.gauntlet) == 0 || m.battle.Enemy.Chinese != m.gauntlet[0].Name {
 		t.Fatalf("new learner: stage %v, enemy %s; want stage 1's first soldier", m.stage, m.battle.Enemy.Chinese)
 	}
@@ -87,11 +88,11 @@ func TestWinningOpenStageClearsIt(t *testing.T) {
 
 func TestBossStageIsABossBattle(t *testing.T) {
 	need := journey.TribulationAt(8).Unlock
-	m := skipScene(New(stageWiki(t, need, 7), nil, nil).Refresh())
+	m := skipScene(New(stageWiki(t, need, 7), nil, nil).RoadFight())
 	if m.stage == nil || m.stage.Number != 8 || m.stage.Boss == nil {
 		t.Fatalf("stage %+v; want the open boss stage 8", m.stage)
 	}
-	normal := skipScene(New(stageWiki(t, need, 0), nil, nil).Refresh()) // stage 1: same demon, not a boss
+	normal := skipScene(New(stageWiki(t, need, 0), nil, nil).RoadFight()) // stage 1: same demon, not a boss
 	m.foe, normal.foe = len(m.gauntlet), len(normal.gauntlet)
 	m.battle, normal.battle = m.stageBattle(), normal.stageBattle()
 	if m.battle.Enemy.MaxHP <= normal.battle.Enemy.MaxHP {
@@ -141,7 +142,7 @@ func TestShakyRecentAnswersMakeBattlesGentler(t *testing.T) {
 	if err := store.WriteSession(sess); err != nil {
 		t.Fatal(err)
 	}
-	m := skipScene(New(store, nil, nil).Refresh())
+	m := skipScene(New(store, nil, nil).RoadFight())
 	if m.difficulty != rpgengine.Easier || m.battle.Difficulty != rpgengine.Easier || m.battle.Effects.Reveals == 0 {
 		t.Fatalf("after 50%% right: difficulty %d, battle %d, reveals %d", m.difficulty, m.battle.Difficulty, m.battle.Effects.Reveals)
 	}
@@ -182,7 +183,7 @@ func TestMasteredFamilyWakesItsSpirit(t *testing.T) {
 	pages["journey.yaml"] = "cleared: {1: \"2026-11-01\", 2: \"2026-11-01\"}\n" // stage 3 needs 16: practice
 	defer func(roll func() int) { spiritRoll = roll }(spiritRoll)
 	spiritRoll = func() int { return 0 }
-	m := skipScene(New(uitest.Wiki(t, pages), nil, nil).Refresh())
+	m := skipScene(New(uitest.Wiki(t, pages), nil, nil).RoadFight())
 	if m.spirit == nil || m.battle.Enemy.Chinese != "河伯" {
 		t.Fatalf("no spirit: enemy %s", m.battle.Enemy.Chinese)
 	}
@@ -196,14 +197,14 @@ func TestMasteredFamilyWakesItsSpirit(t *testing.T) {
 	if m.earned.Yuanbao != 1 {
 		t.Errorf("beating the spirit paid %+v, want an ingot", m.earned)
 	}
-	again := skipScene(New(m.store, nil, nil).Refresh())
+	again := skipScene(New(m.store, nil, nil).RoadFight())
 	if again.spirit != nil {
 		t.Error("a beaten spirit appeared again")
 	}
 }
 
 func TestNightmareRematchOfABeatenBoss(t *testing.T) {
-	m := skipScene(New(stageWiki(t, 0, 8), nil, nil).Refresh()) // boss of stage 8 beaten; practice now
+	m := skipScene(New(stageWiki(t, 0, 8), nil, nil).RoadFight()) // boss of stage 8 beaten; practice now
 	if m.stage != nil || !strings.Contains(m.View(), "n nightmare rematch") {
 		t.Fatalf("practice intro doesn't offer a nightmare:\n%s", m.View())
 	}
@@ -225,5 +226,48 @@ func TestNightmareRematchOfABeatenBoss(t *testing.T) {
 		}
 		m = m.rematch()
 		m.state = stateIntro
+	}
+}
+
+func TestRoadBattlesCarryWoundsAndAFallWakesYouInTown(t *testing.T) {
+	store := stageWiki(t, 0, 4)
+	if err := store.SetPlace(wiki.Place{Region: "changan", X: 10, Y: 6}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.SetWounds(40); err != nil {
+		t.Fatal(err)
+	}
+	m := New(store, nil, nil).Encounter(journey.SoldiersAt(5)[0])
+	if m.stage != nil || m.state != stateIntro || m.battle.Enemy.Chinese != journey.SoldiersAt(5)[0].Name {
+		t.Fatalf("encounter: stage %v, state %s, enemy %s", m.stage, stateNames[m.state], m.battle.Enemy.Chinese)
+	}
+	if m.battle.Player.HP != m.battle.Player.MaxHP-40 {
+		t.Fatalf("HP %d of %d, want 40 wounds carried in", m.battle.Player.HP, m.battle.Player.MaxHP)
+	}
+	m, _ = enter(m)
+	m, _ = wrong(m)
+	playerDown(&m)
+	m, _ = enter(m)
+	if m.state != stateDefeat {
+		t.Fatalf("state %s, want defeat", stateNames[m.state])
+	}
+	m, cmd := enter(m)
+	if msg, ok := cmd().(ui.SwitchViewMsg); !ok || msg.Target != ui.ViewMap {
+		t.Fatalf("a fall should return to the map, got %#v", cmd())
+	}
+	place, err := store.Place()
+	if err != nil || place.Wounds != m.battle.Player.MaxHP/2 {
+		t.Errorf("woke with wounds %d (%v), want half HP", place.Wounds, err)
+	}
+	rm := journey.BuildMap(journey.RegionByID("changan"))
+	if _, town := rm.Towns[journey.Point{X: place.X, Y: place.Y}]; !town && (journey.Point{X: place.X, Y: place.Y}) != rm.Start {
+		t.Errorf("woke at %v, want a town or the region's start", place)
+	}
+}
+
+func TestSparringNeverClearsATribulation(t *testing.T) {
+	m := skipScene(New(stageWiki(t, 0, 0), nil, nil).Spar())
+	if m.stage != nil {
+		t.Fatalf("sparring picked up tribulation %d", m.stage.Number)
 	}
 }

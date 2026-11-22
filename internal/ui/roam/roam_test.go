@@ -29,6 +29,7 @@ func roadWith(t *testing.T, cleared, learned int) Model {
 			t.Fatal(err)
 		}
 	}
+	encounterRoll = func() int { return 99 } // no wild encounters unless a test asks
 	return New(store).SetSize(100, 30).Refresh()
 }
 
@@ -150,5 +151,39 @@ func TestWalkingIntoATownEntersIt(t *testing.T) {
 	msg, ok := cmd().(EnterTownMsg)
 	if !ok || msg.Town != "changan" {
 		t.Fatalf("got %#v, want to enter Chang'an", cmd())
+	}
+}
+
+func TestWildGroundMeetsTheRegionsClans(t *testing.T) {
+	m := roadWith(t, 0, 0)
+	var wild, road journey.Point
+	for y := 0; y < m.region.H; y++ {
+		for x := 0; x < m.region.W; x++ {
+			p := journey.Point{X: x, Y: y}
+			switch m.region.At(p) {
+			case journey.TileWild:
+				wild = p
+			case journey.TilePath:
+				road = p
+			}
+		}
+	}
+	defer func(roll func() int) { encounterRoll = roll }(encounterRoll)
+	encounterRoll = func() int { return 0 }
+	m.pos = journey.Point{X: road.X + 1, Y: road.Y}
+	if _, cmd := m.step(-1, 0); cmd != nil {
+		t.Error("the road itself drew an encounter")
+	}
+	m.pos = journey.Point{X: wild.X + 1, Y: wild.Y}
+	m, cmd := m.step(-1, 0)
+	if m.pos != wild || cmd == nil {
+		t.Fatalf("stepping onto wild ground at %v: pos %v, cmd %v", wild, m.pos, cmd)
+	}
+	msg, ok := cmd().(EncounterMsg)
+	if !ok || msg.Soldier.From > m.region.Region.To {
+		t.Fatalf("got %#v, want a soldier of the region", cmd())
+	}
+	if !strings.Contains(m.View(), "HP") {
+		t.Error("the map doesn't show HP")
 	}
 }

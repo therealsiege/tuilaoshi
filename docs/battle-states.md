@@ -17,7 +17,8 @@ stateDiagram-v2
     PlayerAttack --> Victory : animation ends, enemy HP 0 (saves; clears the stage)
     EnemyAttack --> Fighting : enter / space, player alive
     EnemyAttack --> Defeat : enter / space, player HP 0 (saves)
-    Defeat --> Fighting : enter / space (rematch)
+    Defeat --> Fighting : enter / space, sparring at camp (rematch)
+    Defeat --> [*] : enter / space, on the road (wake at the last town, half HP)
     Victory --> Intro : enter / space, more of the stage's foes to fight (HP carries)
     Victory --> [*] : enter / space, last foe beaten
     Fighting --> [*] : esc (flee, any state)

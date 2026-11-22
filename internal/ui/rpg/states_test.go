@@ -60,7 +60,11 @@ var (
 	enemyDown  = func(m *Model) { m.battle.Enemy.HP = 0 }
 	playerDown = func(m *Model) { m.battle.Player.HP = 0 }
 	// moreFoes puts the beaten enemy first in a gauntlet before the stage's demon.
-	moreFoes = func(m *Model) { m.gauntlet, m.foe = journey.SoldiersAt(1)[:1], 0 }
+	onTheRoad = func(m *Model) { m.road = true }
+	moreFoes  = func(m *Model) {
+		st := journey.Stages(journey.Counts{}, nil)[0]
+		m.stage, m.gauntlet, m.foe = &st, journey.SoldiersAt(1)[:1], 0
+	}
 )
 
 var transitions = []transition{
@@ -76,7 +80,8 @@ var transitions = []transition{
 	{statePlayerAttack, stateVictory, "animation ends, enemy HP 0 (saves; clears the stage)", enemyDown, animationEnds},
 	{stateEnemyAttack, stateFighting, "enter / space, player alive", nil, enter},
 	{stateEnemyAttack, stateDefeat, "enter / space, player HP 0 (saves)", playerDown, enter},
-	{stateDefeat, stateFighting, "enter / space (rematch)", nil, enter},
+	{stateDefeat, stateFighting, "enter / space, sparring at camp (rematch)", nil, enter},
+	{stateDefeat, outside, "enter / space, on the road (wake at the last town, half HP)", onTheRoad, enter},
 	{stateVictory, stateIntro, "enter / space, more of the stage's foes to fight (HP carries)", moreFoes, enter},
 	{stateVictory, outside, "enter / space, last foe beaten", nil, enter},
 	{stateFighting, outside, "esc (flee, any state)", nil, esc},

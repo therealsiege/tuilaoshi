@@ -1,6 +1,9 @@
 package journey
 
-import "testing"
+import (
+	"math/rand"
+	"testing"
+)
 
 func TestRegionsCoverTheRoad(t *testing.T) {
 	next := 1
@@ -23,5 +26,24 @@ func TestRegionsCoverTheRoad(t *testing.T) {
 	}
 	if towns != len(content.Towns) {
 		t.Errorf("%d towns placed in regions, want all %d", towns, len(content.Towns))
+	}
+}
+
+func TestEncountersFavourMinionsOfTheRegion(t *testing.T) {
+	rng := rand.New(rand.NewSource(3))
+	r := content.Regions[RegionByID("heifeng")]
+	ranks := map[string]int{}
+	for i := 0; i < 2000; i++ {
+		s, ok := r.Encounter(rng)
+		if !ok || s.To < r.From || s.From > r.To {
+			t.Fatalf("encountered %s (%d-%d) in %s", s.Name, s.From, s.To, r.ID)
+		}
+		ranks[s.Rank]++
+	}
+	if ranks[RankMinion] <= ranks[RankElite] || ranks[RankElite] <= ranks[RankCaptain] || ranks[RankCaptain] == 0 {
+		t.Errorf("rank mix %v", ranks)
+	}
+	if _, ok := content.Regions[len(content.Regions)-1].Encounter(rng); ok {
+		t.Error("Vulture Peak should be free of soldiers")
 	}
 }

@@ -104,6 +104,24 @@ func (m Model) stageGlyph(p journey.Point) string {
 	return ui.MutedStyle.Render(glyph)
 }
 
+// hpBar shows the pilgrim's HP, and how to heal when hurt.
+func (m Model) hpBar() string {
+	if m.max == 0 {
+		return ""
+	}
+	const width = 16
+	filled := width * m.hp / m.max
+	style := ui.SuccessStyle
+	if m.hp*3 < m.max {
+		style = ui.ErrorStyle
+	}
+	bar := fmt.Sprintf("HP %s %d/%d", style.Render(strings.Repeat("█", filled))+ui.MutedStyle.Render(strings.Repeat("░", width-filled)), m.hp, m.max)
+	if m.hp < m.max {
+		bar += "\n" + ui.MutedStyle.Render("Heal: study at camp, or an inn")
+	}
+	return bar
+}
+
 // sideView says what is ahead, the purse, and the legend.
 func (m Model) sideView() string {
 	var b strings.Builder
@@ -121,7 +139,8 @@ func (m Model) sideView() string {
 	} else if s == nil {
 		b.WriteString(ui.SuccessStyle.Render("The scriptures are won.") + "\n")
 	}
-	b.WriteString("\n" + ui.WarningStyle.Render(fmt.Sprintf("%d 铜钱 · %d 元宝", m.wallet.Tongqian, m.wallet.Yuanbao)) + "\n\n")
+	b.WriteString("\n" + m.hpBar() + "\n")
+	b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("%d 铜钱 · %d 元宝", m.wallet.Tongqian, m.wallet.Yuanbao)) + "\n\n")
 	g := ground[m.region.Region.Terrain]
 	legend := []string{
 		playerStyle.Render("@") + " you",

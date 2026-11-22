@@ -39,7 +39,7 @@ type journeyRecord struct {
 	Region       string            `yaml:"region,omitempty"`        // where the pilgrim stands: region id and cell
 	X            int               `yaml:"x,omitempty"`
 	Y            int               `yaml:"y,omitempty"`
-	HP           int               `yaml:"hp,omitempty"` // health on the road; 0 means full
+	Wounds       int               `yaml:"wounds,omitempty"` // HP lost on the road; rest and study heal it
 }
 
 // journeyPath is the file holding the journey being played.

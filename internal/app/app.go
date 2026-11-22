@@ -163,7 +163,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case roam.EnterTownMsg:
 		return m.enterTown(msg.Town)
 	case roam.FightMsg:
-		return m, ui.SwitchTo(ui.ViewBattle)
+		m.currentView, m.battle = ui.ViewBattle, m.battle.RoadFight()
+		return m, nil
+	case roam.EncounterMsg:
+		m.currentView, m.battle = ui.ViewBattle, m.battle.Encounter(msg.Soldier)
+		return m, nil
 
 	case ui.SwitchViewMsg:
 		m.currentView = msg.Target
@@ -221,7 +225,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.checkCelebrations()
 			return m, nil
 		case ui.ViewBattle:
-			m.battle = m.battle.Refresh()
+			m.battle = m.battle.Spar()
 			return m, m.battle.Init()
 		case ui.ViewReading:
 			m.reader = m.reader.Refresh()

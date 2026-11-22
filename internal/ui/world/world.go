@@ -172,6 +172,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, ui.SwitchTo(ui.ViewShrine)
 		case k.String() == "s":
 			return m.openStone()
+		case k.String() == "r":
+			return m.rest(), nil
 		}
 		return m, nil
 	}

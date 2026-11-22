@@ -112,6 +112,8 @@ type Model struct {
 	spirit *journey.Spirit
 	// nightmare is the beaten boss brought back in a nightmare rematch, if any.
 	nightmare *journey.Boss
+	// road is set for battles fought on the road (see road.go).
+	road bool
 }
 
 type logEntry struct {
@@ -157,7 +159,7 @@ func (m Model) Refresh() Model {
 	m.mastered = m.counts.Mastered
 	stages := journey.Stages(m.counts, cleared)
 	m.stage, m.next = nil, journey.CurrentStage(stages)
-	if m.next != nil && m.next.Status == journey.StageOpen {
+	if m.road && m.next != nil && m.next.Status == journey.StageOpen {
 		m.stage = m.next
 	}
 	// Battles use the words of the stage being fought, or practise the
@@ -202,6 +204,7 @@ func (m Model) Refresh() Model {
 
 // Leave saves the battle's results when the player flees mid-fight.
 func (m Model) Leave() Model {
+	m.keepWounds()
 	m.saveSession()
 	return m
 }
@@ -269,6 +272,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 		case stateDefeat:
 			if key.Matches(msg, m.gkeys.Enter) || msg.Type == tea.KeySpace {
+				if m.road {
+					return m.fall()
+				}
 				return m.rematch().askQuestion()
 			}
 		}
@@ -431,6 +437,9 @@ func (m Model) nextTurn() (Model, tea.Cmd) {
 		} else {
 			m.state = stateDefeat
 			m.battle.State = rpgengine.BattleDefeat
+		}
+		if m.battle.PlayerWon() {
+			m.keepWounds() // before saving: the session's fresh answers then heal
 		}
 		m.saveSession()
 		return m, nil

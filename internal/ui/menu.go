@@ -23,7 +23,7 @@ var DashboardMenu = []MenuGroup{
 		{"c", "Chat with the tutor"},
 	}},
 	{"Journey", []MenuItem{
-		{"f", "Battle the next demon"},
+		{"f", "Spar (practice battle)"},
 		{"j", "Journey map"},
 		{"w", "Road & towns"},
 		{"g", "Shrine: gear & coins"},

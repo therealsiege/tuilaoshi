@@ -93,3 +93,17 @@ func (m Model) stoneView() string {
 	b.WriteString(ui.HelpStyle.Render(help))
 	return b.String()
 }
+
+// rest spends a night at the town's inn, healing every wound for copper.
+func (m Model) rest() Model {
+	ok, err := m.store.RestAtInn()
+	switch {
+	case err != nil:
+		m.loadErr = err
+	case ok:
+		m.note = fmt.Sprintf("You sleep at the inn and wake healed. (-%d 铜钱)", wiki.InnPrice)
+	default:
+		m.note = fmt.Sprintf("The innkeeper shrugs: a room is %d 铜钱, and you look well enough.", wiki.InnPrice)
+	}
+	return m
+}

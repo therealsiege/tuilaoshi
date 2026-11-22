@@ -11,7 +11,7 @@ import (
 )
 
 func TestStageSceneShowsOnceBeforeTheFight(t *testing.T) {
-	m := New(stageWiki(t, 0, 0), nil, nil).SetSize(80, 30).Refresh()
+	m := New(stageWiki(t, 0, 0), nil, nil).SetSize(80, 30).RoadFight()
 	if m.state != stateScene || m.sceneOf == nil || m.sceneOf.Stage != 1 {
 		t.Fatalf("state %s; want stage 1's scene first", stateNames[m.state])
 	}
@@ -32,14 +32,14 @@ func TestStageSceneShowsOnceBeforeTheFight(t *testing.T) {
 	if seen, err := m.store.SceneSeen(1); err != nil || !seen {
 		t.Fatalf("scene not recorded as seen: %v %v", seen, err)
 	}
-	if m = m.Refresh(); m.state != stateIntro {
+	if m = m.RoadFight(); m.state != stateIntro {
 		t.Errorf("second visit: state %s; the scene shows only once", stateNames[m.state])
 	}
 }
 
 func TestStageWithoutSceneDescribesItsTribulation(t *testing.T) {
 	t9 := journey.TribulationAt(9)
-	m := New(stageWiki(t, t9.Unlock, 8), nil, nil).SetSize(80, 30).Refresh()
+	m := New(stageWiki(t, t9.Unlock, 8), nil, nil).SetSize(80, 30).RoadFight()
 	if m.state != stateIntro || m.stage == nil || m.stage.Number != 9 {
 		t.Fatalf("state %s, stage %v; want stage 9's intro (it has no scene)", stateNames[m.state], m.stage)
 	}
