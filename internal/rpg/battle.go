@@ -61,6 +61,10 @@ type Battle struct {
 	// Radicals maps characters to their radical ("火 (fire)") so answers can
 	// show how a word's characters carry its meaning.
 	Radicals map[string]string
+
+	// Rank is the enemy's: a soldier rank, RankDemon or RankBoss. It sets
+	// the copper cash a win pays.
+	Rank string
 }
 
 // Accuracy returns the percentage of questions answered correctly.
@@ -76,6 +80,7 @@ func (b *Battle) Rematch(cards []model.Card) *Battle {
 	r := &Battle{Player: b.Player, Enemy: b.Enemy, State: BattleIntro, Listening: b.Listening, Writing: b.Writing}
 	r.SetEffects(b.startEffects)
 	r.Radicals = b.Radicals
+	r.Rank = b.Rank
 	r.Player.HP = r.Player.MaxHP
 	r.Enemy.HP = r.Enemy.MaxHP
 	r.Question = r.GenerateQuestion(cards)
@@ -115,6 +120,7 @@ func NewBattle(cards []model.Card, demon journey.BestiaryEntry, playerRank strin
 			ImagePath: demon.ImagePath,
 		},
 		State: BattleIntro,
+		Rank:  RankDemon,
 	}
 
 	if len(cards) > 0 {

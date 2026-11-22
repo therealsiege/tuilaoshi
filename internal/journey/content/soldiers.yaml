@@ -1,0 +1,362 @@
+# Foot soldiers: the rank-and-file demons of the novel, fought on the road
+# before each stage's demon and in practice battles. Each serves on stages
+# from..to (tribulation numbers). Rank sets their strength and reward:
+# minion, elite or captain. Names and deeds follow the novel (public domain);
+# portraits are painted by cmd/demonart into assets/images/soldiers/.
+- name: 巡山小妖
+  english: Mountain Patrol Imp
+  rank: minion
+  from: 1
+  to: 78
+  chapter: "Chapter 2"
+  origin: "Every demon cave in the novel keeps imps who beat gongs along the ridges and report travellers to their king."
+  powers: "A rusty spear, a loud gong, and a habit of running home to tell the king"
+- name: 混世小妖
+  english: Imp of the Havoc Monster
+  rank: minion
+  from: 1
+  to: 4
+  chapter: "Chapter 2"
+  origin: "The Havoc Monster's imps carried off the little monkeys of Flower-Fruit Mountain while the Monkey King was away learning the Way."
+  powers: "Swarm attacks with clubs and stolen monkey children as hostages"
+- name: 熊山君
+  english: Lord of Bear Mountain
+  rank: elite
+  from: 5
+  to: 7
+  chapter: "Chapter 13"
+  origin: "A black bear spirit who feasted with the Tiger General on Tang Sanzang's two servants at Double Fork Ridge."
+  powers: "Crushing strength and a guest's appetite"
+- name: 特处士
+  english: Bull Hermit
+  rank: elite
+  from: 5
+  to: 7
+  chapter: "Chapter 13"
+  origin: "A wild ox spirit who called himself a hermit and dined with the Tiger General in his pit."
+  powers: "Charges with iron horns"
+- name: 寅将军
+  english: General Yin the Tiger
+  rank: captain
+  from: 5
+  to: 7
+  chapter: "Chapter 13"
+  origin: "A tiger spirit who caught Tang Sanzang in a pit on his first day out of Chang'an, until the Venerable Gold Star of Venus set him free."
+  powers: "Fangs, claws and a gang of fifty hungry imps"
+- name: 眼看喜
+  english: Eye-Sees-Joy
+  rank: minion
+  from: 8
+  to: 10
+  chapter: "Chapter 14"
+  origin: "One of the six robbers who stopped the pilgrims after Sun Wukong was freed; the six are the six senses that lead a mind astray."
+  powers: "Greed for whatever it sees"
+- name: 耳听怒
+  english: Ear-Hears-Rage
+  rank: minion
+  from: 8
+  to: 10
+  chapter: "Chapter 14"
+  origin: "Another of the six robbers, the sense of hearing that turns every word into anger."
+  powers: "Flies into a rage at a single word"
+- name: 意见欲
+  english: Mind-Sees-Desire
+  rank: elite
+  from: 8
+  to: 10
+  chapter: "Chapter 14"
+  origin: "The robber who is the mind's desire, the hardest of the six senses to strike down."
+  powers: "Wants everything, and keeps wanting it"
+- name: 黑风洞小妖
+  english: Black Wind Cave Imp
+  rank: minion
+  from: 11
+  to: 12
+  chapter: "Chapter 17"
+  origin: "A servant of the Black Bear Spirit, sent out with invitations to the feast held for the stolen cassock."
+  powers: "Carries a box of invitations and a short club"
+- name: 凌虚子
+  english: Master Lingxu
+  rank: elite
+  from: 11
+  to: 12
+  chapter: "Chapter 17"
+  origin: "A grey wolf spirit dressed as a Taoist, bringing a magic pill to the Black Bear's birthday feast; Sun Wukong struck him down and took his shape."
+  powers: "Taoist disguise and a gift of elixir"
+  abilities: [disguise]
+- name: 白衣秀士
+  english: The White-Robed Scholar
+  rank: captain
+  from: 11
+  to: 12
+  chapter: "Chapter 17"
+  origin: "A white python spirit, the Black Bear's scholarly friend, who talked of the Way while plotting over the stolen cassock."
+  powers: "A coiling grip and a silver tongue"
+- name: 巡风小妖
+  english: Wind-Watch Imp
+  rank: minion
+  from: 13
+  to: 19
+  chapter: "Chapter 20"
+  origin: "A scout of the Yellow Wind Demon who watched the ridge for travellers to bring before his king."
+  powers: "Sniffs the wind for strangers"
+- name: 虎先锋
+  english: The Tiger Vanguard
+  rank: captain
+  from: 13
+  to: 19
+  chapter: "Chapter 20"
+  origin: "The Yellow Wind Demon's vanguard, who peeled off his own tiger skin to fool Sun Wukong and carried Tang Sanzang off on a gust."
+  powers: "Sheds his skin to escape, then strikes from behind"
+  abilities: [disguise]
+- name: 碗子山小妖
+  english: Bowl Mountain Imp
+  rank: minion
+  from: 20
+  to: 23
+  chapter: "Chapter 28"
+  origin: "One of the Yellow Robe Demon's imps from the Moon Cave of Bowl Mountain, who dragged Tang Sanzang to his master."
+  powers: "Nets, ropes and an eye for a lone monk"
+- name: 精细鬼
+  english: Cunning Imp
+  rank: minion
+  from: 24
+  to: 27
+  chapter: "Chapter 33"
+  origin: "Sent with the purple-gold gourd to catch Sun Wukong, he traded it for a fake gourd that could hold the sky."
+  powers: "Carries a magic gourd that swallows whoever answers his call"
+- name: 伶俐虫
+  english: Clever Bug
+  rank: minion
+  from: 24
+  to: 27
+  chapter: "Chapter 33"
+  origin: "The Cunning Imp's partner, who carried the jade vase and was just as easily fooled."
+  powers: "Carries a jade vase that melts what it holds"
+- name: 巴山虎
+  english: Bashan Tiger
+  rank: elite
+  from: 24
+  to: 27
+  chapter: "Chapter 34"
+  origin: "One of the two imps sent to fetch the Gold and Silver Horn Kings' old mother, the nine-tailed fox."
+  powers: "A palanquin bearer with a tiger's temper"
+- name: 倚海龙
+  english: Sea-Leaning Dragon
+  rank: elite
+  from: 24
+  to: 27
+  chapter: "Chapter 34"
+  origin: "The other palanquin bearer, struck down by Sun Wukong on the road to Crushing Dragon Cave."
+  powers: "Strong shoulders and a dragon's swagger"
+- name: 九尾狐狸
+  english: Old Nine-Tailed Fox
+  rank: captain
+  from: 24
+  to: 27
+  chapter: "Chapter 34"
+  origin: "The Horn Kings' old mother, keeper of the golden rope, whose shape Sun Wukong borrowed to walk into her sons' cave."
+  powers: "The golden binding rope and a fox's many faces"
+  abilities: [disguise]
+- name: 云里雾
+  english: Mist-in-Cloud
+  rank: minion
+  from: 28
+  to: 31
+  chapter: "Chapter 41"
+  origin: "One of Red Boy's six strong generals, who pushed the fire carts into battle."
+  powers: "Hides in his own cloud"
+  abilities: [blind]
+- name: 急如火
+  english: Swift-as-Fire
+  rank: elite
+  from: 28
+  to: 31
+  chapter: "Chapter 41"
+  origin: "Another of Red Boy's six generals, the one who ran messages faster than flame."
+  powers: "Strikes first and burns as he goes"
+  abilities: [burn]
+- name: 兴烘掀
+  english: Blaze-Stoker
+  rank: captain
+  from: 28
+  to: 31
+  chapter: "Chapter 41"
+  origin: "The leader of Red Boy's six generals, who stoked the five fire carts that fed the Samadhi fire."
+  powers: "Works the bellows of the five fire carts"
+  abilities: [burn]
+- name: 鼍龙
+  english: The Alligator Dragon
+  rank: captain
+  from: 32
+  to: 34
+  chapter: "Chapter 43"
+  origin: "A nephew of the Dragon King of the West Sea who seized the Black River and tried to steam Tang Sanzang for a feast."
+  powers: "Rules the Black River's floods"
+- name: 虎力大仙
+  english: Tiger Strength Immortal
+  rank: captain
+  from: 35
+  to: 38
+  chapter: "Chapter 44"
+  origin: "One of three demon Taoists who ruled the Kingdom of Cart Slow and enslaved its Buddhist monks; he lost to Sun Wukong at praying for rain."
+  powers: "Summons wind, cloud, thunder and rain with a token and a sword"
+- name: 鹿力大仙
+  english: Deer Strength Immortal
+  rank: elite
+  from: 35
+  to: 38
+  chapter: "Chapter 46"
+  origin: "The second of the Cart Slow Taoists, who dared Sun Wukong to have his guts cut out and lost his own."
+  powers: "Contests of magic he cannot win"
+- name: 羊力大仙
+  english: Goat Strength Immortal
+  rank: elite
+  from: 35
+  to: 38
+  chapter: "Chapter 46"
+  origin: "The youngest Cart Slow Taoist, who bathed in boiling oil with a cold dragon's help until Sun Wukong sent the dragon away."
+  powers: "Bathes in boiling oil"
+  abilities: [burn]
+- name: 鳜婆
+  english: Old Mandarin Fish
+  rank: elite
+  from: 39
+  to: 41
+  chapter: "Chapter 48"
+  origin: "The Goldfish Demon's adviser in the River of Heaven, who thought of freezing the river to catch the monk on the ice."
+  powers: "Freezes the River of Heaven overnight"
+- name: 如意真仙
+  english: Immortal As-You-Wish
+  rank: elite
+  from: 44
+  to: 46
+  chapter: "Chapter 53"
+  origin: "The Bull Demon King's brother, who guarded the Abortion Spring in the Women's Kingdom to avenge his nephew Red Boy."
+  powers: "A hooked staff and a grudge"
+- name: 玉面公主
+  english: Princess Jade Face
+  rank: captain
+  from: 50
+  to: 52
+  chapter: "Chapter 60"
+  origin: "A fox princess of Thunder Peak, the Bull Demon King's second wife, whose fortune kept him from home."
+  powers: "Calls the Bull Demon King to her side"
+- name: 奔波儿灞
+  english: Benbo'erba
+  rank: minion
+  from: 53
+  to: 55
+  chapter: "Chapter 62"
+  origin: "A catfish spirit sent by the Nine-Headed Bug to watch the pagoda of the stolen relic; caught, he told the whole story."
+  powers: "Patrols the pagoda's top floor"
+- name: 灞波儿奔
+  english: Babo'erben
+  rank: minion
+  from: 53
+  to: 55
+  chapter: "Chapter 62"
+  origin: "A blackfish spirit, Benbo'erba's partner on watch, caught drinking at the top of the pagoda."
+  powers: "Swims off with whatever shines"
+- name: 万圣龙王
+  english: Dragon King Myriad Sage
+  rank: captain
+  from: 53
+  to: 55
+  chapter: "Chapter 62"
+  origin: "The dragon of Green Wave Pool, father-in-law of the Nine-Headed Bug, who helped steal the Buddha relic from Jisai's pagoda."
+  powers: "Raises a rain of blood over the pagoda"
+- name: 十八公
+  english: Elder Eighteen
+  rank: elite
+  from: 56
+  to: 58
+  chapter: "Chapter 64"
+  origin: "A pine tree spirit of the Thorn Ridge who carried Tang Sanzang off to a night of poetry in the Wood Immortals' Hermitage."
+  powers: "Poems, wine and roots that will not let go"
+- name: 杏仙
+  english: The Apricot Fairy
+  rank: elite
+  from: 56
+  to: 58
+  chapter: "Chapter 64"
+  origin: "An apricot tree spirit who wanted to marry Tang Sanzang after their night of verse; Zhu Bajie felled her with his rake."
+  powers: "Sweet words and blossom that clouds the mind"
+  abilities: [disguise]
+- name: 七虫
+  english: The Seven Insect Sons
+  rank: minion
+  from: 59
+  to: 60
+  chapter: "Chapter 72"
+  origin: "The spider sisters' adopted sons, bees, hornets, gadflies and dragonflies, who swarmed Zhu Bajie."
+  powers: "Swarms and stings"
+  abilities: [venom]
+- name: 百眼魔君
+  english: Demon Lord of a Hundred Eyes
+  rank: captain
+  from: 59
+  to: 60
+  chapter: "Chapter 73"
+  origin: "A centipede spirit who kept the Yellow Flower Temple, poisoned the pilgrims' tea, and blinded Sun Wukong with the golden light of his thousand eyes."
+  powers: "Poisoned tea and blinding golden light"
+  abilities: [venom, blind]
+- name: 小钻风
+  english: Little Drill-Wind
+  rank: minion
+  from: 61
+  to: 65
+  chapter: "Chapter 74"
+  origin: "A patrol imp of Lion-Camel Ridge who wore a password tag; Sun Wukong took his shape and learned the three kings' secrets from him."
+  powers: "Knows the password and the strength of all three kings"
+- name: 青狮
+  english: The Green Lion
+  rank: captain
+  from: 61
+  to: 65
+  chapter: "Chapter 75"
+  origin: "The eldest king of Lion-Camel Ridge, Manjusri's mount, who swallowed Sun Wukong whole and regretted it."
+  powers: "Opens his mouth wide enough to swallow a hundred thousand soldiers"
+- name: 白象
+  english: The White Elephant
+  rank: captain
+  from: 61
+  to: 65
+  chapter: "Chapter 76"
+  origin: "The second king of Lion-Camel Ridge, Samantabhadra's mount, who seized Zhu Bajie with his trunk."
+  powers: "A trunk that coils and lifts"
+- name: 红鳞大蟒
+  english: Great Red-Scaled Python
+  rank: captain
+  from: 66
+  to: 68
+  chapter: "Chapter 67"
+  origin: "A huge serpent of Seven Perfections Mountain whose rotten persimmon gorge nobody could pass, until Zhu Bajie cleared it."
+  powers: "A stinking breath and a body as long as a valley"
+  abilities: [venom]
+- name: 南山大王
+  english: King of the Southern Hill
+  rank: captain
+  from: 69
+  to: 72
+  chapter: "Chapter 85"
+  origin: "A leopard spirit of Mist-Hidden Mountain who faked Tang Sanzang's death with a carved willow head."
+  powers: "Petals scattered to split the pilgrims, and false heads"
+  abilities: [disguise]
+- name: 黄狮精
+  english: Yellow Lion Spirit
+  rank: captain
+  from: 73
+  to: 75
+  chapter: "Chapter 88"
+  origin: "A lion spirit of Leopard-Head Mountain who stole the three disciples' weapons from Jade Flower to hold a Rake Feast."
+  powers: "Steals weapons and holds feasts in their honour"
+- name: 辟寒大王
+  english: Great King Cold-Repeller
+  rank: captain
+  from: 76
+  to: 78
+  chapter: "Chapter 91"
+  origin: "One of three rhinoceros spirits who posed as Buddhas each Lantern Festival in Jinping to drink the city's fragrant lamp oil."
+  powers: "Poses as a Buddha by lamplight"
+  abilities: [disguise]

@@ -36,15 +36,36 @@ func stageWiki(t *testing.T, mastered, cleared int) *wiki.Store {
 
 func TestWinningOpenStageClearsIt(t *testing.T) {
 	m := skipScene(New(stageWiki(t, 0, 0), nil, nil).Refresh())
-	if m.stage == nil || m.stage.Number != 1 || m.battle.Enemy.Chinese != m.stage.Opponent.Name {
-		t.Fatalf("new learner: stage %v, enemy %s; want the stage 1 fight", m.stage, m.battle.Enemy.Chinese)
+	if m.stage == nil || m.stage.Number != 1 || len(m.gauntlet) == 0 || m.battle.Enemy.Chinese != m.gauntlet[0].Name {
+		t.Fatalf("new learner: stage %v, enemy %s; want stage 1's first soldier", m.stage, m.battle.Enemy.Chinese)
 	}
-	m, _ = enter(m)
-	m, _ = right(m)
-	enemyDown(&m)
-	m, _ = animationEnds(m)
-	if m.state != stateVictory || m.saveErr != nil {
-		t.Fatalf("state %s, save error %v", stateNames[m.state], m.saveErr)
+	// Each soldier, then the demon; only the demon's defeat clears the stage.
+	for i := 0; i <= len(m.gauntlet); i++ {
+		m, _ = enter(m)
+		m, _ = right(m)
+		enemyDown(&m)
+		m, _ = animationEnds(m)
+		if m.state != stateVictory || m.saveErr != nil {
+			t.Fatalf("fight %d: state %s, save error %v", i+1, stateNames[m.state], m.saveErr)
+		}
+		if m.earned.Tongqian <= 0 {
+			t.Errorf("fight %d paid no copper", i+1)
+		}
+		if i == len(m.gauntlet) {
+			break
+		}
+		if cleared, err := m.store.ClearedStages(); err != nil || len(cleared) > 0 {
+			t.Fatalf("stage cleared after soldier %d of %d", i+1, len(m.gauntlet))
+		}
+		hurt := m.battle.Player.MaxHP / 2
+		m.battle.Player.HP = hurt
+		m, _ = enter(m)
+		if m.state != stateIntro || m.battle.Player.HP != hurt+m.battle.Player.MaxHP*restShare/100 {
+			t.Fatalf("next foe: state %s, HP %d; want the intro with HP carried from %d plus a rest", stateNames[m.state], m.battle.Player.HP, hurt)
+		}
+	}
+	if m.battle.Enemy.Chinese != m.stage.Opponent.Name {
+		t.Fatalf("last fight is against %s, want %s", m.battle.Enemy.Chinese, m.stage.Opponent.Name)
 	}
 	if !strings.Contains(m.View(), "Tribulation 1 cleared") {
 		t.Errorf("victory screen doesn't say the stage cleared:\n%s", m.View())
@@ -66,10 +87,19 @@ func TestBossStageIsABossBattle(t *testing.T) {
 		t.Fatalf("stage %+v; want the open boss stage 8", m.stage)
 	}
 	normal := skipScene(New(stageWiki(t, need, 0), nil, nil).Refresh()) // stage 1: same demon, not a boss
+	m.foe, normal.foe = len(m.gauntlet), len(normal.gauntlet)
+	m.battle, normal.battle = m.stageBattle(), normal.stageBattle()
 	if m.battle.Enemy.MaxHP <= normal.battle.Enemy.MaxHP {
 		t.Errorf("boss HP %d not above the same demon's %d on an ordinary stage", m.battle.Enemy.MaxHP, normal.battle.Enemy.MaxHP)
 	}
 	if !strings.Contains(m.View(), "BOSS!") {
 		t.Errorf("boss intro missing:\n%s", m.View())
+	}
+	m, _ = enter(m)
+	m, _ = right(m)
+	enemyDown(&m)
+	m, _ = animationEnds(m)
+	if m.earned.Yuanbao != 1 || m.wallet.Yuanbao != 1 {
+		t.Errorf("beating the boss paid %+v, purse %+v; want a silver ingot", m.earned, m.wallet)
 	}
 }

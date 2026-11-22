@@ -92,6 +92,16 @@ type Model struct {
 	now       func() time.Time
 	mastered  int            // the journey's mastered count, which scales player stats
 	counts    journey.Counts // characters learned and mastered, which open stages
+
+	// A stage's soldiers, fought before its demon (see gauntlet.go); foe is
+	// the current fight, len(gauntlet) meaning the demon.
+	gauntlet []journey.Soldier
+	foe      int
+	cleared  map[int]string    // cleared stages, whose companions have joined
+	radicals map[string]string // character -> radical, for answer hints
+
+	// Coins paid by the last fight, and the wallet after it.
+	earned, wallet wiki.Wallet
 }
 
 type logEntry struct {
@@ -146,24 +156,27 @@ func (m Model) Refresh() Model {
 		m.cards = journey.StageCards(*s, pages, cards)
 		m.words = journey.StageProgress(*s, pages, cards)
 	}
+	m.gauntlet, m.foe, m.cleared = nil, 0, cleared
 	switch {
-	case m.stage != nil && m.stage.Boss != nil:
-		// Bosses quiz the learner's weakest of those words.
-		m.cards = rpgengine.WeakCards(m.cards)
-		m.battle = rpgengine.NewBossBattle(m.cards, m.stage.Opponent, m.mastered)
 	case m.stage != nil:
-		m.battle = rpgengine.NewBattle(m.cards, m.stage.Opponent, "", m.mastered)
+		if m.stage.Boss != nil {
+			// Bosses, and their soldiers, quiz the learner's weakest of those words.
+			m.cards = rpgengine.WeakCards(m.cards)
+		}
+		m.startGauntlet()
 	default:
 		reached := len(stages)
 		if m.next != nil {
 			reached = m.next.Number
 		}
-		m.battle = rpgengine.NewRandomBattle(m.cards, m.mastered, rpgengine.ReachedDemons(stages, reached))
+		m.battle = rpgengine.NewPracticeBattle(m.cards, m.mastered,
+			rpgengine.ReachedDemons(stages, reached), rpgengine.ReachedSoldiers(reached))
 	}
 	m.setQuestionKinds()
 	m.applyAbilities(cleared)
+	m.radicals = journey.RadicalIndex(pages)
 	if m.battle != nil {
-		m.battle.Radicals = journey.RadicalIndex(pages)
+		m.battle.Radicals = m.radicals
 	}
 	m.state = stateIntro
 	m.log = nil
@@ -176,63 +189,6 @@ func (m Model) Refresh() Model {
 func (m Model) Leave() Model {
 	m.saveSession()
 	return m
-}
-
-// startSession begins recording results for a new battle.
-func (m Model) startSession() Model {
-	m.session = model.Session{StartedAt: time.Now(), Type: "battle"}
-	m.reviewed = map[string]bool{}
-	m.saved = false
-	m.saveErr = nil
-	return m
-}
-
-// recordAnswer logs an answer and reschedules its card: a miss makes it due
-// again tomorrow, and a hit counts once per battle as a "Hard" review.
-func (m *Model) recordAnswer(q *rpgengine.CombatQuestion, answer string, correct bool) {
-	diff := model.DiffAgain
-	if correct {
-		diff = model.DiffHard
-	}
-	m.session.Items = append(m.session.Items, model.SessionItem{
-		CardID:     q.Card.ID,
-		UserAnswer: answer,
-		Correct:    correct,
-		Difficulty: diff,
-	})
-
-	if m.store == nil || (correct && m.reviewed[q.Card.ID]) {
-		return
-	}
-	card := q.Card
-	if err := m.store.RecordReview(&card, diff, time.Now()); err != nil {
-		m.saveErr = err
-	}
-	m.reviewed[q.Card.ID] = true
-}
-
-// saveSession writes the battle to the wiki's session log once, so it counts
-// toward stats, streaks, and lifetime XP.
-func (m *Model) saveSession() {
-	if m.saved || m.store == nil || m.battle == nil || len(m.session.Items) == 0 {
-		return
-	}
-	m.session.EndedAt = time.Now()
-	m.session.CardsTotal = m.battle.Answered
-	m.session.CardsCorrect = m.battle.CorrectHits
-	m.session.XP = m.battle.XPEarned
-	if err := m.store.WriteSession(m.session); err != nil {
-		m.saveErr = err
-		return
-	}
-	if m.stage != nil && m.battle.PlayerWon() {
-		if err := m.store.RecordStageCleared(m.stage.Number, time.Now()); err != nil {
-			m.saveErr = err
-			return
-		}
-	}
-	m.saved = true
-	m.totalXP = m.store.TotalXP()
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
@@ -290,7 +246,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 		case stateVictory:
 			if key.Matches(msg, m.gkeys.Enter) || msg.Type == tea.KeySpace {
-				return m, ui.SwitchTo(ui.ViewDashboard)
+				return m.onVictoryKey()
 			}
 
 		case stateDefeat:

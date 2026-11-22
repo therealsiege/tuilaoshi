@@ -8,6 +8,7 @@ import (
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
+	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 // menuColumnWidth is the width of one menu group; groups sit side by side
@@ -57,7 +58,16 @@ func (m Model) renderToday() string {
 	if m.due > 0 {
 		due = ui.WarningStyle.Render(thousands(m.due) + " due")
 	}
-	return "  " + ui.SubtitleStyle.Render("Today") + "  " + strings.Join(parts, " · ") + " · " + due
+	return "  " + ui.SubtitleStyle.Render("Today") + "  " + strings.Join(parts, " · ") + " · " + due + "\n" + m.renderPurse()
+}
+
+// renderPurse shows the coins saved, and how far today is from the daily bonus.
+func (m Model) renderPurse() string {
+	purse := fmt.Sprintf("%s 铜钱 · %s 元宝", thousands(m.wallet.Tongqian), thousands(m.wallet.Yuanbao))
+	if left := wiki.DailyGoal - m.daily.CardsReviewed; left > 0 {
+		purse += ui.MutedStyle.Render(fmt.Sprintf("   %d more %s today for the daily bonus", left, plural(left, "answer", "answers")))
+	}
+	return "  " + ui.SubtitleStyle.Render("Purse") + "  " + ui.WarningStyle.Render(purse)
 }
 
 // renderStartHere suggests one next step: due reviews first, then the open

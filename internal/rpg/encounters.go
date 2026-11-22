@@ -61,6 +61,7 @@ func NewBossBattle(cards []model.Card, boss journey.BestiaryEntry, masteredCount
 	b.Enemy.HP *= bossHPMultiplier
 	b.Enemy.MaxHP = b.Enemy.HP
 	b.Enemy.Attack += bossAttackBonus
+	b.Rank = RankBoss
 	return b
 }
 

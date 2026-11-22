@@ -65,6 +65,7 @@ func (m Model) viewIntro() string {
 	b.WriteString("\n\n")
 
 	b.WriteString(m.renderStakes())
+	b.WriteString(m.renderGauntlet())
 	b.WriteString(m.renderAbilities())
 	b.WriteString(ui.HelpStyle.Render("  enter/space begin battle  |  esc flee"))
 
@@ -175,10 +176,16 @@ func (m Model) viewVictory() string {
 
 	fmt.Fprintf(&b, "  %s defeated!\n\n",
 		ui.ChineseStyle.Render(m.battle.Enemy.Chinese))
-	if m.stage != nil {
+	switch {
+	case m.stage != nil && m.lastFoe():
 		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  Tribulation %d cleared! The road west opens.", m.stage.Number)))
 		b.WriteString("\n\n")
+	case m.stage != nil:
+		b.WriteString(m.renderGauntlet())
+		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  Next: %s. You rest and recover a little.", m.nextFoeName())))
+		b.WriteString("\n\n")
 	}
+	b.WriteString(m.renderEarned())
 
 	fmt.Fprintf(&b, "  XP Earned:    %d\n", m.battle.XPEarned)
 	fmt.Fprintf(&b, "  Turns:        %d\n", m.battle.Turn)
@@ -367,10 +374,14 @@ func (m Model) renderStakes() string {
 				b.WriteString(ui.MutedStyle.Render("  "+line) + "\n")
 			}
 		}
-		b.WriteString(ui.WarningStyle.Render("  Win to clear this tribulation."))
+		if m.lastFoe() {
+			b.WriteString(ui.WarningStyle.Render("  Win to clear this tribulation."))
+		} else {
+			b.WriteString(ui.WarningStyle.Render("  Fight through to the demon to clear this tribulation."))
+		}
 		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("  Words: %s · %d/%d learned", m.stage.Words.Name, m.words.Learned, m.words.Total)))
 	case m.next != nil:
-		b.WriteString(ui.WarningStyle.Render("  A demon blocks your path! (practice)"))
+		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  %s blocks your path! (practice)", m.foeKind())))
 		need := journey.NeedText(*m.next, m.counts)
 		fmt.Fprintf(&b, "\n  %s", ui.MutedStyle.Render(fmt.Sprintf("%s%s to open tribulation %d, %s. Practising its words: %s.",
 			strings.ToUpper(need[:1]), need[1:], m.next.Number, m.next.English, m.next.Words.Name)))

@@ -106,8 +106,12 @@ func (c *client) paint(prompt string) (_ []byte, err error) {
 // promptFor describes a demon for the painter: who it is and what it can
 // do, in an original style that stays readable at terminal size.
 func promptFor(d journey.BestiaryEntry) string {
-	subject := fmt.Sprintf("%s (%s), %s, a demon from the classic Chinese novel Journey to the West. %s. Powers: %s.",
-		d.English, d.Name, d.TitleEng, d.Origin, d.Powers)
+	name := fmt.Sprintf("%s (%s)", d.English, d.Name)
+	if d.TitleEng != "" {
+		name += ", " + d.TitleEng
+	}
+	subject := fmt.Sprintf("%s, a demon from the classic Chinese novel Journey to the West. %s. Powers: %s.",
+		name, strings.TrimSuffix(d.Origin, "."), d.Powers)
 	if d.Name == "如来佛祖" {
 		subject = "the Buddha (如来佛祖) as he appears in the classic Chinese novel Journey to the West: serene, majestic and radiant, shown with reverence, seated in golden light."
 	}

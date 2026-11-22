@@ -39,7 +39,7 @@ type sessionRecord struct {
 }
 
 // WriteSession saves a drill, review, or battle session as a markdown file in
-// wiki/sessions/.
+// wiki/sessions/, and pays its coins (see payForSession).
 func (s *Store) WriteSession(sess model.Session) error {
 	sessDir := filepath.Join(s.Dir, sessionsDir)
 	if err := os.MkdirAll(sessDir, 0755); err != nil {
@@ -82,7 +82,10 @@ func (s *Store) WriteSession(sess model.Session) error {
 			item.CardID, item.UserAnswer, result, diff)
 	}
 
-	return os.WriteFile(path, []byte(b.String()), 0644)
+	if err := os.WriteFile(path, []byte(b.String()), 0644); err != nil {
+		return err
+	}
+	return s.payForSession(sess)
 }
 
 func difficultyLabel(d model.DrillDifficulty) string {

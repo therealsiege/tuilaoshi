@@ -1,6 +1,7 @@
-// Command demonart paints a portrait of each demon in the journey bestiary
-// with Google's Gemini Flash image model and saves it where the game looks
-// for it (assets/images/demons/<name>.png). Needs GEMINI_API_KEY (or
+// Command demonart paints a portrait of each demon in the journey bestiary,
+// and of each foot soldier, with Google's Gemini Flash image model and saves
+// it where the game looks for it (assets/images/demons/<name>.png, or
+// soldiers/). Needs GEMINI_API_KEY (or
 // GOOGLE_API_KEY). Existing portraits are kept unless -force is given.
 //
 //	go run ./cmd/demonart [-only 白骨精] [-force] [-model gemini-2.5-flash-image]
@@ -30,7 +31,11 @@ func main() {
 	}
 	client := newClient(key, *model)
 	failed := 0
-	for _, d := range journey.Bestiary() {
+	enemies := journey.Bestiary()
+	for _, s := range journey.Soldiers() {
+		enemies = append(enemies, s.BestiaryEntry)
+	}
+	for _, d := range enemies {
 		if *only != "" && d.Name != *only {
 			continue
 		}

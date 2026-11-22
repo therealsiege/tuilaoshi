@@ -18,6 +18,7 @@ stateDiagram-v2
     EnemyAttack --> Fighting : enter / space, player alive
     EnemyAttack --> Defeat : enter / space, player HP 0 (saves)
     Defeat --> Fighting : enter / space (rematch)
-    Victory --> [*] : enter / space
+    Victory --> Intro : enter / space, more of the stage's foes to fight (HP carries)
+    Victory --> [*] : enter / space, last foe beaten
     Fighting --> [*] : esc (flee, any state)
 ```

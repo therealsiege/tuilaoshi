@@ -21,6 +21,7 @@ type Model struct {
 	daily        wiki.DailyStats
 	journeyState journey.State
 	streak       int
+	wallet       wiki.Wallet
 	due          int
 	xp           int   // lifetime battle XP
 	loadErr      error // why the wiki could not be read, shown under the header
@@ -91,13 +92,14 @@ func (m Model) SetSize(w, h int) Model {
 
 // Refresh reloads data from the wiki store.
 func (m Model) Refresh() Model {
-	var dueErr, journeyErr error
+	var dueErr, journeyErr, walletErr error
 	due, dueErr := wiki.DueItems(m.store, time.Now())
 	m.due = len(due)
 	m.daily = m.store.TodayStats()
 	m.streak = m.store.Streak()
 	m.xp = m.store.TotalXP()
+	m.wallet, walletErr = m.store.Wallet()
 	m.journeyState, journeyErr = journey.Calculate(m.store)
-	m.loadErr = errors.Join(dueErr, journeyErr)
+	m.loadErr = errors.Join(dueErr, journeyErr, walletErr)
 	return m
 }

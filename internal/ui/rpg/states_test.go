@@ -59,6 +59,8 @@ var (
 	// The hit has already landed by the attack states, so these set the result.
 	enemyDown  = func(m *Model) { m.battle.Enemy.HP = 0 }
 	playerDown = func(m *Model) { m.battle.Player.HP = 0 }
+	// moreFoes puts the beaten enemy first in a gauntlet before the stage's demon.
+	moreFoes = func(m *Model) { m.gauntlet, m.foe = journey.SoldiersAt(1)[:1], 0 }
 )
 
 var transitions = []transition{
@@ -75,7 +77,8 @@ var transitions = []transition{
 	{stateEnemyAttack, stateFighting, "enter / space, player alive", nil, enter},
 	{stateEnemyAttack, stateDefeat, "enter / space, player HP 0 (saves)", playerDown, enter},
 	{stateDefeat, stateFighting, "enter / space (rematch)", nil, enter},
-	{stateVictory, outside, "enter / space", nil, enter},
+	{stateVictory, stateIntro, "enter / space, more of the stage's foes to fight (HP carries)", moreFoes, enter},
+	{stateVictory, outside, "enter / space, last foe beaten", nil, enter},
 	{stateFighting, outside, "esc (flee, any state)", nil, esc},
 }
 

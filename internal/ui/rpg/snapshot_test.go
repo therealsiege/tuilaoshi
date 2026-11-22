@@ -27,6 +27,7 @@ func fixedBattle(t *testing.T) Model {
 		Card:     scheduleFor(t, m, "vocabulary/basics.md#书"),
 	}
 	m.battle = b
+	m.gauntlet, m.foe = nil, 0 // the stage's last fight; gauntlets are random
 	m.state = stateIntro
 	return m
 }

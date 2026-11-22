@@ -24,7 +24,7 @@ func (m *Model) applyAbilities(cleared map[int]string) {
 		return
 	}
 	enemy := journey.BestiaryEntry{Name: m.battle.Enemy.Chinese}
-	if d := journey.BestiaryLookup(m.battle.Enemy.Chinese); d != nil {
+	if d := journey.EnemyLookup(m.battle.Enemy.Chinese); d != nil {
 		enemy = *d
 	}
 	var e rpgengine.Effects

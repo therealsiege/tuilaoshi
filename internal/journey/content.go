@@ -27,6 +27,7 @@ type Content struct {
 	Progression  Progression
 	Story        storyBook
 	Episodes     episodeBook
+	Soldiers     []Soldier
 }
 
 // Progression sets which characters count toward opening a stage.
@@ -64,6 +65,7 @@ func LoadContent() (Content, error) {
 		{"progression", &c.Progression},
 		{"scenes", &c.Story},
 		{"episodes", &c.Episodes},
+		{"soldiers", &c.Soldiers},
 	}
 	for _, f := range files {
 		data, err := contentFS.ReadFile("content/" + f.name + ".yaml")
@@ -78,6 +80,16 @@ func LoadContent() (Content, error) {
 		c.Bestiary[i].Art, c.Bestiary[i].ArtLines = strings.Join(c.Bestiary[i].ArtLines, "\n"), nil
 		if c.Bestiary[i].ImagePath == "" {
 			c.Bestiary[i].ImagePath = fmt.Sprintf("assets/images/demons/%s.png", c.Bestiary[i].Name)
+		}
+	}
+	for i := range c.Soldiers {
+		s := &c.Soldiers[i]
+		s.Art, s.ArtLines = strings.Join(s.ArtLines, "\n"), nil
+		if s.Art == "" {
+			s.Art = rankArt[s.Rank]
+		}
+		if s.ImagePath == "" {
+			s.ImagePath = fmt.Sprintf("assets/images/soldiers/%s.png", s.Name)
 		}
 	}
 	return c, nil

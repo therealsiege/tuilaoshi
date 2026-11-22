@@ -15,8 +15,10 @@ import (
 const journeyFile = "journey.yaml"
 
 type journeyRecord struct {
-	Cleared map[int]string `yaml:"cleared"`
-	Seen    []int          `yaml:"seen,omitempty"` // stages whose story scene has been shown
+	Cleared   map[int]string `yaml:"cleared"`
+	Seen      []int          `yaml:"seen,omitempty"` // stages whose story scene has been shown
+	Coins     Wallet         `yaml:"coins,omitempty"`
+	DailyPaid string         `yaml:"daily_paid,omitempty"` // the day the daily bonus was last paid
 }
 
 func (s *Store) readJourney() (journeyRecord, error) {
