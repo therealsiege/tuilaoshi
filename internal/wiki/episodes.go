@@ -70,9 +70,9 @@ func readEpisodeDir(dir string) (model.Episode, error) {
 		return model.Episode{}, err
 	}
 	type subs struct {
-		name string
-		data []byte
-		han  int
+		name     string
+		data     []byte
+		han, all int // Chinese characters, and letters of any script
 	}
 	var files []subs
 	audio := ""
@@ -90,7 +90,7 @@ func readEpisodeDir(dir string) (model.Episode, error) {
 			return model.Episode{}, err
 		}
 		if cueTiming.Match(data) { // any subtitle file, whatever its extension ("x.srt copy")
-			files = append(files, subs{e.Name(), data, hanCount(string(data))})
+			files = append(files, subs{e.Name(), data, hanCount(string(data)), letterCount(string(data))})
 		}
 	}
 	if len(files) == 0 {
@@ -100,7 +100,8 @@ func readEpisodeDir(dir string) (model.Episode, error) {
 	ep := ParseSubtitles(filepath.Base(dir), files[0].data)
 	ep.Source, ep.Audio = filepath.Base(dir), audio
 	for _, f := range files[1:] {
-		if f.han == 0 {
+		// English subtitles: Chinese is at most a sprinkling (a name in a note).
+		if f.han*20 <= f.all {
 			matchEnglish(ep.Lines, parseCues(f.data))
 		}
 	}
@@ -224,6 +225,16 @@ func matchEnglish(lines []model.DialogueLine, english []cue) {
 }
 
 func hasHan(s string) bool { return hanCount(s) > 0 }
+
+func letterCount(s string) int {
+	n := 0
+	for _, r := range s {
+		if unicode.IsLetter(r) {
+			n++
+		}
+	}
+	return n
+}
 
 func hanCount(s string) int {
 	n := 0

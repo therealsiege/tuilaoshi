@@ -51,7 +51,7 @@ func TestEpisodeFolderMatchesEnglishByTimeAndFindsAudio(t *testing.T) {
 	zh := "1\n00:00:00,970 --> 00:00:04,490\n(Transcribed by TurboScribe. Go Unlimited to remove this message.) 猴王出世\n\n" +
 		"2\n00:00:09,670 --> 00:00:12,510\n在很久很久以前\n\n3\n00:00:13,710 --> 00:00:16,610\n古称神州的中国大地上\n"
 	en := "1\n00:00:02,130 --> 00:00:05,770\n(Transcribed by TurboScribe. Go Unlimited to remove this message.) The Monkey King appears.\n\n" +
-		"2\n00:00:10,150 --> 00:00:12,410\nA long, long time ago,\n\n3\n00:00:13,670 --> 00:00:15,190\nin the ancient China known as Shenzhou,\n\n" +
+		"2\n00:00:10,150 --> 00:00:12,410\nA long, long time ago, (some hear 很久: listen)\n\n3\n00:00:13,670 --> 00:00:15,190\nin the ancient China known as Shenzhou,\n\n" +
 		"4\n00:09:00,000 --> 00:09:01,000\nstray line far from any Chinese\n"
 	if err := os.MkdirAll(filepath.Join(store.Dir, PrivateEpisodesDir, ".backup"), 0755); err != nil {
 		t.Fatal(err)
@@ -72,7 +72,7 @@ func TestEpisodeFolderMatchesEnglishByTimeAndFindsAudio(t *testing.T) {
 	if ep.Title != "ep01" || filepath.Base(ep.Audio) != "ep01.mp3" || len(ep.Lines) != 3 {
 		t.Fatalf("episode %q audio %q, %d lines", ep.Title, ep.Audio, len(ep.Lines))
 	}
-	want := []string{"The Monkey King appears.", "A long, long time ago,", "in the ancient China known as Shenzhou,"}
+	want := []string{"The Monkey King appears.", "A long, long time ago, (some hear 很久: listen)", "in the ancient China known as Shenzhou,"}
 	for i, l := range ep.Lines {
 		if l.English != want[i] {
 			t.Errorf("line %d %q: English %q, want %q", i, l.Chinese, l.English, want[i])
