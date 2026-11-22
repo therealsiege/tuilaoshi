@@ -60,8 +60,19 @@ func (m Model) nextFoe() Model {
 // payWin pays the copper a win earns, and a silver ingot for a boss's
 // stage, then works out what this fight paid in all: the right answers
 // (paid when the session was saved), any daily bonus, and the win.
+//
+// A practice win pays only when the fight recalled a word not yet paid for
+// today, so replaying easy battles earns nothing.
 func (m *Model) payWin(before wiki.Wallet) {
+	saved, err := m.store.Wallet()
+	if err != nil {
+		m.saveErr = err
+		return
+	}
 	pay := wiki.Wallet{Tongqian: m.battle.WinCoins()}
+	if m.stage == nil && saved.Tongqian == before.Tongqian {
+		pay.Tongqian = 0
+	}
 	if m.stage != nil && m.stage.Boss != nil && m.lastFoe() && m.battle.PlayerWon() {
 		pay.Yuanbao = 1
 	}

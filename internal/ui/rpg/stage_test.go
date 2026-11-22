@@ -103,3 +103,25 @@ func TestBossStageIsABossBattle(t *testing.T) {
 		t.Errorf("beating the boss paid %+v, purse %+v; want a silver ingot", m.earned, m.wallet)
 	}
 }
+
+func TestReplayingAnEasyPracticeWinPaysNothing(t *testing.T) {
+	win := func(m Model) Model {
+		m.stage = nil // practice
+		q := m.battle.Question
+		m, _ = enter(m)
+		m.battle.Question = q // always the same word
+		m, _ = right(m)
+		enemyDown(&m)
+		m, _ = animationEnds(m)
+		return m
+	}
+	m := win(fixedBattle(t))
+	if m.earned.Tongqian != 1+m.battle.WinCoins() {
+		t.Fatalf("first win paid %+v, want a coin for the word and %d for the win", m.earned, m.battle.WinCoins())
+	}
+	again := fixedBattle(t)
+	again.store = m.store
+	if again = win(again); again.earned != (wiki.Wallet{}) {
+		t.Errorf("the same word won again paid %+v, want nothing", again.earned)
+	}
+}

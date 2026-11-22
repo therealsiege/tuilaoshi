@@ -1,6 +1,7 @@
 package wiki
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 func answers(at time.Time, right, wrong int) model.Session {
 	sess := model.Session{StartedAt: at, EndedAt: at, Type: "drill", CardsTotal: right + wrong, CardsCorrect: right}
 	for i := 0; i < right+wrong; i++ {
-		sess.Items = append(sess.Items, model.SessionItem{CardID: "c", Correct: i < right})
+		sess.Items = append(sess.Items, model.SessionItem{CardID: fmt.Sprintf("c%d-%d", at.UnixNano(), i), Correct: i < right})
 	}
 	return sess
 }
@@ -39,6 +40,24 @@ func TestSessionsPayCopperAndTheDailyBonusOnce(t *testing.T) {
 	}
 	if w, err := store.Wallet(); err != nil || w.Tongqian != want+5 {
 		t.Fatalf("bonus paid twice: %d copper, want %d", w.Tongqian, want+5)
+	}
+}
+
+func TestACardPaysOncePerDay(t *testing.T) {
+	store := NewStore(t.TempDir())
+	now := time.Now()
+	same := answers(now, 3, 0)
+	for i := range same.Items {
+		same.Items[i].CardID = "书"
+	}
+	for i := 0; i < 2; i++ {
+		same.StartedAt = now.Add(time.Duration(i) * time.Second)
+		if err := store.WriteSession(same); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if w, err := store.Wallet(); err != nil || w.Tongqian != 1 {
+		t.Fatalf("one card answered right six times paid %+v %v, want 1 copper", w, err)
 	}
 }
 

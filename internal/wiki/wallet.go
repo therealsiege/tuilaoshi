@@ -1,6 +1,7 @@
 package wiki
 
 import (
+	"slices"
 	"time"
 
 	"github.com/therealsiege/tuilaoshi/internal/model"
@@ -43,20 +44,25 @@ func (s *Store) Earn(w Wallet) error {
 	return s.writeJourney(rec)
 }
 
-// payForSession pays a copper coin for each right answer in a session just
-// saved, and the daily bonus the first time today's answers reach the goal.
+// payForSession pays a copper coin for each card answered right in a
+// session just saved, once per card per day, so repeating easy words earns
+// nothing; and the daily bonus the first time today's answers reach the goal.
 func (s *Store) payForSession(sess model.Session) error {
-	pay := Wallet{}
-	for _, it := range sess.Items {
-		if it.Correct {
-			pay.Tongqian++
-		}
-	}
 	rec, err := s.readJourney()
 	if err != nil {
 		return err
 	}
 	today := time.Now().Format(dateFmt)
+	if rec.PaidDay != today {
+		rec.PaidDay, rec.PaidCards = today, nil
+	}
+	pay := Wallet{}
+	for _, it := range sess.Items {
+		if it.Correct && !slices.Contains(rec.PaidCards, it.CardID) {
+			rec.PaidCards = append(rec.PaidCards, it.CardID)
+			pay.Tongqian++
+		}
+	}
 	if rec.DailyPaid != today && s.TodayStats().CardsReviewed >= DailyGoal {
 		pay.Tongqian += dailyBonus + min(s.Streak(), streakBonusCap)
 		rec.DailyPaid = today

@@ -19,6 +19,8 @@ type journeyRecord struct {
 	Seen      []int          `yaml:"seen,omitempty"` // stages whose story scene has been shown
 	Coins     Wallet         `yaml:"coins,omitempty"`
 	DailyPaid string         `yaml:"daily_paid,omitempty"` // the day the daily bonus was last paid
+	PaidDay   string         `yaml:"paid_day,omitempty"`   // the day PaidCards covers
+	PaidCards []string       `yaml:"paid_cards,omitempty"` // cards already paid for that day
 }
 
 func (s *Store) readJourney() (journeyRecord, error) {
