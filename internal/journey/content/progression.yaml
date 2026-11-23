@@ -3,3 +3,7 @@
 # characters (review interval of 7+ days).
 learning_until: 15    # last tribulation that counts characters being learned
 learning_interval: 2  # review interval (days) at which a character counts as learned: answered correctly at least once
+# The learner's own episodes (wiki/private/episodes, numbered by file name)
+# open along the road: episode n at tribulation 1 + (n-1) * episode_step,
+# rounded down. The 98 series' 52 episodes spread over the 81 tribulations.
+episode_step: 1.5

@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/therealsiege/tuilaoshi/internal/audio"
+	"github.com/therealsiege/tuilaoshi/internal/episode"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	rpgengine "github.com/therealsiege/tuilaoshi/internal/rpg"
@@ -166,6 +167,9 @@ func (m Model) Refresh() Model {
 	// coming stage's words.
 	if s := m.next; s != nil {
 		m.cards = journey.StageCards(*s, pages, cards)
+		if opened, err := episode.OpenedNow(m.store); err == nil {
+			m.cards = episode.WithLatest(m.cards, cards, opened)
+		}
 		m.words = journey.StageProgress(*s, pages, cards)
 	}
 	m.gauntlet, m.foe, m.cleared, m.nightmare = nil, 0, cleared, nil

@@ -37,8 +37,18 @@ type Content struct {
 
 // Progression sets which characters count toward opening a stage.
 type Progression struct {
-	LearningUntil    int `yaml:"learning_until"`    // last stage that counts characters being learned
-	LearningInterval int `yaml:"learning_interval"` // review interval (days) that counts as learned
+	LearningUntil    int     `yaml:"learning_until"`    // last stage that counts characters being learned
+	LearningInterval int     `yaml:"learning_interval"` // review interval (days) that counts as learned
+	EpisodeStep      float64 `yaml:"episode_step"`      // tribulations between the learner's episodes
+}
+
+// LearnedInterval is the review interval, in days, at which a character or
+// word counts as learned.
+func LearnedInterval() int { return content.Progression.LearningInterval }
+
+// EpisodeStage is the tribulation at which the learner's episode n opens.
+func EpisodeStage(n int) int {
+	return min(1+int(float64(max(n-1, 0))*content.Progression.EpisodeStep), len(content.Tribulations))
 }
 
 // content is loaded once at startup; the embedded files are checked by

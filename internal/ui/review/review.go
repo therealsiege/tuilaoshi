@@ -11,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/claude"
+	"github.com/therealsiege/tuilaoshi/internal/episode"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/mnemonic"
 	"github.com/therealsiege/tuilaoshi/internal/model"
@@ -89,6 +90,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case loadDueMsg:
 		m.items, m.loadErr = wiki.DueItems(m.store, time.Now())
+		m.items = m.episodeWordsFirst(m.items)
 		m.cursor = 0
 		m.state = stateList
 		m.saveErr = nil
@@ -210,6 +212,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.noteSaveErr(m.store.WriteSession(m.session))
 
 				m.items, m.loadErr = wiki.DueItems(m.store, time.Now())
+				m.items = m.episodeWordsFirst(m.items)
 				m.cursor = 0
 				m.state = stateList
 			} else {
@@ -376,9 +379,24 @@ func (m Model) SetSize(w, h int) Model {
 // Refresh reloads due items.
 func (m Model) Refresh() Model {
 	m.items, m.loadErr = wiki.DueItems(m.store, time.Now())
+	m.items = m.episodeWordsFirst(m.items)
 	m.cursor = 0
 	m.correct = 0
 	m.total = 0
 	m.state = stateList
 	return m
+}
+
+// episodeWordsFirst moves the words of the episodes the journey has reached
+// to the front of the queue, so they enter review without being marked.
+func (m *Model) episodeWordsFirst(due []model.Card) []model.Card {
+	opened, err := episode.OpenedNow(m.store)
+	if err != nil || len(opened) == 0 {
+		return due
+	}
+	all, err := m.store.DrillableCards()
+	if err != nil {
+		return due
+	}
+	return episode.Ahead(due, opened, all)
 }
