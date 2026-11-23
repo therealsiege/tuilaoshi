@@ -205,6 +205,17 @@ func HelpText(v View) string {
 			"  ↑↓     Select radical\n" +
 			"  esc    Back to dashboard\n" +
 			"  ?      Toggle help"
+	case ViewMap:
+		return "Road Keys\n\n" +
+			"  arrows/hjkl  Walk\n" +
+			"  enter        Enter a town / face a tribulation\n" +
+			"  c / esc      Camp: study, party, shrine\n\n" +
+			"  @ you   · road (safe)   , wild (clans)\n" +
+			"  H town  ! tribulation   & demon's lair\n" +
+			"  + won   < > the next regions\n\n" +
+			"  Studying at camp opens sealed\n" +
+			"  tribulations; winning one opens\n" +
+			"  the road past it."
 	case ViewWorld:
 		return "Town Keys\n\n" +
 			"  ↑↓     Choose a request\n" +

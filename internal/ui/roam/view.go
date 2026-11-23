@@ -192,6 +192,11 @@ func (m Model) sideView() string {
 	}
 	b.WriteString("\n" + m.hpBar() + "\n")
 	b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("%d 铜钱 · %d 元宝", m.wallet.Tongqian, m.wallet.Yuanbao)) + "\n\n")
+	if len(m.cleared) == 0 {
+		b.WriteString(ui.SubtitleStyle.Render("How the road works") + "\n" + ui.MutedStyle.Render(ui.WrapText(
+			"Walk west (←) along the road to the red ! to face your first tribulation. Wild ground hides the region's clans. "+
+				"At camp (c) you study, and studying is what opens the sealed tribulations ahead.", 36)) + "\n\n")
+	}
 	if len(m.quests) > 0 {
 		b.WriteString(ui.SubtitleStyle.Render("Hunts") + "\n" + strings.Join(m.quests, "\n") + "\n\n")
 	}
