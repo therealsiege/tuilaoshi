@@ -2,4 +2,4 @@
 667 internal/journey/journey_test.go
 1169 internal/mnemonic/mnemonic.go
 579 internal/phonetic/phonetic.go
-636 internal/ui/journey/journey.go
+578 internal/ui/journey/journey.go
