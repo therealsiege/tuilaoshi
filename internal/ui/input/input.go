@@ -111,6 +111,17 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case ModePinyin:
 		return m.updatePinyin(keyMsg)
 	case ModeChinese:
+		// Letters typed faster than the terminal is read (or pasted)
+		// arrive as one event; compose them one at a time.
+		if keyMsg.Type == tea.KeyRunes && len(keyMsg.Runes) > 1 {
+			var cmds []tea.Cmd
+			for _, r := range keyMsg.Runes {
+				var cmd tea.Cmd
+				m, cmd = m.updateChinese(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{r}})
+				cmds = append(cmds, cmd)
+			}
+			return m, tea.Batch(cmds...)
+		}
 		return m.updateChinese(keyMsg)
 	default:
 		return m.updateNormal(keyMsg)
