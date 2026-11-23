@@ -177,7 +177,7 @@ For each character given, answer one line: the character, a space, then its comp
 func (c *Client) DecomposeCharacters(ctx context.Context, chars []string) (map[string][]string, error) {
 	msg, err := c.client.Messages.New(ctx, anthropic.MessageNewParams{
 		Model:     chatModel, // the small model splits characters wrongly too often
-		MaxTokens: 1024,
+		MaxTokens: 2048,      // room to think before answering
 		System:    []anthropic.TextBlockParam{{Text: decomposeSystemPrompt}},
 		Messages:  []anthropic.MessageParam{anthropic.NewUserMessage(anthropic.NewTextBlock(strings.Join(chars, "\n")))},
 	})

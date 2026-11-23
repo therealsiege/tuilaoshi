@@ -18,3 +18,13 @@ func TestParseComponents(t *testing.T) {
 		t.Errorf("parsed %v", got)
 	}
 }
+
+func TestParseIdiomTurn(t *testing.T) {
+	got := ParseIdiomTurn("VALID: yes\nNOTE: Chains on 天.\nPLAYED: 天长地久 | tiān cháng dì jiǔ | everlasting\nREPLY: 久别重逢 | jiǔ bié chóng féng | to meet after a long parting\n")
+	if !got.Valid || got.Played.Text != "天长地久" || got.Reply.Text != "久别重逢" || got.Reply.Meaning == "" || got.Note == "" {
+		t.Errorf("parsed %+v", got)
+	}
+	if got := ParseIdiomTurn("VALID: no\nNOTE: Not an idiom.\nPLAYED: none\nREPLY: none"); got.Valid || got.Reply.Text != "" || got.Played.Text != "" {
+		t.Errorf("parsed %+v", got)
+	}
+}

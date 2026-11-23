@@ -255,6 +255,7 @@ func HelpText(v View) string {
 		return "Party Keys\n\n" +
 			"  ↑↓     Choose a companion\n" +
 			"  t      Talk in Chinese (raises the bond)\n" +
+			"  i      Idiom-chain duel (成语接龙)\n" +
 			"  1-4    Read a bond scene\n" +
 			"  e      Translation (in a scene)\n" +
 			"  esc    Close scene / back"

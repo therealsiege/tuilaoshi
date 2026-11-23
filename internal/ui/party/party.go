@@ -44,6 +44,8 @@ type Model struct {
 	// An open conversation, if any (see talk.go).
 	talk   *talk
 	talker Talker
+	duel   *duel // an idiom-chain duel, if one is open (see duel.go)
+	mover  IdiomMover
 	input  input.Model
 
 	note          string
@@ -58,7 +60,7 @@ func New(store *wiki.Store, client *claude.Client, dict *input.Dict) Model {
 	in.SetCharLimit(200)
 	m := Model{store: store, gkeys: ui.DefaultGlobalKeys(), input: in}
 	if client != nil {
-		m.talker = client.ChatAs
+		m.talker, m.mover = client.ChatAs, client.IdiomMove
 	}
 	return m
 }
@@ -73,7 +75,7 @@ func (m Model) SetSize(w, h int) Model {
 
 // Busy reports whether a scene or conversation is open, so esc closes it
 // rather than leaving the screen.
-func (m Model) Busy() bool { return m.reading || m.talk != nil }
+func (m Model) Busy() bool { return m.reading || m.talk != nil || m.duel != nil }
 
 // Refresh reloads the party and bond points.
 func (m Model) Refresh() Model {
@@ -95,17 +97,24 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	if r, ok := msg.(talkReplyMsg); ok {
 		return m.onReply(r), nil
 	}
+	if d, ok := msg.(duelMsg); ok {
+		return m.onDuel(d), nil
+	}
 	k, ok := msg.(tea.KeyMsg)
 	if !ok {
 		return m, nil
 	}
 	switch {
+	case m.duel != nil:
+		return m.updateDuel(k)
 	case m.talk != nil:
 		return m.updateTalk(k)
 	case m.reading:
 		return m.updateScene(k)
 	case k.String() == "t":
 		return m.startTalk()
+	case k.String() == "i":
+		return m.startDuel()
 	}
 	switch {
 	case key.Matches(k, m.gkeys.Back):

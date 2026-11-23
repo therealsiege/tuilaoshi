@@ -126,3 +126,58 @@ func flatten(cmd tea.Cmd) []tea.Msg {
 	}
 	return []tea.Msg{msg}
 }
+
+func TestIdiomDuel(t *testing.T) {
+	m := partyWith(t, "cleared: {}\n") // nobody has joined; 孙悟空 still duels
+	turns := []claude.IdiomTurn{
+		{Valid: true, Reply: claude.Idiom{Text: "一心一意", Pinyin: "yī xīn yī yì", Meaning: "wholeheartedly"}},
+		{Valid: false, Note: "Not a real idiom."},
+		{Valid: true, Played: claude.Idiom{Text: "意气风发", Pinyin: "yì qì fēng fā", Meaning: "high-spirited"}, Reply: claude.Idiom{}},
+	}
+	m.mover = func(_ context.Context, who string, chain []string, attempt string, hint bool) (claude.IdiomTurn, error) {
+		if who != "孙悟空" {
+			t.Errorf("duel with %s", who)
+		}
+		turn := turns[0]
+		turns = turns[1:]
+		return turn, nil
+	}
+	m, cmd := m.Update(press("i"))
+	if m.duel == nil {
+		t.Fatalf("no duel: %q", m.note)
+	}
+	m = m.onDuel(cmd().(tea.BatchMsg)[0]().(duelMsg))
+	if m.duel.last.Text != "一心一意" || !strings.Contains(m.View(), "一心一意") {
+		t.Fatalf("opening not shown:\n%s", m.View())
+	}
+	m.input.SetValue("意思意思")
+	m, cmd = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	m = m.onDuel(cmd().(duelMsg))
+	if m.duel.lives != duelLives-1 || !strings.Contains(m.View(), "Not a real idiom") {
+		t.Fatalf("a miss: lives %d\n%s", m.duel.lives, m.View())
+	}
+	m.input.SetValue("意气风发")
+	m, cmd = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	m = m.onDuel(cmd().(duelMsg))
+	if !m.duel.won || !m.duel.over {
+		t.Fatalf("stumping the companion should win: %+v", m.duel)
+	}
+	w, err := m.store.Wallet()
+	bonds, berr := m.store.BondPoints()
+	cards, cerr := m.store.DrillableCards()
+	if err != nil || berr != nil || cerr != nil {
+		t.Fatal(err, berr, cerr)
+	}
+	if w.Tongqian != duelWinPay+1 || bonds["孙悟空"] != 1 {
+		t.Errorf("after the win: purse %+v (want %d), bond %d (want 1)", w, duelWinPay+1, bonds["孙悟空"])
+	}
+	idioms := 0
+	for _, c := range cards {
+		if c.Chinese == "一心一意" || c.Chinese == "意气风发" {
+			idioms++
+		}
+	}
+	if idioms != 2 {
+		t.Errorf("%d of the idioms met joined the reviews, want 2", idioms)
+	}
+}

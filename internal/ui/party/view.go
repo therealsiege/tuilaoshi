@@ -14,6 +14,8 @@ const listWidth = 34
 
 func (m Model) View() string {
 	switch {
+	case m.duel != nil:
+		return m.duelView()
 	case m.talk != nil:
 		return m.talkView()
 	case m.reading:
@@ -33,7 +35,7 @@ func (m Model) View() string {
 	if m.note != "" {
 		b.WriteString(ui.WarningStyle.Render("  "+m.note) + "\n")
 	}
-	b.WriteString(ui.HelpStyle.Render("  ↑↓ companion · t talk in Chinese · 1-4 read a bond scene · esc back"))
+	b.WriteString(ui.HelpStyle.Render("  ↑↓ companion · t talk in Chinese · i idiom-chain duel · 1-4 read a bond scene · esc back"))
 	return b.String()
 }
 
