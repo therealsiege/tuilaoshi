@@ -24,7 +24,7 @@ type Model struct {
 	cleared  map[int]string
 	kit      wiki.Kit
 	wallet   wiki.Wallet
-	mastered int
+	mastered int // level points (learned + mastered characters), which set HP
 	cursor   int
 	note     string // what the last action did
 	noteErr  bool
@@ -62,7 +62,7 @@ func (m Model) Refresh() Model {
 	m.wallet, errs[2] = m.store.Wallet()
 	pages, err := m.store.ListPages()
 	errs[3] = err
-	m.mastered = journey.CountProgress(pages).Mastered
+	m.mastered = journey.CountProgress(pages).LevelPoints()
 	m.loadErr = errors.Join(errs[:]...)
 	m.note = ""
 	return m

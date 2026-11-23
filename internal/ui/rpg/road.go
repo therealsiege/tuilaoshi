@@ -118,6 +118,6 @@ func PilgrimHP(store *wiki.Store) (hp, most int, err error) {
 	var e rpgengine.Effects
 	rpgengine.AddGear(&e, journey.Worn(kit.Worn))
 	rpgengine.AddUpgrades(&e, journey.Party(cleared), bonds)
-	most = rpgengine.PlayerHP(journey.CountProgress(pages).Mastered) + e.BonusHP
+	most = rpgengine.PlayerHP(journey.CountProgress(pages).LevelPoints()) + e.BonusHP
 	return max(most-place.Wounds, 1), most, nil
 }

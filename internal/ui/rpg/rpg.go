@@ -90,7 +90,7 @@ type Model struct {
 	deadline  time.Time
 	qseq      int
 	now       func() time.Time
-	mastered  int            // the journey's mastered count, which scales player stats
+	mastered  int            // level points (learned + mastered characters), which set player HP
 	counts    journey.Counts // characters learned and mastered, which open stages
 
 	// A stage's soldiers, fought before its demon (see gauntlet.go); foe is
@@ -156,7 +156,7 @@ func (m Model) Refresh() Model {
 	m.cards = cards
 	m.loadErr = errors.Join(cardsErr, pagesErr, clearedErr)
 	m.counts = journey.CountProgress(pages)
-	m.mastered = m.counts.Mastered
+	m.mastered = m.counts.LevelPoints()
 	stages := journey.Stages(m.counts, cleared)
 	m.stage, m.next = nil, journey.CurrentStage(stages)
 	if m.road && m.next != nil && m.next.Status == journey.StageOpen {

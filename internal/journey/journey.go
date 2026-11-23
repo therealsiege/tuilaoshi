@@ -165,7 +165,7 @@ func Calculate(store *wiki.Store) (State, error) {
 
 	return State{
 		Rank:         calculateRank(mastered),
-		Level:        LevelFor(mastered),
+		Level:        LevelFor(counts.LevelPoints()),
 		Progress:     progress,
 		Stage:        CurrentStage(stages),
 		Counts:       counts,

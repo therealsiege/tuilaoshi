@@ -294,6 +294,6 @@ func parseChapterNumber(chapter string) int {
 	return 50 // default to mid-range
 }
 
-// PlayerHP is the player's max HP before gear, from the level that
-// mastered characters reach.
-func PlayerHP(masteredCount int) int { return journey.LevelHP(journey.LevelFor(masteredCount).N) }
+// PlayerHP is the player's max HP before gear, from the level that level
+// points (journey.Counts.LevelPoints) reach.
+func PlayerHP(levelPoints int) int { return journey.LevelHP(journey.LevelFor(levelPoints).N) }
