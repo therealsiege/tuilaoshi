@@ -100,6 +100,7 @@ func (m *Model) payWin(before wiki.Wallet) {
 	if m.road && m.battle.PlayerWon() {
 		m.creditHunts()
 	}
+	m.takeLoot()
 	if pay.Tongqian > 0 {
 		if err := m.store.Tally("battle_won", 1); err != nil {
 			m.saveErr = err
@@ -189,7 +190,7 @@ func (m Model) renderGauntlet() string {
 
 // renderEarned shows the coins this fight paid and the wallet after it.
 func (m Model) renderEarned() string {
-	if m.earned == (wiki.Wallet{}) {
+	if m.earned == (wiki.Wallet{}) && len(m.loot) == 0 && len(m.bonded) == 0 {
 		return ""
 	}
 	got := fmt.Sprintf("+%d 铜钱", m.earned.Tongqian)
@@ -200,6 +201,15 @@ func (m Model) renderEarned() string {
 		ui.MutedStyle.Render(fmt.Sprintf("purse: %d 铜钱 · %d 元宝", m.wallet.Tongqian, m.wallet.Yuanbao)))
 	if len(m.bonded) > 0 {
 		out += ui.ChineseStyle.Render("  Bond +1: "+strings.Join(m.bonded, " · ")) + "\n"
+	}
+	if len(m.loot) > 0 {
+		var names []string
+		for _, id := range m.loot {
+			if mat := journey.MaterialByID(id); mat != nil {
+				names = append(names, mat.Name+" "+mat.English)
+			}
+		}
+		out += ui.SuccessStyle.Render("  Loot: "+strings.Join(names, " · ")) + ui.MutedStyle.Render("  (craft gear at the shrine)") + "\n"
 	}
 	return out
 }

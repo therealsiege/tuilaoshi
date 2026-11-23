@@ -72,6 +72,10 @@ type Battle struct {
 	// Assisted records the party abilities that helped this battle, by
 	// effect name, so the companions behind them earn bond points.
 	Assisted map[string]bool
+
+	// HardHits counts right answers on words still shaky or new (review
+	// interval under HardInterval): only those earn loot.
+	HardHits int
 }
 
 // Accuracy returns the percentage of questions answered correctly.
@@ -164,6 +168,9 @@ func (b *Battle) resolve(right bool) (correct bool, dmg int) {
 	if right {
 		// Correct answer: player attacks enemy.
 		b.CorrectHits++
+		if b.Question.Card.ReviewInterval < HardInterval {
+			b.HardHits++
+		}
 		b.Combo++
 		if b.Combo > b.MaxCombo {
 			b.MaxCombo = b.Combo
@@ -293,6 +300,10 @@ func parseChapterNumber(chapter string) int {
 
 	return 50 // default to mid-range
 }
+
+// HardInterval is the review interval, in days, below which a word is still
+// hard enough for a right answer to earn loot.
+const HardInterval = 7
 
 // PlayerHP is the player's max HP before gear, from the level that level
 // points (journey.Counts.LevelPoints) reach.

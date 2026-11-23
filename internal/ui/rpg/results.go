@@ -17,7 +17,7 @@ func (m Model) startSession() Model {
 	m.reviewed = map[string]bool{}
 	m.saved = false
 	m.saveErr = nil
-	m.earned, m.bonded = wiki.Wallet{}, nil
+	m.earned, m.bonded, m.loot = wiki.Wallet{}, nil, nil
 	return m
 }
 

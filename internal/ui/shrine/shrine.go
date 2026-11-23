@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -23,6 +24,7 @@ type Model struct {
 	items    []journey.Gear // every item, in slot order
 	cleared  map[int]string
 	kit      wiki.Kit
+	mats     map[string]int // materials held, for crafting
 	wallet   wiki.Wallet
 	mastered int // level points (learned + mastered characters), which set HP
 	cursor   int
@@ -60,6 +62,9 @@ func (m Model) Refresh() Model {
 	m.cleared, errs[0] = m.store.ClearedStages()
 	m.kit, errs[1] = m.store.Kit()
 	m.wallet, errs[2] = m.store.Wallet()
+	mats, matErr := m.store.Materials()
+	m.mats = mats
+	errs[1] = errors.Join(errs[1], matErr)
 	pages, err := m.store.ListPages()
 	errs[3] = err
 	m.mastered = journey.CountProgress(pages).LevelPoints()
@@ -92,6 +97,15 @@ func (m Model) act() Model {
 	switch {
 	case !g.OnShelf(m.cleared):
 		return m.say(true, fmt.Sprintf("%s comes to the shrine after tribulation %d.", g.Name, g.Opens))
+	case !m.owns(g.ID) && g.Crafted():
+		if err := m.store.Craft(g.ID, g.Recipe, wiki.Wallet(g.Price)); err != nil {
+			return m.say(true, fmt.Sprintf("Can't craft %s yet: it takes %s. Materials drop from road wins that recall shaky words.", g.Name, recipeText(g.Recipe, g.Price)))
+		}
+		if err := m.store.Wear(g.Slot, g.ID); err != nil {
+			return m.say(true, err.Error())
+		}
+		m = m.Refresh()
+		return m.say(false, fmt.Sprintf("Crafted and put on %s %s.", g.Name, g.English))
 	case !m.owns(g.ID):
 		short := wiki.Wallet{Tongqian: g.Price.Tongqian - m.wallet.Tongqian, Yuanbao: g.Price.Yuanbao - m.wallet.Yuanbao}
 		if short.Tongqian > 0 || short.Yuanbao > 0 {
@@ -135,4 +149,18 @@ func shortText(w wiki.Wallet) string {
 		return fmt.Sprintf("%d more 元宝", w.Yuanbao)
 	}
 	return fmt.Sprintf("%d more 铜钱", w.Tongqian)
+}
+
+// recipeText lists what crafting takes: materials, then any copper.
+func recipeText(recipe map[string]int, price journey.Price) string {
+	var parts []string
+	for _, m := range journey.Materials() {
+		if n := recipe[m.ID]; n > 0 {
+			parts = append(parts, fmt.Sprintf("%d %s", n, m.Name))
+		}
+	}
+	if price.Tongqian > 0 {
+		parts = append(parts, fmt.Sprintf("%d 铜钱", price.Tongqian))
+	}
+	return strings.Join(parts, " + ")
 }

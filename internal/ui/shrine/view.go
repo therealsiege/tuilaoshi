@@ -60,6 +60,8 @@ func (m Model) shelfView() string {
 			status = ui.MutedStyle.Render("owned")
 		case !g.OnShelf(m.cleared):
 			status = ui.MutedStyle.Render(fmt.Sprintf("after %d", g.Opens))
+		case g.Crafted():
+			status = ui.SuccessStyle.Render("craft")
 		default:
 			status = ui.WarningStyle.Render(priceText(g.Price))
 		}
@@ -86,7 +88,10 @@ func (m Model) sheetView() string {
 		g := m.items[m.cursor]
 		b.WriteString(ui.ChineseStyle.Render(g.Name) + "  " + g.English + "\n")
 		b.WriteString(ui.WrapText(g.Desc, 40) + "\n")
-		if g.Price != (journey.Price{}) {
+		switch {
+		case g.Crafted():
+			b.WriteString(ui.MutedStyle.Render("Craft from: "+recipeText(g.Recipe, g.Price)) + "\n")
+		case g.Price != (journey.Price{}):
 			b.WriteString(ui.MutedStyle.Render("Price: "+priceText(g.Price)) + "\n")
 		}
 		b.WriteString("\n")
@@ -101,6 +106,7 @@ func (m Model) sheetView() string {
 			title = g.Name + " " + g.English
 		}
 	}
+	b.WriteString(ui.SubtitleStyle.Render("Materials") + "  " + m.matsText() + "\n\n")
 	b.WriteString(ui.SubtitleStyle.Render("Your pilgrim") + "\n")
 	b.WriteString(ui.ChineseStyle.Render(title) + "\n")
 	fmt.Fprintf(&b, "HP %d · +%d damage per hit\n", rpgengine.PlayerHP(m.mastered)+e.BonusHP, e.BonusDamage)
@@ -126,4 +132,18 @@ func priceText(p journey.Price) string {
 		parts = append(parts, fmt.Sprintf("%d 元宝", p.Yuanbao))
 	}
 	return strings.Join(parts, " + ")
+}
+
+// matsText lists the materials held, or how to get them.
+func (m Model) matsText() string {
+	var parts []string
+	for _, mat := range journey.Materials() {
+		if n := m.mats[mat.ID]; n > 0 {
+			parts = append(parts, fmt.Sprintf("%s ×%d", mat.Name, n))
+		}
+	}
+	if len(parts) == 0 {
+		return ui.MutedStyle.Render("none yet: road wins that recall shaky words drop them")
+	}
+	return strings.Join(parts, "  ")
 }

@@ -115,6 +115,8 @@ type Model struct {
 	nightmare *journey.Boss
 	// road is set for battles fought on the road (see road.go).
 	road bool
+	// loot is the materials the last fight earned (see road.go).
+	loot []string
 }
 
 type logEntry struct {

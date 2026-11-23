@@ -16,15 +16,19 @@ type Price struct {
 
 // Gear is an item sold at the Earth God's shrine.
 type Gear struct {
-	ID      string `yaml:"id"`
-	Name    string `yaml:"name"`
-	English string `yaml:"english"`
-	Slot    string `yaml:"slot"`
-	Effect  string `yaml:"effect,omitempty"` // a gear ability in the rpg registry; titles have none
-	Desc    string `yaml:"desc"`
-	Price   Price  `yaml:"price"`
-	Opens   int    `yaml:"opens,omitempty"` // the stage that must be cleared first
+	ID      string         `yaml:"id"`
+	Name    string         `yaml:"name"`
+	English string         `yaml:"english"`
+	Slot    string         `yaml:"slot"`
+	Effect  string         `yaml:"effect,omitempty"` // a gear ability in the rpg registry; titles have none
+	Desc    string         `yaml:"desc"`
+	Price   Price          `yaml:"price"`
+	Opens   int            `yaml:"opens,omitempty"`  // the stage that must be cleared first
+	Recipe  map[string]int `yaml:"recipe,omitempty"` // crafted gear: material id -> count
 }
+
+// Crafted reports whether the item is made from materials rather than bought.
+func (g Gear) Crafted() bool { return len(g.Recipe) > 0 }
 
 // AllGear returns every item, in shelf order.
 func AllGear() []Gear { return content.Gear }

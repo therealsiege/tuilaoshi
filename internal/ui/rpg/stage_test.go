@@ -309,3 +309,35 @@ func TestAWildEncounterIsNotPractice(t *testing.T) {
 		t.Errorf("encounter intro:\n%s", v)
 	}
 }
+
+func TestLootOnlyFromRoadWinsThatRecallHardWords(t *testing.T) {
+	win := func(m Model, interval int) Model {
+		t.Helper()
+		m.battle.Question = &rpgengine.CombatQuestion{Choices: []string{"a", "b"}, Correct: 0, Damage: 20}
+		m.battle.Question.Card.ReviewInterval = interval
+		m.battle.Question.Card.ID = fmt.Sprintf("w%d", interval)
+		m.state = stateFighting
+		m, _ = right(m)
+		enemyDown(&m)
+		m, _ = animationEnds(m)
+		return m
+	}
+	store := stageWiki(t, 0, 4)
+	if err := store.SetPlace(wiki.Place{Region: "changan"}); err != nil {
+		t.Fatal(err)
+	}
+	minion := journey.SoldiersAt(5)[0]
+	if m := win(New(store, nil, nil).Encounter(minion), 30); len(m.loot) != 0 {
+		t.Errorf("an easy word earned loot %v", m.loot)
+	}
+	if m := win(New(store, nil, nil).Spar(), 1); len(m.loot) != 0 {
+		t.Errorf("sparring earned loot %v", m.loot)
+	}
+	m := win(New(store, nil, nil).Encounter(minion), 1)
+	if len(m.loot) != 1 || !strings.Contains(m.View(), "Loot:") {
+		t.Fatalf("a hard word on the road earned %v:\n%s", m.loot, m.View())
+	}
+	if mats, err := store.Materials(); err != nil || mats[m.loot[0]] != 1 {
+		t.Errorf("loot not kept: %v %v", mats, err)
+	}
+}

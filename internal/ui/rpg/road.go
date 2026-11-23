@@ -121,3 +121,31 @@ func PilgrimHP(store *wiki.Store) (hp, most int, err error) {
 	most = rpgengine.PlayerHP(journey.CountProgress(pages).LevelPoints()) + e.BonusHP
 	return max(most-place.Wounds, 1), most, nil
 }
+
+// takeLoot gives the materials a won road battle earns: one when a shaky or
+// new word was recalled, and a demon core from a captain, demon or boss
+// when two were. Sparring and easy repeats earn nothing.
+func (m *Model) takeLoot() {
+	m.loot = nil
+	if !m.road || !m.battle.PlayerWon() || m.battle.HardHits == 0 {
+		return
+	}
+	terrain := ""
+	if place, err := m.store.Place(); err == nil {
+		if i := journey.RegionByID(place.Region); i >= 0 {
+			terrain = journey.Regions()[i].Terrain
+		}
+	}
+	enemy := journey.BestiaryEntry{Name: m.battle.Enemy.Chinese}
+	if e := journey.EnemyLookup(m.battle.Enemy.Chinese); e != nil {
+		enemy = *e
+	}
+	first, core := journey.Drop(enemy, m.battle.Rank, terrain)
+	m.loot = []string{first}
+	if core && m.battle.HardHits >= 2 {
+		m.loot = append(m.loot, "core")
+	}
+	if err := m.store.AddMaterials(m.loot); err != nil {
+		m.saveErr = err
+	}
+}

@@ -1,0 +1,12 @@
+# Materials dropped by enemies on the road, crafted into gear at the shrine
+# (see gear.yaml `recipe`). They drop only from wins that recalled a shaky
+# or new word (internal/rpg: HardHits), so harder recall pays the loot.
+# What drops depends on the enemy (see materials.go: Drop).
+- {id: hide, name: 兽皮, english: Beast Hide, desc: "Tough hide from a beast spirit."}
+- {id: bone, name: 妖骨, english: Demon Bone, desc: "A bone that hums with leftover magic."}
+- {id: core, name: 妖丹, english: Demon Core, desc: "The pearl of power a demon grows in its belly over centuries."}
+- {id: fire, name: 火晶, english: Fire Crystal, desc: "A shard of flame that never cools."}
+- {id: venom, name: 毒囊, english: Venom Sac, desc: "Handle with care."}
+- {id: feather, name: 灵羽, english: Spirit Feather, desc: "A feather that stirs up wind and dust."}
+- {id: pearl, name: 水珠, english: Water Pearl, desc: "A bead of river water that will not spill."}
+- {id: herb, name: 仙草, english: Immortal Herb, desc: "A herb from where immortals walk."}

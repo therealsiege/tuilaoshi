@@ -106,3 +106,61 @@
   desc: "For one who has crossed the Flaming Mountains on the road west."
   price: {yuanbao: 3}
   opens: 52
+# Crafted gear: made at the shrine from materials (recipe: material id ->
+# count) plus a little copper; it can't be bought.
+- id: hide-vest
+  name: 兽皮甲
+  english: Hide Vest
+  slot: robe
+  effect: hp2
+  desc: "Stitched from beast hides taken on the road: more health."
+  price: {tongqian: 20}
+  recipe: {hide: 3}
+- id: bone-blade
+  name: 骨刃
+  english: Bone Blade
+  slot: weapon
+  effect: power2
+  desc: "A demon's bone, ground to an edge: right answers hit much harder."
+  price: {tongqian: 20}
+  recipe: {bone: 3}
+- id: fire-cover
+  name: 避火罩
+  english: Fire-Warding Cover
+  slot: hat
+  effect: slow_burn2
+  desc: "Fire crystals woven into a hood: twelve more seconds against burning foes."
+  price: {tongqian: 30}
+  recipe: {fire: 3}
+- id: feather-crown
+  name: 灵羽冠
+  english: Spirit-Feather Crown
+  slot: hat
+  effect: reveal
+  desc: "Feathers that see through dust: one more reveal (w) each battle."
+  price: {tongqian: 30}
+  recipe: {feather: 3}
+- id: antidote-pearl
+  name: 避毒珠
+  english: Antidote Pearl
+  slot: charm
+  effect: antidote
+  desc: "A water pearl steeped in venom until it no longer fears it: stinging foes' misses hurt no more than others'."
+  price: {tongqian: 40}
+  recipe: {venom: 2, pearl: 1}
+- id: core-amulet
+  name: 内丹护符
+  english: Demon-Core Amulet
+  slot: charm
+  effect: shield2
+  desc: "Two demon cores bound with immortal herbs: blocks two enemy hits."
+  price: {tongqian: 60}
+  recipe: {core: 2, herb: 2}
+- id: herb-robe
+  name: 仙草衣
+  english: Immortal-Herb Robe
+  slot: robe
+  effect: hp3
+  desc: "Woven from immortal herbs around a demon core: much more health."
+  price: {tongqian: 60}
+  recipe: {herb: 4, core: 1}

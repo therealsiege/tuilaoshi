@@ -62,3 +62,19 @@ func TestBuyWearAndTakeOff(t *testing.T) {
 		t.Errorf("an item not yet on the shelf: %q", m.note)
 	}
 }
+
+func TestCraftFromMaterials(t *testing.T) {
+	m := pick(t, shrineWith(t, 100), "hide-vest")
+	m, _ = m.Update(enter)
+	if !m.noteErr || !strings.Contains(m.note, "3 兽皮") {
+		t.Fatalf("crafting without hides: %q", m.note)
+	}
+	if err := m.store.AddMaterials([]string{"hide", "hide", "hide"}); err != nil {
+		t.Fatal(err)
+	}
+	m = m.Refresh()
+	m, _ = m.Update(enter)
+	if m.noteErr || m.kit.Worn["robe"] != "hide-vest" || m.wallet.Tongqian != 80 {
+		t.Errorf("crafted: %q, worn %v, purse %+v", m.note, m.kit.Worn, m.wallet)
+	}
+}
