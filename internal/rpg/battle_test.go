@@ -1,6 +1,7 @@
 package rpg
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
@@ -133,5 +134,20 @@ func TestRematchRestoresFightAgainstSameEnemy(t *testing.T) {
 	}
 	if r.Question == nil {
 		t.Error("rematch has no question")
+	}
+}
+
+func TestWrongAnswersMatchTheRightOnesLength(t *testing.T) {
+	var cards []model.Card
+	for i, w := range []string{"九", "明", "很", "上", "练习", "生病", "公共汽车", "护照"} {
+		cards = append(cards, model.Card{ID: fmt.Sprint(i), Chinese: w, Pinyin: fmt.Sprintf("p%d", i), English: fmt.Sprintf("meaning %d", i)})
+	}
+	d := newDeck(cards)
+	for i := 0; i < 50; i++ {
+		for _, c := range generateDistractors(cards[0], d, "character", 3, false) {
+			if len([]rune(c)) != 1 {
+				t.Fatalf("a one-character answer got the wrong answer %q", c)
+			}
+		}
 	}
 }

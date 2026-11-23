@@ -7,6 +7,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/therealsiege/tuilaoshi/internal/model"
 )
@@ -288,6 +289,14 @@ func generateDistractors(card model.Card, d deck, category string, count int, lo
 	rand.Shuffle(len(candidates), func(i, j int) {
 		candidates[i], candidates[j] = candidates[j], candidates[i]
 	})
+	// Prefer wrong answers as long as the right one (characters, or pinyin
+	// syllables), so length alone doesn't give the answer away.
+	if category != "meaning" {
+		size := answerSize(correctAnswer, category)
+		sort.SliceStable(candidates, func(i, j int) bool {
+			return (answerSize(candidates[i], category) == size) && (answerSize(candidates[j], category) != size)
+		})
+	}
 	if lookAlike && correctAnswer == card.Chinese {
 		sort.SliceStable(candidates, func(i, j int) bool {
 			return resemblance(card.Chinese, candidates[i]) > resemblance(card.Chinese, candidates[j])
@@ -299,6 +308,15 @@ func generateDistractors(card model.Card, d deck, category string, count int, lo
 	}
 
 	return candidates
+}
+
+// answerSize is an answer's length that a learner could compare at a
+// glance: characters for Chinese, syllables for pinyin.
+func answerSize(answer, category string) int {
+	if category == "pinyin" {
+		return len(strings.Fields(answer))
+	}
+	return utf8.RuneCountInString(answer)
 }
 
 // couldBeRight reports whether val, offered as a wrong answer to a question
