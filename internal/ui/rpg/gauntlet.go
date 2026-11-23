@@ -169,9 +169,13 @@ func (m Model) renderGauntlet() string {
 		names = append(names, s.Name)
 	}
 	names = append(names, m.stage.Opponent.Name)
+	beaten := m.foe // fights won so far, counting this one once it is won
+	if m.state == stateVictory {
+		beaten++
+	}
 	for i := range names {
 		switch {
-		case i < m.foe:
+		case i < beaten:
 			names[i] = ui.MutedStyle.Render("✓ " + names[i])
 		case i == m.foe:
 			names[i] = ui.WarningStyle.Render("▶ " + names[i])

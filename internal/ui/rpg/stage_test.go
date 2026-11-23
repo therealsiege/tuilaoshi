@@ -77,7 +77,7 @@ func TestWinningOpenStageClearsIt(t *testing.T) {
 		t.Errorf("victory screen doesn't say the stage cleared:\n%s", m.View())
 	}
 
-	m = skipScene(m.Refresh()) // stage 2 needs characters this learner lacks
+	m = skipScene(m.Spar()) // stage 2 needs characters this learner lacks
 	if m.stage != nil || m.next == nil || m.next.Number != 2 {
 		t.Fatalf("after clearing 1 with nothing mastered: stage %v, next %v; want practice before stage 2", m.stage, m.next)
 	}
@@ -299,5 +299,13 @@ func TestRoadWinsCountTowardHunts(t *testing.T) {
 	hunts, err := store.Hunts()
 	if err != nil || hunts["changan-hunt"] != 1 {
 		t.Errorf("hunt progress %v %v, want 1 from the road win only", hunts, err)
+	}
+}
+
+func TestAWildEncounterIsNotPractice(t *testing.T) {
+	m := New(stageWiki(t, 0, 0), nil, nil).Encounter(journey.SoldiersAt(1)[0])
+	v := m.View()
+	if strings.Contains(v, "practice") || strings.Contains(v, "0 more") || !strings.Contains(v, "leaps out on the road") {
+		t.Errorf("encounter intro:\n%s", v)
 	}
 }

@@ -182,7 +182,8 @@ func (m Model) sideView() string {
 		if s.Status == journey.StageOpen {
 			b.WriteString(ui.WarningStyle.Render("Ready: walk into the red marker") + "\n")
 		} else {
-			b.WriteString(ui.MutedStyle.Render("Sealed: "+journey.NeedText(*s, m.counts)) + "\n")
+			b.WriteString(ui.WarningStyle.Render("Sealed: "+journey.NeedText(*s, m.counts)) + "\n")
+			b.WriteString(ui.MutedStyle.Render(ui.WrapText(journey.HowToOpen(*s), 36)) + "\n")
 		}
 	} else if s != nil && s.Number > m.region.Region.To {
 		b.WriteString(ui.SuccessStyle.Render("This region is cleared.") + "\n" + ui.MutedStyle.Render("The road west (<) is open.") + "\n")

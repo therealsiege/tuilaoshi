@@ -222,7 +222,7 @@ func (m Model) face(p journey.Point) (Model, tea.Cmd) {
 	case s == nil || s.Number != n:
 		m.note = "An earlier tribulation still waits on the road behind you."
 	case s.Status != journey.StageOpen:
-		m.note = fmt.Sprintf("Tribulation %d is sealed: %s. Study at camp (c) to open it.", n, journey.NeedText(*s, m.counts))
+		m.note = fmt.Sprintf("Tribulation %d is sealed: %s. %s", n, journey.NeedText(*s, m.counts), journey.HowToOpen(*s))
 	default:
 		return m, func() tea.Msg { return FightMsg{} }
 	}

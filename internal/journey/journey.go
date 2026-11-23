@@ -385,5 +385,18 @@ func NeedText(s Stage, c Counts) string {
 	if CountsLearning(s.Number) {
 		verb = "learn"
 	}
-	return fmt.Sprintf("%s %d more characters", verb, s.Needed(c))
+	n := s.Needed(c)
+	if n == 1 {
+		return fmt.Sprintf("%s 1 more character", verb)
+	}
+	return fmt.Sprintf("%s %d more characters", verb, n)
+}
+
+// HowToOpen says what moves a sealed stage's count: a character is learned
+// when a review moves it to a 2-day interval, mastered at 7 days.
+func HowToOpen(s Stage) string {
+	if CountsLearning(s.Number) {
+		return "Review due words at camp (c, then r): a character counts as learned once a right answer moves it to 2+ days."
+	}
+	return "Keep reviewing at camp (c, then r): a character counts as mastered once it reaches a 7-day interval."
 }
