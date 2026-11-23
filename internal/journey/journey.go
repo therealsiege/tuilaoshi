@@ -235,33 +235,11 @@ func calculateRank(mastered int) Rank {
 // calculateProgress places the learner at tribulation (the current stage)
 // with cleared stages behind them.
 func calculateProgress(tribulation, cleared, mastered, totalChars int) Progress {
-
-	// Journey waypoints
-	locations := []struct {
-		name    string
-		english string
-		start   int
-	}{
-		{"长安", "Chang'an (Capital)", 0},
-		{"双叉岭", "Twin Fork Ridge", 10},
-		{"五行山", "Five Elements Mountain", 20},
-		{"观音院", "Guanyin Temple", 30},
-		{"高老庄", "Gao Village", 40},
-		{"流沙河", "Flowing Sands River", 50},
-		{"火焰山", "Flaming Mountains", 60},
-		{"通天河", "Heaven-Reaching River", 70},
-		{"灵山", "Spirit Mountain", 80},
-		{"大雷音寺", "Great Thunder Monastery", 81},
-	}
-
-	location := "长安"
-	locationEn := "Chang'an (Capital)"
-	for i := len(locations) - 1; i >= 0; i-- {
-		if tribulation >= locations[i].start {
-			location = locations[i].name
-			locationEn = locations[i].english
-			break
-		}
+	// Where the pilgrim is: the tribulation's own place, and the region's
+	// English name.
+	location, locationEn := "灵山", "Vulture Peak"
+	if t := TribulationAt(tribulation); t != nil {
+		location, locationEn = t.Location, content.Regions[RegionOf(tribulation)].English
 	}
 
 	percent := float64(cleared) / float64(len(content.Tribulations)) * 100.0

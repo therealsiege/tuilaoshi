@@ -198,10 +198,11 @@ func TestCalculateProgress(t *testing.T) {
 		wantLoc       string
 		wantPct       float64
 	}{
-		{1, 0, "长安", 0},
-		{10, 9, "双叉岭", 9.0 / 81 * 100},
-		{50, 49, "流沙河", 49.0 / 81 * 100},
-		{81, 81, "大雷音寺", 100},
+		// Each tribulation's own place (content/tribulations.yaml).
+		{1, 0, "灵山", 0},
+		{10, 9, "观音禅院", 9.0 / 81 * 100},
+		{50, 49, "火焰山", 49.0 / 81 * 100},
+		{81, 81, "长安", 100},
 	}
 	for _, tt := range tests {
 		got := calculateProgress(tt.trib, tt.cleared, 0, 0)

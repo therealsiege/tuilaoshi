@@ -31,7 +31,7 @@ func TestStartHereSuggestsOneNextStep(t *testing.T) {
 		t.Errorf("with a backlog: %q", v)
 	}
 	m.due = 0
-	if v := uitest.Plain(m.renderStartHere()); !strings.Contains(v, "f  Clear tribulation 1") {
+	if v := uitest.Plain(m.renderStartHere()); !strings.Contains(v, "esc  Tribulation 1 is open") {
 		t.Errorf("nothing due, stage 1 open: %q", v)
 	}
 	m.journeyState.Stage = nil

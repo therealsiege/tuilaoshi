@@ -24,7 +24,7 @@ var DashboardMenu = []MenuGroup{
 	}},
 	{"Journey", []MenuItem{
 		{"f", "Spar (practice battle)"},
-		{"j", "Journey map"},
+		{"j", "Journey log"},
 		{"g", "Shrine: gear & coins"},
 		{"o", "Collection cards"},
 		{"p", "Party & bonds"},
@@ -54,7 +54,7 @@ func MenuLabel(key string) string {
 // menuHelp renders the menu as plain text for the help screen.
 func menuHelp() string {
 	var b strings.Builder
-	b.WriteString("Dashboard Keys\n")
+	b.WriteString("Camp Keys\n")
 	for _, g := range DashboardMenu {
 		b.WriteString("\n" + g.Title + "\n")
 		for _, it := range g.Items {

@@ -102,8 +102,11 @@ func (m Model) renderStartHere() string {
 		} else {
 			key, what = "r", fmt.Sprintf("Review your %s due %s", thousands(m.due), plural(m.due, "word", "words"))
 		}
+		if s != nil && s.Status == journey.StageLocked {
+			what += fmt.Sprintf(": it opens tribulation %d (%s)", s.Number, journey.NeedText(*s, m.journeyState.Counts))
+		}
 	case s != nil && s.Status == journey.StageOpen:
-		key, what = "f", fmt.Sprintf("Clear tribulation %d: battle %s", s.Number, s.Opponent.Name)
+		key, what = "esc", fmt.Sprintf("Tribulation %d is open: walk to its red marker on the road", s.Number)
 	}
 	return "  " + ui.WarningStyle.Render("▶ Start here") + "   " + ui.ChineseStyle.Render(key) + "  " + what
 }

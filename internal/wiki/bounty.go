@@ -23,8 +23,8 @@ type Bounty struct {
 var bountyPool = []Bounty{
 	{"review_right", "Recall 20 due words in review (r)", 20, 30},
 	{"drill_right", "Get 15 words right in flashcards (d)", 15, 25},
-	{"battle_right", "Land 15 hits with fresh words in battle (f)", 15, 25},
-	{"battle_won", "Win 2 battles with fresh words (f)", 2, 25},
+	{"battle_right", "Land 15 hits with fresh words in battle", 15, 25},
+	{"battle_won", "Win 2 battles with fresh words", 2, 25},
 }
 
 const (
