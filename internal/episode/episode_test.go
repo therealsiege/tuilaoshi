@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
@@ -65,5 +66,37 @@ func TestThemeIsTheEpisodesUnlearnedWordsMostUsedFirst(t *testing.T) {
 	got := Ahead(due, []Episode{e}, cards)
 	if got[0].ID != "b" || got[1].ID != "a" || got[2].ID != "x" || got[3].ID != "y" {
 		t.Errorf("review order %v, want the episode's words first", got)
+	}
+}
+
+func TestScenesAskAboutSureLinesWithOtherLinesAsWrongAnswers(t *testing.T) {
+	var lines []model.DialogueLine
+	for i := 0; i < 45; i++ {
+		lines = append(lines, model.DialogueLine{Chinese: fmt.Sprintf("这是第%d句很长的台词", i), English: fmt.Sprintf("This is line %d.", i)})
+	}
+	lines[3].English += " (listen with p)"
+	e := Episode{ID: "ep", Episode: model.Episode{Lines: lines}}
+	scenes := e.Scenes()
+	if len(scenes) != 3 {
+		t.Fatalf("%d scenes from 45 lines, want 3", len(scenes))
+	}
+	for _, s := range scenes {
+		asked := s.Lines[len(s.Lines)-1]
+		if s.Choices[s.Right] != asked.English || strings.Contains(asked.English, "listen") {
+			t.Errorf("scene %d asks %q with right choice %q", s.Index, asked.English, s.Choices[s.Right])
+		}
+		if len(s.Choices) != choiceCount || len(s.Lines) > contextSize+1 {
+			t.Errorf("scene %d: %d choices, %d lines of context", s.Index, len(s.Choices), len(s.Lines))
+		}
+		for i, c := range s.Choices {
+			for _, l := range lines[s.Index*sceneSize : min((s.Index+1)*sceneSize, len(lines))] {
+				if i != s.Right && c == l.English {
+					t.Errorf("scene %d offers its own line %q as a wrong answer", s.Index, c)
+				}
+			}
+		}
+	}
+	if again := e.Scenes(); again[1].Asked != scenes[1].Asked || again[1].Right != scenes[1].Right {
+		t.Error("scenes differ between calls")
 	}
 }

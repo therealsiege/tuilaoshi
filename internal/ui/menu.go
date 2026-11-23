@@ -20,6 +20,7 @@ var DashboardMenu = []MenuGroup{
 		{"r", "Review due words"},
 		{"d", "Practice flashcards"},
 		{"t", "Read & listen"},
+		{"e", "Episodes 剧场"},
 		{"c", "Chat with the tutor"},
 	}},
 	{"Journey", []MenuItem{

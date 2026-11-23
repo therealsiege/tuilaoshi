@@ -6,14 +6,12 @@ package reader
 
 import (
 	"errors"
-	"fmt"
-	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	"github.com/therealsiege/tuilaoshi/internal/segment"
@@ -35,18 +33,7 @@ type clip struct{ start, end time.Duration }
 type clipDoneMsg struct{ err error }
 
 // playClip plays part of an audio file; tests replace it.
-var playClip = func(audio string, c clip) error {
-	player, err := exec.LookPath("ffplay")
-	if err != nil {
-		return fmt.Errorf("playing original audio needs ffplay (brew install ffmpeg)")
-	}
-	out, err := exec.Command(player, "-nodisp", "-autoexit", "-loglevel", "error",
-		"-ss", fmt.Sprintf("%.3f", c.start.Seconds()), "-t", fmt.Sprintf("%.3f", (c.end-c.start).Seconds()), audio).CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("ffplay: %v %s", err, strings.TrimSpace(string(out)))
-	}
-	return nil
-}
+var playClip = func(path string, c clip) error { return audio.PlayClip(path, c.start, c.end) }
 
 // playLine plays the selected line from the episode's original audio.
 func (m Model) playLine() tea.Cmd {

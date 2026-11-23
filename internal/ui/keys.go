@@ -88,6 +88,7 @@ const (
 	ViewWorld      // a town walked into: notice board, inn, stone
 	ViewTitle      // the opening screen: continue, new or load a journey
 	ViewMap        // walking the region's map: the journey's hub
+	ViewTheatre    // the learner's episodes: scenes, listening, talks
 )
 
 // SwitchViewMsg tells the app to change views.
@@ -117,6 +118,7 @@ type DashboardKeys struct {
 	Shrine   key.Binding
 	Cards    key.Binding
 	Party    key.Binding
+	Episodes key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -174,6 +176,10 @@ func DefaultDashboardKeys() DashboardKeys {
 			key.WithKeys("p"),
 			key.WithHelp("p", "party"),
 		),
+		Episodes: key.NewBinding(
+			key.WithKeys("e"),
+			key.WithHelp("e", "episodes"),
+		),
 		Reading: key.NewBinding(
 			key.WithKeys("t"),
 			key.WithHelp("t", "read"),
@@ -205,6 +211,14 @@ func HelpText(v View) string {
 			"  ↑↓     Select radical\n" +
 			"  esc    Back to dashboard\n" +
 			"  ?      Toggle help"
+	case ViewTheatre:
+		return "Episodes Keys\n\n" +
+			"  ↑↓     Choose an episode / scene\n" +
+			"  enter  Open / answer a scene\n" +
+			"  r      Read & listen line by line\n" +
+			"  l      Listening drill (tab replays)\n" +
+			"  t      Talk it over with 孙悟空\n" +
+			"  esc    Back"
 	case ViewMap:
 		return "Road Keys\n\n" +
 			"  arrows/hjkl  Walk\n" +

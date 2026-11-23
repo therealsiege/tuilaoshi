@@ -27,6 +27,7 @@ import (
 	rpgview "github.com/therealsiege/tuilaoshi/internal/ui/rpg"
 	"github.com/therealsiege/tuilaoshi/internal/ui/shrine"
 	"github.com/therealsiege/tuilaoshi/internal/ui/stats"
+	"github.com/therealsiege/tuilaoshi/internal/ui/theatre"
 	"github.com/therealsiege/tuilaoshi/internal/ui/title"
 	"github.com/therealsiege/tuilaoshi/internal/ui/world"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
@@ -58,6 +59,7 @@ type Model struct {
 	world     world.Model
 	title     title.Model
 	roam      roam.Model
+	theatre   theatre.Model
 	battle    rpgview.Model
 	reader    reader.Model
 	assess    assessment.Model
@@ -108,6 +110,7 @@ func New(wikiDir string) (Model, error) {
 		currentView:   ui.ViewTitle,
 		title:         title.New(store, dict).Refresh(),
 		roam:          roam.New(store),
+		theatre:       theatre.New(store, dict),
 		dashboard:     dashboard.New(store, ttsClient),
 		drill:         drill.New(store, claudeClient, ttsClient, dict),
 		browser:       browser.New(store),
@@ -153,6 +156,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.world = m.world.SetSize(msg.Width, msg.Height)
 		m.title = m.title.SetSize(msg.Width, msg.Height)
 		m.roam = m.roam.SetSize(msg.Width, msg.Height)
+		m.theatre = m.theatre.SetSize(msg.Width, msg.Height)
 		m.battle = m.battle.SetSize(msg.Width, msg.Height)
 		m.reader = m.reader.SetSize(msg.Width, msg.Height)
 		m.assess = m.assess.SetSize(msg.Width, msg.Height)
@@ -165,6 +169,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case roam.FightMsg:
 		m.currentView, m.battle = ui.ViewBattle, m.battle.RoadFight()
 		return m, nil
+	case theatre.ReadMsg:
+		m.currentView, m.reader = ui.ViewReading, m.reader.Refresh().OpenEpisode(msg.Episode)
+		return m, nil
+	case theatre.TalkMsg:
+		var cmd tea.Cmd
+		m.currentView = ui.ViewParty
+		m.party, cmd = m.party.TalkAbout(msg.Title, msg.Lines, msg.Words)
+		return m, cmd
 	case roam.EncounterMsg:
 		m.currentView, m.battle = ui.ViewBattle, m.battle.Encounter(msg.Soldier)
 		return m, nil
@@ -220,6 +232,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ui.ViewTitle:
 			m.title = m.title.Refresh()
 			return m, nil
+		case ui.ViewTheatre:
+			m.theatre = m.theatre.Refresh()
+			return m, nil
 		case ui.ViewMap:
 			m.roam = m.roam.Refresh()
 			m.checkCelebrations()
@@ -250,7 +265,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Help toggle from anywhere
 		typing := m.currentView == ui.ViewChat || (m.currentView == ui.ViewParty && m.party.Busy()) ||
 			(m.currentView == ui.ViewWorld && m.world.Typing()) ||
-			(m.currentView == ui.ViewTitle && m.title.Typing())
+			(m.currentView == ui.ViewTitle && m.title.Typing()) ||
+			(m.currentView == ui.ViewTheatre && m.theatre.Typing())
 		if key.Matches(msg, m.keys.Help) && !typing {
 			m.showHelp = !m.showHelp
 			return m, nil
@@ -277,7 +293,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			(m.currentView == ui.ViewBrowser && m.browser.Searching()) ||
 			(m.currentView == ui.ViewParty && m.party.Busy()) ||
 			m.currentView == ui.ViewWorld ||
-			m.currentView == ui.ViewTitle || m.currentView == ui.ViewMap
+			m.currentView == ui.ViewTitle || m.currentView == ui.ViewMap ||
+			(m.currentView == ui.ViewTheatre && m.theatre.Busy())
 		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard && !readingOpen {
 			if !m.isInputComposing() {
 				if m.currentView == ui.ViewBattle {
@@ -323,6 +340,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.title, cmd = m.title.Update(msg)
 	case ui.ViewMap:
 		m.roam, cmd = m.roam.Update(msg)
+	case ui.ViewTheatre:
+		m.theatre, cmd = m.theatre.Update(msg)
 	case ui.ViewBattle:
 		m.battle, cmd = m.battle.Update(msg)
 	case ui.ViewReading:
@@ -365,6 +384,8 @@ func (m Model) View() string {
 		content = m.title.View()
 	case ui.ViewMap:
 		content = m.roam.View()
+	case ui.ViewTheatre:
+		content = m.theatre.View()
 	case ui.ViewBattle:
 		content = m.battle.View()
 	case ui.ViewReading:
@@ -384,21 +405,6 @@ func (m Model) View() string {
 	}
 
 	return content
-}
-
-// isInputComposing checks if the current view's input is in Chinese composition mode.
-func (m Model) isInputComposing() bool {
-	switch m.currentView {
-	case ui.ViewDrill:
-		return m.drill.InputComposing()
-	case ui.ViewChat:
-		return m.chat.InputComposing()
-	case ui.ViewReview:
-		return m.review.InputComposing()
-	case ui.ViewBattle:
-		return m.battle.InputComposing()
-	}
-	return false
 }
 
 func (m Model) renderCelebrationOverlay(base string) string {

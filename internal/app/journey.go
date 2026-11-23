@@ -30,3 +30,18 @@ func (m Model) enterTown(id string) (tea.Model, tea.Cmd) {
 	m.world = m.world.Refresh().OpenTown(id)
 	return m, nil
 }
+
+// isInputComposing checks if the current view's input is in Chinese composition mode.
+func (m Model) isInputComposing() bool {
+	switch m.currentView {
+	case ui.ViewDrill:
+		return m.drill.InputComposing()
+	case ui.ViewChat:
+		return m.chat.InputComposing()
+	case ui.ViewReview:
+		return m.review.InputComposing()
+	case ui.ViewBattle:
+		return m.battle.InputComposing()
+	}
+	return false
+}

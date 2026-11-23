@@ -10,6 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/therealsiege/tuilaoshi/internal/claude"
+	"github.com/therealsiege/tuilaoshi/internal/episode"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
@@ -60,10 +61,34 @@ func (m Model) startTalk() (Model, tea.Cmd) {
 		m.loadErr = err
 	}
 	words := studyWords(cards, rand.New(rand.NewSource(time.Now().UnixNano())))
-	m.talk = &talk{with: b, system: journey.TalkPrompt(b.Companion, b.bond, words), words: words}
+	return m.openTalk(b, journey.TalkPrompt(b.Companion, b.bond, words), words)
+}
+
+// openTalk starts a conversation with a member, on a prompt, around words.
+func (m Model) openTalk(b member, system string, words []model.Card) (Model, tea.Cmd) {
+	m.talk = &talk{with: b, system: system, words: words}
 	m.input.Reset()
 	m.note = ""
 	return m, tea.Batch(m.send(journey.TalkOpener), m.input.Focus())
+}
+
+// TalkAbout opens a conversation about an episode with the Monkey King,
+// built around its words. He tells these stories himself, so he will talk
+// them over before joining the pilgrimage.
+func (m Model) TalkAbout(title string, lines []model.DialogueLine, words []model.Card) (Model, tea.Cmd) {
+	m = m.Refresh()
+	if m.talker == nil {
+		m.note = "Talking needs ANTHROPIC_API_KEY (in ~/.config/tuilaoshi/env)."
+		return m, nil
+	}
+	for i, b := range m.members {
+		if b.Name == episode.Talker {
+			m.cursor = i
+			words = episode.TalkWords(words, talkWords)
+			return m.openTalk(b, episode.TalkPrompt(b.Companion, b.bond, title, lines, words), words)
+		}
+	}
+	return m, nil
 }
 
 // studyWords picks words still being learned (review interval under two
