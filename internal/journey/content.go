@@ -34,6 +34,7 @@ type Content struct {
 	Spirits      []Spirit
 	Regions      []Region
 	Materials    []Material
+	Festivals    []Festival
 }
 
 // Progression sets which characters count toward opening a stage.
@@ -88,6 +89,7 @@ func LoadContent() (Content, error) {
 		{"spirits", &c.Spirits},
 		{"regions", &c.Regions},
 		{"materials", &c.Materials},
+		{"festivals", &c.Festivals},
 	}
 	for _, f := range files {
 		data, err := contentFS.ReadFile("content/" + f.name + ".yaml")

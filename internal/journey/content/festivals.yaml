@@ -1,0 +1,254 @@
+# Chinese festivals on the real calendar. While one is on (window_before
+# days before its date to window_after days after), the festival screen
+# offers its story, two reading questions (right choice written first,
+# shuffled on screen; a miss locks until tomorrow) and its words, which join
+# the reviews. Lunar dates are listed per year (dates); content_test fails
+# when the table no longer covers next year, as a reminder to extend it.
+# Text is original, written for TuiLaoShi.
+- id: dongzhi
+  name: 冬至
+  english: Winter Solstice
+  dates: ["2026-12-22", "2027-12-22", "2028-12-21", "2029-12-21", "2030-12-22"]
+  window_before: 2
+  window_after: 2
+  desc: "The longest night of the year. In the north families eat dumplings; in the south, sweet rice balls."
+  words:
+    - {chinese: 冬至, pinyin: dōngzhì, meaning: winter solstice}
+    - {chinese: 饺子, pinyin: jiǎozi, meaning: dumplings}
+    - {chinese: 汤圆, pinyin: tāngyuán, meaning: sweet rice balls in soup}
+    - {chinese: 白天, pinyin: báitiān, meaning: daytime}
+    - {chinese: 夜晚, pinyin: yèwǎn, meaning: night}
+    - {chinese: 团圆, pinyin: tuányuán, meaning: (family) reunion}
+    - {chinese: 暖和, pinyin: nuǎnhuo, meaning: warm}
+    - {chinese: 节气, pinyin: jiéqì, meaning: solar term}
+  text: |
+    冬至是一年中白天最短、夜晚最长的一天。
+    北方人喜欢在冬至吃饺子，有人说吃了饺子，耳朵就不会冻坏。
+    南方人常常吃汤圆，一家人团团圆圆，屋子里很暖和。
+  text_english: |
+    The winter solstice is the day with the shortest daytime and the longest night of the year.
+    Northerners like to eat dumplings on the solstice; some say eating them keeps your ears from freezing.
+    Southerners often eat sweet rice balls; the whole family is together, and the house is warm.
+  questions:
+    - {question: 冬至这一天有什么特别？, choices: [夜晚最长, 白天最长, 天气最热, 月亮最圆]}
+    - {question: 南方人冬至常常吃什么？, choices: [汤圆, 饺子, 月饼, 粽子]}
+- id: laba
+  name: 腊八节
+  english: Laba Festival
+  dates: ["2027-01-15", "2028-01-04", "2029-01-22", "2030-01-11"]
+  window_before: 1
+  window_after: 2
+  desc: "The eighth day of the last lunar month: a warm porridge of grains, beans and nuts, and the New Year's preparations begin."
+  words:
+    - {chinese: 腊八粥, pinyin: làbāzhōu, meaning: Laba porridge}
+    - {chinese: 粥, pinyin: zhōu, meaning: porridge}
+    - {chinese: 豆子, pinyin: dòuzi, meaning: beans}
+    - {chinese: 准备, pinyin: zhǔnbèi, meaning: to prepare}
+    - {chinese: 过年, pinyin: guònián, meaning: to celebrate the New Year}
+    - {chinese: 寺庙, pinyin: sìmiào, meaning: temple}
+    - {chinese: 煮, pinyin: zhǔ, meaning: to boil, to cook}
+    - {chinese: 甜, pinyin: tián, meaning: sweet}
+  text: |
+    腊八节在农历十二月初八。
+    这一天，人们用米、豆子和干果煮一锅甜甜的腊八粥。
+    以前，寺庙也会煮粥送给穷人。
+    老人常说："过了腊八就是年。"从这天起，大家开始准备过年了。
+  text_english: |
+    The Laba Festival falls on the eighth day of the twelfth lunar month.
+    On this day people cook a pot of sweet Laba porridge from rice, beans and dried fruit.
+    In the past, temples also cooked porridge to give to the poor.
+    The old saying goes: "After Laba, it's the New Year." From this day on, everyone starts preparing for the New Year.
+  questions:
+    - {question: 腊八粥里没有什么？, choices: [肉, 米, 豆子, 干果]}
+    - {question: "\"过了腊八就是年\"是什么意思？", choices: [从腊八开始准备过年, 腊八就是新年, 腊八以后不过年, 过年要吃腊八粥]}
+- id: chunjie
+  name: 春节
+  english: Spring Festival
+  dates: ["2027-02-06", "2028-01-26", "2029-02-13", "2030-02-03"]
+  window_before: 3
+  window_after: 12 # until just before the Lantern Festival's window
+  desc: "The lunar New Year: home for the reunion dinner, red envelopes, firecrackers, and visits through to the Lantern Festival."
+  words:
+    - {chinese: 春节, pinyin: chūnjié, meaning: Spring Festival}
+    - {chinese: 除夕, pinyin: chúxī, meaning: New Year's Eve}
+    - {chinese: 年夜饭, pinyin: niányèfàn, meaning: New Year's Eve dinner}
+    - {chinese: 红包, pinyin: hóngbāo, meaning: red envelope (of money)}
+    - {chinese: 春联, pinyin: chūnlián, meaning: Spring Festival couplets}
+    - {chinese: 鞭炮, pinyin: biānpào, meaning: firecrackers}
+    - {chinese: 拜年, pinyin: bàinián, meaning: to pay a New Year call}
+    - {chinese: 恭喜发财, pinyin: gōngxǐ fācái, meaning: wishing you prosperity}
+  text: |
+    春节是中国最重要的节日。除夕晚上，不管离家多远，大家都想回家吃年夜饭。
+    门上贴着红红的春联，孩子们最喜欢收红包。
+    新年的第一天，人们穿上新衣服，去亲戚朋友家拜年，见面就说："恭喜发财！"
+  text_english: |
+    The Spring Festival is China's most important holiday. On New Year's Eve, however far from home, everyone wants to go home for the reunion dinner.
+    Bright red couplets are pasted on the doors, and children love receiving red envelopes most of all.
+    On the first day of the New Year, people put on new clothes and visit relatives and friends, greeting each other with "Wishing you prosperity!"
+  questions:
+    - {question: 除夕晚上大家最想做什么？, choices: [回家吃年夜饭, 去朋友家拜年, 贴春联, 穿新衣服]}
+    - {question: 新年第一天见面常说什么？, choices: [恭喜发财, 生日快乐, 一路平安, 晚安]}
+- id: yuanxiao
+  name: 元宵节
+  english: Lantern Festival
+  dates: ["2027-02-20", "2028-02-09", "2029-02-27", "2030-02-17"]
+  window_before: 1
+  window_after: 2
+  desc: "The first full moon of the year closes the New Year: lanterns, lantern riddles and sweet glutinous rice balls."
+  words:
+    - {chinese: 元宵, pinyin: yuánxiāo, meaning: sweet rice dumpling; the Lantern Festival}
+    - {chinese: 灯笼, pinyin: dēnglong, meaning: lantern}
+    - {chinese: 猜, pinyin: cāi, meaning: to guess}
+    - {chinese: 灯谜, pinyin: dēngmí, meaning: lantern riddle}
+    - {chinese: 热闹, pinyin: rènao, meaning: lively, bustling}
+    - {chinese: 月圆, pinyin: yuè yuán, meaning: full moon}
+    - {chinese: 正月, pinyin: zhēngyuè, meaning: first lunar month}
+    - {chinese: 街上, pinyin: jiē shang, meaning: in the street}
+  text: |
+    正月十五是元宵节，这是新年里第一个月圆的晚上。
+    街上挂满了灯笼，非常热闹。
+    很多灯笼上写着灯谜，猜对了还有小礼物。
+    晚上回家，一家人一起吃元宵。
+  text_english: |
+    The fifteenth of the first lunar month is the Lantern Festival, the first night of the new year with a full moon.
+    The streets are hung with lanterns and are very lively.
+    Many lanterns have riddles written on them, and guessing right wins a small gift.
+    In the evening, back home, the family eats sweet rice dumplings together.
+  questions:
+    - {question: 灯笼上写着什么？, choices: [灯谜, 春联, 名字, 地图]}
+    - {question: 元宵节是在哪一天？, choices: [正月十五, 正月初一, 八月十五, 五月初五]}
+- id: qingming
+  name: 清明节
+  english: Qingming Festival
+  dates: ["2026-04-05", "2027-04-05", "2028-04-04", "2029-04-04", "2030-04-05"]
+  window_before: 1
+  window_after: 2
+  desc: "Tomb-sweeping day in early spring: families tend their ancestors' graves, then walk in the new green."
+  words:
+    - {chinese: 清明, pinyin: qīngmíng, meaning: Qingming (clear and bright)}
+    - {chinese: 扫墓, pinyin: sǎomù, meaning: to sweep the tombs}
+    - {chinese: 祖先, pinyin: zǔxiān, meaning: ancestors}
+    - {chinese: 纪念, pinyin: jìniàn, meaning: to commemorate}
+    - {chinese: 踏青, pinyin: tàqīng, meaning: spring outing}
+    - {chinese: 风筝, pinyin: fēngzheng, meaning: kite}
+    - {chinese: 下雨, pinyin: xià yǔ, meaning: to rain}
+    - {chinese: 春天, pinyin: chūntiān, meaning: spring}
+  text: |
+    清明节在春天，天气慢慢暖和了，常常下小雨。
+    这一天，人们去扫墓，纪念自己的祖先。
+    扫完墓，很多家庭会去郊外踏青，孩子们在草地上放风筝。
+  text_english: |
+    The Qingming Festival is in spring; the weather is slowly warming up, and there is often light rain.
+    On this day, people go to sweep the tombs and commemorate their ancestors.
+    After sweeping the tombs, many families go on a spring outing in the countryside, and children fly kites on the grass.
+  questions:
+    - {question: 清明节人们去做什么？, choices: [扫墓, 吃月饼, 划龙舟, 猜灯谜]}
+    - {question: 孩子们在草地上做什么？, choices: [放风筝, 放鞭炮, 吃粽子, 看月亮]}
+- id: duanwu
+  name: 端午节
+  english: Dragon Boat Festival
+  dates: ["2027-06-09", "2028-05-28", "2029-06-16", "2030-06-05"]
+  window_before: 1
+  window_after: 2
+  desc: "The fifth day of the fifth month, in memory of the poet Qu Yuan: dragon-boat races and rice dumplings wrapped in leaves."
+  words:
+    - {chinese: 端午节, pinyin: Duānwǔ jié, meaning: Dragon Boat Festival}
+    - {chinese: 粽子, pinyin: zòngzi, meaning: sticky rice dumpling in leaves}
+    - {chinese: 龙舟, pinyin: lóngzhōu, meaning: dragon boat}
+    - {chinese: 比赛, pinyin: bǐsài, meaning: race, competition}
+    - {chinese: 诗人, pinyin: shīrén, meaning: poet}
+    - {chinese: 纪念, pinyin: jìniàn, meaning: to commemorate}
+    - {chinese: 包, pinyin: bāo, meaning: to wrap}
+    - {chinese: 河, pinyin: hé, meaning: river}
+  text: |
+    农历五月初五是端午节，人们用这个节日纪念古代的诗人屈原。
+    据说屈原跳进了江里，人们划着船去找他。
+    所以今天大家还会在河上举行龙舟比赛，家家户户包粽子、吃粽子。
+  text_english: |
+    The fifth day of the fifth lunar month is the Dragon Boat Festival, when people commemorate the ancient poet Qu Yuan.
+    It is said that Qu Yuan threw himself into the river, and people rowed out in boats to look for him.
+    So today there are still dragon-boat races on the rivers, and every family wraps and eats rice dumplings.
+  questions:
+    - {question: 端午节纪念谁？, choices: [诗人屈原, 孙悟空, 玉帝, 唐僧]}
+    - {question: 端午节河上有什么活动？, choices: [龙舟比赛, 放风筝, 猜灯谜, 看灯笼]}
+- id: qixi
+  name: 七夕
+  english: Qixi (Double Seventh)
+  dates: ["2027-08-08", "2028-08-26", "2029-08-16", "2030-08-05"]
+  window_before: 1
+  window_after: 1
+  desc: "The seventh night of the seventh month, when the Cowherd and the Weaver Girl meet on a bridge of magpies."
+  words:
+    - {chinese: 七夕, pinyin: Qīxī, meaning: Double Seventh Festival}
+    - {chinese: 牛郎, pinyin: Niúláng, meaning: the Cowherd}
+    - {chinese: 织女, pinyin: Zhīnǚ, meaning: the Weaver Girl}
+    - {chinese: 喜鹊, pinyin: xǐquè, meaning: magpie}
+    - {chinese: 银河, pinyin: yínhé, meaning: the Milky Way}
+    - {chinese: 见面, pinyin: jiànmiàn, meaning: to meet}
+    - {chinese: 爱情, pinyin: àiqíng, meaning: romantic love}
+    - {chinese: 桥, pinyin: qiáo, meaning: bridge}
+  text: |
+    很久以前，牛郎和织女相爱了，可是王母娘娘用银河把他们分开了。
+    他们一年只能见一次面，就在七月初七。
+    那天晚上，很多喜鹊飞来，搭成一座桥，让他们在桥上见面。
+  text_english: |
+    Long ago, the Cowherd and the Weaver Girl fell in love, but the Queen Mother separated them with the Milky Way.
+    They can meet only once a year, on the seventh day of the seventh month.
+    That night many magpies fly up and form a bridge so the two can meet on it.
+  questions:
+    - {question: 谁把牛郎和织女分开了？, choices: [王母娘娘, 玉帝, 喜鹊, 孙悟空]}
+    - {question: 他们在哪儿见面？, choices: [喜鹊搭的桥上, 银河里, 天宫里, 花果山]}
+- id: zhongqiu
+  name: 中秋节
+  english: Mid-Autumn Festival
+  dates: ["2027-09-15", "2028-10-03", "2029-09-22", "2030-09-12"]
+  window_before: 2
+  window_after: 2
+  desc: "The full moon of the eighth month: mooncakes, family reunions and the story of Chang'e on the moon."
+  words:
+    - {chinese: 中秋节, pinyin: Zhōngqiū jié, meaning: Mid-Autumn Festival}
+    - {chinese: 月饼, pinyin: yuèbing, meaning: mooncake}
+    - {chinese: 赏月, pinyin: shǎng yuè, meaning: to admire the moon}
+    - {chinese: 嫦娥, pinyin: Cháng'é, meaning: Chang'e, the moon goddess}
+    - {chinese: 圆, pinyin: yuán, meaning: round, full}
+    - {chinese: 思念, pinyin: sīniàn, meaning: to miss, long for}
+    - {chinese: 家乡, pinyin: jiāxiāng, meaning: hometown}
+    - {chinese: 团圆, pinyin: tuányuán, meaning: (family) reunion}
+  text: |
+    八月十五的月亮又大又圆，这天是中秋节。
+    一家人坐在一起赏月、吃月饼，聊嫦娥和玉兔的故事。
+    在外地工作的人看着月亮，会特别思念家乡。
+  text_english: |
+    On the fifteenth of the eighth month the moon is big and round: this is the Mid-Autumn Festival.
+    The family sits together admiring the moon, eating mooncakes and telling the story of Chang'e and the Jade Rabbit.
+    People working far from home look at the moon and miss their hometown especially.
+  questions:
+    - {question: 中秋节大家吃什么？, choices: [月饼, 粽子, 饺子, 元宵]}
+    - {question: 在外地工作的人看着月亮会怎么样？, choices: [思念家乡, 很想睡觉, 去扫墓, 猜灯谜]}
+- id: chongyang
+  name: 重阳节
+  english: Double Ninth Festival
+  dates: ["2026-10-18", "2027-10-08", "2028-10-26", "2029-10-16", "2030-10-05"]
+  window_before: 1
+  window_after: 1
+  desc: "The ninth day of the ninth month: climbing heights, chrysanthemums, and honouring the old."
+  words:
+    - {chinese: 重阳节, pinyin: Chóngyáng jié, meaning: Double Ninth Festival}
+    - {chinese: 登高, pinyin: dēnggāo, meaning: to climb a height}
+    - {chinese: 菊花, pinyin: júhuā, meaning: chrysanthemum}
+    - {chinese: 老人, pinyin: lǎorén, meaning: the elderly}
+    - {chinese: 尊敬, pinyin: zūnjìng, meaning: to respect}
+    - {chinese: 健康, pinyin: jiànkāng, meaning: healthy, health}
+    - {chinese: 爬山, pinyin: páshān, meaning: to climb a mountain}
+    - {chinese: 秋天, pinyin: qiūtiān, meaning: autumn}
+  text: |
+    九月初九是重阳节，秋天的天气很好。
+    人们喜欢去爬山登高，一边看菊花，一边祝家里的老人身体健康。
+    现在重阳节也是尊敬老人的节日。
+  text_english: |
+    The ninth day of the ninth month is the Double Ninth Festival, and the autumn weather is fine.
+    People like to climb mountains to the heights, admiring the chrysanthemums and wishing the old people of the family good health.
+    Today the Double Ninth is also a day for respecting the elderly.
+  questions:
+    - {question: 重阳节人们喜欢做什么？, choices: [爬山登高, 划龙舟, 吃年夜饭, 放鞭炮]}
+    - {question: 现在重阳节也是什么节日？, choices: [尊敬老人的节日, 孩子的节日, 情人的节日, 新年]}

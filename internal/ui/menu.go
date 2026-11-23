@@ -36,6 +36,7 @@ var DashboardMenu = []MenuGroup{
 	{"More", []MenuItem{
 		{"b", "Browse the wiki"},
 		{"/", "Search the wiki"},
+		{"y", "Festivals 节日"},
 		{"x", "Radicals"},
 		{"v", "Voices"},
 	}},

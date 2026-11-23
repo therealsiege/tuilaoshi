@@ -45,3 +45,30 @@ func (m Model) isInputComposing() bool {
 	}
 	return false
 }
+
+// resize passes the terminal's size to every screen.
+func (m Model) resize(w, h int) Model {
+	m.width = w
+	m.height = h
+	m.dashboard = m.dashboard.SetSize(w, h)
+	m.drill = m.drill.SetSize(w, h)
+	m.browser = m.browser.SetSize(w, h)
+	m.chat = m.chat.SetSize(w, h)
+	m.review = m.review.SetSize(w, h)
+	m.stats = m.stats.SetSize(w, h)
+	m.journey = m.journey.SetSize(w, h)
+	m.radicals = m.radicals.SetSize(w, h)
+	m.shrine = m.shrine.SetSize(w, h)
+	m.cards = m.cards.SetSize(w, h)
+	m.party = m.party.SetSize(w, h)
+	m.world = m.world.SetSize(w, h)
+	m.title = m.title.SetSize(w, h)
+	m.roam = m.roam.SetSize(w, h)
+	m.theatre = m.theatre.SetSize(w, h)
+	m.forge = m.forge.SetSize(w, h)
+	m.battle = m.battle.SetSize(w, h)
+	m.reader = m.reader.SetSize(w, h)
+	m.assess = m.assess.SetSize(w, h)
+	m.festival = m.festival.SetSize(w, h)
+	return m
+}

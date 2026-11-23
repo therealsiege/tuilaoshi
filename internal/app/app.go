@@ -18,6 +18,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/ui/collection"
 	"github.com/therealsiege/tuilaoshi/internal/ui/dashboard"
 	"github.com/therealsiege/tuilaoshi/internal/ui/drill"
+	"github.com/therealsiege/tuilaoshi/internal/ui/festival"
 	"github.com/therealsiege/tuilaoshi/internal/ui/forgeview"
 	journeyview "github.com/therealsiege/tuilaoshi/internal/ui/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui/party"
@@ -62,6 +63,7 @@ type Model struct {
 	roam      roam.Model
 	theatre   theatre.Model
 	forge     forgeview.Model
+	festival  festival.Model
 	battle    rpgview.Model
 	reader    reader.Model
 	assess    assessment.Model
@@ -114,6 +116,7 @@ func New(wikiDir string) (Model, error) {
 		roam:          roam.New(store),
 		theatre:       theatre.New(store, dict),
 		forge:         forgeview.New(store, claudeClient),
+		festival:      festival.New(store),
 		dashboard:     dashboard.New(store, ttsClient),
 		drill:         drill.New(store, claudeClient, ttsClient, dict),
 		browser:       browser.New(store),
@@ -143,28 +146,7 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.width = msg.Width
-		m.height = msg.Height
-		m.dashboard = m.dashboard.SetSize(msg.Width, msg.Height)
-		m.drill = m.drill.SetSize(msg.Width, msg.Height)
-		m.browser = m.browser.SetSize(msg.Width, msg.Height)
-		m.chat = m.chat.SetSize(msg.Width, msg.Height)
-		m.review = m.review.SetSize(msg.Width, msg.Height)
-		m.stats = m.stats.SetSize(msg.Width, msg.Height)
-		m.journey = m.journey.SetSize(msg.Width, msg.Height)
-		m.radicals = m.radicals.SetSize(msg.Width, msg.Height)
-		m.shrine = m.shrine.SetSize(msg.Width, msg.Height)
-		m.cards = m.cards.SetSize(msg.Width, msg.Height)
-		m.party = m.party.SetSize(msg.Width, msg.Height)
-		m.world = m.world.SetSize(msg.Width, msg.Height)
-		m.title = m.title.SetSize(msg.Width, msg.Height)
-		m.roam = m.roam.SetSize(msg.Width, msg.Height)
-		m.theatre = m.theatre.SetSize(msg.Width, msg.Height)
-		m.forge = m.forge.SetSize(msg.Width, msg.Height)
-		m.battle = m.battle.SetSize(msg.Width, msg.Height)
-		m.reader = m.reader.SetSize(msg.Width, msg.Height)
-		m.assess = m.assess.SetSize(msg.Width, msg.Height)
-		return m, nil
+		return m.resize(msg.Width, msg.Height), nil
 
 	case title.StartedMsg:
 		return m.startJourney()
@@ -239,6 +221,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ui.ViewTheatre:
 			m.theatre = m.theatre.Refresh()
 			return m, nil
+		case ui.ViewFestival:
+			m.festival = m.festival.Refresh()
+			return m, nil
 		case ui.ViewForge:
 			var cmd tea.Cmd
 			m.forge, cmd = m.forge.Refresh()
@@ -303,7 +288,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.currentView == ui.ViewWorld ||
 			m.currentView == ui.ViewTitle || m.currentView == ui.ViewMap ||
 			(m.currentView == ui.ViewTheatre && m.theatre.Busy()) ||
-			m.currentView == ui.ViewForge
+			m.currentView == ui.ViewForge ||
+			(m.currentView == ui.ViewFestival && m.festival.Busy())
 		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard && !readingOpen {
 			if !m.isInputComposing() {
 				if m.currentView == ui.ViewBattle {
@@ -353,6 +339,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.theatre, cmd = m.theatre.Update(msg)
 	case ui.ViewForge:
 		m.forge, cmd = m.forge.Update(msg)
+	case ui.ViewFestival:
+		m.festival, cmd = m.festival.Update(msg)
 	case ui.ViewBattle:
 		m.battle, cmd = m.battle.Update(msg)
 	case ui.ViewReading:
@@ -399,6 +387,8 @@ func (m Model) View() string {
 		content = m.theatre.View()
 	case ui.ViewForge:
 		content = m.forge.View()
+	case ui.ViewFestival:
+		content = m.festival.View()
 	case ui.ViewBattle:
 		content = m.battle.View()
 	case ui.ViewReading:

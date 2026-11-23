@@ -8,9 +8,12 @@ import (
 	"time"
 )
 
-// idiomPage collects the idioms met in idiom-chain duels, as a vocabulary
-// page, so they come up in reviews like any other word.
-const idiomPage = "vocabulary/chengyu-duels.md"
+// Pages of words the game adds to the reviews: idioms met in idiom-chain
+// duels, and the words of festivals the learner has visited.
+const (
+	idiomPage    = "vocabulary/chengyu-duels.md"
+	festivalPage = "vocabulary/festivals.md"
+)
 
 // Word is a word to add to the wiki: Chinese, its pinyin and meaning.
 type Word struct {
@@ -20,15 +23,26 @@ type Word struct {
 // AddIdioms adds idioms not yet on the duel idiom page, creating it if
 // needed, and returns how many were new.
 func (s *Store) AddIdioms(words []Word, now time.Time) (int, error) {
-	path := filepath.Join(s.Dir, idiomPage)
+	return s.addWords(idiomPage, "成语 from idiom-chain duels", "chengyu, duels", words, now)
+}
+
+// AddFestivalWords adds a festival's words to the festival words page.
+func (s *Store) AddFestivalWords(words []Word, now time.Time) (int, error) {
+	return s.addWords(festivalPage, "节日 Festival words", "festivals, culture", words, now)
+}
+
+// addWords adds words not yet on a vocabulary page, creating it with title
+// and tags if needed, and returns how many were new.
+func (s *Store) addWords(rel, title, tags string, words []Word, now time.Time) (int, error) {
+	path := filepath.Join(s.Dir, rel)
 	data, err := os.ReadFile(path)
 	if err != nil && !os.IsNotExist(err) {
-		return 0, fmt.Errorf("read %s: %w", idiomPage, err)
+		return 0, fmt.Errorf("read %s: %w", rel, err)
 	}
 	page := string(data)
 	if page == "" {
-		page = fmt.Sprintf("---\ntype: vocabulary\nlevel: advanced\nstatus: active\ntags: [chengyu, duels]\nintroduced: %s\n---\n\n"+
-			"# 成语 from idiom-chain duels\n\n| Word | Pinyin | Meaning |\n|------|--------|---------|\n", FormatDate(now))
+		page = fmt.Sprintf("---\ntype: vocabulary\nlevel: advanced\nstatus: active\ntags: [%s]\nintroduced: %s\n---\n\n"+
+			"# %s\n\n| Word | Pinyin | Meaning |\n|------|--------|---------|\n", tags, FormatDate(now), title)
 	}
 	added := 0
 	for _, w := range words {

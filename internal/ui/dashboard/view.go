@@ -88,7 +88,20 @@ func (m Model) renderBounties() string {
 	if m.shields > 0 {
 		note += fmt.Sprintf(" · %d %s held", m.shields, plural(m.shields, "shield", "shields"))
 	}
-	return b.String() + "            " + ui.MutedStyle.Render(note)
+	return b.String() + "            " + ui.MutedStyle.Render(note) + m.renderFestival()
+}
+
+// renderFestival names the festival on today, or counts down to the next.
+func (m Model) renderFestival() string {
+	o, on, ok := journey.FestivalNow(m.now())
+	switch {
+	case !ok:
+		return ""
+	case on:
+		return "\n  " + ui.SubtitleStyle.Render("节日") + "      " + ui.WarningStyle.Render(o.Name+"快乐！") + " " + o.English + ui.MutedStyle.Render(" · its story, questions and a 元宝 (y)")
+	}
+	days := o.DaysUntil(m.now())
+	return "\n  " + ui.SubtitleStyle.Render("节日") + "      " + ui.MutedStyle.Render(fmt.Sprintf("next: %s %s in %d %s (y)", o.Name, o.English, days, plural(days, "day", "days")))
 }
 
 // renderStartHere suggests one next step: due reviews first, then the open
