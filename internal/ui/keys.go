@@ -89,6 +89,7 @@ const (
 	ViewTitle      // the opening screen: continue, new or load a journey
 	ViewMap        // walking the region's map: the journey's hub
 	ViewTheatre    // the learner's episodes: scenes, listening, talks
+	ViewForge      // the character forge: build characters from their parts
 )
 
 // SwitchViewMsg tells the app to change views.
@@ -119,6 +120,7 @@ type DashboardKeys struct {
 	Cards    key.Binding
 	Party    key.Binding
 	Episodes key.Binding
+	Forge    key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -180,6 +182,10 @@ func DefaultDashboardKeys() DashboardKeys {
 			key.WithKeys("e"),
 			key.WithHelp("e", "episodes"),
 		),
+		Forge: key.NewBinding(
+			key.WithKeys("z"),
+			key.WithHelp("z", "forge"),
+		),
 		Reading: key.NewBinding(
 			key.WithKeys("t"),
 			key.WithHelp("t", "read"),
@@ -211,6 +217,12 @@ func HelpText(v View) string {
 			"  ↑↓     Select radical\n" +
 			"  esc    Back to dashboard\n" +
 			"  ?      Toggle help"
+	case ViewForge:
+		return "Forge Keys\n\n" +
+			"  1-8        Pick a part\n" +
+			"  backspace  Undo a part\n" +
+			"  enter      Forge / next character\n" +
+			"  esc        Back (saves what you forged)"
 	case ViewTheatre:
 		return "Episodes Keys\n\n" +
 			"  ↑↓     Choose an episode / scene\n" +

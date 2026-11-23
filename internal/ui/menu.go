@@ -21,6 +21,7 @@ var DashboardMenu = []MenuGroup{
 		{"d", "Practice flashcards"},
 		{"t", "Read & listen"},
 		{"e", "Episodes 剧场"},
+		{"z", "Character forge 字炉"},
 		{"c", "Chat with the tutor"},
 	}},
 	{"Journey", []MenuItem{

@@ -170,6 +170,39 @@ func ParseWritingGrade(response string) (score int, feedback string) {
 	return score, feedback
 }
 
+const decomposeSystemPrompt = `You split simplified Chinese characters into their top-level written components: the two or three parts a learner sees first, each itself a character or radical, which together are exactly the whole character. Use simplified forms only. Examples: 河 氵 可; 想 相 心; 好 女 子; 森 木 木 木; 语 讠 吾; 草 艹 早; 闻 门 耳; 宫 宀 吕; 选 辶 先; 邻 令 阝; 爷 父 卩; 器 吅 犬 吅; 睡 目 垂; 赛 宀 共 贝.
+For each character given, answer one line: the character, a space, then its components separated by spaces. A character that is a single component (人, 水, 山) gets just itself. No other text.`
+
+// DecomposeCharacters asks for each character's main written components.
+func (c *Client) DecomposeCharacters(ctx context.Context, chars []string) (map[string][]string, error) {
+	msg, err := c.client.Messages.New(ctx, anthropic.MessageNewParams{
+		Model:     chatModel, // the small model splits characters wrongly too often
+		MaxTokens: 1024,
+		System:    []anthropic.TextBlockParam{{Text: decomposeSystemPrompt}},
+		Messages:  []anthropic.MessageParam{anthropic.NewUserMessage(anthropic.NewTextBlock(strings.Join(chars, "\n")))},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("claude decompose: %w", err)
+	}
+	return ParseComponents(extractText(msg), chars), nil
+}
+
+// ParseComponents reads "河 氵 可" lines for the characters asked about.
+func ParseComponents(response string, asked []string) map[string][]string {
+	want := map[string]bool{}
+	for _, c := range asked {
+		want[c] = true
+	}
+	out := map[string][]string{}
+	for _, line := range strings.Split(response, "\n") {
+		f := strings.Fields(line)
+		if len(f) >= 2 && want[f[0]] {
+			out[f[0]] = f[1:]
+		}
+	}
+	return out
+}
+
 // Explain requests a grammar or usage explanation.
 func (c *Client) Explain(ctx context.Context, topic string) (string, error) {
 	prompt := fmt.Sprintf(

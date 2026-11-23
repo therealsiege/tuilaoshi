@@ -18,6 +18,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/ui/collection"
 	"github.com/therealsiege/tuilaoshi/internal/ui/dashboard"
 	"github.com/therealsiege/tuilaoshi/internal/ui/drill"
+	"github.com/therealsiege/tuilaoshi/internal/ui/forgeview"
 	journeyview "github.com/therealsiege/tuilaoshi/internal/ui/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui/party"
 	"github.com/therealsiege/tuilaoshi/internal/ui/radicals"
@@ -60,6 +61,7 @@ type Model struct {
 	title     title.Model
 	roam      roam.Model
 	theatre   theatre.Model
+	forge     forgeview.Model
 	battle    rpgview.Model
 	reader    reader.Model
 	assess    assessment.Model
@@ -111,6 +113,7 @@ func New(wikiDir string) (Model, error) {
 		title:         title.New(store, dict).Refresh(),
 		roam:          roam.New(store),
 		theatre:       theatre.New(store, dict),
+		forge:         forgeview.New(store, claudeClient),
 		dashboard:     dashboard.New(store, ttsClient),
 		drill:         drill.New(store, claudeClient, ttsClient, dict),
 		browser:       browser.New(store),
@@ -157,6 +160,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.title = m.title.SetSize(msg.Width, msg.Height)
 		m.roam = m.roam.SetSize(msg.Width, msg.Height)
 		m.theatre = m.theatre.SetSize(msg.Width, msg.Height)
+		m.forge = m.forge.SetSize(msg.Width, msg.Height)
 		m.battle = m.battle.SetSize(msg.Width, msg.Height)
 		m.reader = m.reader.SetSize(msg.Width, msg.Height)
 		m.assess = m.assess.SetSize(msg.Width, msg.Height)
@@ -235,6 +239,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ui.ViewTheatre:
 			m.theatre = m.theatre.Refresh()
 			return m, nil
+		case ui.ViewForge:
+			var cmd tea.Cmd
+			m.forge, cmd = m.forge.Refresh()
+			return m, cmd
 		case ui.ViewMap:
 			m.roam = m.roam.Refresh()
 			m.checkCelebrations()
@@ -294,7 +302,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			(m.currentView == ui.ViewParty && m.party.Busy()) ||
 			m.currentView == ui.ViewWorld ||
 			m.currentView == ui.ViewTitle || m.currentView == ui.ViewMap ||
-			(m.currentView == ui.ViewTheatre && m.theatre.Busy())
+			(m.currentView == ui.ViewTheatre && m.theatre.Busy()) ||
+			m.currentView == ui.ViewForge
 		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard && !readingOpen {
 			if !m.isInputComposing() {
 				if m.currentView == ui.ViewBattle {
@@ -342,6 +351,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.roam, cmd = m.roam.Update(msg)
 	case ui.ViewTheatre:
 		m.theatre, cmd = m.theatre.Update(msg)
+	case ui.ViewForge:
+		m.forge, cmd = m.forge.Update(msg)
 	case ui.ViewBattle:
 		m.battle, cmd = m.battle.Update(msg)
 	case ui.ViewReading:
@@ -386,6 +397,8 @@ func (m Model) View() string {
 		content = m.roam.View()
 	case ui.ViewTheatre:
 		content = m.theatre.View()
+	case ui.ViewForge:
+		content = m.forge.View()
 	case ui.ViewBattle:
 		content = m.battle.View()
 	case ui.ViewReading:
