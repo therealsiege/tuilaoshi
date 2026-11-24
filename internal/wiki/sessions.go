@@ -36,6 +36,7 @@ type sessionRecord struct {
 	Answers int
 	Correct int
 	XP      int
+	Missed  []string // card IDs answered wrong
 }
 
 // WriteSession saves a drill, review, or battle session as a markdown file in
@@ -46,8 +47,15 @@ func (s *Store) WriteSession(sess model.Session) error {
 		return fmt.Errorf("create sessions dir: %w", err)
 	}
 
-	filename := sess.StartedAt.Format("2006-01-02-150405") + ".md"
-	path := filepath.Join(sessDir, filename)
+	// Sessions started in the same second get their own files.
+	base := sess.StartedAt.Format("2006-01-02-150405")
+	path := filepath.Join(sessDir, base+".md")
+	for n := 2; ; n++ {
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			break
+		}
+		path = filepath.Join(sessDir, fmt.Sprintf("%s-%d.md", base, n))
+	}
 
 	var b strings.Builder
 	b.WriteString("---\n")
@@ -144,6 +152,8 @@ func parseSession(date, content string) sessionRecord {
 		rec.Answers++
 		if correct {
 			rec.Correct++
+		} else if cells := strings.Split(trimmed, "|"); len(cells) > 1 {
+			rec.Missed = append(rec.Missed, strings.TrimSpace(cells[1]))
 		}
 	}
 	return rec
@@ -248,4 +258,25 @@ func (s *Store) RecentAccuracy(n int) (pct, answered int) {
 		return 0, 0
 	}
 	return correct * 100 / answered, answered
+}
+
+// MissedSince lists the cards answered wrong on or after day from (each
+// once, most recent sessions last), for a boss made of the learner's own
+// mistakes.
+func (s *Store) MissedSince(from time.Time) []string {
+	start := from.Format(dateFmt)
+	seen := map[string]bool{}
+	var out []string
+	for _, rec := range s.readSessions() {
+		if rec.Date < start {
+			continue
+		}
+		for _, id := range rec.Missed {
+			if !seen[id] {
+				seen[id] = true
+				out = append(out, id)
+			}
+		}
+	}
+	return out
 }

@@ -115,6 +115,8 @@ type Model struct {
 	nightmare *journey.Boss
 	// road is set for battles fought on the road (see road.go).
 	road bool
+	// inner is set when fighting the week's Inner Demon (see innerdemon.go).
+	inner bool
 	// loot is the materials the last fight earned (see road.go).
 	loot []string
 }
@@ -174,7 +176,7 @@ func (m Model) Refresh() Model {
 		}
 		m.words = journey.StageProgress(*s, pages, cards)
 	}
-	m.gauntlet, m.foe, m.cleared, m.nightmare = nil, 0, cleared, nil
+	m.gauntlet, m.foe, m.cleared, m.nightmare, m.inner = nil, 0, cleared, nil, false
 	if m.store != nil {
 		pct, answered := m.store.RecentAccuracy(rpgengine.RecentAnswers)
 		m.accuracy, m.difficulty = pct, rpgengine.DifficultyFor(pct, answered)

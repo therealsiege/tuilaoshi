@@ -33,6 +33,9 @@ func (m Model) View() string {
 	b.WriteString(m.renderJourney())
 	b.WriteString("\n")
 
+	if m.note != "" {
+		b.WriteString(ui.WarningStyle.Render("  "+m.note) + "\n")
+	}
 	footer := "  ? help · esc back on the road · T journeys · q quit"
 	if m.tts != nil && m.tts.Available() {
 		footer += " · audio on (" + m.tts.ChineseVoice().Name + " / " + m.tts.EnglishVoice().Name + ")"
@@ -84,7 +87,7 @@ func (m Model) renderBounties() string {
 	if m.shields > 0 {
 		note += fmt.Sprintf(" · %d %s held", m.shields, plural(m.shields, "shield", "shields"))
 	}
-	return b.String() + "            " + ui.MutedStyle.Render(note) + m.renderFestival()
+	return b.String() + "            " + ui.MutedStyle.Render(note) + m.renderFestival() + m.renderInnerDemon()
 }
 
 // renderFestival names the festival on today, or counts down to the next.
@@ -98,6 +101,16 @@ func (m Model) renderFestival() string {
 	}
 	days := o.DaysUntil(m.now())
 	return "\n  " + ui.SubtitleStyle.Render("节日") + "      " + ui.MutedStyle.Render(fmt.Sprintf("next: %s %s in %d %s (y)", o.Name, o.English, days, plural(days, "day", "days")))
+}
+
+// renderInnerDemon says whether the week's missed words have woken the
+// Inner Demon.
+func (m Model) renderInnerDemon() string {
+	label := "\n  " + ui.SubtitleStyle.Render("心魔") + "      "
+	if m.missed >= journey.InnerDemonWakes {
+		return label + ui.ErrorStyle.Render(fmt.Sprintf("the Inner Demon wakes: %d words you missed this week (m)", m.missed))
+	}
+	return label + ui.MutedStyle.Render(fmt.Sprintf("sleeps: %d of %d missed words this week wake it", m.missed, journey.InnerDemonWakes))
 }
 
 // renderStartHere suggests one next step: due reviews first, then the open

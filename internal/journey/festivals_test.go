@@ -45,3 +45,13 @@ func TestFestivalNowAndNext(t *testing.T) {
 		t.Errorf("two days after the solstice: %s on %v", o.Year(), on)
 	}
 }
+
+func TestWeeksStartOnMonday(t *testing.T) {
+	sun := time.Date(2026, 11, 29, 20, 0, 0, 0, time.Local)
+	if got := WeekStart(sun); got.Weekday() != time.Monday || got.Day() != 23 {
+		t.Errorf("week of Sunday 29 Nov starts %v", got)
+	}
+	if WeekID(sun) != "2026-W48" {
+		t.Errorf("week id %s", WeekID(sun))
+	}
+}

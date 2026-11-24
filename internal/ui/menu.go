@@ -26,6 +26,7 @@ var DashboardMenu = []MenuGroup{
 	}},
 	{"Journey", []MenuItem{
 		{"f", "Spar (practice battle)"},
+		{"m", "Inner Demon 心魔"},
 		{"j", "Journey log"},
 		{"g", "Shrine: gear & coins"},
 		{"o", "Collection cards"},

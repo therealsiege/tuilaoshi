@@ -354,3 +354,35 @@ func TestSternerSettingOverridesAdapting(t *testing.T) {
 		t.Error("a portrait drawn with portraits off")
 	}
 }
+
+func TestTheInnerDemonIsMadeOfTheWeeksMisses(t *testing.T) {
+	store := stageWiki(t, 0, 0) // characters/c0..c3 among its cards
+	cards, err := store.DrillableCards()
+	if err != nil {
+		t.Fatal(err)
+	}
+	sess := model.Session{StartedAt: time.Now(), EndedAt: time.Now(), Type: "review"}
+	for _, c := range cards {
+		sess.Items = append(sess.Items, model.SessionItem{CardID: c.ID, Correct: false})
+	}
+	if err := store.WriteSession(sess); err != nil {
+		t.Fatal(err)
+	}
+	m := New(store, nil, nil).InnerDemon()
+	if !m.inner || m.battle.Enemy.Chinese != "心魔" || len(m.cards) != len(cards) {
+		t.Fatalf("inner demon: %v %s with %d cards, want %d", m.inner, m.battle.Enemy.Chinese, len(m.cards), len(cards))
+	}
+	if !strings.Contains(m.View(), "words you missed this week") {
+		t.Errorf("intro:\n%s", m.View())
+	}
+	for i, want := range []int{1, 0} {
+		m := New(store, nil, nil).InnerDemon()
+		m, _ = enter(m)
+		m, _ = right(m)
+		enemyDown(&m)
+		m, _ = animationEnds(m)
+		if m.earned.Yuanbao != want {
+			t.Errorf("win %d paid %d ingots, want %d", i+1, m.earned.Yuanbao, want)
+		}
+	}
+}

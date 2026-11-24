@@ -2,6 +2,7 @@ package dashboard
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -9,6 +10,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
+	rpgview "github.com/therealsiege/tuilaoshi/internal/ui/rpg"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
@@ -24,6 +26,8 @@ type Model struct {
 	wallet       wiki.Wallet
 	bounties     []wiki.BountyStatus
 	shields      int              // streak shields held
+	missed       int              // words missed this week, which wake the Inner Demon
+	note         string           // what the last key did, when it did nothing
 	now          func() time.Time // the clock, fixed in tests
 	due          int
 	xp           int   // lifetime battle XP
@@ -94,6 +98,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, ui.SwitchTo(ui.ViewFestival)
 		case key.Matches(msg, m.keys.Settings):
 			return m, ui.SwitchTo(ui.ViewSettings)
+		case key.Matches(msg, m.keys.Inner):
+			if m.missed < journey.InnerDemonWakes {
+				m.note = fmt.Sprintf("The Inner Demon sleeps: it wakes when %d missed words gather this week (%d so far).", journey.InnerDemonWakes, m.missed)
+				return m, nil
+			}
+			return m, func() tea.Msg { return ui.InnerDemonMsg{} }
 		case key.Matches(msg, m.keys.Reading):
 			return m, ui.SwitchTo(ui.ViewReading)
 		case key.Matches(msg, m.keys.Assess):
@@ -122,6 +132,9 @@ func (m Model) Refresh() Model {
 	m.xp = m.store.TotalXP()
 	m.wallet, walletErr = m.store.Wallet()
 	m.bounties, m.shields, bountyErr = m.store.Bounties(m.now())
+	missed, missErr := rpgview.MissedThisWeek(m.store, m.now())
+	m.missed, m.note = len(missed), ""
+	bountyErr = errors.Join(bountyErr, missErr)
 	m.journeyState, journeyErr = journey.Calculate(m.store)
 	m.loadErr = errors.Join(dueErr, journeyErr, walletErr, bountyErr)
 	return m

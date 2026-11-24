@@ -94,6 +94,9 @@ const (
 	ViewSettings   // the learner's preferences
 )
 
+// InnerDemonMsg asks the app to start the fight with the week's Inner Demon.
+type InnerDemonMsg struct{}
+
 // SwitchViewMsg tells the app to change views.
 type SwitchViewMsg struct {
 	Target View
@@ -125,6 +128,7 @@ type DashboardKeys struct {
 	Forge    key.Binding
 	Festival key.Binding
 	Settings key.Binding
+	Inner    key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -197,6 +201,10 @@ func DefaultDashboardKeys() DashboardKeys {
 		Settings: key.NewBinding(
 			key.WithKeys(","),
 			key.WithHelp(",", "settings"),
+		),
+		Inner: key.NewBinding(
+			key.WithKeys("m"),
+			key.WithHelp("m", "inner demon"),
 		),
 		Reading: key.NewBinding(
 			key.WithKeys("t"),

@@ -39,6 +39,7 @@ func main() {
 	for _, s := range journey.Spirits() {
 		enemies = append(enemies, s.BestiaryEntry)
 	}
+	enemies = append(enemies, journey.InnerDemon)
 	for _, d := range enemies {
 		if *only != "" && d.Name != *only {
 			continue

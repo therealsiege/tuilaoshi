@@ -83,6 +83,18 @@ func (m *Model) payWin(before wiki.Wallet) {
 	if m.spirit != nil && m.battle.PlayerWon() {
 		pay.Yuanbao = 1 // a spirit appears only until it is first beaten
 	}
+	if m.inner && m.battle.PlayerWon() {
+		// The claim records the week's first win; its reward is paid with the win's.
+		first, err := m.store.Claim("innerdemon:"+journey.WeekID(time.Now()), wiki.Wallet{})
+		if err != nil {
+			m.saveErr = err
+			return
+		}
+		if first {
+			pay.Yuanbao++
+			pay.Tongqian += innerDemonPay
+		}
+	}
 	if m.nightmare != nil && m.battle.PlayerWon() {
 		first, err := m.store.RecordNightmare(m.nightmare.Name)
 		if err != nil {

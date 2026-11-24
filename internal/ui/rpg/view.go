@@ -389,6 +389,9 @@ func (m Model) renderStakes() string {
 			b.WriteString(ui.WarningStyle.Render("  Fight through to the demon to clear this tribulation."))
 		}
 		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("  Words: %s · %d/%d learned", m.stage.Words.Name, m.words.Learned, m.words.Total)))
+	case m.inner:
+		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  心魔 The Inner Demon: the %d words you missed this week, risen against you.", len(m.cards))))
+		b.WriteString("\n" + ui.MutedStyle.Render("  Beat it to put them right: the first win each week pays 40 铜钱 and a 元宝."))
 	case m.nightmare != nil:
 		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  梦魇 Nightmare: %s returns, half as strong again, asking only your weakest words.", m.nightmare.Name)))
 	case m.road && m.next != nil:

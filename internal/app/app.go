@@ -152,6 +152,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.currentView = ui.ViewParty
 		m.party, cmd = m.party.TalkAbout(msg.Title, msg.Lines, msg.Words)
 		return m, cmd
+	case ui.InnerDemonMsg:
+		m.currentView, m.battle = ui.ViewBattle, m.battle.InnerDemon()
+		return m, nil
 	case roam.EncounterMsg:
 		m.currentView, m.battle = ui.ViewBattle, m.battle.Encounter(msg.Soldier)
 		return m, nil
