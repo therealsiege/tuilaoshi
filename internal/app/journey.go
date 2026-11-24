@@ -70,5 +70,6 @@ func (m Model) resize(w, h int) Model {
 	m.reader = m.reader.SetSize(w, h)
 	m.assess = m.assess.SetSize(w, h)
 	m.festival = m.festival.SetSize(w, h)
+	m.diary = m.diary.SetSize(w, h)
 	return m
 }

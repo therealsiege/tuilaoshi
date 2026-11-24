@@ -27,6 +27,7 @@ const (
 	screenTown screen = iota
 	screenQuest
 	screenStone // a town's secret stone (see stone.go)
+	screenAlms  // asking a townsperson for alms (see alms.go)
 )
 
 // Model is the world map view model.
@@ -54,6 +55,9 @@ type Model struct {
 	stones []string       // towns whose stone is open
 	hunts  map[string]int // hunts accepted: id -> soldiers beaten
 	hinted bool           // the open stone's pinyin has been shown
+
+	alms      journey.Alms // the townsperson asked for alms
+	almsOrder []int        // the alms choices' order on screen
 
 	note          string
 	width, height int
@@ -116,6 +120,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	}
 	back := key.Matches(k, m.gkeys.Back)
 	switch m.screen {
+	case screenAlms:
+		if back && m.answered < 0 {
+			m.screen, m.note = screenTown, ""
+			return m, nil
+		}
+		return m.updateAlms(k), nil
 	case screenStone:
 		if back && !m.input.Composing() {
 			m.screen, m.note = screenTown, ""
@@ -156,6 +166,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m.rest(), nil
 		case k.String() == "b":
 			return m.buy(), nil
+		case k.String() == "a":
+			return m.openAlms(), nil
+		case k.String() == "t":
+			return m.trade(), nil
 		}
 		return m, nil
 	}

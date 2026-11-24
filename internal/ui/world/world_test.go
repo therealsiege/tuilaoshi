@@ -224,3 +224,55 @@ func TestBuyingFoodAndRestingThePartyInTown(t *testing.T) {
 		t.Errorf("the inn didn't restore the master: %d %v (%q)", tr.Health[journey.Master], err, m.note)
 	}
 }
+
+func TestAskingForAlmsOnceADay(t *testing.T) {
+	m := worldAt(t, 11)
+	m, _ = m.Update(press("a"))
+	if m.screen != screenAlms || strings.Contains(m.View(), m.alms.English) {
+		t.Fatalf("alms not open, or English shown before answering:\n%s", m.View())
+	}
+	m, _ = m.Update(press(string(rune('1' + politeAt(m)))))
+	tr, _, err := journey.LoadTrail(m.store, nil)
+	if err != nil || tr.Food != journey.StartFood+journey.AlmsFood || !strings.Contains(m.View(), m.alms.Thanks) {
+		t.Fatalf("asked well: food %d %v\n%s", tr.Food, err, m.View())
+	}
+	m, _ = m.Update(enter)
+	m, _ = m.Update(press("a"))
+	if m.screen != screenTown || !strings.Contains(m.note, "tomorrow") {
+		t.Fatalf("asked twice in a day: screen %d, %q", m.screen, m.note)
+	}
+	m.now = func() time.Time { return day.AddDate(0, 0, 1) }
+	m, _ = m.Update(press("a"))
+	m, _ = m.Update(press(string(rune('1' + (politeAt(m)+1)%3)))) // rude
+	tr, _, err = journey.LoadTrail(m.store, nil)
+	if err != nil || tr.Food != journey.StartFood+journey.AlmsFood || !strings.Contains(m.View(), "turn away") {
+		t.Errorf("a rude request still fed the party: food %d\n%s", tr.Food, m.View())
+	}
+}
+
+func TestTradingAMaterialForFood(t *testing.T) {
+	m := worldAt(t, 11)
+	m, _ = m.Update(press("t"))
+	if !strings.Contains(m.note, "pack is empty") {
+		t.Fatalf("traded with an empty pack: %q", m.note)
+	}
+	if err := m.store.AddMaterials([]string{"hide", "bone", "bone"}); err != nil {
+		t.Fatal(err)
+	}
+	m, _ = m.Update(press("t"))
+	held, err := m.store.Materials()
+	tr, _, trailErr := journey.LoadTrail(m.store, nil)
+	if err != nil || trailErr != nil || held["bone"] != 1 || held["hide"] != 1 || tr.Food != journey.StartFood+journey.Barter {
+		t.Errorf("trade the most-held material: %v food %d %v (%q)", held, tr.Food, err, m.note)
+	}
+}
+
+// politeAt is where the fitting request sits among the alms choices shown.
+func politeAt(m Model) int {
+	for i, j := range m.almsOrder {
+		if j == 0 {
+			return i
+		}
+	}
+	return -1
+}

@@ -113,20 +113,7 @@ func (m Model) rest() Model {
 
 // restoreParty heals the party on the trail after a night at the inn.
 func (m *Model) restoreParty() {
-	cleared, err := m.store.ClearedStages()
-	if err != nil {
-		m.loadErr = err
-		return
-	}
-	t, members, err := journey.LoadTrail(m.store, cleared)
-	if err != nil {
-		m.loadErr = err
-		return
-	}
-	t.Restore(members)
-	if err := m.store.SaveTrail(t); err != nil {
-		m.loadErr = err
-	}
+	m.withTrail(func(t *journey.Trail, members []string) { t.Restore(members) })
 }
 
 // Supplies sold in towns: 斋饭 by the bundle.
@@ -141,20 +128,11 @@ func (m Model) buy() Model {
 		m.note = fmt.Sprintf("%d 斋饭 cost %d 铜钱: not enough in the purse.", foodBundle, foodPrice)
 		return m
 	}
-	cleared, err := m.store.ClearedStages()
-	if err != nil {
-		m.loadErr = err
-		return m
-	}
-	t, _, err := journey.LoadTrail(m.store, cleared)
-	if err != nil {
-		m.loadErr = err
-		return m
-	}
-	t.Food += foodBundle
-	if err := m.store.SaveTrail(t); err != nil {
-		m.loadErr = err
-	}
-	m.note = fmt.Sprintf("Bought %d 斋饭 (-%d 铜钱): %d now.", foodBundle, foodPrice, t.Food)
+	food := 0
+	m.withTrail(func(t *journey.Trail, _ []string) {
+		t.Food += foodBundle
+		food = t.Food
+	})
+	m.note = fmt.Sprintf("Bought %d 斋饭 (-%d 铜钱): %d now.", foodBundle, foodPrice, food)
 	return m
 }

@@ -99,6 +99,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, ui.SwitchTo(ui.ViewFestival)
 		case key.Matches(msg, m.keys.Settings):
 			return m, ui.SwitchTo(ui.ViewSettings)
+		case key.Matches(msg, m.keys.Diary):
+			return m, ui.SwitchTo(ui.ViewDiary)
 		case key.Matches(msg, m.keys.Inner):
 			if m.missed < journey.InnerDemonWakes {
 				m.note = fmt.Sprintf("The Inner Demon sleeps: it wakes when %d missed words gather this week (%d so far).", journey.InnerDemonWakes, m.missed)

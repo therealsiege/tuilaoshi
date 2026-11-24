@@ -1,0 +1,100 @@
+# Asking for alms (化缘) in a town: a townsperson in a situation, and three
+# things to say. The fitting, polite monk's request is written first (the
+# screen shuffles them); the others are rude or wrong for the moment.
+# Original text, written for TuiLaoShi.
+- text: 一位大娘站在家门口，正在晒衣服。
+  english: An auntie is standing at her door, hanging out washing.
+  choices:
+    - 阿弥陀佛，女施主，贫僧从东土大唐来，能不能施舍一点儿斋饭？
+    - 喂！给我们点儿吃的！
+    - 大娘，您的衣服真好看，多少钱一件？
+  english_choices:
+    - "Amitabha. Kind lady, this poor monk comes from the Tang lands in the east. Could you spare a little food?"
+    - "Hey! Give us something to eat!"
+    - "Auntie, your clothes are lovely. How much is one?"
+  thanks: 大娘笑着点点头，进屋拿了一大包馒头。
+  thanks_english: The auntie smiles, nods, and goes in to fetch a big bundle of steamed buns.
+- text: 一个饭店的老板正在门口招呼客人。
+  english: A restaurant owner is at his door, welcoming customers.
+  choices:
+    - 老板，打扰了。我们是去西天取经的和尚，能不能结个善缘？
+    - 老板，给我来一盘红烧肉！
+    - 你们的饭太贵了，便宜一点儿吧。
+  english_choices:
+    - "Excuse me, sir. We are monks going west for the scriptures. Might you share a little kindness?"
+    - "Boss, a plate of braised pork for me!"
+    - "Your food is too expensive. Make it cheaper."
+  thanks: 老板说："取经的师父，快请进！"送了你们一桌素菜。
+  thanks_english: "The owner says, \"Masters on the way to the scriptures, please come in!\" and treats you to a table of vegetable dishes."
+- text: 一位老爷爷坐在树下乘凉，手里拿着一把扇子。
+  english: An old man sits in the shade of a tree, fanning himself.
+  choices:
+    - 老人家，您好。我们走了很远的路，能不能讨一碗水、一点儿吃的？
+    - 老头儿，把扇子给我用用。
+    - 老爷爷，这棵树是什么时候种的？
+  english_choices:
+    - "Good day, sir. We've come a long way. Could we trouble you for a bowl of water and a little food?"
+    - "Old man, give me your fan."
+    - "Grandpa, when was this tree planted?"
+  thanks: 老爷爷高兴地说："出家人不容易，跟我来吧。"
+  thanks_english: "The old man says warmly, \"It's not easy being a monk. Come with me.\""
+- text: 市场上，一个卖馒头的小伙子刚蒸好一锅馒头。
+  english: In the market, a young man selling steamed buns has just taken a fresh batch from the steamer.
+  choices:
+    - 小兄弟，贫僧身上没有钱，能不能施舍两个馒头？
+    - 这些馒头都是我的了！
+    - 你的馒头是不是昨天剩下的？
+  english_choices:
+    - "Young brother, this poor monk has no money. Could you spare two buns?"
+    - "These buns are all mine now!"
+    - "Are your buns left over from yesterday?"
+  thanks: 小伙子说："拿去吧，路上吃。"还多给了几个。
+  thanks_english: "The young man says, \"Take them, eat them on the way,\" and gives you a few extra."
+- text: 一户人家正在办喜事，院子里摆满了桌子。
+  english: A family is holding a wedding; their courtyard is full of tables.
+  choices:
+    - 恭喜恭喜！贫僧路过这里，祝你们百年好合。能不能讨一点儿斋饭？
+    - 你们家好吵，能不能小声一点儿？
+    - 我也要喝酒！
+  english_choices:
+    - "Congratulations! Passing by, this poor monk wishes you a lifetime together. Might we have a little vegetarian food?"
+    - "Your house is so noisy. Can you keep it down?"
+    - "I want some wine too!"
+  thanks: 主人很高兴，说出家人来祝福是好兆头，送了很多点心。
+  thanks_english: The host is delighted, says a monk's blessing is a good omen, and gives you plenty of pastries.
+- text: 一位年轻的妈妈抱着孩子，孩子一直在哭。
+  english: A young mother is holding her baby, who won't stop crying.
+  choices:
+    - 女施主，孩子是不是饿了？贫僧给他念一段经，保佑他平安。
+    - 快让他别哭了，吵死了！
+    - 你的孩子几岁了？会说话吗？
+  english_choices:
+    - "Is the little one hungry? Let this poor monk chant a sutra to keep him safe."
+    - "Make him stop crying, it's deafening!"
+    - "How old is your child? Can he talk?"
+  thanks: 孩子听着念经，慢慢不哭了。妈妈很感激，送了你们一篮子饼。
+  thanks_english: Listening to the chant, the baby slowly stops crying. The grateful mother gives you a basket of flatbread.
+- text: 一位读书人在茶馆里写字，旁边放着几个包子。
+  english: A scholar is writing in a teahouse, a few buns beside him.
+  choices:
+    - 先生，打扰您了。贫僧远道而来，能不能请您施舍一点儿吃的？
+    - 你的字写得太难看了。
+    - 包子给我，字给你。
+  english_choices:
+    - "Forgive the interruption, sir. This poor monk has come from afar. Might you spare a little to eat?"
+    - "Your handwriting is awful."
+    - "Give me the buns and you can keep the writing."
+  thanks: 读书人放下笔，说："请坐，一起吃吧。"
+  thanks_english: "The scholar puts down his brush: \"Please sit, let's eat together.\""
+- text: 一个农夫赶着牛车从田里回来，车上装满了菜。
+  english: A farmer is driving an ox cart back from the fields, laden with vegetables.
+  choices:
+    - 大哥，辛苦了。我们是取经的和尚，能不能分一点儿菜给我们？
+    - 你的牛走得太慢了！
+    - 这些菜是你偷来的吧？
+  english_choices:
+    - "You've worked hard, brother. We are monks on the way to the scriptures. Could you share a few vegetables?"
+    - "Your ox is far too slow!"
+    - "You stole these vegetables, didn't you?"
+  thanks: 农夫哈哈一笑，抱下一大捆菜送给你们。
+  thanks_english: The farmer laughs and lifts down a big bundle of vegetables for you.

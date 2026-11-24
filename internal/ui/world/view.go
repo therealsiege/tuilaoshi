@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -12,6 +13,8 @@ import (
 func (m Model) View() string {
 	var b strings.Builder
 	switch m.screen {
+	case screenAlms:
+		b.WriteString(m.almsView())
 	case screenStone:
 		b.WriteString(m.stoneView())
 	case screenQuest:
@@ -64,8 +67,9 @@ func (m Model) townView() string {
 		fmt.Fprintf(&b, "  %s%s · %s  %s\n", marker, ui.ChineseStyle.Render(q.Title), q.Giver, status)
 	}
 	b.WriteString("\n  " + ui.MutedStyle.Render(fmt.Sprintf("客栈 The inn: a night's rest heals you and the party for %d 铜钱 (r)", wiki.InnPrice)) + "\n")
-	b.WriteString("  " + ui.MutedStyle.Render(fmt.Sprintf("杂货铺 The store: %d 斋饭 for %d 铜钱 (b) · the well fills your water", foodBundle, foodPrice)) + "\n")
-	help := "  ↑↓ choose · enter read · r rest at the inn · b buy 斋饭 · g the Earth God's shrine · esc back on the road"
+	b.WriteString("  " + ui.MutedStyle.Render(fmt.Sprintf("杂货铺 The store: %d 斋饭 for %d 铜钱 (b), or %d for a material (t) · the well fills your water", foodBundle, foodPrice, journey.Barter)) + "\n")
+	b.WriteString("  " + ui.MutedStyle.Render(fmt.Sprintf("化缘 Ask the townsfolk for alms, once a day: +%d 斋饭 if asked well (a)", journey.AlmsFood)) + "\n")
+	help := "  ↑↓ choose · enter read · r rest · b buy · t trade · a alms · g shrine · esc back on the road"
 	if t.Stone != nil {
 		if slices.Contains(m.stones, t.ID) {
 			b.WriteString("\n  " + ui.MutedStyle.Render("石碑 The roadside stone stands open: ") + ui.ChineseStyle.Render(t.Stone.Idiom) + "\n")

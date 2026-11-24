@@ -16,6 +16,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/ui/chat"
 	"github.com/therealsiege/tuilaoshi/internal/ui/collection"
 	"github.com/therealsiege/tuilaoshi/internal/ui/dashboard"
+	"github.com/therealsiege/tuilaoshi/internal/ui/diary"
 	"github.com/therealsiege/tuilaoshi/internal/ui/drill"
 	"github.com/therealsiege/tuilaoshi/internal/ui/festival"
 	"github.com/therealsiege/tuilaoshi/internal/ui/forgeview"
@@ -64,6 +65,7 @@ type Model struct {
 	theatre   theatre.Model
 	forge     forgeview.Model
 	festival  festival.Model
+	diary     diary.Model
 	settings  settings.Model
 	battle    rpgview.Model
 	reader    reader.Model
@@ -109,6 +111,7 @@ func New(wikiDir string) (Model, error) {
 		theatre:     theatre.New(store, dict),
 		forge:       forgeview.New(store, claudeClient),
 		festival:    festival.New(store),
+		diary:       diary.New(store, claudeClient, dict),
 		settings:    settings.New(store),
 		dashboard:   dashboard.New(store, ttsClient),
 		drill:       drill.New(store, claudeClient, ttsClient, dict),
@@ -219,6 +222,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ui.ViewSettings:
 			m.settings = m.settings.Refresh()
 			return m, nil
+		case ui.ViewDiary:
+			var cmd tea.Cmd
+			m.diary, cmd = m.diary.Refresh()
+			return m, cmd
 		case ui.ViewForge:
 			var cmd tea.Cmd
 			m.forge, cmd = m.forge.Refresh()
@@ -254,7 +261,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		typing := m.currentView == ui.ViewChat || (m.currentView == ui.ViewParty && m.party.Busy()) ||
 			(m.currentView == ui.ViewWorld && m.world.Typing()) ||
 			(m.currentView == ui.ViewTitle && m.title.Typing()) ||
-			(m.currentView == ui.ViewTheatre && m.theatre.Typing())
+			(m.currentView == ui.ViewTheatre && m.theatre.Typing()) || (m.currentView == ui.ViewDiary && m.diary.Typing())
 		if key.Matches(msg, m.keys.Help) && !typing {
 			m.showHelp = !m.showHelp
 			return m, nil
@@ -283,7 +290,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.currentView == ui.ViewWorld ||
 			m.currentView == ui.ViewTitle || m.currentView == ui.ViewMap ||
 			(m.currentView == ui.ViewTheatre && m.theatre.Busy()) ||
-			m.currentView == ui.ViewForge ||
+			m.currentView == ui.ViewForge || m.currentView == ui.ViewDiary ||
 			(m.currentView == ui.ViewFestival && m.festival.Busy())
 		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard && !readingOpen {
 			if !m.isInputComposing() {
@@ -338,6 +345,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.festival, cmd = m.festival.Update(msg)
 	case ui.ViewSettings:
 		m.settings, cmd = m.settings.Update(msg)
+	case ui.ViewDiary:
+		m.diary, cmd = m.diary.Update(msg)
 	case ui.ViewBattle:
 		m.battle, cmd = m.battle.Update(msg)
 	case ui.ViewReading:
@@ -388,6 +397,8 @@ func (m Model) View() string {
 		content = m.festival.View()
 	case ui.ViewSettings:
 		content = m.settings.View()
+	case ui.ViewDiary:
+		content = m.diary.View()
 	case ui.ViewBattle:
 		content = m.battle.View()
 	case ui.ViewReading:

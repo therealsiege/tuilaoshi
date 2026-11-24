@@ -92,6 +92,7 @@ const (
 	ViewForge      // the character forge: build characters from their parts
 	ViewFestival   // Chinese festivals on the real calendar
 	ViewSettings   // the learner's preferences
+	ViewDiary      // the travel diary kept at camp
 )
 
 // InnerDemonMsg asks the app to start the fight with the week's Inner Demon.
@@ -129,6 +130,7 @@ type DashboardKeys struct {
 	Festival key.Binding
 	Settings key.Binding
 	Inner    key.Binding
+	Diary    key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -206,6 +208,10 @@ func DefaultDashboardKeys() DashboardKeys {
 			key.WithKeys("m"),
 			key.WithHelp("m", "inner demon"),
 		),
+		Diary: key.NewBinding(
+			key.WithKeys("w"),
+			key.WithHelp("w", "diary"),
+		),
 		Reading: key.NewBinding(
 			key.WithKeys("t"),
 			key.WithHelp("t", "read"),
@@ -242,6 +248,11 @@ func HelpText(v View) string {
 			"  ↑↓     Choose a setting\n" +
 			"  ←→     Change it (saved at once)\n" +
 			"  esc    Back"
+	case ViewDiary:
+		return "Diary Keys\n\n" +
+			"  enter       Send today's entry\n" +
+			"  ctrl+space  Pinyin / English input\n" +
+			"  esc         Back to camp"
 	case ViewFestival:
 		return "Festival Keys\n\n" +
 			"  1-2    Answer a question\n" +
@@ -279,6 +290,9 @@ func HelpText(v View) string {
 			"  1-4    Answer a request\n" +
 			"  s      The town's stone\n" +
 			"  r      Rest at the inn\n" +
+			"  b      Buy 斋饭 at the store\n" +
+			"  t      Trade a material for 斋饭\n" +
+			"  a      Ask for alms (化缘), once a day\n" +
 			"  g      Shrine\n" +
 			"  esc    Back on the road"
 	case ViewParty:
