@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
@@ -105,6 +106,7 @@ func (m Model) act() Model {
 			return m.say(true, err.Error())
 		}
 		m = m.Refresh()
+		ui.Cue(audio.Coins)
 		return m.say(false, fmt.Sprintf("Crafted and put on %s %s.", g.Name, g.English))
 	case !m.owns(g.ID):
 		short := wiki.Wallet{Tongqian: g.Price.Tongqian - m.wallet.Tongqian, Yuanbao: g.Price.Yuanbao - m.wallet.Yuanbao}
@@ -118,6 +120,7 @@ func (m Model) act() Model {
 			return m.say(true, err.Error())
 		}
 		m = m.Refresh()
+		ui.Cue(audio.Coins)
 		return m.say(false, fmt.Sprintf("Bought and put on %s %s.", g.Name, g.English))
 	case m.kit.Worn[g.Slot] == g.ID:
 		if err := m.store.Wear(g.Slot, ""); err != nil {

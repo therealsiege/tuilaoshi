@@ -3,7 +3,10 @@ package app
 import (
 	"fmt"
 
+	"github.com/therealsiege/tuilaoshi/internal/audio"
+
 	"github.com/therealsiege/tuilaoshi/internal/journey"
+	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/ui/celebrate"
 )
 
@@ -30,6 +33,7 @@ func (m *Model) checkCelebrations() {
 			if state.Bosses[i].Defeated {
 				c := celebrate.BossDefeatCelebration(state.Bosses[i].Name, state.Bosses[i].English)
 				m.celebration = &c
+				ui.Cue(audio.LevelUp)
 				m.celebrationTTL = 3
 				break
 			}
@@ -43,6 +47,7 @@ func (m *Model) checkCelebrations() {
 	if state.Rank.Name != m.prevRankName {
 		c := celebrate.RankUpCelebration(state.Rank.Name, state.Rank.English)
 		m.celebration = &c
+		ui.Cue(audio.LevelUp)
 		m.celebrationTTL = 3
 		m.prevRankName = state.Rank.Name
 		m.prevBossCount = bossCount
@@ -53,6 +58,7 @@ func (m *Model) checkCelebrations() {
 	if state.Level.N > m.prevLevel {
 		c := celebrate.LevelUpCelebration(state.Level.N, levelGains(state, m.prevLevel, m.prevOpenStage))
 		m.celebration = &c
+		ui.Cue(audio.LevelUp)
 		m.celebrationTTL = 3
 	}
 

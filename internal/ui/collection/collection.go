@@ -11,6 +11,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
@@ -128,6 +129,7 @@ func (m Model) claim() Model {
 			m.note, m.noteErr = err.Error(), true
 			return m
 		}
+		ui.Cue(audio.Coins)
 		m = m.Refresh()
 		m.note, m.noteErr = "Set complete! The Earth God pays "+priceText(s.Reward)+".", false
 	}

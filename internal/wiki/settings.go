@@ -14,6 +14,7 @@ const settingsFile = "settings.yaml"
 // Settings are the learner's preferences.
 type Settings struct {
 	Speech      bool   `yaml:"speech"`       // speak answers and lines aloud
+	Effects     bool   `yaml:"effects"`      // short sound cues for game events
 	Input       string `yaml:"input"`        // answer boxes start in: chinese, pinyin, english
 	Difficulty  string `yaml:"difficulty"`   // battles: adaptive, gentler, sterner
 	Encounters  string `yaml:"encounters"`   // wild encounters: normal, fewer, off
@@ -23,7 +24,7 @@ type Settings struct {
 
 // DefaultSettings are the settings before the learner changes any.
 func DefaultSettings() Settings {
-	return Settings{Speech: true, Input: "chinese", Difficulty: "adaptive", Encounters: "normal", Portraits: "large", ReviewChunk: 20}
+	return Settings{Speech: true, Effects: true, Input: "chinese", Difficulty: "adaptive", Encounters: "normal", Portraits: "large", ReviewChunk: 20}
 }
 
 // Settings reads the learner's settings, filling any missing with defaults.

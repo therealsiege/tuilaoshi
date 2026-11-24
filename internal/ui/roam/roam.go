@@ -16,6 +16,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	rpgview "github.com/therealsiege/tuilaoshi/internal/ui/rpg"
@@ -190,6 +191,7 @@ func (m Model) step(dx, dy int) (Model, tea.Cmd) {
 	if m.region.At(to) == journey.TileWild && encounterRoll() < encounterRate() {
 		if s, ok := m.region.Region.Encounter(rand.New(rand.NewSource(rand.Int63()))); ok {
 			m.note = s.Name + " " + s.English + " leaps out of the undergrowth!"
+			ui.Cue(audio.Encounter)
 			return m, func() tea.Msg { return EncounterMsg{Soldier: s} }
 		}
 	}

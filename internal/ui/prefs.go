@@ -1,6 +1,9 @@
 package ui
 
 import (
+	"testing"
+
+	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/ui/input"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -17,4 +20,12 @@ func AnswerMode() input.Mode {
 		return input.ModePinyin
 	}
 	return input.ModeChinese
+}
+
+// Cue plays a game event's sound when the learner has sound effects on.
+// Tests stay silent.
+func Cue(e audio.Effect) {
+	if Prefs.Effects && !testing.Testing() {
+		audio.Play(e)
+	}
 }

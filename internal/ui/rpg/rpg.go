@@ -403,6 +403,7 @@ func (m Model) afterAnswer(q *rpgengine.CombatQuestion, answer string, correct b
 		m.log = appendLog(m.log, logEntry{text: e, style: ui.SuccessStyle})
 	}
 	if correct {
+		ui.Cue(audio.Right)
 		m.state = statePlayerAttack
 		m.battle.State = rpgengine.BattlePlayerAttack
 		entry := logEntry{
@@ -418,6 +419,7 @@ func (m Model) afterAnswer(q *rpgengine.CombatQuestion, answer string, correct b
 			m.log = appendLog(m.log, comboEntry)
 		}
 	} else {
+		ui.Cue(audio.Wrong)
 		m.state = stateEnemyAttack
 		m.battle.State = rpgengine.BattleEnemyAttack
 		entry := logEntry{
@@ -444,9 +446,11 @@ func (m Model) rematch() Model {
 func (m Model) nextTurn() (Model, tea.Cmd) {
 	if m.battle.IsOver() {
 		if m.battle.PlayerWon() {
+			ui.Cue(audio.Victory)
 			m.state = stateVictory
 			m.battle.State = rpgengine.BattleVictory
 		} else {
+			ui.Cue(audio.Defeat)
 			m.state = stateDefeat
 			m.battle.State = rpgengine.BattleDefeat
 		}

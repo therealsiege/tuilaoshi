@@ -15,9 +15,7 @@ func TestChangingASettingSavesAndAppliesIt(t *testing.T) {
 	defer func(p wiki.Settings) { ui.Prefs = p }(ui.Prefs)
 	m := New(uitest.Wiki(t, nil)).Refresh()
 	uitest.Golden(t, "settings", m.View())
-	for i := 0; i < 3; i++ { // Wild encounters
-		m, _ = m.Update(tea.KeyMsg{Type: tea.KeyDown})
-	}
+	m.cursor = row(t, "Wild encounters")
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRight})
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRight})
 	if ui.Prefs.Encounters != "off" || !strings.Contains(m.View(), "Saved") {
@@ -32,9 +30,21 @@ func TestChangingASettingSavesAndAppliesIt(t *testing.T) {
 	if ui.Prefs.Encounters != "off" {
 		t.Errorf("left and right don't cycle: %q", ui.Prefs.Encounters)
 	}
-	m.cursor = len(options) - 1 // Review chunk
+	m.cursor = row(t, "Review chunk")
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRight})
 	if ui.Prefs.ReviewChunk != 30 {
 		t.Errorf("review chunk %d, want 30", ui.Prefs.ReviewChunk)
 	}
+}
+
+// row finds a setting's row by its label.
+func row(t *testing.T, label string) int {
+	t.Helper()
+	for i, o := range options {
+		if o.label == label {
+			return i
+		}
+	}
+	t.Fatalf("no setting %q", label)
+	return 0
 }
