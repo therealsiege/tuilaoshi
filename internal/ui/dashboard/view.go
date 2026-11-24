@@ -57,7 +57,11 @@ func (m Model) renderToday() string {
 	if m.due > 0 {
 		due = ui.WarningStyle.Render(thousands(m.due) + " due")
 	}
-	return "  " + ui.SubtitleStyle.Render("Today") + "  " + strings.Join(parts, " · ") + " · " + due + "\n" + m.renderPurse()
+	today := "  " + ui.SubtitleStyle.Render("Today") + "  " + strings.Join(parts, " · ") + " · " + due + "\n"
+	if m.newWords > 0 {
+		today += ui.SuccessStyle.Render(fmt.Sprintf("         +%d new words from your frequency list joined your reviews", m.newWords)) + "\n"
+	}
+	return today + m.renderPurse()
 }
 
 // renderPurse shows the coins saved, and how far today is from the daily bonus.

@@ -22,6 +22,7 @@ type studyRecord struct {
 	BountiesPaid []string       `yaml:"bounties_paid,omitempty"` // today's bounties already paid
 	Shields      int            `yaml:"shields,omitempty"`       // streak shields held
 	Shielded     []string       `yaml:"shielded,omitempty"`      // missed days a shield covered
+	FreqDay      string         `yaml:"freq_day,omitempty"`      // the day frequency words were last introduced
 }
 
 func (s *Store) readStudy() (studyRecord, error) {

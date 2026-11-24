@@ -48,6 +48,10 @@ var options = []option{
 		[]string{"large", "small", "off"},
 		func(s wiki.Settings) string { return s.Portraits },
 		func(s *wiki.Settings, v string) { s.Portraits = v }},
+	{"New words a day", "Words from your frequency list (make freqlist) that join your reviews each day, most frequent first",
+		[]string{"0", "5", "10", "20"},
+		func(s wiki.Settings) string { return fmt.Sprint(s.NewWords) },
+		func(s *wiki.Settings, v string) { _, _ = fmt.Sscan(v, &s.NewWords) }}, //nolint:errcheck // choices are numbers
 	{"Review chunk", "How many due words camp's Start here suggests at once (the daily bonus stays at 20)",
 		[]string{"10", "20", "30", "50"},
 		func(s wiki.Settings) string { return fmt.Sprint(s.ReviewChunk) },

@@ -28,6 +28,7 @@ type Model struct {
 	shields      int              // streak shields held
 	missed       int              // words missed this week, which wake the Inner Demon
 	note         string           // what the last key did, when it did nothing
+	newWords     int              // frequency words that joined the reviews today
 	now          func() time.Time // the clock, fixed in tests
 	due          int
 	xp           int   // lifetime battle XP
@@ -132,6 +133,11 @@ func (m Model) Refresh() Model {
 	m.xp = m.store.TotalXP()
 	m.wallet, walletErr = m.store.Wallet()
 	m.bounties, m.shields, bountyErr = m.store.Bounties(m.now())
+	if n, err := m.store.IntroduceFrequency(ui.Prefs.NewWords, m.now()); err != nil {
+		bountyErr = err
+	} else if n > 0 {
+		m.newWords = n
+	}
 	missed, missErr := rpgview.MissedThisWeek(m.store, m.now())
 	m.missed, m.note = len(missed), ""
 	bountyErr = errors.Join(bountyErr, missErr)

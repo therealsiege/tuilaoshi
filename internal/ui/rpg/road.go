@@ -4,6 +4,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
+	"github.com/therealsiege/tuilaoshi/internal/model"
 	rpgengine "github.com/therealsiege/tuilaoshi/internal/rpg"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
@@ -148,4 +149,27 @@ func (m *Model) takeLoot() {
 	if err := m.store.AddMaterials(m.loot); err != nil {
 		m.saveErr = err
 	}
+}
+
+// frequencyInBattle caps how many frequency-list words a battle adds.
+const frequencyInBattle = 20
+
+// withFrequency adds the frequency-list words still being learned to a
+// battle's cards, so the road quizzes the words the list introduced.
+func withFrequency(cards, all []model.Card) []model.Card {
+	have := map[string]bool{}
+	for _, c := range cards {
+		have[c.ID] = true
+	}
+	added := 0
+	for _, c := range all {
+		if added == frequencyInBattle {
+			break
+		}
+		if wiki.FrequencyPage(c.ID) && c.ReviewInterval < journey.LearnedInterval() && !have[c.ID] {
+			cards = append(cards, c)
+			added++
+		}
+	}
+	return cards
 }

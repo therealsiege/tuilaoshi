@@ -174,6 +174,7 @@ func (m Model) Refresh() Model {
 		if opened, err := episode.OpenedNow(m.store); err == nil {
 			m.cards = episode.WithLatest(m.cards, cards, opened)
 		}
+		m.cards = withFrequency(m.cards, cards)
 		m.words = journey.StageProgress(*s, pages, cards)
 	}
 	m.gauntlet, m.foe, m.cleared, m.nightmare, m.inner = nil, 0, cleared, nil, false

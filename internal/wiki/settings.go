@@ -20,11 +20,12 @@ type Settings struct {
 	Encounters  string `yaml:"encounters"`   // wild encounters: normal, fewer, off
 	Portraits   string `yaml:"portraits"`    // enemy portraits: large, small, off
 	ReviewChunk int    `yaml:"review_chunk"` // due words "Start here" suggests at once
+	NewWords    int    `yaml:"new_words"`    // frequency-list words introduced a day
 }
 
 // DefaultSettings are the settings before the learner changes any.
 func DefaultSettings() Settings {
-	return Settings{Speech: true, Effects: true, Input: "chinese", Difficulty: "adaptive", Encounters: "normal", Portraits: "large", ReviewChunk: 20}
+	return Settings{Speech: true, Effects: true, Input: "chinese", Difficulty: "adaptive", Encounters: "normal", Portraits: "large", ReviewChunk: 20, NewWords: 10}
 }
 
 // Settings reads the learner's settings, filling any missing with defaults.
@@ -39,6 +40,9 @@ func (s *Store) Settings() (Settings, error) {
 	}
 	if err := yaml.Unmarshal(data, &set); err != nil {
 		return DefaultSettings(), fmt.Errorf("parse %s: %w", settingsFile, err)
+	}
+	if set.NewWords < 0 {
+		set.NewWords = 0
 	}
 	if set.ReviewChunk <= 0 {
 		set.ReviewChunk = DefaultSettings().ReviewChunk

@@ -1,4 +1,4 @@
-.PHONY: build run test fmt check lint golden recordings launcher demonart clean
+.PHONY: build run test fmt check lint golden recordings launcher demonart freqlist clean
 
 GOLANGCI_LINT = go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 
@@ -43,6 +43,11 @@ launcher:
 
 # Paint demon portraits with Gemini Flash Image (GEMINI_API_KEY in ~/.config/tuilaoshi/env).
 # Pass ARGS, e.g. make demonart ARGS="-only 白骨精 -force".
+# Import a frequency word list (mylingua xlsx) into the private wiki, e.g.
+# make freqlist IN="$$HOME/Desktop/list.xlsx".
+freqlist:
+	go run ./cmd/freqlist -in "$(IN)" -wiki wiki
+
 demonart:
 	zsh -c 'source ~/.config/tuilaoshi/env 2>/dev/null; go run ./cmd/demonart $(ARGS)'
 

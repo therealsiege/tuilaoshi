@@ -390,6 +390,7 @@ func (m Model) Refresh() Model {
 // episodeWordsFirst moves the words of the episodes the journey has reached
 // to the front of the queue, so they enter review without being marked.
 func (m *Model) episodeWordsFirst(due []model.Card) []model.Card {
+	due = frequencyNext(due)
 	opened, err := episode.OpenedNow(m.store)
 	if err != nil || len(opened) == 0 {
 		return due
@@ -399,4 +400,18 @@ func (m *Model) episodeWordsFirst(due []model.Card) []model.Card {
 		return due
 	}
 	return episode.Ahead(due, opened, all)
+}
+
+// frequencyNext moves frequency-list words not yet learned to the front,
+// keeping episode words ahead of them.
+func frequencyNext(due []model.Card) []model.Card {
+	var freq, rest []model.Card
+	for _, c := range due {
+		if wiki.FrequencyPage(c.ID) && c.ReviewInterval < journey.LearnedInterval() {
+			freq = append(freq, c)
+		} else {
+			rest = append(rest, c)
+		}
+	}
+	return append(freq, rest...)
 }
