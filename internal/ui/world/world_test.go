@@ -9,6 +9,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -193,5 +194,33 @@ func TestHuntAcceptBeatAndCollect(t *testing.T) {
 	w, err := m.store.Wallet()
 	if err != nil || w.Tongqian != 40 || m.states["changan-hunt"] != wiki.QuestDone {
 		t.Errorf("collecting: purse %+v %v, state %v", w, err, m.states["changan-hunt"])
+	}
+}
+
+func TestBuyingFoodAndRestingThePartyInTown(t *testing.T) {
+	m := worldAt(t, 11)
+	m, _ = m.Update(press("b"))
+	if !strings.Contains(m.note, "not enough") {
+		t.Fatalf("bought with an empty purse: %q", m.note)
+	}
+	if err := m.store.Earn(wiki.Wallet{Tongqian: 40}); err != nil {
+		t.Fatal(err)
+	}
+	m, _ = m.Update(press("b"))
+	tr, _, err := journey.LoadTrail(m.store, nil)
+	if err != nil || tr.Food != journey.StartFood+10 {
+		t.Fatalf("after buying: food %d %v", tr.Food, err)
+	}
+	tr.Health[journey.Master] = 20
+	if err := m.store.SaveTrail(tr); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.store.SetWounds(10); err != nil {
+		t.Fatal(err)
+	}
+	m, _ = m.Update(press("r"))
+	tr, _, err = journey.LoadTrail(m.store, nil)
+	if err != nil || tr.Health[journey.Master] != 100 {
+		t.Errorf("the inn didn't restore the master: %d %v (%q)", tr.Health[journey.Master], err, m.note)
 	}
 }

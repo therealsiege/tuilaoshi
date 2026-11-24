@@ -35,3 +35,23 @@ func TestWoundsHealByStudyAndAtTheInn(t *testing.T) {
 		t.Errorf("rest at the inn: %v, wounds %d, purse %+v (%v %v %v)", ok, p.Wounds, w, err, perr, werr)
 	}
 }
+
+func TestTrailRoundTrips(t *testing.T) {
+	store := NewStore(t.TempDir())
+	var got struct{ Day, Food int }
+	if ok, err := store.Trail(&got); ok || err != nil {
+		t.Fatalf("a new journey has a trail: %v %v", ok, err)
+	}
+	if err := store.SaveTrail(struct{ Day, Food int }{3, 17}); err != nil {
+		t.Fatal(err)
+	}
+	if ok, err := store.Trail(&got); !ok || err != nil || got.Day != 3 || got.Food != 17 {
+		t.Errorf("trail %+v %v %v", got, ok, err)
+	}
+	if err := store.SetPlace(Place{Region: "r", X: 1}); err != nil {
+		t.Fatal(err)
+	}
+	if ok, err := store.Trail(&got); !ok || err != nil || got.Food != 17 {
+		t.Error("moving lost the trail")
+	}
+}

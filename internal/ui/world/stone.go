@@ -7,6 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -94,16 +95,66 @@ func (m Model) stoneView() string {
 	return b.String()
 }
 
-// rest spends a night at the town's inn, healing every wound for copper.
+// rest spends a night at the town's inn: the pilgrim's wounds heal, and
+// the party's health, spirits and water are restored.
 func (m Model) rest() Model {
 	ok, err := m.store.RestAtInn()
 	switch {
 	case err != nil:
 		m.loadErr = err
 	case ok:
-		m.note = fmt.Sprintf("You sleep at the inn and wake healed. (-%d 铜钱)", wiki.InnPrice)
+		m.note = fmt.Sprintf("The party sleeps at the inn and wakes restored. (-%d 铜钱)", wiki.InnPrice)
+		m.restoreParty()
 	default:
-		m.note = fmt.Sprintf("The innkeeper shrugs: a room is %d 铜钱, and you look well enough.", wiki.InnPrice)
+		m.note = fmt.Sprintf("A room is %d 铜钱; it heals you and the whole party.", wiki.InnPrice)
 	}
+	return m
+}
+
+// restoreParty heals the party on the trail after a night at the inn.
+func (m *Model) restoreParty() {
+	cleared, err := m.store.ClearedStages()
+	if err != nil {
+		m.loadErr = err
+		return
+	}
+	t, members, err := journey.LoadTrail(m.store, cleared)
+	if err != nil {
+		m.loadErr = err
+		return
+	}
+	t.Restore(members)
+	if err := m.store.SaveTrail(t); err != nil {
+		m.loadErr = err
+	}
+}
+
+// Supplies sold in towns: 斋饭 by the bundle.
+const (
+	foodBundle = 10
+	foodPrice  = 15
+)
+
+// buy buys a bundle of 斋饭 for the road.
+func (m Model) buy() Model {
+	if err := m.store.Spend(wiki.Wallet{Tongqian: foodPrice}); err != nil {
+		m.note = fmt.Sprintf("%d 斋饭 cost %d 铜钱: not enough in the purse.", foodBundle, foodPrice)
+		return m
+	}
+	cleared, err := m.store.ClearedStages()
+	if err != nil {
+		m.loadErr = err
+		return m
+	}
+	t, _, err := journey.LoadTrail(m.store, cleared)
+	if err != nil {
+		m.loadErr = err
+		return m
+	}
+	t.Food += foodBundle
+	if err := m.store.SaveTrail(t); err != nil {
+		m.loadErr = err
+	}
+	m.note = fmt.Sprintf("Bought %d 斋饭 (-%d 铜钱): %d now.", foodBundle, foodPrice, t.Food)
 	return m
 }

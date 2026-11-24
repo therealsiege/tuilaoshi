@@ -93,3 +93,17 @@ func (s *Store) payForSession(sess model.Session) error {
 	}
 	return s.writeJourney(rec)
 }
+
+// Spend takes coins from the purse, or returns ErrCantAfford.
+func (s *Store) Spend(w Wallet) error {
+	rec, err := s.readJourney()
+	if err != nil {
+		return err
+	}
+	if rec.Coins.Tongqian < w.Tongqian || rec.Coins.Yuanbao < w.Yuanbao {
+		return ErrCantAfford
+	}
+	rec.Coins.Tongqian -= w.Tongqian
+	rec.Coins.Yuanbao -= w.Yuanbao
+	return s.writeJourney(rec)
+}

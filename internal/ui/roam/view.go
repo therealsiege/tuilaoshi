@@ -50,7 +50,7 @@ func (m Model) View() string {
 	if m.note != "" {
 		b.WriteString(ui.WarningStyle.Render("  "+m.note) + "\n")
 	}
-	b.WriteString(ui.HelpStyle.Render("  arrows walk · enter act · c camp (study, party, shrine…) · ? help"))
+	b.WriteString(ui.HelpStyle.Render("  arrows walk · enter act · p pace · f rations · w rest a day · c camp · ? help"))
 	return b.String()
 }
 
@@ -190,7 +190,8 @@ func (m Model) sideView() string {
 	} else if s == nil {
 		b.WriteString(ui.SuccessStyle.Render("The scriptures are won.") + "\n")
 	}
-	b.WriteString("\n" + m.hpBar() + "\n")
+	b.WriteString("\n" + m.trailView())
+	b.WriteString(m.hpBar() + "\n")
 	b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("%d 铜钱 · %d 元宝", m.wallet.Tongqian, m.wallet.Yuanbao)) + "\n\n")
 	if len(m.cleared) == 0 {
 		b.WriteString(ui.SubtitleStyle.Render("How the road works") + "\n" + ui.MutedStyle.Render(ui.WrapText(

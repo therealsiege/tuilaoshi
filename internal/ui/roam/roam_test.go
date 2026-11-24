@@ -66,7 +66,7 @@ func walkTo(t *testing.T, m Model, target journey.Point) (Model, tea.Cmd) {
 		var cmd tea.Cmd
 		before := m.pos
 		m, cmd = m.step(dx, dy)
-		if cmd != nil || m.note != "" {
+		if cmd != nil || (m.note != "" && !strings.HasPrefix(m.note, "Day ")) {
 			return m, cmd
 		}
 		if m.pos == before {
@@ -199,3 +199,29 @@ func TestEncounterSettings(t *testing.T) {
 		}
 	}
 }
+
+func TestTheTrailRunsOnDaysAndSupplies(t *testing.T) {
+	m := roadWith(t, 0, 0)
+	m, _ = m.Update(press("p")) // brisk
+	m, _ = m.Update(press("f")) // meager
+	if m.trail.Pace != "brisk" || m.trail.Rations != "meager" {
+		t.Fatalf("pace %s rations %s", m.trail.Pace, m.trail.Rations)
+	}
+	m, _ = m.Update(press("w")) // rest a day
+	saved, _, err := journey.LoadTrail(m.store, m.cleared)
+	if err != nil || saved.Day != 2 || saved.Pace != "brisk" || saved.Food != journey.StartFood-2 {
+		t.Fatalf("after resting: %+v %v", saved, err)
+	}
+	m.trail.Health[journey.Master], m.trail.Food, m.trail.Water = 5, 0, 0
+	m.trail.Steps = 8 // the next step ends a brisk day
+	m.pos = m.region.Start
+	m, _ = m.step(-1, 0)
+	if !m.trail.Collapsed() && m.trail.Health[journey.Master] != 30 {
+		t.Fatalf("a starving, thirsty master at 5 health: %d", m.trail.Health[journey.Master])
+	}
+	if !strings.Contains(m.note, "collapses") || m.pos != m.region.Start {
+		t.Errorf("the master should be carried back: %q at %v", m.note, m.pos)
+	}
+}
+
+func press(s string) tea.KeyMsg { return tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(s)} }

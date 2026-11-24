@@ -386,3 +386,20 @@ func TestTheInnerDemonIsMadeOfTheWeeksMisses(t *testing.T) {
 		}
 	}
 }
+
+func TestAnIllDiscipleSitsOutBattles(t *testing.T) {
+	store := stageWiki(t, 0, 8) // 孙悟空 has joined
+	tr, members, err := journey.LoadTrail(store, map[int]string{8: "x"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	tr.Join(members)
+	tr.Health["孙悟空"] = 0
+	if err := store.SaveTrail(tr); err != nil {
+		t.Fatal(err)
+	}
+	m := New(store, nil, nil).Spar()
+	if m.battle.Effects.Reveals != 0 || !strings.Contains(m.View(), "孙悟空 is ill") {
+		t.Errorf("an ill 孙悟空 still helps: reveals %d\n%s", m.battle.Effects.Reveals, m.View())
+	}
+}

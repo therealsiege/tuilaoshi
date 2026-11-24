@@ -1,5 +1,7 @@
 package wiki
 
+import "fmt"
+
 // Place is where the pilgrim stands on the road, and the HP they have lost.
 // Wounds rather than HP are kept so gear that raises max HP still counts.
 type Place struct {
@@ -51,4 +53,26 @@ func (s *Store) RestAtInn() (bool, error) {
 	rec.Coins.Tongqian -= InnPrice
 	rec.Wounds = 0
 	return true, s.writeJourney(rec)
+}
+
+// Trail decodes the journey's trail state into out; ok is false when the
+// journey has none yet.
+func (s *Store) Trail(out any) (ok bool, err error) {
+	rec, err := s.readJourney()
+	if err != nil || rec.Trail.Kind == 0 {
+		return false, err
+	}
+	return true, rec.Trail.Decode(out)
+}
+
+// SaveTrail stores the journey's trail state.
+func (s *Store) SaveTrail(v any) error {
+	rec, err := s.readJourney()
+	if err != nil {
+		return err
+	}
+	if err := rec.Trail.Encode(v); err != nil {
+		return fmt.Errorf("encode trail: %w", err)
+	}
+	return s.writeJourney(rec)
 }

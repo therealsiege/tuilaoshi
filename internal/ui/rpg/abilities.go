@@ -27,8 +27,12 @@ func (m *Model) applyAbilities(cleared map[int]string) {
 	if d := journey.EnemyLookup(m.battle.Enemy.Chinese); d != nil {
 		enemy = *d
 	}
+	party, ill := m.ableParty(cleared)
 	var e rpgengine.Effects
-	e, m.abilities = rpgengine.EffectsFor(enemy, journey.Party(cleared))
+	e, m.abilities = rpgengine.EffectsFor(enemy, party)
+	for _, name := range ill {
+		m.abilities = append(m.abilities, name+" is ill on the trail and can't help (rest at an inn)")
+	}
 	if m.store != nil {
 		kit, err := m.store.Kit()
 		if err != nil {
@@ -39,7 +43,7 @@ func (m *Model) applyAbilities(cleared map[int]string) {
 		if err != nil {
 			m.loadErr = err
 		}
-		m.abilities = append(m.abilities, rpgengine.AddUpgrades(&e, journey.Party(cleared), bonds)...)
+		m.abilities = append(m.abilities, rpgengine.AddUpgrades(&e, party, bonds)...)
 	}
 	if m.spirit != nil {
 		m.abilities = append(m.abilities, "A hidden spirit, drawn out by your mastery of "+m.spirit.Radical+": every question uses "+m.spirit.Radical+" characters")
@@ -124,4 +128,26 @@ func (m Model) renderTimer() string {
 		return ""
 	}
 	return ui.WarningStyle.Render(fmt.Sprintf("  ⏳ %ds", m.secondsLeft())) + "\n"
+}
+
+// ableParty is the party as it can help in battle: a companion too ill on
+// the trail (health 0) sits this one out. It also names the ill.
+func (m *Model) ableParty(cleared map[int]string) ([]journey.Companion, []string) {
+	party := journey.Party(cleared)
+	if m.store == nil {
+		return party, nil
+	}
+	t, _, err := journey.LoadTrail(m.store, cleared)
+	if err != nil {
+		m.loadErr = err
+		return party, nil
+	}
+	var ill []string
+	for i, c := range party {
+		if c.Unlocked && t.Ill(c.Name) {
+			party[i].Unlocked = false
+			ill = append(ill, c.Name)
+		}
+	}
+	return party, ill
 }

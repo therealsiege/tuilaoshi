@@ -62,6 +62,8 @@ type Model struct {
 	wallet  wiki.Wallet
 	hp, max int                        // the pilgrim's HP on the road, and its most
 	quests  []string                   // the quest log: hunts under way
+	trail   journey.Trail              // days, supplies and the party (see trail.go)
+	members []string                   // the party walking
 	states  map[string]wiki.QuestState // side quests' states, for the road strip
 	note    string
 
@@ -94,6 +96,7 @@ func (m Model) Refresh() Model {
 	states, questErr := m.store.Quests(time.Now())
 	m.states, m.loadErr = states, errors.Join(m.loadErr, questErr)
 	m.quests = m.questLog()
+	m.loadTrail()
 	hp, most, hpErr := rpgview.PilgrimHP(m.store)
 	m.hp, m.max = hp, most
 	m.loadErr = errors.Join(m.loadErr, hpErr)
@@ -163,6 +166,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case key.Matches(k, m.gkeys.Enter):
 		return m.act()
 	}
+	if m, ok := m.trailKey(k); ok {
+		return m, nil
+	}
 	return m, nil
 }
 
@@ -184,6 +190,7 @@ func (m Model) step(dx, dy int) (Model, tea.Cmd) {
 	}
 	m.pos = to
 	m.save()
+	m = m.walked()
 	if t, ok := m.region.Towns[to]; ok {
 		id := t.ID
 		return m, func() tea.Msg { return EnterTownMsg{Town: id} }

@@ -63,8 +63,9 @@ func (m Model) townView() string {
 		}
 		fmt.Fprintf(&b, "  %s%s · %s  %s\n", marker, ui.ChineseStyle.Render(q.Title), q.Giver, status)
 	}
-	b.WriteString("\n  " + ui.MutedStyle.Render(fmt.Sprintf("客栈 The inn: a night's rest heals you for %d 铜钱 (r)", wiki.InnPrice)) + "\n")
-	help := "  ↑↓ choose · enter read · r rest at the inn · g the Earth God's shrine · esc back on the road"
+	b.WriteString("\n  " + ui.MutedStyle.Render(fmt.Sprintf("客栈 The inn: a night's rest heals you and the party for %d 铜钱 (r)", wiki.InnPrice)) + "\n")
+	b.WriteString("  " + ui.MutedStyle.Render(fmt.Sprintf("杂货铺 The store: %d 斋饭 for %d 铜钱 (b) · the well fills your water", foodBundle, foodPrice)) + "\n")
+	help := "  ↑↓ choose · enter read · r rest at the inn · b buy 斋饭 · g the Earth God's shrine · esc back on the road"
 	if t.Stone != nil {
 		if slices.Contains(m.stones, t.ID) {
 			b.WriteString("\n  " + ui.MutedStyle.Render("石碑 The roadside stone stands open: ") + ui.ChineseStyle.Render(t.Stone.Idiom) + "\n")

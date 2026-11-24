@@ -154,6 +154,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m.openStone()
 		case k.String() == "r":
 			return m.rest(), nil
+		case k.String() == "b":
+			return m.buy(), nil
 		}
 		return m, nil
 	}

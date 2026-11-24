@@ -42,6 +42,7 @@ type journeyRecord struct {
 	X            int               `yaml:"x,omitempty"`
 	Y            int               `yaml:"y,omitempty"`
 	Wounds       int               `yaml:"wounds,omitempty"` // HP lost on the road; rest and study heal it
+	Trail        yaml.Node         `yaml:"trail,omitempty"`  // the trail's state (journey.Trail), kept opaque here
 }
 
 // journeyPath is the file holding the journey being played.
