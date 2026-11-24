@@ -40,6 +40,9 @@ func (m Model) View() string {
 		ui.MutedStyle.Render(fmt.Sprintf("region %d of %d · tribulations %d–%d", m.region.Index+1, len(journey.Regions()), r.From, r.To)) + "\n")
 	b.WriteString(ui.LoadError(m.loadErr))
 	grid := m.gridView()
+	if m.event != nil {
+		grid = m.eventView()
+	}
 	side := m.sideView()
 	if m.width == 0 || m.width >= m.region.W+40 {
 		b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, grid, "   ", side))

@@ -39,6 +39,8 @@ func (m Model) walked() Model {
 		m.note = strings.Join(append([]string{fmt.Sprintf("Day %d.", m.trail.Day)}, m.trail.Notes...), " ")
 		if m.trail.Collapsed() {
 			m = m.carryBack()
+		} else {
+			m = m.maybeEvent()
 		}
 	}
 	m.saveTrail()

@@ -32,6 +32,7 @@ func roadWith(t *testing.T, cleared, learned int) Model {
 		}
 	}
 	encounterRoll = func() int { return 99 } // no wild encounters unless a test asks
+	eventRoll = func() int { return 99 }     // nor trail events
 	return New(store).SetSize(100, 30).Refresh()
 }
 
@@ -225,3 +226,40 @@ func TestTheTrailRunsOnDaysAndSupplies(t *testing.T) {
 }
 
 func press(s string) tea.KeyMsg { return tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(s)} }
+
+func TestADayCanBringAnEvent(t *testing.T) {
+	m := roadWith(t, 0, 0)
+	defer func(roll func() int) { eventRoll = roll }(eventRoll)
+	eventRoll = func() int { return 0 }
+	m.trail.Steps = 5 // the next step ends a steady day
+	m.pos = m.region.Start
+	m, _ = m.step(-1, 0)
+	if m.event == nil {
+		t.Fatal("no event at the end of the day")
+	}
+	opening := strings.Join(strings.Fields(m.event.English)[:3], " ")
+	if strings.Contains(m.View(), opening) {
+		t.Errorf("the English shows before choosing:\n%s", m.View())
+	}
+	food, health := m.trail.Food, m.trail.Health[journey.Master]
+	o := m.event.Choices[0].Outcome
+	m, _ = m.Update(press("1"))
+	if m.event.chose != 0 || !strings.Contains(m.View(), opening) {
+		t.Fatalf("after choosing:\n%s", m.View())
+	}
+	if o.Coins >= 0 {
+		wantFood := max(food+o.Food, 0)
+		if m.trail.Food != wantFood {
+			t.Errorf("food %d, want %d", m.trail.Food, wantFood)
+		}
+		if o.Who == "" || o.Who == journey.Master {
+			if want := min(max(health+o.Health, 0), 100); m.trail.Health[journey.Master] != want {
+				t.Errorf("health %d, want %d", m.trail.Health[journey.Master], want)
+			}
+		}
+	}
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if m.event != nil {
+		t.Error("enter should walk on")
+	}
+}

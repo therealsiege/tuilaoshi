@@ -1,0 +1,368 @@
+# Trail events: things that befall the party on the road, one chance a
+# day. Written in Chinese (HSK3-4) with choices in Chinese; the English
+# shows once chosen. terrains limits where an event happens (empty: any);
+# needs limits it, or a choice, to a party that has that member. An
+# outcome moves the trail: food, water, coins (铜钱), and health and morale
+# for the whole party, or for one member (who).
+- id: bandits
+  terrains: [mountain, forest, desert]
+  text: 路上突然跳出几个强盗，手里拿着刀，大喊："把钱和吃的都交出来！"
+  english: "Suddenly a few bandits jump out onto the road, knives in hand, shouting: \"Hand over your money and your food!\""
+  choices:
+    - text: 让悟空把他们赶走
+      english: Have Wukong chase them off
+      needs: 孙悟空
+      outcome: {coins: 10, morale: 5}
+      result: 悟空一棒子下去，强盗们吓得丢下钱就跑了。
+      result_english: One swing of Wukong's staff and the bandits drop their money and run.
+    - text: 把一些斋饭给他们
+      english: Give them some of the food
+      outcome: {food: -10, morale: -5}
+      result: 强盗拿了斋饭走了，大家心里很不舒服。
+      result_english: The bandits take the food and go; everyone feels sore about it.
+    - text: 转身就跑
+      english: Turn and run
+      outcome: {food: -4, health: -6}
+      result: 大家跑得很狼狈，路上丢了一些吃的。
+      result_english: The party flees in a mess, dropping some food along the way.
+- id: old-woman
+  terrains: [mountain, forest]
+  text: 一位老婆婆提着篮子走过来，说她的女儿病了，请师父去她家看一看。可是她的眼睛有点儿奇怪。
+  english: An old woman comes up with a basket and says her daughter is ill; she asks the master to come to her home. But there is something strange about her eyes.
+  choices:
+    - text: 请悟空先看一看她
+      english: Ask Wukong to look at her first
+      needs: 孙悟空
+      outcome: {morale: 10}
+      result: 悟空的火眼金睛一看，原来她是个妖怪变的！妖怪吓得逃走了。
+      result_english: "One look from Wukong's fiery golden eyes: she is a demon in disguise! It flees in fright."
+    - text: 跟着她走
+      english: Follow her
+      outcome: {health: -15, food: -5}
+      result: 走进林子，她突然变成了妖怪。大家好不容易才逃出来。
+      result_english: Deep in the woods she suddenly turns into a demon. The party barely escapes.
+    - text: 有礼貌地拒绝，继续赶路
+      english: Politely decline and keep going
+      outcome: {}
+      result: 老婆婆冷冷地看着你们走远了。
+      result_english: The old woman watches you go with a cold stare.
+- id: harvest
+  terrains: [forest, river, palace]
+  text: 前面有个小村子，村民们正在田里收麦子，忙得不得了。
+  english: There is a small village ahead; the villagers are busy harvesting wheat in the fields.
+  choices:
+    - text: 帮他们干半天活
+      english: Help them for half a day
+      outcome: {food: 12, health: -4, morale: 5}
+      result: 大家累得满头大汗，村民们送了很多粮食表示感谢。
+      result_english: Everyone works up a sweat, and the villagers give plenty of grain in thanks.
+    - text: 用铜钱买一些粮食
+      english: Buy some grain with copper
+      outcome: {coins: -15, food: 10}
+      result: 村民们把新收的麦子做成了饼，卖给你们。
+      result_english: The villagers bake the new wheat into flatbread and sell it to you.
+    - text: 不停下来
+      english: Don't stop
+      outcome: {}
+      result: 大家看了一眼金色的麦田，继续向西走。
+      result_english: The party glances at the golden fields and walks on west.
+- id: bajie-hungry
+  needs: 猪八戒
+  text: 八戒坐在地上不走了，抱怨说："天天吃这么一点儿斋饭，我饿得走不动了！"
+  english: "Bajie sits down and won't move, complaining: \"Such a little food every day, I'm too hungry to walk!\""
+  choices:
+    - text: 多给他一份斋饭
+      english: Give him an extra share
+      outcome: {food: -3, morale: 5}
+      result: 八戒高兴地吃完，拍拍肚子又上路了。
+      result_english: Bajie happily eats it up, pats his belly and sets off again.
+    - text: 给他讲一个笑话
+      english: Tell him a joke
+      outcome: {morale: 2}
+      result: 八戒笑得在地上打滚，然后不好意思地站了起来。
+      result_english: Bajie rolls on the ground laughing, then gets up looking sheepish.
+    - text: 骂他懒
+      english: Scold him for being lazy
+      outcome: {morale: -8}
+      result: 八戒生气了，一路上都不说话。
+      result_english: Bajie takes offence and doesn't speak the rest of the way.
+- id: storm
+  text: 天突然黑了下来，刮起大风，下起了大雨。
+  english: The sky suddenly darkens, a strong wind rises, and heavy rain begins to fall.
+  choices:
+    - text: 找个山洞躲雨
+      english: Find a cave to shelter in
+      outcome: {food: -2}
+      result: 大家在山洞里等到雨停，又暖和又安全。
+      result_english: The party waits out the rain in a cave, warm and safe.
+    - text: 冒着雨继续走
+      english: Keep walking through the rain
+      outcome: {health: -10, morale: -5}
+      result: 大家全身都湿透了，好几个人开始咳嗽。
+      result_english: Everyone is soaked through, and several start to cough.
+- id: master-fever
+  text: 师父发烧了，脸红红的，说话也没有力气。
+  english: The master has a fever; his face is flushed and he speaks weakly.
+  choices:
+    - text: 停下来休息
+      english: Stop and rest
+      outcome: {food: -3, health: 15, who: 唐僧}
+      result: 休息了一夜，师父的烧退了。
+      result_english: After a night's rest, the master's fever breaks.
+    - text: 去附近找些草药
+      english: Look for herbs nearby
+      outcome: {health: 10, who: 唐僧}
+      result: 大家找到了草药，煮了一碗药汤给师父喝。
+      result_english: The party finds herbs and brews the master a bowl of medicine.
+    - text: 继续赶路，路上再说
+      english: Keep going and see how it goes
+      outcome: {health: -15, who: 唐僧}
+      result: 师父越走越虚弱，差点儿从马上掉下来。
+      result_english: The master grows weaker as they go and almost falls off his horse.
+- id: fog
+  terrains: [forest, mountain, cave]
+  text: 雾越来越大，前后都看不清楚，大家找不到路了。
+  english: The fog grows thicker until nothing can be seen ahead or behind; the party has lost the way.
+  choices:
+    - text: 等雾散了再走
+      english: Wait for the fog to lift
+      outcome: {food: -3}
+      result: 中午雾散了，路就在眼前。
+      result_english: By noon the fog lifts, and the road is right in front of you.
+    - text: 让白龙马带路
+      english: Let the white dragon horse lead
+      needs: 白龙马
+      outcome: {morale: 5}
+      result: 白龙马低头闻了闻，稳稳地把大家带出了雾。
+      result_english: The dragon horse sniffs the ground and leads everyone steadily out of the fog.
+    - text: 随便选一条路
+      english: Pick a path at random
+      outcome: {health: -5, morale: -6}
+      result: 大家走了半天，又回到了原来的地方。
+      result_english: After half a day of walking, the party ends up right where it started.
+- id: temple-night
+  text: 路边有一座小庙，庙里的老和尚请大家进去住一晚。
+  english: There is a small temple by the road; its old monk invites everyone in to stay the night.
+  choices:
+    - text: 住下来，帮老和尚打扫院子
+      english: Stay, and help the old monk sweep the courtyard
+      outcome: {health: 10, morale: 6}
+      result: 老和尚做了热腾腾的斋饭，大家睡了个好觉。
+      result_english: The old monk cooks a hot vegetarian meal, and everyone sleeps well.
+    - text: 谢过老和尚，继续赶路
+      english: Thank the old monk and keep going
+      outcome: {}
+      result: 老和尚送大家到门口，祝你们一路平安。
+      result_english: The old monk sees you to the gate and wishes you a safe journey.
+- id: mirage
+  terrains: [desert, fire]
+  text: 远处好像有一片湖水，在阳光下亮闪闪的，可是越走好像越远。
+  english: In the distance there seems to be a lake shimmering in the sun, but the further you walk, the further away it seems.
+  choices:
+    - text: 那是假的，先喝点儿水休息
+      english: It's not real; drink a little and rest
+      outcome: {water: -3, health: 4}
+      result: 大家在树荫下喝了水，觉得舒服多了。
+      result_english: The party drinks in the shade and feels much better.
+    - text: 快跑过去看看
+      english: Hurry over to see
+      outcome: {water: -2, health: -10, morale: -5}
+      result: 跑了很久，什么也没有，大家又热又累。
+      result_english: After a long run there is nothing there; everyone is hot and exhausted.
+- id: caravan
+  terrains: [desert, fire, palace]
+  text: 一支商队从对面走过来，骆驼上驮着很多水袋。商人说可以卖一些水给你们。
+  english: A caravan comes the other way, its camels laden with water skins. The merchant offers to sell you some water.
+  choices:
+    - text: 买十袋水
+      english: Buy ten skins of water
+      outcome: {coins: -10, water: 10}
+      result: 商人数了数铜钱，把水袋交给了你们。
+      result_english: The merchant counts the coins and hands over the water skins.
+    - text: 不用了，谢谢
+      english: No, thank you
+      outcome: {}
+      result: 商队慢慢地走远了。
+      result_english: The caravan slowly moves off into the distance.
+- id: wild-fruit
+  terrains: [mountain, forest]
+  text: 山坡上长着很多红红的果子，看起来很好吃。
+  english: The hillside is covered in bright red fruit that looks delicious.
+  choices:
+    - text: 让悟空先尝一尝
+      english: Let Wukong taste one first
+      needs: 孙悟空
+      outcome: {food: 10, morale: 3}
+      result: 悟空尝了尝，说："好吃，没有毒！"大家摘了很多。
+      result_english: "Wukong tries one: \"Tasty, and not poisonous!\" Everyone picks plenty."
+    - text: 大家马上摘来吃
+      english: Everyone picks and eats at once
+      outcome: {health: -10}
+      result: 有的果子没有熟，大家吃了都肚子疼。
+      result_english: Some of the fruit isn't ripe, and everyone gets a stomach ache.
+    - text: 不认识的果子不吃
+      english: Don't eat fruit you don't know
+      outcome: {}
+      result: 小心总是没错的。
+      result_english: Caution is never a mistake.
+- id: lost-child
+  text: 路边有个小孩在哭，他说和家人走散了，不知道怎么回家。
+  english: A child is crying by the road; he says he got separated from his family and doesn't know how to get home.
+  choices:
+    - text: 送他回家
+      english: Take him home
+      outcome: {food: -2, coins: 10, morale: 10}
+      result: 孩子的父母非常感谢你们，一定要送你们一些铜钱。
+      result_english: The child's parents are very grateful and insist on giving you some copper.
+    - text: 告诉他往哪儿走，然后离开
+      english: Tell him which way to go, then leave
+      outcome: {morale: -4}
+      result: 孩子一边哭一边走了，师父叹了一口气。
+      result_english: The child walks off, still crying; the master sighs.
+- id: cold-night
+  terrains: [mountain, cave]
+  text: 山上的夜晚非常冷，大家冷得睡不着。
+  english: The mountain night is bitterly cold, and no one can sleep.
+  choices:
+    - text: 捡些木头，生一堆火
+      english: Gather wood and build a fire
+      outcome: {morale: 5}
+      result: 火烧起来了，大家围着火聊天，慢慢暖和了。
+      result_english: The fire catches; everyone chats around it and slowly warms up.
+    - text: 趁夜赶路
+      english: Walk on through the night
+      outcome: {health: -10, morale: -4}
+      result: 黑夜里路不好走，好几个人摔倒了。
+      result_english: The road is hard in the dark, and several people fall.
+- id: sha-load
+  needs: 沙悟净
+  text: 沙僧放下担子，揉着肩膀说："担子太重了，我的肩膀很疼。"
+  english: "Sha Wujing sets down the load and rubs his shoulder: \"The load is too heavy; my shoulder hurts.\""
+  choices:
+    - text: 大家轮流挑担子
+      english: Take turns carrying the load
+      outcome: {morale: 5, health: -2}
+      result: 大家都分担一点儿，沙僧感激地笑了。
+      result_english: Everyone shares a little, and Sha Wujing smiles gratefully.
+    - text: 扔掉一些不重要的东西
+      english: Throw away some things that don't matter
+      outcome: {food: -5, morale: 2}
+      result: 担子轻了，可是也少了一些吃的。
+      result_english: The load is lighter, but there is less food too.
+    - text: 让他自己想办法
+      english: Leave him to work it out
+      outcome: {morale: -6}
+      result: 沙僧什么也没说，只是低着头继续走。
+      result_english: Sha Wujing says nothing and just walks on with his head down.
+- id: quarrel
+  needs: 孙悟空
+  text: 悟空打死了一只老虎，师父说他不应该杀生，两个人吵了起来。
+  english: Wukong has killed a tiger; the master says he shouldn't take life, and the two of them argue.
+  choices:
+    - text: 劝师父别生气
+      english: Calm the master down
+      outcome: {morale: 5}
+      result: 师父慢慢冷静下来，说悟空也是为了保护大家。
+      result_english: The master slowly calms down and says Wukong was protecting everyone.
+    - text: 让悟空向师父道歉
+      english: Have Wukong apologize to the master
+      outcome: {morale: 3}
+      result: 悟空不太情愿地说了声"对不起"，师父点了点头。
+      result_english: "Wukong reluctantly says \"sorry\", and the master nods."
+    - text: 不管他们
+      english: Stay out of it
+      outcome: {morale: -10}
+      result: 两个人谁也不理谁，路上非常安静。
+      result_english: Neither will speak to the other; the road is very quiet.
+- id: fisherman
+  terrains: [river]
+  text: 河边有个渔夫，他的船上放着几个刚做好的大饼。
+  english: There is a fisherman by the river with a few freshly made flatbreads on his boat.
+  choices:
+    - text: 用五个铜钱换他的饼
+      english: Trade five copper for his flatbread
+      outcome: {coins: -5, food: 6}
+      result: 渔夫高兴地把饼包好，交给了你们。
+      result_english: The fisherman happily wraps the bread and hands it over.
+    - text: 打个招呼就走
+      english: Say hello and go on
+      outcome: {}
+      result: 渔夫笑着挥了挥手。
+      result_english: The fisherman smiles and waves.
+- id: market
+  terrains: [palace]
+  text: 城里正在赶集，街上人山人海，到处都是卖东西的。
+  english: There's a market day in the city; the streets are packed and there are sellers everywhere.
+  choices:
+    - text: 买些干粮
+      english: Buy some dry provisions
+      outcome: {coins: -15, food: 12}
+      result: 你们买了很多干粮，够吃好几天。
+      result_english: You buy plenty of provisions, enough for several days.
+    - text: 去看看热闹
+      english: Go and enjoy the bustle
+      outcome: {morale: 8}
+      result: 大家看了杂技，听了说书，心情好多了。
+      result_english: The party watches acrobats and listens to storytellers, and spirits lift.
+    - text: 不进城
+      english: Don't go into the city
+      outcome: {}
+      result: 你们从城外绕了过去。
+      result_english: You skirt round the city.
+- id: snake
+  terrains: [forest, cave, mountain]
+  text: 一条大蛇横在路中间，正抬着头看着你们。
+  english: A huge snake lies across the road, head raised, watching you.
+  choices:
+    - text: 绕路走
+      english: Go around it
+      outcome: {food: -2}
+      result: 多走了一些路，不过大家都很安全。
+      result_english: It's a longer way round, but everyone is safe.
+    - text: 让八戒用钉耙把它赶走
+      english: Have Bajie drive it off with his rake
+      needs: 猪八戒
+      outcome: {morale: 4}
+      result: 八戒大叫一声，把蛇吓得钻进了草丛。
+      result_english: Bajie gives a great shout, and the snake slithers off into the grass.
+    - text: 从它旁边冲过去
+      english: Rush past it
+      outcome: {health: -10}
+      result: 蛇咬了一口，好几个人受了伤。
+      result_english: The snake strikes, and several people are hurt.
+- id: drought
+  terrains: [desert, fire]
+  text: 这个村子已经三年没有下雨了，村民们求师父为他们念经求雨。
+  english: This village hasn't had rain in three years; the villagers beg the master to chant sutras for rain.
+  choices:
+    - text: 留下来为他们念经
+      english: Stay and chant for them
+      outcome: {food: -3, water: 8, morale: 10}
+      result: 念完经，天上下起了小雨。村民们把最好的水送给了你们。
+      result_english: As the chanting ends, a light rain begins. The villagers give you their best water.
+    - text: 说我们帮不上忙
+      english: Say there's nothing you can do
+      outcome: {morale: -5}
+      result: 村民们失望地低下了头。
+      result_english: The villagers lower their heads in disappointment.
+- id: night-sounds
+  terrains: [cave, forest]
+  text: 晚上，山洞深处传来奇怪的声音，好像有人在哭，又好像有人在笑。
+  english: At night, strange sounds come from deep in the cave, like someone crying, or someone laughing.
+  choices:
+    - text: 派沙僧去看一看
+      english: Send Sha Wujing to have a look
+      needs: 沙悟净
+      outcome: {morale: 5}
+      result: 沙僧回来说，只是风吹过石头缝的声音。
+      result_english: Sha Wujing comes back and says it's only the wind through the cracks in the rock.
+    - text: 点上灯，大家靠在一起
+      english: Light a lamp and stay close together
+      outcome: {morale: 2}
+      result: 大家一夜没怎么睡，好在没出什么事。
+      result_english: No one sleeps much, but nothing happens.
+    - text: 马上离开这里
+      english: Leave at once
+      outcome: {health: -3, food: -1}
+      result: 大家摸黑走了出去，有人摔了一跤。
+      result_english: The party gropes its way out in the dark; someone takes a fall.

@@ -64,6 +64,7 @@ type Model struct {
 	quests  []string                   // the quest log: hunts under way
 	trail   journey.Trail              // days, supplies and the party (see trail.go)
 	members []string                   // the party walking
+	event   *trailEvent                // an event being met (see events.go)
 	states  map[string]wiki.QuestState // side quests' states, for the road strip
 	note    string
 
@@ -152,6 +153,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	if !ok {
 		return m, nil
 	}
+	if m.event != nil {
+		return m.updateEvent(k)
+	}
 	switch {
 	case key.Matches(k, m.gkeys.Up):
 		return m.step(0, -1)
@@ -190,7 +194,9 @@ func (m Model) step(dx, dy int) (Model, tea.Cmd) {
 	}
 	m.pos = to
 	m.save()
-	m = m.walked()
+	if m = m.walked(); m.event != nil {
+		return m, nil // the day's event comes before anything else on this step
+	}
 	if t, ok := m.region.Towns[to]; ok {
 		id := t.ID
 		return m, func() tea.Msg { return EnterTownMsg{Town: id} }
