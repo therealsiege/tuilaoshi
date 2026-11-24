@@ -191,6 +191,10 @@ func (m Model) step(dx, dy int) (Model, tea.Cmd) {
 		if !m.stageCleared(to) {
 			return m.face(to) // the tribulation bars the road: face it, don't pass
 		}
+	case journey.TileCrossing:
+		if !m.hasCrossed() {
+			return m.faceCrossing(), nil // the obstacle bars the road until crossed
+		}
 	}
 	m.pos = to
 	m.save()

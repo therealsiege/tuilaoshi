@@ -10,13 +10,14 @@ import (
 type Tile byte
 
 const (
-	TileBlock Tile = iota // mountain, water, trees: can't be walked
-	TilePath              // the road: safe
-	TileWild              // wild ground beside the road: random encounters
-	TileTown              // a town on the road
-	TileStage             // a tribulation; it bars the road until cleared
-	TileEast              // back east, to the previous region
-	TileWest              // on west, to the next region
+	TileBlock    Tile = iota // mountain, water, trees: can't be walked
+	TilePath                 // the road: safe
+	TileWild                 // wild ground beside the road: random encounters
+	TileTown                 // a town on the road
+	TileStage                // a tribulation; it bars the road until cleared
+	TileEast                 // back east, to the previous region
+	TileWest                 // on west, to the next region
+	TileCrossing             // a river, pass or desert: it bars the road until crossed
 )
 
 // Point is a cell on a region map.
@@ -36,6 +37,10 @@ type RegionMap struct {
 	End    Point    // where the pilgrim arrives back from the west
 	Towns  map[Point]Town
 	Stages map[Point]int
+
+	// The region's obstacle, if its terrain has one, and where it stands.
+	Crossing *Crossing
+	CrossAt  Point
 }
 
 const (
@@ -109,6 +114,19 @@ func BuildMap(i int) RegionMap {
 		// Straighten the road around an event so its column has one road cell.
 		row[cols[j]+1], row[cols[j]-1] = row[cols[j]], row[cols[j]]
 	}
+	// The obstacle goes in the middle of the widest stretch between events.
+	crossCol := 0
+	if m.Crossing = CrossingFor(r.Terrain); m.Crossing != nil {
+		edges := append([]int{m.W - 3}, cols...)
+		edges = append(edges, 2)
+		gap := 0
+		for j := 1; j < len(edges); j++ {
+			if d := edges[j-1] - edges[j]; d > gap {
+				gap, crossCol = d, edges[j]+d/2
+			}
+		}
+		row[crossCol+1], row[crossCol-1] = row[crossCol], row[crossCol]
+	}
 
 	// Carve the road, joining each column to the next with a vertical run.
 	for x := m.W - 2; x >= 1; x-- {
@@ -147,6 +165,14 @@ func BuildMap(i int) RegionMap {
 		}
 		m.Tiles[p.Y][p.X] = TileStage
 		m.Stages[p] = e.stage
+	}
+
+	if m.Crossing != nil {
+		for y := 0; y < m.H; y++ {
+			m.Tiles[y][crossCol] = TileBlock
+		}
+		m.CrossAt = Point{crossCol, row[crossCol]}
+		m.Tiles[m.CrossAt.Y][crossCol] = TileCrossing
 	}
 
 	m.Start, m.End = Point{m.W - 2, row[m.W-2]}, Point{1, row[1]}

@@ -27,9 +27,10 @@ type Trail struct {
 	Water   int            `yaml:"water"`
 	Pace    string         `yaml:"pace"`
 	Rations string         `yaml:"rations"`
-	Health  map[string]int `yaml:"health"` // member -> 0..100
-	Morale  map[string]int `yaml:"morale"` // member -> 0..100
-	Notes   []string       `yaml:"-"`      // what the last day brought, for the map
+	Health  map[string]int `yaml:"health"`            // member -> 0..100
+	Morale  map[string]int `yaml:"morale"`            // member -> 0..100
+	Notes   []string       `yaml:"-"`                 // what the last day brought, for the map
+	Crossed []string       `yaml:"crossed,omitempty"` // regions whose obstacle has been crossed
 }
 
 // Supplies a journey starts with, and the most water the party carries.

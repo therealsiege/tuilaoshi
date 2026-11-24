@@ -3,7 +3,7 @@ package journey
 import "testing"
 
 // reach floods the walkable cells from p, stopping at markers unless open.
-func reach(m RegionMap, from Point, open func(stage int) bool) map[Point]bool {
+func reach(m RegionMap, from Point, open func(stage int) bool, crossed bool) map[Point]bool {
 	seen := map[Point]bool{from: true}
 	queue := []Point{from}
 	for len(queue) > 0 {
@@ -11,6 +11,9 @@ func reach(m RegionMap, from Point, open func(stage int) bool) map[Point]bool {
 		queue = queue[1:]
 		if n, ok := m.Stages[p]; ok && !open(n) && p != from {
 			continue // a closed tribulation: reached, but not passed
+		}
+		if m.At(p) == TileCrossing && !crossed && p != from {
+			continue // an uncrossed obstacle
 		}
 		for _, d := range []Point{{1, 0}, {-1, 0}, {0, 1}, {0, -1}} {
 			q := Point{p.X + d.X, p.Y + d.Y}
@@ -29,7 +32,7 @@ func TestEveryRegionMapIsWalkableAndGated(t *testing.T) {
 		if len(m.Stages) != r.To-r.From+1 || len(m.Towns) != len(r.TownsIn()) {
 			t.Errorf("%s: %d stages, %d towns", r.ID, len(m.Stages), len(m.Towns))
 		}
-		all := reach(m, m.Start, func(int) bool { return true })
+		all := reach(m, m.Start, func(int) bool { return true }, true)
 		if !all[m.End] || !all[m.Lair()] {
 			t.Errorf("%s: the road doesn't run from the east door to the west", r.ID)
 		}
@@ -39,7 +42,10 @@ func TestEveryRegionMapIsWalkableAndGated(t *testing.T) {
 			}
 		}
 		// With nothing cleared, the first tribulation stops the pilgrim.
-		shut := reach(m, m.Start, func(int) bool { return false })
+		shut := reach(m, m.Start, func(int) bool { return false }, true)
+		if m.Crossing != nil && reach(m, m.Start, func(int) bool { return true }, false)[m.End] {
+			t.Errorf("%s: the west door can be reached without crossing the %s", r.ID, m.Crossing.Kind)
+		}
 		if shut[m.End] {
 			t.Errorf("%s: the west door can be reached without clearing a tribulation", r.ID)
 		}
@@ -51,6 +57,9 @@ func TestEveryRegionMapIsWalkableAndGated(t *testing.T) {
 		}
 		if !shut[firstStage] {
 			t.Errorf("%s: the first tribulation can't be reached", r.ID)
+		}
+		if (m.Crossing != nil) != (CrossingFor(r.Terrain) != nil) || (m.Crossing != nil && m.At(m.CrossAt) != TileCrossing) {
+			t.Errorf("%s: crossing misplaced", r.ID)
 		}
 		if BuildMap(i).Tiles[m.H/2][m.W/2] != m.Tiles[m.H/2][m.W/2] {
 			t.Errorf("%s: maps differ between builds", r.ID)

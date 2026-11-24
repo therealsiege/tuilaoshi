@@ -3,6 +3,7 @@ package roam
 import (
 	"fmt"
 	"math/rand"
+	"slices"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -24,6 +25,7 @@ type trailEvent struct {
 	journey.Event
 	chose  int    // -1 until chosen
 	effect string // what the choice changed, in short
+	cross  bool   // the region's obstacle: crossing it once chosen
 }
 
 // maybeEvent may bring an event at the end of a day.
@@ -43,6 +45,9 @@ func (m Model) updateEvent(k tea.KeyMsg) (Model, tea.Cmd) {
 	if e.chose >= 0 {
 		if key.Matches(k, m.gkeys.Enter) || k.Type == tea.KeySpace || key.Matches(k, m.gkeys.Back) {
 			m.event = nil
+			if e.cross {
+				m = m.crossed()
+			}
 		}
 		return m, nil
 	}
@@ -129,3 +134,22 @@ func (m Model) eventView() string {
 	b.WriteString("\n" + ui.HelpStyle.Render("  enter walk on"))
 	return b.String()
 }
+
+// faceCrossing meets the region's obstacle: today's conditions and the choices.
+func (m Model) faceCrossing() Model {
+	e := m.region.Crossing.Event(rand.New(rand.NewSource(rand.Int63())))
+	m.event = &trailEvent{Event: e, chose: -1, cross: true}
+	return m
+}
+
+// crossed puts the party on the far side of the obstacle, for good.
+func (m Model) crossed() Model {
+	m.trail.Crossed = append(m.trail.Crossed, m.region.Region.ID)
+	m.pos = m.region.CrossAt
+	m.save()
+	m.saveTrail()
+	return m
+}
+
+// hasCrossed reports whether this region's obstacle is behind the party.
+func (m Model) hasCrossed() bool { return slices.Contains(m.trail.Crossed, m.region.Region.ID) }

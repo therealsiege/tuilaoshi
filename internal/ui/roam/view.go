@@ -133,6 +133,12 @@ func (m Model) gridView() string {
 				b.WriteString(ui.SubtitleStyle.Render(">"))
 			case journey.TileWest:
 				b.WriteString(ui.SubtitleStyle.Render("<"))
+			case journey.TileCrossing:
+				if m.hasCrossed() {
+					b.WriteString(pathStyle.Render("="))
+				} else {
+					b.WriteString(ui.WarningStyle.Bold(true).Render("*"))
+				}
 			}
 		}
 		b.WriteString("\n")
@@ -210,6 +216,7 @@ func (m Model) sideView() string {
 		townStyle.Render("H") + " town",
 		ui.ErrorStyle.Render("!") + " tribulation  " + ui.ErrorStyle.Render("&") + " demon's lair",
 		ui.MutedStyle.Render("+") + " cleared",
+		ui.WarningStyle.Render("*") + " river, pass or desert to cross",
 		wildStyle.Render(g[1]) + " wild ground",
 		ui.SubtitleStyle.Render("< >") + " roads to the next regions",
 	}

@@ -2,6 +2,7 @@ package journey
 
 import (
 	"math/rand"
+	"slices"
 	"testing"
 )
 
@@ -64,5 +65,36 @@ func TestPickingAndApplyingAnEvent(t *testing.T) {
 	tr.Apply(Outcome{Food: -100, Water: 50, Health: -20, Who: Master}, party)
 	if tr.Food != 0 || tr.Water != MaxWater || tr.Health[Master] != 80 || tr.Health["孙悟空"] != 100 {
 		t.Errorf("after the outcome: %+v", tr)
+	}
+}
+
+func TestACrossingsConditionDecidesWhichChoiceGoesWrong(t *testing.T) {
+	c := CrossingFor("river")
+	if c == nil || CrossingFor("palace") != nil {
+		t.Fatal("rivers should have a crossing and palaces none")
+	}
+	for seed := int64(0); seed < 20; seed++ {
+		e := c.Event(rand.New(rand.NewSource(seed)))
+		for _, cond := range c.Conditions {
+			if e.Text != c.Name+"："+cond.Text {
+				continue
+			}
+			for i, ch := range e.Choices {
+				bad := ch.Result == c.Bad
+				if bad != slices.Contains(cond.Danger, i) {
+					t.Errorf("%q: choice %q bad %v", cond.Text, ch.Text, bad)
+				}
+				if bad && ch.Outcome.Health >= c.Choices[i].Outcome.Health {
+					t.Errorf("%q: a dangerous choice doesn't hurt", cond.Text)
+				}
+			}
+		}
+	}
+	for _, cr := range content.Crossings {
+		for _, cond := range cr.Conditions {
+			if len(cond.Danger) >= len(cr.Choices) {
+				t.Errorf("%s: %q leaves no safe way across", cr.Kind, cond.Text)
+			}
+		}
 	}
 }

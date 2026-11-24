@@ -1,0 +1,54 @@
+# Obstacles on the road: a river to cross, a mountain pass, a stretch of
+# desert. A region of that terrain has one on its road, blocking it until
+# crossed. Crossing shows one of the conditions (in Chinese) and offers the
+# kind's choices; the condition's danger lists the choices it makes go
+# wrong (harm on top of their cost). Reading the condition right is what
+# gets the party across cheaply. Original text, written for TuiLaoShi.
+- kind: river
+  name: 渡河
+  english: A river crossing
+  terrains: [river]
+  choices:
+    - {text: 涉水过河, english: Wade across, outcome: {}, ok: 大家卷起裤腿，顺利地走了过去。, ok_english: "Everyone rolls up their trousers and wades across without trouble."}
+    - {text: 请船家送你们过河, english: Pay a boatman to ferry you, outcome: {coins: -10}, ok: 船家稳稳地把大家送到了对岸。, ok_english: The boatman takes everyone steadily to the far bank.}
+    - {text: 等一天再过, english: Wait a day and cross then, outcome: {food: -6}, ok: 第二天水退了一些，大家安全过了河。, ok_english: "The next day the water has dropped, and everyone crosses safely."}
+    - {text: 绕远路走桥, english: Take the long way round by a bridge, outcome: {food: -10, health: -3}, ok: 多走了两天，总算从桥上过了河。, ok_english: "Two days longer, but at last you cross by the bridge."}
+  conditions:
+    - {text: 河水很浅，能看见河底的石头。, english: "The water is shallow; you can see the stones on the riverbed.", danger: []}
+    - {text: 河水又深又急，昨天还有人被冲走了。, english: "The river is deep and fast; someone was swept away only yesterday.", danger: [0]}
+    - {text: 船家喝醉了，船底还有一个洞。, english: "The boatman is drunk, and his boat has a hole in the bottom.", danger: [1]}
+    - {text: 上游下了大雨，河水还在往上涨。, english: "It has rained hard upstream, and the river is still rising.", danger: [0, 2]}
+  harm: {health: -20, food: -8}
+  bad: 出事了！有人掉进水里，好不容易才救上来，还丢了不少吃的。
+  bad_english: "Disaster! Someone falls in and is only just pulled out, and a good deal of food is lost."
+- kind: pass
+  name: 山口
+  english: A mountain pass
+  terrains: [mountain, cave]
+  choices:
+    - {text: 直接翻过去, english: Climb straight over, outcome: {health: -3}, ok: 山路虽然陡，大家还是翻过去了。, ok_english: "The path is steep, but everyone makes it over."}
+    - {text: 等天晴了再走, english: Wait for clear weather, outcome: {food: -6}, ok: 等了一天，天晴了，山路好走多了。, ok_english: "After a day's wait the sky clears, and the path is much easier."}
+    - {text: 走山谷里的小路, english: Take the small path through the valley, outcome: {food: -8}, ok: 小路很安静，大家慢慢走了出来。, ok_english: "The valley path is quiet, and the party slowly makes its way through."}
+  conditions:
+    - {text: 天很晴，山路又干又平。, english: "The sky is clear, and the mountain path is dry and even.", danger: []}
+    - {text: 山上正下着大雪，路又窄又滑。, english: "Heavy snow is falling on the mountain; the path is narrow and slippery.", danger: [0]}
+    - {text: 听说山谷里常常有强盗出没。, english: They say bandits often lurk in the valley., danger: [2]}
+  harm: {health: -18, morale: -8}
+  bad: 出事了！有人摔伤了，大家都吓坏了。
+  bad_english: "Disaster! Someone is hurt in a fall, and everyone is badly shaken."
+- kind: desert
+  name: 沙漠
+  english: A desert crossing
+  terrains: [desert, fire]
+  choices:
+    - {text: 白天赶路, english: Travel by day, outcome: {water: -6}, ok: 大家顶着太阳走了一天，总算走出了沙漠。, ok_english: "The party walks a day under the sun and makes it out of the desert."}
+    - {text: 晚上赶路, english: Travel by night, outcome: {health: -3}, ok: 夜里凉快，大家走得很快。, ok_english: "The night is cool, and the party moves quickly."}
+    - {text: 跟着商队一起走, english: Travel with a caravan, outcome: {coins: -10}, ok: 商队的人很熟悉路，带大家走了出去。, ok_english: The caravan knows the way and leads everyone out.}
+  conditions:
+    - {text: 天气不太热，风也不大。, english: "The weather isn't too hot, and the wind is light.", danger: []}
+    - {text: 太阳特别大，沙子烫得像火一样。, english: "The sun is fierce, and the sand is as hot as fire.", danger: [0]}
+    - {text: 听说晚上沙漠里有狼群。, english: They say wolves roam the desert at night., danger: [1]}
+    - {text: 那些商人看起来不太友好，一直盯着你们的行李。, english: "The merchants look unfriendly and keep eyeing your baggage.", danger: [2]}
+  harm: {health: -18, water: -6}
+  bad: 出事了！大家吃了不少苦，好几个人病倒了。
+  bad_english: "Disaster! The party suffers badly, and several fall ill."

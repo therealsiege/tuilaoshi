@@ -36,46 +36,55 @@ func roadWith(t *testing.T, cleared, learned int) Model {
 	return New(store).SetSize(100, 30).Refresh()
 }
 
-// walkTo moves the pilgrim along the road until next to p (or onto it,
-// for a town), using the map's own walking.
+// walkTo moves the pilgrim along the shortest walkable route until next
+// to target (or onto it, for a town), using the map's own walking and
+// getting past any obstacle or event on the way.
 func walkTo(t *testing.T, m Model, target journey.Point) (Model, tea.Cmd) {
 	t.Helper()
-	for steps := 0; steps < 200; steps++ {
-		dx := 0
-		switch {
-		case m.pos.X > target.X:
-			dx = -1
-		case m.pos.X < target.X:
-			dx = 1
-		}
-		next := journey.Point{X: m.pos.X + dx, Y: m.pos.Y}
-		dy := 0
-		if dx == 0 || m.region.At(next) == journey.TileBlock {
-			dx = 0
-			// follow the road up or down to the column's road cell
-			for _, d := range []int{-1, 1} {
-				if m.region.At(journey.Point{X: m.pos.X, Y: m.pos.Y + d}) != journey.TileBlock {
-					if (d < 0) == (m.pos.Y > target.Y) || m.pos.Y == target.Y {
-						dy = d
-					}
-				}
-			}
-			if dy == 0 {
-				dy = map[bool]int{true: -1, false: 1}[m.pos.Y > target.Y]
-			}
+	for steps := 0; steps < 300; steps++ {
+		next, ok := nextStep(m.region, m.pos, target)
+		if !ok {
+			t.Fatalf("no route from %v to %v", m.pos, target)
 		}
 		var cmd tea.Cmd
-		before := m.pos
-		m, cmd = m.step(dx, dy)
+		m, cmd = m.step(next.X-m.pos.X, next.Y-m.pos.Y)
+		if m.event != nil {
+			m, _ = m.Update(press("1"))
+			m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+			continue
+		}
 		if cmd != nil || (m.note != "" && !strings.HasPrefix(m.note, "Day ")) {
 			return m, cmd
-		}
-		if m.pos == before {
-			t.Fatalf("stuck at %v heading for %v", m.pos, target)
 		}
 	}
 	t.Fatalf("never reached %v", target)
 	return m, nil
+}
+
+// nextStep is the first step of a shortest route from p to target over
+// walkable cells (obstacles count as walkable: they are crossed).
+func nextStep(rm journey.RegionMap, p, target journey.Point) (journey.Point, bool) {
+	prev := map[journey.Point]journey.Point{p: p}
+	queue := []journey.Point{p}
+	for len(queue) > 0 {
+		q := queue[0]
+		queue = queue[1:]
+		if q == target {
+			for prev[q] != p {
+				q = prev[q]
+			}
+			return q, true
+		}
+		for _, d := range []journey.Point{{X: -1}, {X: 1}, {Y: -1}, {Y: 1}} {
+			n := journey.Point{X: q.X + d.X, Y: q.Y + d.Y}
+			if _, seen := prev[n]; seen || rm.At(n) == journey.TileBlock || rm.At(n) == journey.TileEast || rm.At(n) == journey.TileWest {
+				continue
+			}
+			prev[n] = q
+			queue = append(queue, n)
+		}
+	}
+	return journey.Point{}, false
 }
 
 func TestTheRoadStartsInTheFirstRegion(t *testing.T) {
@@ -261,5 +270,29 @@ func TestADayCanBringAnEvent(t *testing.T) {
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
 	if m.event != nil {
 		t.Error("enter should walk on")
+	}
+}
+
+func TestCrossingTheRegionsRiver(t *testing.T) {
+	m := roadWith(t, 0, 0) // region 1 is a river region
+	if m.region.Crossing == nil {
+		t.Fatal("no crossing in the first region")
+	}
+	m.pos = journey.Point{X: m.region.CrossAt.X + 1, Y: m.region.CrossAt.Y}
+	m, _ = m.step(-1, 0)
+	if m.event == nil || !m.event.cross || m.pos == m.region.CrossAt {
+		t.Fatalf("stepping onto the river: event %v, at %v", m.event, m.pos)
+	}
+	m, _ = m.Update(press("2")) // the ferry
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if m.event != nil || m.pos != m.region.CrossAt || !m.hasCrossed() {
+		t.Fatalf("after crossing: event %v, at %v, crossed %v", m.event, m.pos, m.hasCrossed())
+	}
+	m, _ = m.step(-1, 0)
+	if m.event != nil {
+		t.Error("a crossed river asked again")
+	}
+	if reloaded := New(m.store).Refresh(); !reloaded.hasCrossed() {
+		t.Error("the crossing wasn't saved")
 	}
 }
