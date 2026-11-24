@@ -1,0 +1,55 @@
+package wiki
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"gopkg.in/yaml.v3"
+)
+
+// settingsFile keeps the learner's settings, shared by every journey.
+const settingsFile = "settings.yaml"
+
+// Settings are the learner's preferences.
+type Settings struct {
+	Speech      bool   `yaml:"speech"`       // speak answers and lines aloud
+	Input       string `yaml:"input"`        // answer boxes start in: chinese, pinyin, english
+	Difficulty  string `yaml:"difficulty"`   // battles: adaptive, gentler, sterner
+	Encounters  string `yaml:"encounters"`   // wild encounters: normal, fewer, off
+	Portraits   string `yaml:"portraits"`    // enemy portraits: large, small, off
+	ReviewChunk int    `yaml:"review_chunk"` // due words "Start here" suggests at once
+}
+
+// DefaultSettings are the settings before the learner changes any.
+func DefaultSettings() Settings {
+	return Settings{Speech: true, Input: "chinese", Difficulty: "adaptive", Encounters: "normal", Portraits: "large", ReviewChunk: 20}
+}
+
+// Settings reads the learner's settings, filling any missing with defaults.
+func (s *Store) Settings() (Settings, error) {
+	set := DefaultSettings()
+	data, err := os.ReadFile(filepath.Join(s.Dir, settingsFile))
+	if os.IsNotExist(err) {
+		return set, nil
+	}
+	if err != nil {
+		return set, fmt.Errorf("read %s: %w", settingsFile, err)
+	}
+	if err := yaml.Unmarshal(data, &set); err != nil {
+		return DefaultSettings(), fmt.Errorf("parse %s: %w", settingsFile, err)
+	}
+	if set.ReviewChunk <= 0 {
+		set.ReviewChunk = DefaultSettings().ReviewChunk
+	}
+	return set, nil
+}
+
+// SaveSettings writes the learner's settings.
+func (s *Store) SaveSettings(set Settings) error {
+	data, err := yaml.Marshal(set)
+	if err != nil {
+		return fmt.Errorf("encode %s: %w", settingsFile, err)
+	}
+	return os.WriteFile(filepath.Join(s.Dir, settingsFile), data, 0644)
+}

@@ -3,7 +3,6 @@ package rpg
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
-	"github.com/therealsiege/tuilaoshi/internal/ui/input"
 )
 
 // setQuestionKinds asks for spoken questions when audio works, and typed
@@ -30,7 +29,7 @@ func (m Model) prepareQuestion() (Model, tea.Cmd) {
 	m.order = nil
 	if q := m.battle.Question; q != nil && q.Category == "write" {
 		m.input.Reset()
-		m.input.SetMode(input.ModeChinese)
+		m.input.SetMode(ui.AnswerMode())
 		return m, m.input.Focus()
 	}
 	return m, m.speakQuestion()

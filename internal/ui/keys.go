@@ -91,6 +91,7 @@ const (
 	ViewTheatre    // the learner's episodes: scenes, listening, talks
 	ViewForge      // the character forge: build characters from their parts
 	ViewFestival   // Chinese festivals on the real calendar
+	ViewSettings   // the learner's preferences
 )
 
 // SwitchViewMsg tells the app to change views.
@@ -123,6 +124,7 @@ type DashboardKeys struct {
 	Episodes key.Binding
 	Forge    key.Binding
 	Festival key.Binding
+	Settings key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -192,6 +194,10 @@ func DefaultDashboardKeys() DashboardKeys {
 			key.WithKeys("y"),
 			key.WithHelp("y", "festivals"),
 		),
+		Settings: key.NewBinding(
+			key.WithKeys(","),
+			key.WithHelp(",", "settings"),
+		),
 		Reading: key.NewBinding(
 			key.WithKeys("t"),
 			key.WithHelp("t", "read"),
@@ -223,6 +229,11 @@ func HelpText(v View) string {
 			"  ↑↓     Select radical\n" +
 			"  esc    Back to dashboard\n" +
 			"  ?      Toggle help"
+	case ViewSettings:
+		return "Settings Keys\n\n" +
+			"  ↑↓     Choose a setting\n" +
+			"  ←→     Change it (saved at once)\n" +
+			"  esc    Back"
 	case ViewFestival:
 		return "Festival Keys\n\n" +
 			"  1-2    Answer a question\n" +

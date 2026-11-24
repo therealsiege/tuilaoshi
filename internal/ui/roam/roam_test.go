@@ -9,7 +9,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
+	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
+	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 // roadWith is a journey with stages 1..cleared won and learned characters.
@@ -185,5 +187,15 @@ func TestWildGroundMeetsTheRegionsClans(t *testing.T) {
 	}
 	if !strings.Contains(m.View(), "HP") {
 		t.Error("the map doesn't show HP")
+	}
+}
+
+func TestEncounterSettings(t *testing.T) {
+	defer func(p wiki.Settings) { ui.Prefs = p }(ui.Prefs)
+	for setting, want := range map[string]int{"normal": encounterChance, "fewer": encounterChance / 2, "off": 0} {
+		ui.Prefs.Encounters = setting
+		if got := encounterRate(); got != want {
+			t.Errorf("%s: rate %d, want %d", setting, got, want)
+		}
 	}
 }

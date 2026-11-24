@@ -9,7 +9,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/claude"
-	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/ui/assessment"
 	"github.com/therealsiege/tuilaoshi/internal/ui/browser"
@@ -27,6 +26,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/ui/review"
 	"github.com/therealsiege/tuilaoshi/internal/ui/roam"
 	rpgview "github.com/therealsiege/tuilaoshi/internal/ui/rpg"
+	"github.com/therealsiege/tuilaoshi/internal/ui/settings"
 	"github.com/therealsiege/tuilaoshi/internal/ui/shrine"
 	"github.com/therealsiege/tuilaoshi/internal/ui/stats"
 	"github.com/therealsiege/tuilaoshi/internal/ui/theatre"
@@ -64,6 +64,7 @@ type Model struct {
 	theatre   theatre.Model
 	forge     forgeview.Model
 	festival  festival.Model
+	settings  settings.Model
 	battle    rpgview.Model
 	reader    reader.Model
 	assess    assessment.Model
@@ -91,51 +92,39 @@ func New(wikiDir string) (Model, error) {
 	if err != nil {
 		return Model{}, fmt.Errorf("read wiki: %w", err)
 	}
+	if ui.Prefs, err = store.Settings(); err != nil {
+		return Model{}, err
+	}
 	// Build pinyin/character dictionary from wiki pages
 	dict := buildDict(pages)
 
-	// Snapshot initial journey state to detect future milestones.
-	initialState, err := journey.Calculate(store)
-	if err != nil {
-		return Model{}, fmt.Errorf("read wiki: %w", err)
-	}
-	initialBossCount := 0
-	for _, b := range initialState.Bosses {
-		if b.Defeated {
-			initialBossCount++
-		}
-	}
-
 	return Model{
-		store:         store,
-		claude:        claudeClient,
-		tts:           ttsClient,
-		keys:          ui.DefaultGlobalKeys(),
-		currentView:   ui.ViewTitle,
-		title:         title.New(store, dict).Refresh(),
-		roam:          roam.New(store),
-		theatre:       theatre.New(store, dict),
-		forge:         forgeview.New(store, claudeClient),
-		festival:      festival.New(store),
-		dashboard:     dashboard.New(store, ttsClient),
-		drill:         drill.New(store, claudeClient, ttsClient, dict),
-		browser:       browser.New(store),
-		chat:          chat.New(claudeClient, ttsClient, dict),
-		review:        review.New(store, claudeClient, ttsClient, dict),
-		stats:         stats.New(store),
-		journey:       journeyview.New(store),
-		radicals:      radicals.New(),
-		shrine:        shrine.New(store),
-		cards:         collection.New(store),
-		party:         party.New(store, claudeClient, dict),
-		world:         world.New(store, claudeClient, dict),
-		battle:        rpgview.New(store, ttsClient, dict),
-		reader:        reader.New(store),
-		assess:        assessment.New(store),
-		prevRankName:  initialState.Rank.Name,
-		prevBossCount: initialBossCount,
-		prevLevel:     initialState.Level.N,
-		prevOpenStage: openStage(initialState),
+		store:       store,
+		claude:      claudeClient,
+		tts:         ttsClient,
+		keys:        ui.DefaultGlobalKeys(),
+		currentView: ui.ViewTitle,
+		title:       title.New(store, dict).Refresh(),
+		roam:        roam.New(store),
+		theatre:     theatre.New(store, dict),
+		forge:       forgeview.New(store, claudeClient),
+		festival:    festival.New(store),
+		settings:    settings.New(store),
+		dashboard:   dashboard.New(store, ttsClient),
+		drill:       drill.New(store, claudeClient, ttsClient, dict),
+		browser:     browser.New(store),
+		chat:        chat.New(claudeClient, ttsClient, dict),
+		review:      review.New(store, claudeClient, ttsClient, dict),
+		stats:       stats.New(store),
+		journey:     journeyview.New(store),
+		radicals:    radicals.New(),
+		shrine:      shrine.New(store),
+		cards:       collection.New(store),
+		party:       party.New(store, claudeClient, dict),
+		world:       world.New(store, claudeClient, dict),
+		battle:      rpgview.New(store, ttsClient, dict),
+		reader:      reader.New(store),
+		assess:      assessment.New(store),
 	}, nil
 }
 
@@ -223,6 +212,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		case ui.ViewFestival:
 			m.festival = m.festival.Refresh()
+			return m, nil
+		case ui.ViewSettings:
+			m.settings = m.settings.Refresh()
 			return m, nil
 		case ui.ViewForge:
 			var cmd tea.Cmd
@@ -341,6 +333,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.forge, cmd = m.forge.Update(msg)
 	case ui.ViewFestival:
 		m.festival, cmd = m.festival.Update(msg)
+	case ui.ViewSettings:
+		m.settings, cmd = m.settings.Update(msg)
 	case ui.ViewBattle:
 		m.battle, cmd = m.battle.Update(msg)
 	case ui.ViewReading:
@@ -389,6 +383,8 @@ func (m Model) View() string {
 		content = m.forge.View()
 	case ui.ViewFestival:
 		content = m.festival.View()
+	case ui.ViewSettings:
+		content = m.settings.View()
 	case ui.ViewBattle:
 		content = m.battle.View()
 	case ui.ViewReading:

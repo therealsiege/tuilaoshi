@@ -92,6 +92,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, ui.SwitchTo(ui.ViewForge)
 		case key.Matches(msg, m.keys.Festival):
 			return m, ui.SwitchTo(ui.ViewFestival)
+		case key.Matches(msg, m.keys.Settings):
+			return m, ui.SwitchTo(ui.ViewSettings)
 		case key.Matches(msg, m.keys.Reading):
 			return m, ui.SwitchTo(ui.ViewReading)
 		case key.Matches(msg, m.keys.Assess):

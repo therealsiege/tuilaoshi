@@ -11,6 +11,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/episode"
 	"github.com/therealsiege/tuilaoshi/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/ui/input"
 )
 
@@ -54,7 +55,7 @@ func (m Model) nextLine() (Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	if d.Type {
 		m.listen.input.Reset()
-		m.listen.input.SetMode(input.ModeChinese)
+		m.listen.input.SetMode(ui.AnswerMode())
 		cmds = append(cmds, m.listen.input.Focus())
 	}
 	return m, tea.Batch(append(cmds, m.play())...)

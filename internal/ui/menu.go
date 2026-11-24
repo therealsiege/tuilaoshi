@@ -39,6 +39,7 @@ var DashboardMenu = []MenuGroup{
 		{"y", "Festivals 节日"},
 		{"x", "Radicals"},
 		{"v", "Voices"},
+		{",", "Settings"},
 	}},
 }
 

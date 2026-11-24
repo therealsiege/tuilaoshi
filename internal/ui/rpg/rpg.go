@@ -178,6 +178,12 @@ func (m Model) Refresh() Model {
 	if m.store != nil {
 		pct, answered := m.store.RecentAccuracy(rpgengine.RecentAnswers)
 		m.accuracy, m.difficulty = pct, rpgengine.DifficultyFor(pct, answered)
+		switch ui.Prefs.Difficulty { // the learner's setting overrides adapting
+		case "gentler":
+			m.difficulty = rpgengine.Easier
+		case "sterner":
+			m.difficulty = rpgengine.Harder
+		}
 	}
 	switch {
 	case m.stage != nil:

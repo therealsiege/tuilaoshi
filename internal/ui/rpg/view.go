@@ -48,10 +48,13 @@ func (m Model) viewIntro() string {
 	var b strings.Builder
 	enemy := m.battle.Enemy
 
-	// Enemy image or ASCII art.
+	// Enemy image or ASCII art; none when portraits are turned off.
 	w, h := m.portraitSize()
-	art := imgview.RenderWithFallback(enemy.ImagePath, w, h, enemy.Art)
+	art := m.portrait(enemy.ImagePath, enemy.Art, w, h)
 	for _, line := range strings.Split(art, "\n") {
+		if art == "" {
+			break
+		}
 		b.WriteString(ui.ErrorStyle.Render("      " + line))
 		b.WriteString("\n")
 	}
@@ -82,7 +85,7 @@ func (m Model) viewFighting() string {
 	var b strings.Builder
 	b.WriteString(m.renderHPBars())
 	b.WriteString("\n")
-	art := imgview.RenderWithFallback(m.battle.Enemy.ImagePath, 30, 10, m.battle.Enemy.Art)
+	art := m.portrait(m.battle.Enemy.ImagePath, m.battle.Enemy.Art, 30, 10)
 	for _, line := range strings.Split(art, "\n") {
 		b.WriteString("      " + line + "\n")
 	}
@@ -405,10 +408,23 @@ func (m Model) renderStakes() string {
 	return b.String() + "\n\n"
 }
 
+// portrait draws an enemy's picture (or its ASCII art), or nothing when
+// the learner has turned portraits off.
+func (m Model) portrait(path, art string, w, h int) string {
+	if ui.Prefs.Portraits == "off" {
+		return ""
+	}
+	return imgview.RenderWithFallback(path, w, h, art)
+}
+
 // portraitSize fits the intro's demon portrait to the terminal: up to 60x24
-// cells, leaving room for the text below it, and never below 30x10.
+// cells (30x10 when the learner wants small portraits), leaving room for the
+// text below it, and never below 30x10.
 func (m Model) portraitSize() (w, h int) {
 	w, h = 60, 24
+	if ui.Prefs.Portraits == "small" {
+		w, h = 30, 10
+	}
 	if m.width > 0 {
 		w = min(w, m.width-10)
 	}

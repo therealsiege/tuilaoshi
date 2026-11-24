@@ -12,7 +12,7 @@ type SpeechDoneMsg struct{ Err error }
 // SpeakCmd speaks text in the background. It is nil when audio is off or
 // there is nothing to say, which tea.Batch skips.
 func SpeakCmd(tts *audio.Client, text, lang string) tea.Cmd {
-	if tts == nil || !tts.Available() || text == "" {
+	if tts == nil || !tts.Available() || text == "" || !Prefs.Speech {
 		return nil
 	}
 	return func() tea.Msg {

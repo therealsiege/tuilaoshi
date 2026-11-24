@@ -35,7 +35,18 @@ type EncounterMsg struct{ Soldier journey.Soldier }
 // meets one of the region's clans; the road itself is safe.
 const encounterChance = 12
 
-// encounterRoll draws 0-99 against encounterChance; tests fix it.
+// encounterRate is the chance in effect, by the learner's setting.
+func encounterRate() int {
+	switch ui.Prefs.Encounters {
+	case "fewer":
+		return encounterChance / 2
+	case "off":
+		return 0
+	}
+	return encounterChance
+}
+
+// encounterRoll draws 0-99 against encounterRate; tests fix it.
 var encounterRoll = func() int { return rand.Intn(100) }
 
 // Model is the walking map.
@@ -176,7 +187,7 @@ func (m Model) step(dx, dy int) (Model, tea.Cmd) {
 		id := t.ID
 		return m, func() tea.Msg { return EnterTownMsg{Town: id} }
 	}
-	if m.region.At(to) == journey.TileWild && encounterRoll() < encounterChance {
+	if m.region.At(to) == journey.TileWild && encounterRoll() < encounterRate() {
 		if s, ok := m.region.Region.Encounter(rand.New(rand.NewSource(rand.Int63()))); ok {
 			m.note = s.Name + " " + s.English + " leaps out of the undergrowth!"
 			return m, func() tea.Msg { return EncounterMsg{Soldier: s} }

@@ -341,3 +341,16 @@ func TestLootOnlyFromRoadWinsThatRecallHardWords(t *testing.T) {
 		t.Errorf("loot not kept: %v %v", mats, err)
 	}
 }
+
+func TestSternerSettingOverridesAdapting(t *testing.T) {
+	defer func(p wiki.Settings) { ui.Prefs = p }(ui.Prefs)
+	ui.Prefs.Difficulty = "sterner"
+	if m := New(stageWiki(t, 0, 0), nil, nil).Spar(); m.difficulty != rpgengine.Harder {
+		t.Errorf("difficulty %d with battles set sterner", m.difficulty)
+	}
+	ui.Prefs.Portraits = "off"
+	m := New(stageWiki(t, 0, 0), nil, nil).Spar()
+	if m.portrait("x.png", "ART", 30, 10) != "" {
+		t.Error("a portrait drawn with portraits off")
+	}
+}
