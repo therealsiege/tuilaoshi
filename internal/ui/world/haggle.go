@@ -20,9 +20,6 @@ import (
 // down, never below a floor; rudeness can push it up. ctrl+y takes the
 // price on offer; after haggleRounds the merchant's word is final.
 
-// Talker answers a message in a character's voice (claude.Client.ChatAs).
-type Talker func(ctx context.Context, system string, history []claude.ChatMessage, msg string) (string, error)
-
 // The bundle haggled over, and how the price is set from the town's price
 // for a bundle of 斋饭: asking 30% over, never below 60%.
 const (

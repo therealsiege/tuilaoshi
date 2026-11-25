@@ -316,6 +316,8 @@ func HelpText(v View) string {
 			"  h      Haggle with the merchant (讨价还价)\n" +
 			"  t      Trade a material for 斋饭\n" +
 			"  a      Ask for alms (化缘), once a day\n" +
+			"  f      Fiery Eyes (火眼金睛): question three\n" +
+			"         villagers in Chinese, accuse the demon\n" +
 			"  ctrl+r Hear the Chinese on screen\n" +
 			"  g      Shrine\n" +
 			"  esc    Back on the road"

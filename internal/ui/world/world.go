@@ -32,6 +32,7 @@ const (
 	screenGate     // a kingdom's gate questions (see passport.go)
 	screenPassport // the stamps collected
 	screenHaggle   // bargaining with the merchant (see haggle.go)
+	screenEyes     // a mystery: find the demon among villagers (see eyes.go)
 )
 
 // Model is the world map view model.
@@ -74,6 +75,8 @@ type Model struct {
 	talker Talker    // the merchant's voice; nil without Claude
 	haggle *haggling // the haggle open
 
+	eyes eyes // the town's Fiery Eyes mystery
+
 	note          string
 	width, height int
 	loadErr       error
@@ -88,13 +91,14 @@ func New(store *wiki.Store, client *claude.Client, dict *input.Dict) Model {
 	m := Model{store: store, gkeys: ui.DefaultGlobalKeys(), towns: journey.Towns(), now: time.Now, input: in}
 	if client != nil {
 		m.grader, m.talker = client.GradeWriting, client.ChatAs
+		m.eyes.talker, m.eyes.keyed = client.ChatAs, client.Ready
 	}
 	return m
 }
 
 // Typing reports whether a writing request or a stone has the keyboard.
 func (m Model) Typing() bool {
-	return m.screen == screenStone || m.screen == screenRiddle || m.screen == screenGate || (m.screen == screenHaggle && !m.haggle.bought) || (m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing())
+	return m.screen == screenStone || m.screen == screenRiddle || m.screen == screenGate || (m.screen == screenHaggle && !m.haggle.bought) || (m.screen == screenEyes && m.eyes.asking) || (m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing())
 }
 
 func (m Model) Init() tea.Cmd { return nil }
@@ -134,6 +138,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	if h, ok := msg.(haggleMsg); ok {
 		return m.onHaggle(h), nil
 	}
+	if r, ok := msg.(eyesReplyMsg); ok {
+		return m.onEyesReply(r), nil
+	}
 	k, ok := msg.(tea.KeyMsg)
 	if !ok {
 		return m, nil
@@ -157,6 +164,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m.Refresh(), nil
 		}
 		return m.updateGate(k)
+	case screenEyes:
+		return m.updateEyes(k, back)
 	case screenRiddle:
 		if back && !m.input.Composing() {
 			m.screen, m.note = screenTown, ""
@@ -223,6 +232,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m.openPassport()
 		case k.String() == "h":
 			return m.openHaggle()
+		case k.String() == "f":
+			return m.openEyes()
 		}
 		return m, nil
 	}

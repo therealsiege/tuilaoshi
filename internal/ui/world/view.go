@@ -19,6 +19,8 @@ func (m Model) View() string {
 		b.WriteString(m.gateView())
 	case screenPassport:
 		b.WriteString(m.passportView())
+	case screenEyes:
+		b.WriteString(m.eyesView())
 	case screenRiddle:
 		b.WriteString(m.riddleView())
 	case screenAlms:
@@ -89,7 +91,8 @@ func (m Model) townView() string {
 	} else {
 		b.WriteString("  " + ui.MutedStyle.Render(fmt.Sprintf("通关文牒 Your travel rescript: %d of %d seals (p)", len(m.stamps), len(journey.Gates()))) + "\n")
 	}
-	help := "  ↑↓ choose · enter read · r rest · b buy · x sandals · o offering · t trade · a alms · h haggle · l riddle · p papers · g shrine · esc"
+	b.WriteString("  " + eyesLine() + "\n")
+	help := "  ↑↓ choose · enter read · r rest · b buy · x sandals · o offering · t trade · a alms · h haggle · l riddle · p papers · f rumour · g shrine · esc"
 	if t.Stone != nil {
 		if slices.Contains(m.stones, t.ID) {
 			b.WriteString("\n  " + ui.MutedStyle.Render("石碑 The roadside stone stands open: ") + ui.ChineseStyle.Render(t.Stone.Idiom) + "\n")
