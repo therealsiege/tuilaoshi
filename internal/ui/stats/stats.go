@@ -24,7 +24,8 @@ type Model struct {
 	pages   []model.Page
 	hist    history // the review log: week ahead, retention, hard words (ahead.go)
 	now     func() time.Time
-	loadErr error // why the wiki could not be read, shown above the numbers
+	loadErr error  // why the wiki could not be read, shown above the numbers
+	spider  spider // the web of studied words, shown with w (webview.go)
 	width   int
 	height  int
 }
@@ -43,15 +44,34 @@ func (m Model) Init() tea.Cmd {
 	return func() tea.Msg { return refreshMsg{} }
 }
 
+// Update refreshes the numbers, and handles the web's keys: w switches
+// between the numbers and the web.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-	switch msg.(type) {
+	switch msg := msg.(type) {
 	case refreshMsg:
 		return m.Refresh(), nil
+	case tea.KeyMsg:
+		switch {
+		case m.spider.walk.active():
+			return m.updateWalk(msg)
+		case m.spider.on:
+			return m.updateWeb(msg)
+		case msg.String() == "w":
+			m.spider.on = true
+			return m.loadWeb(), nil
+		}
 	}
 	return m, nil
 }
 
+// View shows the numbers, or the web, or a walk of the web.
 func (m Model) View() string {
+	switch {
+	case m.spider.walk.active():
+		return m.walkView()
+	case m.spider.on:
+		return m.webView()
+	}
 	var b strings.Builder
 
 	title := ui.TitleStyle.Render("Study Statistics 学习统计")
@@ -91,7 +111,7 @@ func (m Model) View() string {
 	b.WriteString(m.renderStreak())
 	b.WriteString("\n\n")
 
-	b.WriteString(ui.HelpStyle.Render("  esc back to dashboard • ? help"))
+	b.WriteString(ui.HelpStyle.Render("  w spider's web 盘丝洞 • esc back to dashboard • ? help"))
 
 	return b.String()
 }
@@ -360,5 +380,8 @@ func (m Model) Refresh() Model {
 	var histErr error
 	m.hist, histErr = loadHistory(m.store, m.now())
 	m.loadErr = errors.Join(statsErr, pagesErr, histErr)
+	if m.spider.on {
+		m = m.loadWeb()
+	}
 	return m
 }

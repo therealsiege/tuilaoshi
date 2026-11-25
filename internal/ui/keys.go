@@ -235,8 +235,14 @@ func HelpText(v View) string {
 		return menuHelp()
 	case ViewStats:
 		return "Stats Keys\n\n" +
-			"  esc  Back to dashboard\n" +
-			"  ?    Toggle help"
+			"  w      Spider's web 盘丝洞 / back to the numbers\n" +
+			"  ↑↓     Web: pick a strand\n" +
+			"  →/←    Web: follow it / go back\n" +
+			"  c      Web: centre on the weakest word\n" +
+			"  enter  Web: revive the slipping words around the centre\n" +
+			"  1-4    Reviving: rate (space shows the answer)\n" +
+			"  esc    Back to dashboard (while reviving: to the web)\n" +
+			"  ?      Toggle help"
 	case ViewJourney:
 		return "Journey Keys\n\n" +
 			"  tab    Switch tab\n" +
