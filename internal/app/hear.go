@@ -40,6 +40,8 @@ func (m Model) ownsEsc() bool {
 		return m.theatre.Busy()
 	case ui.ViewFestival:
 		return m.festival.Busy()
+	case ui.ViewStats:
+		return m.stats.Walking()
 	}
 	return false
 }
