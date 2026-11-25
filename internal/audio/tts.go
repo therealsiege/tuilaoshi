@@ -114,30 +114,75 @@ func (c *Client) Speak(text, lang string) error {
 	if !c.Available() {
 		return fmt.Errorf("FISH_AUDIO_API_KEY not set")
 	}
-	if text == "" {
-		return nil
-	}
-	if c.apiKey == "" {
-		voice := systemVoices["zh"]
-		if lang == "en" {
-			voice = systemVoices["en"]
-		}
-		if out, err := exec.Command(c.sayPath, "-v", voice, text).CombinedOutput(); err != nil {
-			return fmt.Errorf("say: %v: %s", err, strings.TrimSpace(string(out)))
-		}
-		return nil
-	}
-
 	voice := c.zhVoice
 	if lang == "en" {
 		voice = c.enVoice
 	}
+	return c.speakIn(text, voice)
+}
 
-	audioData, err := c.synthesize(text, voice)
+// Line is one line to speak, in its own voice.
+type Line struct {
+	Text  string
+	Voice Voice
+}
+
+// OtherChineseVoice is a Chinese voice other than the one chosen, for a
+// second speaker.
+func (c *Client) OtherChineseVoice() Voice {
+	for _, v := range ChineseVoices() {
+		if v.ID != c.zhVoice.ID {
+			return v
+		}
+	}
+	return c.zhVoice
+}
+
+// SpeakLines speaks lines one after another, each in its own voice: a
+// conversation between two speakers.
+func (c *Client) SpeakLines(lines []Line) error {
+	if !c.Available() {
+		return fmt.Errorf("FISH_AUDIO_API_KEY not set")
+	}
+	for _, l := range lines {
+		if err := c.speakIn(l.Text, l.Voice); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// otherSystemVoice is the macOS say voice for a second Chinese speaker;
+// without it the second speaker falls back to the first's voice.
+const otherSystemVoice = "Grandpa (Chinese (China mainland))"
+
+// speakIn synthesizes text in voice v and plays it. Through macOS say, the
+// chosen Chinese voice is Tingting and any other is otherSystemVoice.
+func (c *Client) speakIn(text string, v Voice) error {
+	if text == "" {
+		return nil
+	}
+	if c.apiKey == "" {
+		name := systemVoices["zh"]
+		switch {
+		case v.Lang == "en":
+			name = systemVoices["en"]
+		case v.ID != c.zhVoice.ID:
+			name = otherSystemVoice
+		}
+		out, err := exec.Command(c.sayPath, "-v", name, text).CombinedOutput()
+		if err != nil && name == otherSystemVoice {
+			out, err = exec.Command(c.sayPath, "-v", systemVoices["zh"], text).CombinedOutput()
+		}
+		if err != nil {
+			return fmt.Errorf("say: %v: %s", err, strings.TrimSpace(string(out)))
+		}
+		return nil
+	}
+	audioData, err := c.synthesize(text, v)
 	if err != nil {
 		return err
 	}
-
 	return playAudio(audioData)
 }
 

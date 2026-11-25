@@ -40,7 +40,7 @@ func (m Model) walked() Model {
 		if m.trail.Collapsed() {
 			m = m.carryBack()
 		} else {
-			m = m.maybeEvent()
+			m = m.maybeEvent().maybePlot()
 		}
 	}
 	m.saveTrail()
@@ -101,6 +101,9 @@ func (m Model) trailView() string {
 	}
 	fmt.Fprintf(&b, "%s · %s · %s\n", ui.SubtitleStyle.Render(fmt.Sprintf("Day %d", t.Day)), food, water)
 	b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("%s pace (p) · %s rations (f)", t.Pace, t.Rations)) + "\n")
+	if t.Forewarned {
+		b.WriteString(ui.SuccessStyle.Render("Forewarned: the next danger does half its harm") + "\n")
+	}
 	for _, name := range m.members {
 		h, mo := t.Health[name], t.Morale[name]
 		style := ui.SuccessStyle

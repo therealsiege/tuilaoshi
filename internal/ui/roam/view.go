@@ -42,6 +42,8 @@ func (m Model) View() string {
 	grid := m.gridView()
 	if m.event != nil {
 		grid = m.eventView()
+	} else if m.plot != nil {
+		grid = m.plotView()
 	}
 	if m.compact() {
 		b.WriteString(grid + "\n" + m.compactSide())
@@ -212,7 +214,11 @@ func (m Model) compactSide() string {
 		lines = append(lines, ui.SuccessStyle.Render("This region is cleared: the road west (<) is open."))
 	}
 	t := m.trail
-	lines = append(lines, fmt.Sprintf("%s · 斋饭 %d · 水 %d · %s, %s", ui.SubtitleStyle.Render(fmt.Sprintf("Day %d", t.Day)), t.Food, t.Water, t.Pace, t.Rations))
+	day := fmt.Sprintf("%s · 斋饭 %d · 水 %d · %s, %s", ui.SubtitleStyle.Render(fmt.Sprintf("Day %d", t.Day)), t.Food, t.Water, t.Pace, t.Rations)
+	if t.Forewarned {
+		day += " · " + ui.SuccessStyle.Render("forewarned")
+	}
+	lines = append(lines, day)
 	var party []string
 	for _, name := range m.members {
 		status := fmt.Sprintf("%s ♥%d ☺%d", name, t.Health[name], t.Morale[name])

@@ -108,7 +108,7 @@ func New(wikiDir string) (Model, error) {
 		keys:        ui.DefaultGlobalKeys(),
 		currentView: ui.ViewTitle,
 		title:       title.New(store, dict).Refresh(),
-		roam:        roam.New(store),
+		roam:        roam.New(store, ttsClient),
 		theatre:     theatre.New(store, dict),
 		forge:       forgeview.New(store, ai),
 		festival:    festival.New(store),

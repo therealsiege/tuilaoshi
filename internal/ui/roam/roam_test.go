@@ -33,7 +33,8 @@ func roadWith(t *testing.T, cleared, learned int) Model {
 	}
 	encounterRoll = func() int { return 99 } // no wild encounters unless a test asks
 	eventRoll = func() int { return 99 }     // nor trail events
-	return New(store).SetSize(120, 45).Refresh()
+	plotRoll = func() int { return 99 }      // nor plotting demons
+	return New(store, nil).SetSize(120, 45).Refresh()
 }
 
 // walkTo moves the pilgrim along the shortest walkable route until next
@@ -154,7 +155,7 @@ func TestDoorsLeadBetweenRegions(t *testing.T) {
 	if m.region.Index != 1 || m.pos != m.region.Start {
 		t.Fatalf("west door led to region %d %v", m.region.Index, m.pos)
 	}
-	reloaded := New(m.store).Refresh()
+	reloaded := New(m.store, nil).Refresh()
 	if reloaded.region.Index != 1 || reloaded.pos != m.pos {
 		t.Errorf("the place wasn't restored: region %d %v", reloaded.region.Index, reloaded.pos)
 	}
@@ -304,7 +305,7 @@ func TestCrossingTheRegionsRiver(t *testing.T) {
 	if m.event != nil {
 		t.Error("a crossed river asked again")
 	}
-	if reloaded := New(m.store).Refresh(); !reloaded.hasCrossed() {
+	if reloaded := New(m.store, nil).Refresh(); !reloaded.hasCrossed() {
 		t.Error("the crossing wasn't saved")
 	}
 }

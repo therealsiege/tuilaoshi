@@ -68,9 +68,18 @@ func (m Model) updateEvent(k tea.KeyMsg) (Model, tea.Cmd) {
 			m.loadErr = err
 		}
 	}
+	spared := false
+	if m.trail.Forewarned {
+		if o, spared = journey.Forewarn(o); spared {
+			m.trail.Forewarned = false // the warning is spent on this danger
+		}
+	}
 	m.trail.Apply(o, m.members)
 	m.saveTrail()
 	e.effect = effectText(o)
+	if spared {
+		e.effect += " (forewarned: harm halved)"
+	}
 	return m.refreshPurse(), nil
 }
 
@@ -124,6 +133,9 @@ func (m Model) eventView() string {
 		b.WriteString(line + "\n")
 	}
 	if e.chose < 0 {
+		if m.trail.Forewarned {
+			b.WriteString("\n  " + ui.SuccessStyle.Render("Forewarned: whatever harm comes is halved."))
+		}
 		b.WriteString("\n" + ui.HelpStyle.Render("  1-3 choose"))
 		return b.String()
 	}
@@ -155,10 +167,13 @@ func (m Model) crossed() Model {
 func (m Model) hasCrossed() bool { return slices.Contains(m.trail.Crossed, m.region.Region.ID) }
 
 // Hear is the Chinese of the event or crossing open, to read aloud: its
-// text, and once chosen what came of it.
+// text, and once chosen what came of it; or the overheard demons' lines.
 func (m Model) Hear() string {
 	e := m.event
 	if e == nil {
+		if m.plot != nil {
+			return m.plot.plotText()
+		}
 		return ""
 	}
 	if e.chose >= 0 {

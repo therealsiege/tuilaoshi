@@ -1,0 +1,176 @@
+# Overheard demons (妖怪密谋): at night on the trail, two demons plot an
+# ambush. who names the speaker of each line (two demons, each with their
+# own voice). The question asks where or when they will strike; the right
+# answer is written first (the screen shuffles them). warning is what the
+# party resolves once it understands: forewarned, the next danger on the
+# road does half its harm. Original text, written for TuiLaoShi (HSK3-4).
+- id: stone-bridge
+  lines:
+    - who: 狼精
+      text: 听说唐僧明天一早要过前面那座石桥。
+      english: I hear the Tang monk is crossing that stone bridge ahead first thing tomorrow.
+    - who: 狐狸精
+      text: 那我们就躲在桥下面，等他走到中间再动手。
+      english: Then we hide under the bridge and make our move when he's halfway across.
+    - who: 狼精
+      text: 好主意！太阳一出来，我们就跳出来抓他。
+      english: Good idea! As soon as the sun is up, we jump out and grab him.
+  question: 妖怪准备在哪里埋伏？
+  question_english: Where are the demons going to lie in wait?
+  choices: [石桥下面, 山洞里面, 河对岸的树林里]
+  english_choices: [Under the stone bridge, Inside a cave, In the woods across the river]
+  warning: 明天过石桥的时候，大家先看看桥下面。
+  warning_english: When we cross the stone bridge tomorrow, everyone looks under it first.
+- id: pine-wood
+  lines:
+    - who: 虎精
+      text: 大王说了，那个和尚今天晚上走不远。
+      english: The king says that monk won't get far tonight.
+    - who: 豹精
+      text: 那我们什么时候动手？
+      english: So when do we make our move?
+    - who: 虎精
+      text: 等天黑了，他们在松树林里睡着的时候。
+      english: Once it's dark, when they've fallen asleep in the pine wood.
+  question: 妖怪打算什么时候动手？
+  question_english: When do the demons plan to strike?
+  choices: [天黑以后他们睡着的时候, 明天中午吃饭的时候, 天亮以前他们出发的时候]
+  english_choices: [After dark once they're asleep, At lunch tomorrow, Before dawn as they set out]
+  warning: 今天晚上大家轮流睡觉，总有一个人醒着。
+  warning_english: Tonight everyone sleeps in turns, and someone is always awake.
+- id: the-well
+  lines:
+    - who: 蛇精
+      text: 这一带只有一口井，他们一定会去打水。
+      english: There's only one well around here. They're sure to go and draw water.
+    - who: 蝎子精
+      text: 那我先在井边藏好，你在后面的草里等着。
+      english: Then I'll hide by the well first, and you wait in the grass behind.
+    - who: 蛇精
+      text: 记住，等那个胖和尚弯下腰再咬他。
+      english: Remember, wait until the fat monk bends over, then bite him.
+  question: 妖怪要在哪里等唐僧他们？
+  question_english: Where will the demons wait for the Tang monk's party?
+  choices: [井边, 村子里的饭店, 山顶上]
+  english_choices: [By the well, At the village restaurant, On the mountaintop]
+  warning: 去井边打水的时候，两个人一起去，互相看着。
+  warning_english: When we fetch water at the well, two go together and watch each other's backs.
+- id: morning-fog
+  lines:
+    - who: 熊精
+      text: 明天早上山里会有大雾，什么都看不清楚。
+      english: Tomorrow morning there'll be thick fog in the mountains. You won't see a thing.
+    - who: 狼精
+      text: 太好了，雾最大的时候我们就下手。
+      english: Perfect. We strike when the fog is thickest.
+    - who: 熊精
+      text: 对，雾一散，那只猴子就会发现我们。
+      english: Right. Once the fog lifts, that monkey will spot us.
+  question: 妖怪打算什么时候下手？
+  question_english: When do the demons plan to strike?
+  choices: [明天早上雾最大的时候, 今天晚上月亮出来的时候, 后天下午雾散了以后]
+  english_choices: [Tomorrow morning when the fog is thickest, Tonight when the moon comes out, The afternoon after next once the fog has lifted]
+  warning: 明天早上等雾散了再走。
+  warning_english: Tomorrow morning we wait for the fog to lift before setting out.
+- id: old-temple
+  lines:
+    - who: 鼠精
+      text: 你看见山脚下那座破庙了吗？
+      english: Did you see that ruined temple at the foot of the mountain?
+    - who: 狐狸精
+      text: 看见了。唐僧那么喜欢拜佛，一定会进去。
+      english: I did. The Tang monk loves worshipping the Buddha so much, he's sure to go in.
+    - who: 鼠精
+      text: 对。我们就在佛像后面等他，他一跪下我们就出来。
+      english: Right. We wait behind the Buddha statue, and the moment he kneels, we come out.
+  question: 妖怪准备在哪里埋伏？
+  question_english: Where are the demons going to lie in wait?
+  choices: [破庙的佛像后面, 山顶的大树上, 河边的船里]
+  english_choices: [Behind the Buddha statue in the ruined temple, Up a big tree on the summit, In a boat by the river]
+  warning: 进破庙以前，先让徒弟看看佛像后面。
+  warning_english: Before entering the ruined temple, a disciple checks behind the Buddha statue.
+- id: market-day
+  lines:
+    - who: 狐狸精
+      text: 后天镇上有集市，人特别多。
+      english: The day after tomorrow there's a market in town, and it'll be packed.
+    - who: 狼精
+      text: 人多有什么用？
+      english: What good are crowds?
+    - who: 狐狸精
+      text: 人多才好下手啊！中午最热闹的时候，我们变成卖东西的，谁也认不出来。
+      english: Crowds are exactly what we need! At noon when it's busiest, we turn into stallholders and nobody will know us.
+  question: 妖怪什么时候动手？
+  question_english: When will the demons strike?
+  choices: [后天中午集市最热闹的时候, 明天早上集市开门以前, 今天晚上集市关门以后]
+  english_choices: [At noon the day after tomorrow when the market is busiest, Tomorrow morning before the market opens, Tonight after the market closes]
+  warning: 后天中午别去集市，早上买完东西就走。
+  warning_english: The day after tomorrow we stay away from the market at noon; we shop in the morning and leave.
+- id: narrow-pass
+  lines:
+    - who: 山羊精
+      text: 过了这片沙地，就是一个很窄的山口。
+      english: Past this stretch of sand there's a very narrow pass.
+    - who: 牛精
+      text: 那里只能一个人一个人地走过去。
+      english: You can only get through there one person at a time.
+    - who: 山羊精
+      text: 对，我们就藏在山口两边的石头上，往下推大石头。
+      english: Exactly. We hide on the rocks on both sides of the pass and roll boulders down.
+  question: 妖怪要在哪里埋伏？
+  question_english: Where will the demons lie in wait?
+  choices: [窄山口两边的石头上, 沙地中间, 山脚下的村子里]
+  english_choices: [On the rocks on both sides of the narrow pass, In the middle of the sand, In the village at the foot of the mountain]
+  warning: 过山口的时候，先看看两边的石头上有没有人。
+  warning_english: At the pass, we first check the rocks on both sides for anyone up there.
+- id: ferry
+  lines:
+    - who: 鱼精
+      text: 那几个和尚要坐船过河，我已经打听清楚了。
+      english: Those monks are taking a boat across the river. I've found out everything.
+    - who: 龟精
+      text: 什么时候？
+      english: When?
+    - who: 鱼精
+      text: 后天下午。船一到河中间，我就把它弄翻。
+      english: The afternoon after next. The moment the boat reaches the middle of the river, I'll tip it over.
+  question: 妖怪打算什么时候把船弄翻？
+  question_english: When do the demons plan to tip the boat over?
+  choices: [后天下午船到河中间的时候, 明天早上船刚出发的时候, 后天晚上船靠岸以后]
+  english_choices: [The afternoon after next when the boat reaches mid-river, Tomorrow morning just as the boat sets off, The evening after next once the boat has docked]
+  warning: 后天下午不坐船，换一个时间过河。
+  warning_english: We won't take the boat the afternoon after next; we'll cross at another time.
+- id: rain-cave
+  lines:
+    - who: 蝙蝠精
+      text: 明天要下大雨，他们一定会找地方躲雨。
+      english: There'll be heavy rain tomorrow. They're sure to look for shelter.
+    - who: 蜘蛛精
+      text: 附近只有我们这个山洞能躲雨。今天晚上我就在洞口织一张大网。
+      english: Our cave is the only shelter nearby. Tonight I'll weave a big web across the mouth of it.
+    - who: 蝙蝠精
+      text: 好，他们一进来就跑不了了。
+      english: Good. Once they come in, they won't get away.
+  question: 妖怪准备在哪里抓唐僧？
+  question_english: Where are the demons planning to catch the Tang monk?
+  choices: [山洞口, 大树下面, 河边的小房子里]
+  english_choices: [At the mouth of the cave, Under a big tree, In a little hut by the river]
+  warning: 明天下雨也不进山洞，大家带好雨伞。
+  warning_english: Even if it rains tomorrow we stay out of the cave; everyone keeps an umbrella handy.
+- id: midnight
+  lines:
+    - who: 黑熊精
+      text: 那只猴子晚上不睡觉，一直在旁边看着。
+      english: That monkey doesn't sleep at night. He keeps watch the whole time.
+    - who: 狼精
+      text: 那怎么办？
+      english: So what do we do?
+    - who: 黑熊精
+      text: 别着急。半夜三点左右他最累，那时候我们从后面过去。
+      english: Don't worry. Around three in the morning he's at his most tired. That's when we come up from behind.
+  question: 妖怪什么时候过来？
+  question_english: When will the demons come?
+  choices: [半夜三点左右, 天刚黑的时候, 早上太阳出来以后]
+  english_choices: [Around three in the morning, Just after dark, In the morning after sunrise]
+  warning: 半夜三点换人看守，多点一堆火。
+  warning_english: At three in the morning we change the watch and light another fire.

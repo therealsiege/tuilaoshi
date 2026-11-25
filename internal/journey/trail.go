@@ -31,6 +31,8 @@ type Trail struct {
 	Morale  map[string]int `yaml:"morale"`            // member -> 0..100
 	Notes   []string       `yaml:"-"`                 // what the last day brought, for the map
 	Crossed []string       `yaml:"crossed,omitempty"` // regions whose obstacle has been crossed
+	// Forewarned: demons were overheard plotting, so the next danger does half its harm.
+	Forewarned bool `yaml:"forewarned,omitempty"`
 }
 
 // Supplies a journey starts with, and the most water the party carries.

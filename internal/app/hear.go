@@ -13,6 +13,9 @@ func (m Model) hear() tea.Cmd {
 	var text string
 	switch m.currentView {
 	case ui.ViewMap:
+		if cmd := m.roam.Replay(); cmd != nil {
+			return cmd // overheard demons, in their two voices
+		}
 		text = m.roam.Hear()
 	case ui.ViewWorld:
 		text = m.world.Hear()

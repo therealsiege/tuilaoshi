@@ -65,6 +65,8 @@ type Model struct {
 	trail   journey.Trail              // days, supplies and the party (see trail.go)
 	members []string                   // the party walking
 	event   *trailEvent                // an event being met (see events.go)
+	plot    *overheard                 // demons overheard plotting (see plots.go)
+	tts     *audio.Client              // speaks the overheard demons; nil: read them
 	states  map[string]wiki.QuestState // side quests' states, for the road strip
 	note    string
 
@@ -72,9 +74,9 @@ type Model struct {
 	loadErr       error
 }
 
-// New creates the walking map.
-func New(store *wiki.Store) Model {
-	return Model{store: store, gkeys: ui.DefaultGlobalKeys()}
+// New creates the walking map; tts (nil for none) voices overheard demons.
+func New(store *wiki.Store, tts *audio.Client) Model {
+	return Model{store: store, gkeys: ui.DefaultGlobalKeys(), tts: tts}
 }
 
 func (m Model) Init() tea.Cmd { return nil }
@@ -156,6 +158,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	if m.event != nil {
 		return m.updateEvent(k)
 	}
+	if m.plot != nil {
+		return m.updatePlot(k)
+	}
 	switch {
 	case key.Matches(k, m.gkeys.Up):
 		return m.step(0, -1)
@@ -200,6 +205,9 @@ func (m Model) step(dx, dy int) (Model, tea.Cmd) {
 	m.save()
 	if m = m.walked(); m.event != nil {
 		return m, nil // the day's event comes before anything else on this step
+	}
+	if m.plot != nil {
+		return m, m.speakPlot() // and so do the night's plotting demons
 	}
 	if t, ok := m.region.Towns[to]; ok {
 		id := t.ID
