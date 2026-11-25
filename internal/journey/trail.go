@@ -35,6 +35,9 @@ type Trail struct {
 	SandalDays int `yaml:"sandal_days,omitempty"` // days walked on the party's sandals (see supplies.go)
 
 	Weather string `yaml:"-"` // the solar term's weather (see solarterms.go), set by the caller each day
+
+	// Forewarned: demons were overheard plotting, so the next danger does half its harm.
+	Forewarned bool `yaml:"forewarned,omitempty"`
 }
 
 // Supplies a journey starts with, and the most water the party carries.

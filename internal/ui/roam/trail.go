@@ -54,7 +54,7 @@ func (m Model) walked() Model {
 		if m.trail.Collapsed() {
 			m = m.carryBack()
 		} else {
-			m = m.maybeEvent()
+			m = m.maybeEvent().maybePlot()
 		}
 	}
 	m.saveTrail()
@@ -123,6 +123,9 @@ func (m Model) trailView() string {
 		b.WriteString(ui.ErrorStyle.Render("草鞋 worn out: buy new in a town") + "\n")
 	} else {
 		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("草鞋 good for %d more days", journey.SandalLife-t.SandalDays)) + "\n")
+	}
+	if t.Forewarned {
+		b.WriteString(ui.SuccessStyle.Render("Forewarned: the next danger does half its harm") + "\n")
 	}
 	for _, name := range m.members {
 		h, mo := t.Health[name], t.Morale[name]

@@ -281,6 +281,8 @@ func HelpText(v View) string {
 			"  p            Pace · f rations\n" +
 			"  r            Rest a day\n" +
 			"  ctrl+r       Hear an event in Chinese\n" +
+			"  1-3          Answer where or when the\n" +
+			"               overheard demons strike\n" +
 			"  c / esc      Camp: study, party, shrine\n\n" +
 			"  @ you   · road (safe)   , wild (clans)\n" +
 			"  H town  ! tribulation   & demon's lair\n" +

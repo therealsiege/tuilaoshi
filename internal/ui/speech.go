@@ -20,6 +20,20 @@ func SpeakCmd(tts *audio.Client, text, lang string) tea.Cmd {
 	}
 }
 
+// SpeakLinesCmd speaks a conversation in the background, each line in its
+// own voice. It is nil when audio is off or there is nothing to say.
+func SpeakLinesCmd(tts *audio.Client, lines []audio.Line) tea.Cmd {
+	if !Audible(tts) || len(lines) == 0 {
+		return nil
+	}
+	return func() tea.Msg {
+		return SpeechDoneMsg{Err: tts.SpeakLines(lines)}
+	}
+}
+
+// Audible reports whether speech will be heard: a voice, and speech on.
+func Audible(tts *audio.Client) bool { return tts != nil && tts.Available() && Prefs.Speech }
+
 // AudioError renders why the last speech failed, or "" when it worked.
 func AudioError(err error) string {
 	if err == nil {
