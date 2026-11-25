@@ -109,3 +109,71 @@ func TestGeneratedWordPagesMoveToPrivate(t *testing.T) {
 		t.Errorf("page not moved: %v", err)
 	}
 }
+
+func TestBackupsAreDailyAndPruned(t *testing.T) {
+	store := newTestStore(t)
+	db, err := store.progress()
+	if err != nil {
+		t.Fatal(err)
+	}
+	day := time.Date(2026, 11, 1, 9, 0, 0, 0, time.Local)
+	for i := range 10 {
+		if err := store.backupDaily(db, day.AddDate(0, 0, i)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := store.backupDaily(db, day.AddDate(0, 0, 9)); err != nil {
+		t.Fatal(err)
+	}
+	entries, err := os.ReadDir(filepath.Join(store.Dir, backupsDir))
+	if err != nil || len(entries) != keepBackups || entries[0].Name() != "progress-2026-11-04.db" {
+		t.Errorf("backups %v %v, want the newest %d from 11-04", entries, err, keepBackups)
+	}
+}
+
+func TestExportThenImportOnAnotherMac(t *testing.T) {
+	here := newTestStore(t)
+	if err := here.SaveSettings(Settings{NewWords: 3, ReviewChunk: 50}); err != nil {
+		t.Fatal(err)
+	}
+	cards, err := here.DrillableCards()
+	if err != nil {
+		t.Fatal(err)
+	}
+	book := findCard(t, cards, "characters/shu1.md")
+	if err := here.RecordReview(&book, model.DiffAgain, time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	out := t.TempDir()
+	if err := here.Export(out); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"settings.yaml", exportSchedules, exportReviews} {
+		if _, err := os.Stat(filepath.Join(out, name)); err != nil {
+			t.Errorf("export lacks %s: %v", name, err)
+		}
+	}
+	there := newTestStore(t)
+	for range 2 { // importing twice adds no review twice
+		if err := there.Import(out); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if set, err := there.Settings(); err != nil || set.NewWords != 3 {
+		t.Errorf("settings %+v %v", set, err)
+	}
+	db, err := there.progress()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var lapses, logged int
+	if err := db.QueryRow(`SELECT lapses FROM schedules WHERE card_id = ?`, book.ID).Scan(&lapses); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.QueryRow(`SELECT count(*) FROM reviews`).Scan(&logged); err != nil {
+		t.Fatal(err)
+	}
+	if lapses != 1 || logged != 1 {
+		t.Errorf("lapses %d, reviews %d; want 1 and 1", lapses, logged)
+	}
+}

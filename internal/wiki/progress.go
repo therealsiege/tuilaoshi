@@ -66,6 +66,9 @@ func (s *Store) progress() (*sql.DB, error) {
 		if err == nil {
 			err = s.moveGeneratedPages(db)
 		}
+		if err == nil && !fresh {
+			err = s.backupDaily(db, time.Now())
+		}
 		if err != nil {
 			s.dbErr = fmt.Errorf("open %s: %w", progressFile, err)
 			if db != nil {
