@@ -20,3 +20,14 @@ wiki/images/
 
 # Learner-supplied material from shows they own; never committed (the repo is public)
 wiki/private/
+
+# The learner's progress, written by the app while playing; the repo is public.
+wiki/saves/
+wiki/sessions/
+wiki/journey.yaml
+wiki/study.yaml
+wiki/word-schedule.yaml
+wiki/settings.yaml
+wiki/forge.yaml
+wiki/vocabulary/chengyu-duels.md
+wiki/vocabulary/festivals.md
