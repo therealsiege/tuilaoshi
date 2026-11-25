@@ -22,13 +22,13 @@ func TestWoundsHealByStudyAndAtTheInn(t *testing.T) {
 	if p, err := store.Place(); err != nil || p.Wounds != 30-5*studyHeal {
 		t.Fatalf("after 5 fresh answers, wounds %d, want %d", p.Wounds, 30-5*studyHeal)
 	}
-	if ok, err := store.RestAtInn(); err != nil || ok {
+	if ok, err := store.RestAtInn(10); err != nil || ok {
 		t.Fatalf("rested without the price: %v %v", ok, err)
 	}
-	if err := store.Earn(Wallet{Tongqian: InnPrice}); err != nil {
+	if err := store.Earn(Wallet{Tongqian: 10}); err != nil {
 		t.Fatal(err)
 	}
-	ok, err := store.RestAtInn()
+	ok, err := store.RestAtInn(10)
 	p, perr := store.Place()
 	w, werr := store.Wallet()
 	if err != nil || perr != nil || werr != nil || !ok || p.Wounds != 0 || w.Tongqian != 5 {

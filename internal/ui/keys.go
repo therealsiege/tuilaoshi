@@ -296,6 +296,8 @@ func HelpText(v View) string {
 			"  s      The town's stone\n" +
 			"  r      Rest at the inn\n" +
 			"  b      Buy 斋饭 at the store\n" +
+			"  x      Buy straw sandals (草鞋) for the party\n" +
+			"  o      Make a temple offering, once a day\n" +
 			"  t      Trade a material for 斋饭\n" +
 			"  a      Ask for alms (化缘), once a day\n" +
 			"  ctrl+r Hear the Chinese on screen\n" +

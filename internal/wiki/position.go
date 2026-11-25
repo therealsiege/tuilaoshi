@@ -11,11 +11,8 @@ type Place struct {
 }
 
 // Healing: each fresh right answer heals study points, and a night at an
-// inn heals everything for InnPrice copper.
-const (
-	studyHeal = 2
-	InnPrice  = 10
-)
+// inn heals everything (the town sets the price).
+const studyHeal = 2
 
 // Place returns where the journey being played stands.
 func (s *Store) Place() (Place, error) {
@@ -43,14 +40,14 @@ func (s *Store) SetWounds(wounds int) error {
 	return s.writeJourney(rec)
 }
 
-// RestAtInn heals every wound for InnPrice copper. It reports false when
-// the purse is short or there is nothing to heal.
-func (s *Store) RestAtInn() (bool, error) {
+// RestAtInn spends a night at an inn for price copper, healing every
+// wound. It reports false when the purse is short.
+func (s *Store) RestAtInn(price int) (bool, error) {
 	rec, err := s.readJourney()
-	if err != nil || rec.Wounds == 0 || rec.Coins.Tongqian < InnPrice {
+	if err != nil || rec.Coins.Tongqian < price {
 		return false, err
 	}
-	rec.Coins.Tongqian -= InnPrice
+	rec.Coins.Tongqian -= price
 	rec.Wounds = 0
 	return true, s.writeJourney(rec)
 }

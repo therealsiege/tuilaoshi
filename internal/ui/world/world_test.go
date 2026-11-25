@@ -282,3 +282,29 @@ func politeAt(m Model) int {
 	}
 	return -1
 }
+
+func TestSandalsAndATempleOffering(t *testing.T) {
+	m := worldAt(t, 11)
+	if err := m.store.Earn(wiki.Wallet{Tongqian: 200}); err != nil {
+		t.Fatal(err)
+	}
+	m.withTrail(func(tr *journey.Trail, _ []string) { tr.SandalDays = journey.SandalLife + 3 })
+	m, _ = m.Update(press("x"))
+	tr, _, err := journey.LoadTrail(m.store, nil)
+	if err != nil || tr.SandalsWorn() || !strings.Contains(m.note, "New straw sandals") {
+		t.Fatalf("sandals: worn %v %v (%q)", tr.SandalsWorn(), err, m.note)
+	}
+	tr.Morale[journey.Master] = 40
+	if err := m.store.SaveTrail(tr); err != nil {
+		t.Fatal(err)
+	}
+	m, _ = m.Update(press("o"))
+	tr, _, err = journey.LoadTrail(m.store, nil)
+	if err != nil || tr.Morale[journey.Master] != 40+journey.OfferingMorale {
+		t.Errorf("offering: morale %d %v (%q)", tr.Morale[journey.Master], err, m.note)
+	}
+	m, _ = m.Update(press("o"))
+	if !strings.Contains(m.note, "tomorrow") {
+		t.Errorf("a second offering the same day: %q", m.note)
+	}
+}

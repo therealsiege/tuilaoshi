@@ -170,6 +170,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m.openAlms(), nil
 		case k.String() == "t":
 			return m.trade(), nil
+		case k.String() == "x":
+			return m.buySandals(), nil
+		case k.String() == "o":
+			return m.offer(), nil
 		}
 		return m, nil
 	}

@@ -98,41 +98,74 @@ func (m Model) stoneView() string {
 // rest spends a night at the town's inn: the pilgrim's wounds heal, and
 // the party's health, spirits and water are restored.
 func (m Model) rest() Model {
-	ok, err := m.store.RestAtInn()
+	price := m.towns[m.town].Price(journey.InnPrice)
+	ok, err := m.store.RestAtInn(price)
 	switch {
 	case err != nil:
 		m.loadErr = err
 	case ok:
-		m.note = fmt.Sprintf("The party sleeps at the inn and wakes restored. (-%d 铜钱)", wiki.InnPrice)
-		m.restoreParty()
+		m.note = fmt.Sprintf("The party sleeps at the inn and wakes restored. (-%d 铜钱)", price)
+		m.withTrail(func(t *journey.Trail, members []string) { t.Restore(members) })
 	default:
-		m.note = fmt.Sprintf("A room is %d 铜钱; it heals you and the whole party.", wiki.InnPrice)
+		m.note = fmt.Sprintf("A room here is %d 铜钱; it heals you and the whole party.", price)
 	}
 	return m
 }
 
-// restoreParty heals the party on the trail after a night at the inn.
-func (m *Model) restoreParty() {
-	m.withTrail(func(t *journey.Trail, members []string) { t.Restore(members) })
-}
-
-// Supplies sold in towns: 斋饭 by the bundle.
-const (
-	foodBundle = 10
-	foodPrice  = 15
-)
-
 // buy buys a bundle of 斋饭 for the road.
 func (m Model) buy() Model {
-	if err := m.store.Spend(wiki.Wallet{Tongqian: foodPrice}); err != nil {
-		m.note = fmt.Sprintf("%d 斋饭 cost %d 铜钱: not enough in the purse.", foodBundle, foodPrice)
+	price := m.towns[m.town].Price(journey.FoodPrice)
+	if err := m.store.Spend(wiki.Wallet{Tongqian: price}); err != nil {
+		m.note = fmt.Sprintf("%d 斋饭 cost %d 铜钱 here: not enough in the purse.", journey.FoodBundle, price)
 		return m
 	}
 	food := 0
 	m.withTrail(func(t *journey.Trail, _ []string) {
-		t.Food += foodBundle
+		t.Food += journey.FoodBundle
 		food = t.Food
 	})
-	m.note = fmt.Sprintf("Bought %d 斋饭 (-%d 铜钱): %d now.", foodBundle, foodPrice, food)
+	m.note = fmt.Sprintf("Bought %d 斋饭 (-%d 铜钱): %d now.", journey.FoodBundle, price, food)
+	return m
+}
+
+// buySandals puts new straw sandals on the whole party.
+func (m Model) buySandals() Model {
+	members := 0
+	m.withTrail(func(_ *journey.Trail, ms []string) { members = len(ms) })
+	price := m.towns[m.town].Price(journey.SandalPrice) * members
+	if err := m.store.Spend(wiki.Wallet{Tongqian: price}); err != nil {
+		m.note = fmt.Sprintf("草鞋 for the party cost %d 铜钱 here: not enough in the purse.", price)
+		return m
+	}
+	m.withTrail(func(t *journey.Trail, _ []string) { t.NewSandals() })
+	m.note = fmt.Sprintf("New straw sandals for everyone (-%d 铜钱): good for %d days of walking.", price, journey.SandalLife)
+	return m
+}
+
+// offer makes a temple offering, once a day in each town: the party's
+// spirits lift.
+func (m Model) offer() Model {
+	t := m.towns[m.town]
+	price := t.Price(journey.OfferingPrice)
+	done, err := m.store.Offered(t.ID, m.now())
+	switch {
+	case err != nil:
+		m.loadErr = err
+		return m
+	case done:
+		m.note = "The incense you lit today still burns. Come back tomorrow."
+		return m
+	}
+	if err := m.store.Spend(wiki.Wallet{Tongqian: price}); err != nil {
+		m.note = fmt.Sprintf("An offering here is %d 铜钱: not enough in the purse.", price)
+		return m
+	}
+	if err := m.store.MarkOffered(t.ID, m.now()); err != nil {
+		m.loadErr = err
+	}
+	m.withTrail(func(tr *journey.Trail, members []string) {
+		tr.Apply(journey.Outcome{Morale: journey.OfferingMorale}, members)
+	})
+	m.note = fmt.Sprintf("You light incense at the temple (-%d 铜钱). The party's spirits lift.", price)
 	return m
 }

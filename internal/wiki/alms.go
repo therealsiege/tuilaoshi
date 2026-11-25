@@ -67,3 +67,22 @@ func (s *Store) WriteDiary(e DiaryEntry) error {
 	rec.Diary = append(rec.Diary, e)
 	return s.writeJourney(rec)
 }
+
+// Offered reports whether an offering was made at a town's temple today.
+func (s *Store) Offered(town string, now time.Time) (bool, error) {
+	rec, err := s.readJourney()
+	return rec.Offered[town] == now.Format(dateFmt), err
+}
+
+// MarkOffered records today's offering at a town's temple.
+func (s *Store) MarkOffered(town string, now time.Time) error {
+	rec, err := s.readJourney()
+	if err != nil {
+		return err
+	}
+	if rec.Offered == nil {
+		rec.Offered = map[string]string{}
+	}
+	rec.Offered[town] = now.Format(dateFmt)
+	return s.writeJourney(rec)
+}

@@ -101,6 +101,11 @@ func (m Model) trailView() string {
 	}
 	fmt.Fprintf(&b, "%s · %s · %s\n", ui.SubtitleStyle.Render(fmt.Sprintf("Day %d", t.Day)), food, water)
 	b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("%s pace (p) · %s rations (f)", t.Pace, t.Rations)) + "\n")
+	if t.SandalsWorn() {
+		b.WriteString(ui.ErrorStyle.Render("草鞋 worn out: buy new in a town") + "\n")
+	} else {
+		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("草鞋 good for %d more days", journey.SandalLife-t.SandalDays)) + "\n")
+	}
 	for _, name := range m.members {
 		h, mo := t.Health[name], t.Morale[name]
 		style := ui.SuccessStyle

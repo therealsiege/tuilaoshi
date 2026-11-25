@@ -45,3 +45,31 @@ func TestRunningOutHurtsAndRestHeals(t *testing.T) {
 		t.Error("settings don't cycle")
 	}
 }
+
+func TestSandalsWearOutAndPricesRiseGoingWest(t *testing.T) {
+	members := []string{Master}
+	tr := NewTrail()
+	tr.Food, tr.Water = 1000, MaxWater
+	for range SandalLife {
+		tr.Water = MaxWater
+		tr.PassDay(members, "mountain", false)
+	}
+	if tr.SandalsWorn() || tr.stepsToday() != stepsPerDay["steady"] {
+		t.Fatalf("sandals worn after %d days", SandalLife)
+	}
+	before := tr.Health[Master]
+	tr.PassDay(members, "mountain", false)
+	if !tr.SandalsWorn() || tr.stepsToday() != stepsPerDay["steady"]-wornSteps || tr.Health[Master] != clamp(before+rationHealth["filling"]+paceHealth["steady"]-wornHealth) {
+		t.Errorf("worn sandals: worn %v, steps %d, health %d -> %d", tr.SandalsWorn(), tr.stepsToday(), before, tr.Health[Master])
+	}
+	tr.NewSandals()
+	if tr.SandalsWorn() {
+		t.Error("new sandals still worn")
+	}
+	if p := (Town{Stage: 1}).Price(FoodPrice); p != FoodPrice {
+		t.Errorf("first town charges %d, want the base %d", p, FoodPrice)
+	}
+	if p := (Town{Stage: 81}).Price(FoodPrice); p != 4*FoodPrice {
+		t.Errorf("the last town charges %d, want four times the base", p)
+	}
+}

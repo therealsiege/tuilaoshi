@@ -39,10 +39,11 @@ type journeyRecord struct {
 	Region       string            `yaml:"region,omitempty"`        // where the pilgrim stands: region id and cell
 	X            int               `yaml:"x,omitempty"`
 	Y            int               `yaml:"y,omitempty"`
-	Wounds       int               `yaml:"wounds,omitempty"` // HP lost on the road; rest and study heal it
-	Trail        yaml.Node         `yaml:"trail,omitempty"`  // the trail's state (journey.Trail), kept opaque here
-	Alms         map[string]string `yaml:"alms,omitempty"`   // town id -> the day alms were last asked there
-	Diary        []DiaryEntry      `yaml:"diary,omitempty"`  // the travel diary, oldest first
+	Wounds       int               `yaml:"wounds,omitempty"`  // HP lost on the road; rest and study heal it
+	Trail        yaml.Node         `yaml:"trail,omitempty"`   // the trail's state (journey.Trail), kept opaque here
+	Alms         map[string]string `yaml:"alms,omitempty"`    // town id -> the day alms were last asked there
+	Diary        []DiaryEntry      `yaml:"diary,omitempty"`   // the travel diary, oldest first
+	Offered      map[string]string `yaml:"offered,omitempty"` // town id -> the day an offering was last made there
 }
 
 // journeyDoc names the save of the journey being played (see progress.go).

@@ -31,6 +31,8 @@ type Trail struct {
 	Morale  map[string]int `yaml:"morale"`            // member -> 0..100
 	Notes   []string       `yaml:"-"`                 // what the last day brought, for the map
 	Crossed []string       `yaml:"crossed,omitempty"` // regions whose obstacle has been crossed
+
+	SandalDays int `yaml:"sandal_days,omitempty"` // days walked on the party's sandals (see supplies.go)
 }
 
 // Supplies a journey starts with, and the most water the party carries.
@@ -87,7 +89,7 @@ func (t *Trail) Join(members []string) {
 // reports so, with what the day brought in t.Notes.
 func (t *Trail) Step(members []string, terrain string) bool {
 	t.Steps++
-	if t.Steps < stepsPerDay[t.Pace] {
+	if t.Steps < t.stepsToday() {
 		return false
 	}
 	t.PassDay(members, terrain, false)
@@ -117,6 +119,8 @@ func (t *Trail) PassDay(members []string, terrain string, rest bool) {
 	health, morale := rationHealth[t.Rations]+paceHealth[t.Pace], paceMorale[t.Pace]
 	if rest {
 		health, morale = 10, 5
+	} else {
+		health -= t.wearSandals()
 	}
 	if hungry {
 		health, morale = health-10, morale-8
