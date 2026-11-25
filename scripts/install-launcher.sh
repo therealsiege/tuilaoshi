@@ -24,8 +24,13 @@ end tell'
 lipo -create -output "$RES/tuilaoshi" "$WORK/arm64" "$WORK/amd64"
 
 # A snapshot of the wiki (private episodes included) to seed other Macs, and
-# the demon portraits.
-rsync -a --delete --exclude '.DS_Store' "$REPO/wiki/" "$RES/wiki/"
+# the demon portraits. This Mac's progress stays out: each Mac keeps its own.
+rsync -a --delete --delete-excluded --exclude '.DS_Store' \
+  --exclude 'progress.db*' --exclude 'backups/' --exclude '*.imported' --exclude '*.adopted' \
+  --exclude 'saves/' --exclude 'sessions/' --exclude 'private/vocabulary/' \
+  --exclude '/journey.yaml' --exclude '/study.yaml' --exclude '/word-schedule.yaml' \
+  --exclude '/settings.yaml' --exclude '/forge.yaml' \
+  "$REPO/wiki/" "$RES/wiki/"
 if [[ -d "$REPO/assets/images" ]]; then
   mkdir -p "$RES/assets"
   rsync -a --delete --exclude '.DS_Store' "$REPO/assets/images/" "$RES/assets/images/"

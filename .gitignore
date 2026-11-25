@@ -22,6 +22,10 @@ wiki/images/
 wiki/private/
 
 # The learner's progress, written by the app while playing; the repo is public.
+wiki/progress.db*
+wiki/backups/
+wiki/**/*.imported
+wiki/*.adopted
 wiki/saves/
 wiki/sessions/
 wiki/journey.yaml

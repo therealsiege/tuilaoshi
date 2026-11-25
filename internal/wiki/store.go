@@ -1,6 +1,7 @@
 package wiki
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -23,6 +24,11 @@ type Store struct {
 	// and size are unchanged, so screens can list the whole wiki cheaply.
 	mu    sync.Mutex
 	pages map[string]cachedPage
+
+	// The progress file (see progress.go), opened on first use.
+	dbOnce sync.Once
+	db     *sql.DB
+	dbErr  error
 }
 
 type cachedPage struct {
@@ -143,47 +149,6 @@ func (s *Store) ListDirPages(subdir string) ([]model.Page, error) {
 		pages = append(pages, page)
 	}
 	return pages, nil
-}
-
-// writeFrontmatter updates the frontmatter of a page on disk without changing
-// the body. Callers outside this package save reviews with RecordReview.
-func (s *Store) writeFrontmatter(page model.Page) error {
-	path := filepath.Join(s.Dir, page.Path)
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return fmt.Errorf("read for update %s: %w", page.Path, err)
-	}
-
-	_, body := splitFrontmatter(data)
-
-	var b strings.Builder
-	b.WriteString("---\n")
-	fmt.Fprintf(&b, "type: %s\n", page.Type)
-	if page.Level != "" {
-		fmt.Fprintf(&b, "level: %s\n", page.Level)
-	}
-	if page.Status != "" {
-		fmt.Fprintf(&b, "status: %s\n", page.Status)
-	}
-	if !page.LastReviewed.IsZero() {
-		fmt.Fprintf(&b, "last_reviewed: %s\n", FormatDate(page.LastReviewed))
-	}
-	if len(page.Tags) > 0 {
-		fmt.Fprintf(&b, "tags: [%s]\n", strings.Join(page.Tags, ", "))
-	}
-	if !page.Introduced.IsZero() {
-		fmt.Fprintf(&b, "introduced: %s\n", FormatDate(page.Introduced))
-	}
-	if page.ReviewInterval > 0 {
-		fmt.Fprintf(&b, "review_interval: %d\n", page.ReviewInterval)
-	}
-	if !page.NextReview.IsZero() {
-		fmt.Fprintf(&b, "next_review: %s\n", FormatDate(page.NextReview))
-	}
-	b.WriteString("---\n\n")
-	b.WriteString(body)
-
-	return os.WriteFile(path, []byte(b.String()), 0644)
 }
 
 // UpdateSection rewrites the body of a page's "## heading" section, up to

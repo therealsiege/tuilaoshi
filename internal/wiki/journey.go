@@ -1,9 +1,6 @@
 package wiki
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
 	"slices"
 	"time"
 
@@ -11,8 +8,9 @@ import (
 )
 
 // A journey's game state (story, purse, gear, bonds, quests, collection)
-// is kept in a save file, wiki/saves/<id>.yaml, so several journeys can be
-// played; with no save chosen (Store.Save empty) it is wiki/journey.yaml.
+// is kept in a save, saves/<id>.yaml in the progress file, so several
+// journeys can be played; with no save chosen (Store.Save empty) it is
+// journey.yaml.
 // Study progress is shared by every journey: word schedules live on the
 // pages, and the day's study bookkeeping in study.yaml (see study.go).
 const journeyFile = "journey.yaml"
@@ -47,41 +45,25 @@ type journeyRecord struct {
 	Diary        []DiaryEntry      `yaml:"diary,omitempty"`  // the travel diary, oldest first
 }
 
-// journeyPath is the file holding the journey being played.
-func (s *Store) journeyPath() string {
+// journeyDoc names the save of the journey being played (see progress.go).
+func (s *Store) journeyDoc() string {
 	if s.Save != "" {
-		return filepath.Join(s.Dir, savesDir, s.Save+".yaml")
+		return savesDir + "/" + s.Save + ".yaml"
 	}
-	return filepath.Join(s.Dir, journeyFile)
+	return journeyFile
 }
 
 func (s *Store) readJourney() (journeyRecord, error) {
 	rec := journeyRecord{}
-	data, err := os.ReadFile(s.journeyPath())
-	if err != nil && !os.IsNotExist(err) {
-		return rec, fmt.Errorf("read journey progress: %w", err)
-	}
-	if err == nil {
-		if err := yaml.Unmarshal(data, &rec); err != nil {
-			return rec, fmt.Errorf("parse %s: %w", journeyFile, err)
-		}
-	}
+	err := s.readYAML(s.journeyDoc(), &rec)
 	if rec.Cleared == nil {
 		rec.Cleared = map[int]string{}
 	}
-	return rec, nil
+	return rec, err
 }
 
 func (s *Store) writeJourney(rec journeyRecord) error {
-	data, err := yaml.Marshal(rec)
-	if err != nil {
-		return fmt.Errorf("encode journey progress: %w", err)
-	}
-	path := s.journeyPath()
-	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-		return fmt.Errorf("create saves dir: %w", err)
-	}
-	return os.WriteFile(path, data, 0644)
+	return s.writeYAML(s.journeyDoc(), rec)
 }
 
 // ClearedStages returns the date each stage was cleared, by tribulation

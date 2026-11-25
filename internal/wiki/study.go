@@ -1,13 +1,5 @@
 package wiki
 
-import (
-	"fmt"
-	"os"
-	"path/filepath"
-
-	"gopkg.in/yaml.v3"
-)
-
 // studyFile keeps the day's study bookkeeping, shared by every journey:
 // which words have already paid today, the daily bonus, bounty progress
 // and streak shields. Study belongs to the learner, not to one journey.
@@ -27,23 +19,8 @@ type studyRecord struct {
 
 func (s *Store) readStudy() (studyRecord, error) {
 	var rec studyRecord
-	data, err := os.ReadFile(filepath.Join(s.Dir, studyFile))
-	if os.IsNotExist(err) {
-		return rec, nil
-	}
-	if err != nil {
-		return rec, fmt.Errorf("read study progress: %w", err)
-	}
-	if err := yaml.Unmarshal(data, &rec); err != nil {
-		return rec, fmt.Errorf("parse %s: %w", studyFile, err)
-	}
-	return rec, nil
+	err := s.readYAML(studyFile, &rec)
+	return rec, err
 }
 
-func (s *Store) writeStudy(rec studyRecord) error {
-	data, err := yaml.Marshal(rec)
-	if err != nil {
-		return fmt.Errorf("encode study progress: %w", err)
-	}
-	return os.WriteFile(filepath.Join(s.Dir, studyFile), data, 0644)
-}
+func (s *Store) writeStudy(rec studyRecord) error { return s.writeYAML(studyFile, rec) }

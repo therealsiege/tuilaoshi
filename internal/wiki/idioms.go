@@ -11,8 +11,8 @@ import (
 // Pages of words the game adds to the reviews: idioms met in idiom-chain
 // duels, and the words of festivals the learner has visited.
 const (
-	idiomPage    = "vocabulary/chengyu-duels.md"
-	festivalPage = "vocabulary/festivals.md"
+	idiomPage    = "private/vocabulary/chengyu-duels.md"
+	festivalPage = "private/vocabulary/festivals.md"
 )
 
 // Word is a word to add to the wiki: Chinese, its pinyin and meaning.

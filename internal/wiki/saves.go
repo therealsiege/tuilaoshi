@@ -3,8 +3,6 @@ package wiki
 import (
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -26,31 +24,24 @@ type SaveInfo struct {
 }
 
 // Saves lists the saved journeys, most recently played first. A journey
-// kept the old way, in wiki/journey.yaml, is moved into the saves first.
+// kept the old way, as journey.yaml, is moved into the saves first.
 func (s *Store) Saves() ([]SaveInfo, error) {
 	if err := s.adoptOldJourney(); err != nil {
 		return nil, err
 	}
-	entries, err := os.ReadDir(filepath.Join(s.Dir, savesDir))
-	if os.IsNotExist(err) {
-		return nil, nil
-	}
+	names, err := s.docNames(savesDir + "/")
 	if err != nil {
-		return nil, fmt.Errorf("list saves: %w", err)
+		return nil, err
 	}
 	var saves []SaveInfo
-	for _, e := range entries {
-		id, ok := strings.CutSuffix(e.Name(), ".yaml")
-		if e.IsDir() || !ok {
+	for _, name := range names {
+		id, ok := strings.CutSuffix(strings.TrimPrefix(name, savesDir+"/"), ".yaml")
+		if !ok || strings.Contains(id, "/") {
 			continue
 		}
-		data, err := os.ReadFile(filepath.Join(s.Dir, savesDir, e.Name()))
-		if err != nil {
-			return nil, fmt.Errorf("read save %s: %w", id, err)
-		}
 		var rec journeyRecord
-		if err := yaml.Unmarshal(data, &rec); err != nil {
-			return nil, fmt.Errorf("parse save %s: %w", id, err)
+		if err := s.readYAML(name, &rec); err != nil {
+			return nil, fmt.Errorf("save %s: %w", id, err)
 		}
 		info := SaveInfo{ID: id, Name: rec.Name, Cleared: len(rec.Cleared), Coins: rec.Coins}
 		info.Created, _ = time.Parse(time.RFC3339, rec.Created) //nolint:errcheck // a missing date sorts last
@@ -64,10 +55,20 @@ func (s *Store) Saves() ([]SaveInfo, error) {
 	return saves, nil
 }
 
+// saveExists reports whether a journey is saved under id.
+func (s *Store) saveExists(id string) (bool, error) {
+	_, ok, err := s.readDoc(savesDir + "/" + id + ".yaml")
+	return ok, err
+}
+
 // NewSave starts a journey named name and makes it the one being played.
 func (s *Store) NewSave(name string, now time.Time) (string, error) {
 	id := now.Format("20060102-150405")
-	if _, err := os.Stat(filepath.Join(s.Dir, savesDir, id+".yaml")); err == nil {
+	taken, err := s.saveExists(id)
+	if err != nil {
+		return "", err
+	}
+	if taken {
 		id += fmt.Sprintf("-%d", now.Nanosecond())
 	}
 	s.Save = id
@@ -80,8 +81,12 @@ func (s *Store) UseSave(id string, now time.Time) error {
 	if id == "" || strings.ContainsAny(id, `/\`) {
 		return errors.New("bad save id")
 	}
-	if _, err := os.Stat(filepath.Join(s.Dir, savesDir, id+".yaml")); err != nil {
-		return fmt.Errorf("no saved journey %s: %w", id, err)
+	ok, err := s.saveExists(id)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("no saved journey %s", id)
 	}
 	s.Save = id
 	rec, err := s.readJourney()
@@ -100,21 +105,19 @@ func (s *Store) DeleteSave(id string) error {
 	if s.Save == id {
 		s.Save = ""
 	}
-	return os.Remove(filepath.Join(s.Dir, savesDir, id+".yaml"))
+	return s.deleteDoc(savesDir + "/" + id + ".yaml")
 }
 
-// adoptOldJourney moves a journey kept in wiki/journey.yaml into the saves,
+// adoptOldJourney moves a journey kept as journey.yaml into the saves,
 // and its study bookkeeping into study.yaml, once.
 func (s *Store) adoptOldJourney() error {
-	old := filepath.Join(s.Dir, journeyFile)
-	data, err := os.ReadFile(old)
-	if os.IsNotExist(err) {
-		return nil
+	data, ok, err := s.readDoc(journeyFile)
+	if err != nil || !ok {
+		return err
 	}
-	if err != nil {
-		return fmt.Errorf("read %s: %w", journeyFile, err)
-	}
-	if _, err := os.Stat(filepath.Join(s.Dir, studyFile)); os.IsNotExist(err) {
+	if _, has, err := s.readDoc(studyFile); err != nil {
+		return err
+	} else if !has {
 		var study studyRecord
 		if err := yaml.Unmarshal(data, &study); err != nil {
 			return fmt.Errorf("parse %s: %w", journeyFile, err)
@@ -130,11 +133,11 @@ func (s *Store) adoptOldJourney() error {
 	if rec.Name == "" {
 		rec.Name = "西行之路 The Road West"
 	}
-	info, err := os.Stat(old)
+	when, err := s.docUpdated(journeyFile)
 	if err != nil {
 		return err
 	}
-	stamp := info.ModTime().Format(time.RFC3339)
+	stamp := when.Format(time.RFC3339)
 	rec.Created, rec.Played = stamp, stamp
 	saved := s.Save
 	s.Save = "journey-1"
@@ -143,5 +146,5 @@ func (s *Store) adoptOldJourney() error {
 	if err != nil {
 		return err
 	}
-	return os.Rename(old, old+".adopted")
+	return s.deleteDoc(journeyFile)
 }

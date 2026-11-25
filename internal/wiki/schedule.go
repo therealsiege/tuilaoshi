@@ -2,21 +2,17 @@ package wiki
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/therealsiege/tuilaoshi/internal/model"
-	"gopkg.in/yaml.v3"
 )
 
-// wordScheduleFile holds review schedules for individual vocabulary words.
-// Words on a vocabulary page share its frontmatter, so each word's own
-// schedule lives here, keyed by card ID (e.g. "vocabulary/food.md#米饭").
+// wordScheduleFile held review schedules for vocabulary words before the
+// progress file; it is read once, when the progress file is made.
 const wordScheduleFile = "word-schedule.yaml"
 
-// wordSchedule is one word's entry in the schedule file.
+// wordSchedule is one card's schedule: an entry of the old schedule file,
+// and a row of the schedules table.
 type wordSchedule struct {
 	Introduced     string `yaml:"introduced,omitempty"`
 	LastReviewed   string `yaml:"last_reviewed,omitempty"`
@@ -24,40 +20,32 @@ type wordSchedule struct {
 	NextReview     string `yaml:"next_review,omitempty"`
 }
 
-// isWordCard reports whether a card is one row of a vocabulary table rather
-// than a whole page.
-func isWordCard(id string) bool {
-	return strings.Contains(id, "#")
-}
-
-// readWordSchedules loads the word schedule file. A missing file means no
-// word has been reviewed on its own yet.
-func (s *Store) readWordSchedules() (map[string]wordSchedule, error) {
+// readSchedules loads every card's saved schedule, by card id.
+func (s *Store) readSchedules() (map[string]wordSchedule, error) {
+	db, err := s.progress()
+	if err != nil {
+		return nil, err
+	}
+	rows, err := db.Query(`SELECT card_id, introduced, last_reviewed, review_interval, next_review FROM schedules`)
+	if err != nil {
+		return nil, fmt.Errorf("read schedules: %w", err)
+	}
+	defer rows.Close() //nolint:errcheck // read-only
 	schedules := map[string]wordSchedule{}
-	data, err := os.ReadFile(filepath.Join(s.Dir, wordScheduleFile))
-	if os.IsNotExist(err) {
-		return schedules, nil
+	for rows.Next() {
+		var id string
+		var sch wordSchedule
+		if err := rows.Scan(&id, &sch.Introduced, &sch.LastReviewed, &sch.ReviewInterval, &sch.NextReview); err != nil {
+			return nil, err
+		}
+		schedules[id] = sch
 	}
-	if err != nil {
-		return nil, fmt.Errorf("read word schedules: %w", err)
-	}
-	if err := yaml.Unmarshal(data, &schedules); err != nil {
-		return nil, fmt.Errorf("parse %s: %w", wordScheduleFile, err)
-	}
-	return schedules, nil
-}
-
-func (s *Store) writeWordSchedules(schedules map[string]wordSchedule) error {
-	data, err := yaml.Marshal(schedules)
-	if err != nil {
-		return fmt.Errorf("encode word schedules: %w", err)
-	}
-	return os.WriteFile(filepath.Join(s.Dir, wordScheduleFile), data, 0644)
+	return schedules, rows.Err()
 }
 
 // DrillableCards returns flashcards for every character, vocabulary, and
-// grammar page. Vocabulary words reviewed on their own carry their own
-// schedule; the rest inherit their page's.
+// grammar page. A card reviewed in the game carries its saved schedule;
+// the rest start from their page's frontmatter.
 func (s *Store) DrillableCards() ([]model.Card, error) {
 	pages, err := s.ListPages()
 	if err != nil {
@@ -73,7 +61,7 @@ func (s *Store) DrillableCards() ([]model.Card, error) {
 	}
 	cards := CardsFromPages(drillable)
 
-	schedules, err := s.readWordSchedules()
+	schedules, err := s.readSchedules()
 	if err != nil {
 		return nil, err
 	}
@@ -90,29 +78,35 @@ func (s *Store) DrillableCards() ([]model.Card, error) {
 	return cards, nil
 }
 
-// RecordReview reschedules a card after a review and saves the result:
-// vocabulary words to the word schedule file, other cards to their page.
+// RecordReview reschedules a card after a review and saves its schedule
+// and the answer to the progress file.
 func (s *Store) RecordReview(card *model.Card, difficulty model.DrillDifficulty, now time.Time) error {
+	was := card.ReviewInterval
 	updateSRS(card, difficulty, now)
-
-	if isWordCard(card.ID) {
-		schedules, err := s.readWordSchedules()
-		if err != nil {
-			return err
-		}
-		schedules[card.ID] = wordSchedule{
-			Introduced:     FormatDate(card.Introduced),
-			LastReviewed:   FormatDate(card.LastReviewed),
-			ReviewInterval: card.ReviewInterval,
-			NextReview:     FormatDate(card.NextReview),
-		}
-		return s.writeWordSchedules(schedules)
-	}
-
-	page, err := s.ReadPage(card.ID)
+	db, err := s.progress()
 	if err != nil {
 		return err
 	}
-	applySRSToPage(&page, *card)
-	return s.writeFrontmatter(page)
+	lapse := 0
+	if difficulty == model.DiffAgain {
+		lapse = 1
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback() //nolint:errcheck // a no-op after Commit
+	if _, err := tx.Exec(`INSERT INTO schedules (card_id, introduced, last_reviewed, review_interval, next_review, reps, lapses)
+		VALUES (?, ?, ?, ?, ?, 1, ?)
+		ON CONFLICT(card_id) DO UPDATE SET introduced = excluded.introduced, last_reviewed = excluded.last_reviewed,
+			review_interval = excluded.review_interval, next_review = excluded.next_review,
+			reps = reps + 1, lapses = lapses + excluded.lapses`,
+		card.ID, FormatDate(card.Introduced), FormatDate(card.LastReviewed), card.ReviewInterval, FormatDate(card.NextReview), lapse); err != nil {
+		return fmt.Errorf("save schedule %s: %w", card.ID, err)
+	}
+	if _, err := tx.Exec(`INSERT INTO reviews (card_id, at, rating, interval_was, interval_now) VALUES (?, ?, ?, ?, ?)`,
+		card.ID, now.Format(time.RFC3339), int(difficulty), was, card.ReviewInterval); err != nil {
+		return fmt.Errorf("log review %s: %w", card.ID, err)
+	}
+	return tx.Commit()
 }

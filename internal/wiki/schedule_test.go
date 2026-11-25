@@ -98,27 +98,29 @@ func TestRecordReviewSchedulesOneVocabularyWord(t *testing.T) {
 	}
 }
 
-func TestRecordReviewWritesCharacterPage(t *testing.T) {
+func TestRecordReviewKeepsThePageUnchanged(t *testing.T) {
 	store := newTestStore(t)
 	cards, err := store.DrillableCards()
 	if err != nil {
 		t.Fatal(err)
 	}
 	book := findCard(t, cards, "characters/shu1.md")
-
 	if err := store.RecordReview(&book, model.DiffGood, time.Now()); err != nil {
 		t.Fatalf("RecordReview: %v", err)
 	}
-
+	cards, err = store.DrillableCards()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := findCard(t, cards, "characters/shu1.md"); got.ReviewInterval != 7 {
+		t.Errorf("saved interval = %d, want 7 (3 × 2.5)", got.ReviewInterval)
+	}
 	page, err := store.ReadPage("characters/shu1.md")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if page.ReviewInterval != 7 {
-		t.Errorf("page interval = %d, want 7 (3 × 2.5)", page.ReviewInterval)
-	}
-	if _, err := os.Stat(filepath.Join(store.Dir, wordScheduleFile)); !os.IsNotExist(err) {
-		t.Error("character review should not create the word schedule file")
+	if page.ReviewInterval != 3 {
+		t.Errorf("the page changed to interval %d; pages are content only", page.ReviewInterval)
 	}
 }
 

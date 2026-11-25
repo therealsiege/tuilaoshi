@@ -1,13 +1,5 @@
 package wiki
 
-import (
-	"fmt"
-	"os"
-	"path/filepath"
-
-	"gopkg.in/yaml.v3"
-)
-
 // settingsFile keeps the learner's settings, shared by every journey.
 const settingsFile = "settings.yaml"
 
@@ -31,15 +23,8 @@ func DefaultSettings() Settings {
 // Settings reads the learner's settings, filling any missing with defaults.
 func (s *Store) Settings() (Settings, error) {
 	set := DefaultSettings()
-	data, err := os.ReadFile(filepath.Join(s.Dir, settingsFile))
-	if os.IsNotExist(err) {
-		return set, nil
-	}
-	if err != nil {
-		return set, fmt.Errorf("read %s: %w", settingsFile, err)
-	}
-	if err := yaml.Unmarshal(data, &set); err != nil {
-		return DefaultSettings(), fmt.Errorf("parse %s: %w", settingsFile, err)
+	if err := s.readYAML(settingsFile, &set); err != nil {
+		return DefaultSettings(), err
 	}
 	if set.NewWords < 0 {
 		set.NewWords = 0
@@ -52,9 +37,5 @@ func (s *Store) Settings() (Settings, error) {
 
 // SaveSettings writes the learner's settings.
 func (s *Store) SaveSettings(set Settings) error {
-	data, err := yaml.Marshal(set)
-	if err != nil {
-		return fmt.Errorf("encode %s: %w", settingsFile, err)
-	}
-	return os.WriteFile(filepath.Join(s.Dir, settingsFile), data, 0644)
+	return s.writeYAML(settingsFile, set)
 }

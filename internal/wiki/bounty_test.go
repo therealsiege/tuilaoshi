@@ -1,8 +1,6 @@
 package wiki
 
 import (
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
 )
@@ -63,7 +61,7 @@ func TestShieldCoversAMissedDay(t *testing.T) {
 	if _, shields, err := store.Bounties(time.Now()); err != nil || shields != 0 {
 		t.Errorf("shields left %d %v, want 0", shields, err)
 	}
-	if err := os.Remove(filepath.Join(store.Dir, studyFile)); err != nil {
+	if err := store.deleteDoc(studyFile); err != nil {
 		t.Fatal(err)
 	}
 	if got := store.Streak(); got != 1 {

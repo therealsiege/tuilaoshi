@@ -58,13 +58,3 @@ func DueItems(store *Store, now time.Time) ([]model.Card, error) {
 	}
 	return due, nil
 }
-
-// ApplySRSToPage updates a page's SRS frontmatter fields from a card.
-func applySRSToPage(page *model.Page, card model.Card) {
-	page.LastReviewed = card.LastReviewed
-	page.ReviewInterval = card.ReviewInterval
-	page.NextReview = card.NextReview
-	if page.Introduced.IsZero() {
-		page.Introduced = card.Introduced
-	}
-}
