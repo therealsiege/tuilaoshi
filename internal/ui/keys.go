@@ -355,6 +355,14 @@ func HelpText(v View) string {
 			"  1-4    Rate difficulty\n" +
 			"  ctrl+space  Toggle input mode\n" +
 			"  esc    Back to dashboard"
+	case ViewReading:
+		return "Reading Keys\n\n" +
+			"  ↑↓     Choose a text / line\n" +
+			"  enter  Read / didn't know this word\n" +
+			"  s      说书人 The Storyteller: a chapter a day\n" +
+			"  e      English · p hear the line\n" +
+			"  ctrl+r Hear the storyteller's chapter\n" +
+			"  esc    Back"
 	default:
 		return "  ?  Toggle help\n  esc  Back"
 	}

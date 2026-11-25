@@ -127,7 +127,7 @@ func New(wikiDir string) (Model, error) {
 		party:       party.New(store, ai, dict),
 		world:       world.New(store, ai, dict),
 		battle:      rpgview.New(store, ttsClient, dict),
-		reader:      reader.New(store),
+		reader:      reader.New(store).WithStoryteller(ai),
 		assess:      assessment.New(store),
 	}, nil
 }
