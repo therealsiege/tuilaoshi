@@ -130,3 +130,15 @@ func (s *Store) NewWordsPaused(perDay int, now time.Time) (string, error) {
 	}
 	return "", nil
 }
+
+// ReviewsBetween is how many reviews from one time up to another were
+// remembered, of how many.
+func (s *Store) ReviewsBetween(from, to time.Time) (right, total int, err error) {
+	db, err := s.progress()
+	if err != nil {
+		return 0, 0, err
+	}
+	err = db.QueryRow(`SELECT count(*), coalesce(sum(rating > 0), 0) FROM reviews WHERE at >= ? AND at < ?`,
+		from.Format(time.RFC3339), to.Format(time.RFC3339)).Scan(&total, &right)
+	return right, total, err
+}

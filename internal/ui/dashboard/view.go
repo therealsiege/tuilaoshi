@@ -18,6 +18,9 @@ const menuColumnWidth = 28
 // View shows, top to bottom: today's numbers, one suggested next step, the
 // menu grouped by purpose, and where the journey stands.
 func (m Model) View() string {
+	if m.reading && m.letter != nil {
+		return m.letterView()
+	}
 	var b strings.Builder
 	b.WriteString(ui.TitleStyle.MarginBottom(0).Render("  营地 Camp"))
 	b.WriteString(ui.MutedStyle.Render("  study by the fire, then back on the road (esc)"))
@@ -165,7 +168,7 @@ func (m Model) renderBounties() string {
 	if m.shields > 0 {
 		note += fmt.Sprintf(" · %d %s held", m.shields, plural(m.shields, "shield", "shields"))
 	}
-	return b.String() + "            " + ui.MutedStyle.Render(note) + m.renderFestival() + m.renderTerm() + m.renderInnerDemon()
+	return b.String() + "            " + ui.MutedStyle.Render(note) + m.renderFestival() + m.renderTerm() + m.renderInnerDemon() + m.renderLetterLine()
 }
 
 // weatherNote says what a term's weather does on the road.

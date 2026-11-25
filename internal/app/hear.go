@@ -23,6 +23,8 @@ func (m Model) hear() tea.Cmd {
 		text = m.festival.Hear()
 	case ui.ViewDiary:
 		text = m.diary.Hear()
+	case ui.ViewDashboard:
+		text = m.dashboard.Hear()
 	case ui.ViewReading:
 		text = m.reader.Hear()
 	}

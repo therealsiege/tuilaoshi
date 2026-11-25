@@ -31,6 +31,8 @@ type Model struct {
 	newWords     int              // frequency words that joined the reviews today
 	paused       string           // why new frequency words are waiting, or ""
 	assessed     bool             // the level check has been taken
+	letter       *wiki.Letter     // Guanyin's latest letter, or nil (letter.go)
+	reading      bool             // the letter is open
 	now          func() time.Time // the clock, fixed in tests
 	due          int
 	xp           int   // lifetime battle XP
@@ -64,7 +66,22 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m.Refresh(), nil
 
 	case tea.KeyMsg:
+		if m.reading {
+			if key.Matches(msg, m.gkeys.Back) || key.Matches(msg, m.gkeys.Enter) {
+				m.reading = false
+			}
+			return m, nil
+		}
 		switch {
+		case msg.String() == "n" && m.letter != nil:
+			m.reading = true
+			if !m.letter.Read {
+				m.letter.Read = true
+				if err := m.store.SaveLetter(*m.letter); err != nil {
+					m.loadErr = err
+				}
+			}
+			return m, nil
 		case key.Matches(msg, m.gkeys.Back):
 			return m, ui.SwitchTo(ui.ViewMap) // back on the road
 		case msg.String() == "T":
@@ -151,6 +168,8 @@ func (m Model) Refresh() Model {
 	missed, missErr := rpgview.MissedThisWeek(m.store, m.now())
 	m.missed, m.note = len(missed), ""
 	bountyErr = errors.Join(bountyErr, missErr)
+	letter, letterErr := m.loadLetter()
+	m.letter, bountyErr = letter, errors.Join(bountyErr, letterErr)
 	m.journeyState, journeyErr = journey.Calculate(m.store)
 	m.loadErr = errors.Join(dueErr, journeyErr, walletErr, bountyErr)
 	return m
