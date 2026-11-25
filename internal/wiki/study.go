@@ -15,6 +15,7 @@ type studyRecord struct {
 	Shields      int            `yaml:"shields,omitempty"`       // streak shields held
 	Shielded     []string       `yaml:"shielded,omitempty"`      // missed days a shield covered
 	FreqDay      string         `yaml:"freq_day,omitempty"`      // the day frequency words were last introduced
+	Assessed     string         `yaml:"assessed,omitempty"`      // the day the level check was last taken
 }
 
 func (s *Store) readStudy() (studyRecord, error) {

@@ -13,6 +13,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/therealsiege/tuilaoshi/internal/assess"
+	"github.com/therealsiege/tuilaoshi/internal/model"
 	rpgengine "github.com/therealsiege/tuilaoshi/internal/rpg"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
@@ -47,6 +48,8 @@ type Model struct {
 	last     string // "✓" or "✗ …" for the previous answer
 
 	results          []assess.Result
+	known            []model.Card // characters and words at or below the levels found, to mark known
+	marked           int          // how many were marked known, once done (-1 before)
 	loadErr, saveErr error
 	width, height    int
 }
@@ -134,10 +137,28 @@ func (m Model) finish() Model {
 		m.results = append(m.results, assess.FromStaircase(s, m.stairs[i]))
 	}
 	date := time.Now().Format("2006-01-02")
-	m.saveErr = m.store.UpdateSection(overviewPage, overviewSection, func(old string) string {
+	m.saveErr = errors.Join(m.store.UpdateSection(overviewPage, overviewSection, func(old string) string {
 		return assess.UpdateSection(old, m.results, date)
-	})
+	}), m.store.MarkAssessed(time.Now()))
+	m.known, m.marked = knownCards(m.skills, m.results), -1
 	return m
+}
+
+// knownCards are the character and vocabulary cards at or below the level
+// each of those two skills was found at.
+func knownCards(skills []assess.Skill, results []assess.Result) []model.Card {
+	var known []model.Card
+	for i, s := range skills {
+		if i >= len(results) || (s.Name != "Character recognition" && s.Name != "Vocabulary (passive)") {
+			continue
+		}
+		for level, cards := range s.ByLevel {
+			if level <= results[i].Level {
+				known = append(known, cards...)
+			}
+		}
+	}
+	return known
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
@@ -166,8 +187,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			}
 		}
 	case phaseResults:
-		if key.Matches(k, m.gkeys.Enter) {
+		switch {
+		case key.Matches(k, m.gkeys.Enter):
 			return m, ui.SwitchTo(ui.ViewDashboard)
+		case k.String() == "k" && m.marked < 0 && len(m.known) > 0:
+			n, err := m.store.MarkKnown(m.known, time.Now())
+			m.marked, m.saveErr = n, errors.Join(m.saveErr, err)
 		}
 	}
 	return m, nil
@@ -241,6 +266,16 @@ func (m Model) viewResults() string {
 		b.WriteString(ui.SuccessStyle.Render("  Saved to wiki/overview.md (Current Level Assessment)."))
 	}
 	b.WriteString("\n\n")
-	b.WriteString(ui.HelpStyle.Render("  enter dashboard"))
+	help := "  enter dashboard"
+	switch {
+	case m.marked >= 0:
+		b.WriteString(ui.SuccessStyle.Render(fmt.Sprintf("  %d words marked known: they leave today's reviews and come back over the next two months.", m.marked)) + "\n\n")
+	case len(m.known) > 0:
+		fmt.Fprintf(&b, "  %s  Mark the %d characters and words at or below your level as known.\n", ui.ChineseStyle.Render("k"), len(m.known))
+		b.WriteString(ui.MutedStyle.Render("     They leave today's reviews and come back spread over the next two months,") + "\n")
+		b.WriteString(ui.MutedStyle.Render("     so they stay fresh while you work on the rest. Words you've reviewed keep their schedule.") + "\n\n")
+		help = "  k mark them known · enter dashboard"
+	}
+	b.WriteString(ui.HelpStyle.Render(help))
 	return b.String()
 }

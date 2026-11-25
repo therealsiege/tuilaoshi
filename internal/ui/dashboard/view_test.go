@@ -41,6 +41,10 @@ func TestStartHereSuggestsOneNextStep(t *testing.T) {
 		t.Errorf("with a word due: %q", v)
 	}
 	m.due = 10789
+	if v := uitest.Plain(m.renderStartHere()); !strings.Contains(v, "a  Check your level first") {
+		t.Errorf("a new learner with a backlog: %q", v)
+	}
+	m.assessed = true
 	if v := uitest.Plain(m.renderStartHere()); !strings.Contains(v, "r  Review 20 of your 10,789 due words") {
 		t.Errorf("with a backlog: %q", v)
 	}

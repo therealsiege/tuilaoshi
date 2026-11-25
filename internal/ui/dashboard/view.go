@@ -188,11 +188,19 @@ func (m Model) renderInnerDemon() string {
 	return label + ui.MutedStyle.Render(fmt.Sprintf("sleeps: %d of %d missed words this week wake it", m.missed, journey.InnerDemonWakes))
 }
 
-// renderStartHere suggests one next step: due reviews first, then the open
-// journey stage, then reading.
+// firstCheckDue is the backlog at which a learner who hasn't taken the
+// level check is pointed to it first: it moves the words they know out of
+// the way.
+const firstCheckDue = 500
+
+// renderStartHere suggests one next step: the level check for a new
+// learner facing a big backlog, due reviews, then the open journey stage,
+// then reading.
 func (m Model) renderStartHere() string {
 	key, what := "t", "Read & listen to something new"
 	switch s := m.journeyState.Stage; {
+	case !m.assessed && m.due > firstCheckDue:
+		key, what = "a", fmt.Sprintf("Check your level first: words you already know leave today's %s due", thousands(m.due))
 	case m.due > 0:
 		if dailyChunk := ui.Prefs.ReviewChunk; m.due > dailyChunk {
 			key, what = "r", fmt.Sprintf("Review %d of your %s due words", dailyChunk, thousands(m.due))

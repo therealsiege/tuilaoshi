@@ -30,6 +30,7 @@ type Model struct {
 	note         string           // what the last key did, when it did nothing
 	newWords     int              // frequency words that joined the reviews today
 	paused       string           // why new frequency words are waiting, or ""
+	assessed     bool             // the level check has been taken
 	now          func() time.Time // the clock, fixed in tests
 	due          int
 	xp           int   // lifetime battle XP
@@ -145,6 +146,8 @@ func (m Model) Refresh() Model {
 		why, err := m.store.NewWordsPaused(ui.Prefs.NewWords, m.now())
 		m.paused, bountyErr = why, errors.Join(bountyErr, err)
 	}
+	assessed, assessErr := m.store.Assessed()
+	m.assessed, bountyErr = assessed, errors.Join(bountyErr, assessErr)
 	missed, missErr := rpgview.MissedThisWeek(m.store, m.now())
 	m.missed, m.note = len(missed), ""
 	bountyErr = errors.Join(bountyErr, missErr)

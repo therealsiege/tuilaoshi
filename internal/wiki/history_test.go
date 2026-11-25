@@ -70,3 +70,34 @@ func TestNewWordsWaitWhileTooManyAreDue(t *testing.T) {
 		t.Errorf("not paused with %d due: %q %v", PauseDue+1, why, err)
 	}
 }
+
+func TestKnownWordsLeaveTodayAndComeBackSpread(t *testing.T) {
+	store := newTestStore(t)
+	now := time.Date(2026, 11, 25, 9, 0, 0, 0, time.Local)
+	review(t, store, "vocabulary/food.md#米饭", model.DiffGood, now) // reviewed: keeps its schedule
+	cards, err := store.DrillableCards()
+	if err != nil {
+		t.Fatal(err)
+	}
+	n, err := store.MarkKnown(cards, now)
+	if err != nil || n != len(cards)-1 {
+		t.Fatalf("marked %d of %d %v, want all but the reviewed one", n, len(cards), err)
+	}
+	due, err := DueItems(store, now)
+	if err != nil || len(due) != 0 {
+		t.Errorf("due after marking known: %d %v", len(due), err)
+	}
+	cards, err = store.DrillableCards()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range cards {
+		days := int(c.NextReview.Sub(now).Hours()/24 + 0.5)
+		if c.ID != "vocabulary/food.md#米饭" && (days < knownFrom || days > knownUntil) {
+			t.Errorf("%s comes back in %d days, want %d-%d", c.ID, days, knownFrom, knownUntil)
+		}
+	}
+	if ok, err := store.Assessed(); err != nil || !ok {
+		t.Errorf("assessed %v %v", ok, err)
+	}
+}

@@ -69,3 +69,22 @@ func TestAssessmentFindsLowerLevelWhenWrong(t *testing.T) {
 		t.Errorf("character result %q, want below HSK3", got)
 	}
 }
+
+func TestKnownWordsCanBeMarkedAfterTheCheck(t *testing.T) {
+	m := assessWiki(t)
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	for i := 0; m.phase == phaseAsking && i < 50; i++ {
+		m.selected = m.question.Correct
+		m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	}
+	if len(m.known) != 8 || !strings.Contains(m.View(), "Mark the 8 characters") {
+		t.Fatalf("known %d:\n%s", len(m.known), m.View())
+	}
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("k")})
+	if m.marked != 8 || m.saveErr != nil || !strings.Contains(m.View(), "8 words marked known") {
+		t.Errorf("marked %d %v:\n%s", m.marked, m.saveErr, m.View())
+	}
+	if ok, err := m.store.Assessed(); err != nil || !ok {
+		t.Errorf("assessed %v %v", ok, err)
+	}
+}
