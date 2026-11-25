@@ -177,3 +177,15 @@ func (m Model) updateQuestion(k tea.KeyMsg) Model {
 	}
 	return m
 }
+
+// Hear is the festival's Chinese, to read aloud: the question open, or its
+// story.
+func (m Model) Hear() string {
+	if !m.ok {
+		return ""
+	}
+	if m.asking >= 0 {
+		return m.occ.Questions[m.asking].Question
+	}
+	return m.occ.Text
+}

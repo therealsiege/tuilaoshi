@@ -153,3 +153,16 @@ func (m Model) crossed() Model {
 
 // hasCrossed reports whether this region's obstacle is behind the party.
 func (m Model) hasCrossed() bool { return slices.Contains(m.trail.Crossed, m.region.Region.ID) }
+
+// Hear is the Chinese of the event or crossing open, to read aloud: its
+// text, and once chosen what came of it.
+func (m Model) Hear() string {
+	e := m.event
+	if e == nil {
+		return ""
+	}
+	if e.chose >= 0 {
+		return e.Text + "\n" + e.Choices[e.chose].Result
+	}
+	return e.Text
+}

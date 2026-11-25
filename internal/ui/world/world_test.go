@@ -236,7 +236,13 @@ func TestAskingForAlmsOnceADay(t *testing.T) {
 	if err != nil || tr.Food != journey.StartFood+journey.AlmsFood || !strings.Contains(m.View(), m.alms.Thanks) {
 		t.Fatalf("asked well: food %d %v\n%s", tr.Food, err, m.View())
 	}
+	if !strings.Contains(m.Hear(), m.alms.Thanks) {
+		t.Errorf("ctrl+r should read the scene and the thanks: %q", m.Hear())
+	}
 	m, _ = m.Update(enter)
+	if m.Hear() != m.towns[m.town].Desc {
+		t.Errorf("in town ctrl+r reads the town: %q", m.Hear())
+	}
 	m, _ = m.Update(press("a"))
 	if m.screen != screenTown || !strings.Contains(m.note, "tomorrow") {
 		t.Fatalf("asked twice in a day: screen %d, %q", m.screen, m.note)

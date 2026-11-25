@@ -283,17 +283,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if key.Matches(msg, m.keys.Quit) && m.currentView == ui.ViewDashboard {
 			return m, tea.Quit
 		}
+		// ctrl+r reads aloud the Chinese on screens without their own voice
+		if cmd := m.hear(); msg.Type == tea.KeyCtrlR && cmd != nil {
+			return m, cmd
+		}
 		// Global back to dashboard (unless input is composing in Chinese mode,
-		// or esc closes an open reading)
-		readingOpen := (m.currentView == ui.ViewReading && m.reader.Open()) ||
-			(m.currentView == ui.ViewBrowser && m.browser.Searching()) ||
-			(m.currentView == ui.ViewParty && m.party.Busy()) ||
-			m.currentView == ui.ViewWorld ||
-			m.currentView == ui.ViewTitle || m.currentView == ui.ViewMap ||
-			(m.currentView == ui.ViewTheatre && m.theatre.Busy()) ||
-			m.currentView == ui.ViewForge || m.currentView == ui.ViewDiary ||
-			(m.currentView == ui.ViewFestival && m.festival.Busy())
-		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard && !readingOpen {
+		// or the screen uses esc itself)
+		if key.Matches(msg, m.keys.Back) && m.currentView != ui.ViewDashboard && !m.ownsEsc() {
 			if !m.isInputComposing() {
 				if m.currentView == ui.ViewBattle {
 					// Fleeing a battle returns to the road it was fought on.

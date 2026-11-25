@@ -182,3 +182,12 @@ func (m Model) onGrade(msg gradeMsg) Model {
 	m.input.Blur()
 	return m
 }
+
+// Hear is the diary's Chinese, to read aloud: today's entry once written,
+// else the day's prompt.
+func (m Model) Hear() string {
+	if m.written && len(m.entries) > 0 {
+		return m.entries[len(m.entries)-1].Text
+	}
+	return "今天走到了哪里？遇到了什么？心情怎么样？"
+}

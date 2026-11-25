@@ -252,11 +252,13 @@ func HelpText(v View) string {
 		return "Diary Keys\n\n" +
 			"  enter       Send today's entry\n" +
 			"  ctrl+space  Pinyin / English input\n" +
+			"  ctrl+r      Hear your entry\n" +
 			"  esc         Back to camp"
 	case ViewFestival:
 		return "Festival Keys\n\n" +
 			"  1-2    Answer a question\n" +
 			"  e      English translation\n" +
+			"  ctrl+r Hear it in Chinese\n" +
 			"  esc    Back"
 	case ViewForge:
 		return "Forge Keys\n\n" +
@@ -278,6 +280,7 @@ func HelpText(v View) string {
 			"  enter        Enter a town / face a tribulation\n" +
 			"  p            Pace · f rations\n" +
 			"  r            Rest a day\n" +
+			"  ctrl+r       Hear an event in Chinese\n" +
 			"  c / esc      Camp: study, party, shrine\n\n" +
 			"  @ you   · road (safe)   , wild (clans)\n" +
 			"  H town  ! tribulation   & demon's lair\n" +
@@ -295,6 +298,7 @@ func HelpText(v View) string {
 			"  b      Buy 斋饭 at the store\n" +
 			"  t      Trade a material for 斋饭\n" +
 			"  a      Ask for alms (化缘), once a day\n" +
+			"  ctrl+r Hear the Chinese on screen\n" +
 			"  g      Shrine\n" +
 			"  esc    Back on the road"
 	case ViewParty:

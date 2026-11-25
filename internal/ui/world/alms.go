@@ -159,3 +159,21 @@ func (m *Model) withTrail(change func(*journey.Trail, []string)) {
 		m.loadErr = err
 	}
 }
+
+// Hear is the Chinese open in town, to read aloud: a notice, a townsperson
+// met for alms (and their thanks once asked well), or the town itself.
+func (m Model) Hear() string {
+	t := m.towns[m.town]
+	switch m.screen {
+	case screenQuest:
+		return t.Quests[m.quest].Text
+	case screenAlms:
+		if m.answered >= 0 && m.almsOrder[m.answered] == 0 {
+			return m.alms.Text + "\n" + m.alms.Thanks
+		}
+		return m.alms.Text
+	case screenTown:
+		return t.Desc
+	}
+	return ""
+}
