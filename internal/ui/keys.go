@@ -298,6 +298,7 @@ func HelpText(v View) string {
 			"  b      Buy 斋饭 at the store\n" +
 			"  x      Buy straw sandals (草鞋) for the party\n" +
 			"  o      Make a temple offering, once a day\n" +
+			"  l      Guess a lantern riddle (灯谜)\n" +
 			"  t      Trade a material for 斋饭\n" +
 			"  a      Ask for alms (化缘), once a day\n" +
 			"  ctrl+r Hear the Chinese on screen\n" +

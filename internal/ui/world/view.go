@@ -13,6 +13,8 @@ import (
 func (m Model) View() string {
 	var b strings.Builder
 	switch m.screen {
+	case screenRiddle:
+		b.WriteString(m.riddleView())
 	case screenAlms:
 		b.WriteString(m.almsView())
 	case screenStone:
@@ -71,7 +73,12 @@ func (m Model) townView() string {
 		journey.FoodBundle, t.Price(journey.FoodPrice), journey.Barter, t.Price(journey.SandalPrice))) + "\n")
 	b.WriteString("  " + ui.MutedStyle.Render(fmt.Sprintf("寺庙 The temple: an offering of %d 铜钱 lifts the party's spirits, once a day (o)", t.Price(journey.OfferingPrice))) + "\n")
 	b.WriteString("  " + ui.MutedStyle.Render(fmt.Sprintf("化缘 Ask the townsfolk for alms, once a day: +%d 斋饭 if asked well (a)", journey.AlmsFood)) + "\n")
-	help := "  ↑↓ choose · enter read · r rest · b buy · x sandals · o offering · t trade · a alms · g shrine · esc back"
+	lantern := "灯谜 A lantern riddle hangs by the gate: guess the character for 铜钱 (l)"
+	if m.feast() {
+		lantern = "元宵灯会 The Lantern Festival fair: three riddles today, double pay (l)"
+	}
+	b.WriteString("  " + ui.MutedStyle.Render(lantern) + "\n")
+	help := "  ↑↓ choose · enter read · r rest · b buy · x sandals · o offering · t trade · a alms · l riddle · g shrine · esc back"
 	if t.Stone != nil {
 		if slices.Contains(m.stones, t.ID) {
 			b.WriteString("\n  " + ui.MutedStyle.Render("石碑 The roadside stone stands open: ") + ui.ChineseStyle.Render(t.Stone.Idiom) + "\n")

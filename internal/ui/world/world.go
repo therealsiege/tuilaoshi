@@ -26,8 +26,9 @@ type screen int
 const (
 	screenTown screen = iota
 	screenQuest
-	screenStone // a town's secret stone (see stone.go)
-	screenAlms  // asking a townsperson for alms (see alms.go)
+	screenStone  // a town's secret stone (see stone.go)
+	screenAlms   // asking a townsperson for alms (see alms.go)
+	screenRiddle // a lantern riddle (see riddle.go)
 )
 
 // Model is the world map view model.
@@ -59,6 +60,9 @@ type Model struct {
 	alms      journey.Alms // the townsperson asked for alms
 	almsOrder []int        // the alms choices' order on screen
 
+	riddle journey.Riddle // the lantern riddle open
+	tries  int            // wrong guesses at it
+
 	note          string
 	width, height int
 	loadErr       error
@@ -79,7 +83,7 @@ func New(store *wiki.Store, client *claude.Client, dict *input.Dict) Model {
 
 // Typing reports whether a writing request or a stone has the keyboard.
 func (m Model) Typing() bool {
-	return m.screen == screenStone || (m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing())
+	return m.screen == screenStone || m.screen == screenRiddle || (m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing())
 }
 
 func (m Model) Init() tea.Cmd { return nil }
@@ -120,6 +124,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	}
 	back := key.Matches(k, m.gkeys.Back)
 	switch m.screen {
+	case screenRiddle:
+		if back && !m.input.Composing() {
+			m.screen, m.note = screenTown, ""
+			return m.Refresh(), nil
+		}
+		return m.updateRiddle(k)
 	case screenAlms:
 		if back && m.answered < 0 {
 			m.screen, m.note = screenTown, ""
@@ -174,6 +184,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m.buySandals(), nil
 		case k.String() == "o":
 			return m.offer(), nil
+		case k.String() == "l":
+			return m.openRiddle()
 		}
 		return m, nil
 	}

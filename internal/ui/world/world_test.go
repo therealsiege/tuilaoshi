@@ -308,3 +308,31 @@ func TestSandalsAndATempleOffering(t *testing.T) {
 		t.Errorf("a second offering the same day: %q", m.note)
 	}
 }
+
+func TestALanternRiddleADay(t *testing.T) {
+	m := worldAt(t, 11)
+	m, _ = m.Update(press("l"))
+	if m.screen != screenRiddle || !strings.Contains(m.View(), m.riddle.Riddle) || strings.Contains(m.View(), "谜底") {
+		t.Fatalf("riddle not open, or the answer shows:\n%s", m.View())
+	}
+	m.input.SetValue(m.riddle.Answer)
+	m, _ = m.Update(enter)
+	w, err := m.store.Wallet()
+	if err != nil || w.Tongqian != journey.RiddlePay || !strings.Contains(m.View(), "猜中了") {
+		t.Fatalf("solved: purse %+v %v\n%s", w, err, m.View())
+	}
+	m, _ = m.Update(enter)
+	m, _ = m.Update(press("l"))
+	if m.screen != screenTown || !strings.Contains(m.note, "tomorrow") {
+		t.Fatalf("a second riddle the same day: %q", m.note)
+	}
+	m.now = func() time.Time { return day.AddDate(0, 0, 1) }
+	m, _ = m.Update(press("l"))
+	for range journey.RiddleTries {
+		m.input.SetValue("错")
+		m, _ = m.Update(enter)
+	}
+	if m.answered != 0 || !strings.Contains(m.View(), "谜底："+m.riddle.Answer) {
+		t.Errorf("after %d misses the answer shows:\n%s", journey.RiddleTries, m.View())
+	}
+}

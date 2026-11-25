@@ -165,6 +165,8 @@ func (m *Model) withTrail(change func(*journey.Trail, []string)) {
 func (m Model) Hear() string {
 	t := m.towns[m.town]
 	switch m.screen {
+	case screenRiddle:
+		return m.riddle.Riddle
 	case screenQuest:
 		return t.Quests[m.quest].Text
 	case screenAlms:

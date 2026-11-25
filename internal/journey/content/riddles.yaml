@@ -1,0 +1,93 @@
+# Lantern riddles (灯谜, here 字谜): each riddle describes a character by
+# its parts. Traditional riddles, solved by putting components together;
+# `explain` says how, shown after answering.
+- riddle: 一口咬掉牛尾巴
+  answer: 告
+  pinyin: gào
+  english: One mouth bites off the ox's tail.
+  explain: "牛 without its tail is 𠂒 (the top of 告); add 口: 告."
+- riddle: 一人一张口，口下长只手
+  answer: 拿
+  pinyin: ná
+  english: A person, a mouth, and under the mouth a hand.
+  explain: "人 + 一 + 口 make 合; a 手 below: 拿."
+- riddle: 千里相逢
+  answer: 重
+  pinyin: zhòng
+  english: Meeting after a thousand li.
+  explain: "千 and 里 joined: 重."
+- riddle: 一加一
+  answer: 王
+  pinyin: wáng
+  english: One plus one.
+  explain: "一 + 十 (the plus sign) + 一: 王."
+- riddle: 半个月亮
+  answer: 胖
+  pinyin: pàng
+  english: Half of the moon.
+  explain: "半 beside 月: 胖."
+- riddle: 一月一日非今天
+  answer: 明
+  pinyin: míng
+  english: The first of the month, but not today.
+  explain: "日 and 月 together, and not today but tomorrow (明天): 明."
+- riddle: 两个人坐在土上
+  answer: 坐
+  pinyin: zuò
+  english: Two people sitting on the earth.
+  explain: "Two 人 above 土: 坐."
+- riddle: 七十二小时
+  answer: 晶
+  pinyin: jīng
+  english: Seventy-two hours.
+  explain: "Seventy-two hours is three days, three 日: 晶."
+- riddle: 自大一点
+  answer: 臭
+  pinyin: chòu
+  english: Self, big, and a dot.
+  explain: "自 over 大, plus a dot: 臭 (one dot of conceit makes a stink)."
+- riddle: 人在草木中
+  answer: 茶
+  pinyin: chá
+  english: A person among grass and trees.
+  explain: "艹 above, 木 below, 人 between: 茶."
+- riddle: 十张口，一颗心
+  answer: 思
+  pinyin: sī
+  english: Ten mouths and one heart.
+  explain: "十 in 口 is 田; a 心 below: 思."
+- riddle: 上下合
+  answer: 卡
+  pinyin: kǎ
+  english: Up and down put together.
+  explain: "上 over 下: 卡."
+- riddle: 一边是红，一边是绿，一边喜风，一边喜雨
+  answer: 秋
+  pinyin: qiū
+  english: One side red, one side green; one side loves the wind, one side the rain.
+  explain: "火 is red and loves the wind; 禾 is green and loves the rain: 秋."
+- riddle: 大口吃小口
+  answer: 回
+  pinyin: huí
+  english: A big mouth eats a small mouth.
+  explain: "A small 口 inside a big 口: 回."
+- riddle: 天没有它大，人有它大
+  answer: 一
+  pinyin: yī
+  english: Heaven is no bigger without it; a person with it is big.
+  explain: "天 without 一 is 大; 人 with 一 is 大: 一."
+- riddle: 一人在内
+  answer: 肉
+  pinyin: ròu
+  english: One more person inside.
+  explain: "内 with one more 人 inside: 肉."
+- riddle: 二小二小，头上长草
+  answer: 蒜
+  pinyin: suàn
+  english: Two-small, two-small, with grass on top.
+  explain: "二 over 小 is 示; two 示 under 艹: 蒜."
+- riddle: 一只狗，两个口，谁遇它谁发愁
+  answer: 哭
+  pinyin: kū
+  english: A dog and two mouths; whoever meets it is sad.
+  explain: "Two 口 over 犬 (a dog): 哭."
