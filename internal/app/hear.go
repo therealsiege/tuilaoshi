@@ -20,6 +20,8 @@ func (m Model) hear() tea.Cmd {
 		text = m.festival.Hear()
 	case ui.ViewDiary:
 		text = m.diary.Hear()
+	case ui.ViewReading:
+		text = m.reader.Hear()
 	}
 	return ui.SpeakCmd(m.tts, text, "zh")
 }

@@ -12,6 +12,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/therealsiege/tuilaoshi/internal/audio"
+	"github.com/therealsiege/tuilaoshi/internal/claude"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	"github.com/therealsiege/tuilaoshi/internal/segment"
@@ -74,13 +75,32 @@ type Model struct {
 	clips       []clip                  // where each line is spoken in it
 	status      string                  // result of the last mark
 
+	// The teahouse storyteller (see storyteller.go).
+	teller      Teller              // nil without an API key
+	now         func() time.Time    // today, for one chapter a day
+	known       []string            // a sample of the learner's known words
+	chapters    []wiki.StoryChapter // chapters told so far, in order
+	story       bool                // on the storyteller's shelf
+	shelfCursor int                 // 0 tells the next chapter; then told ones, newest first
+	telling     bool                // waiting for the storyteller
+	chapterOpen bool                // the open text is a told chapter
+
 	loadErr, saveErr error
 	width, height    int
 }
 
 // New creates a reading view.
 func New(store *wiki.Store) Model {
-	return Model{store: store, gkeys: ui.DefaultGlobalKeys()}
+	return Model{store: store, gkeys: ui.DefaultGlobalKeys(), now: time.Now}
+}
+
+// WithStoryteller lets the storyteller tell new chapters through Claude;
+// without a ready client he says he needs a key.
+func (m Model) WithStoryteller(client *claude.Client) Model {
+	if client.Ready() {
+		m.teller = client.TellChapter
+	}
+	return m
 }
 
 // Init satisfies the Bubble Tea model interface.
@@ -92,8 +112,9 @@ func (m Model) SetSize(w, h int) Model {
 	return m
 }
 
-// Open reports whether a text is open, so esc returns to the list.
-func (m Model) Open() bool { return m.open }
+// Open reports whether a text or the storyteller's shelf is open, so esc
+// returns to the list.
+func (m Model) Open() bool { return m.open || m.story }
 
 // Refresh reloads the reading list and the decks used for glosses.
 func (m Model) Refresh() Model {
@@ -102,7 +123,11 @@ func (m Model) Refresh() Model {
 	private, privErr := m.store.PrivateEpisodes()
 	pages, pagesErr := m.store.ListPages()
 	cleared, clearedErr := m.store.ClearedStages()
-	m.loadErr = errors.Join(readErr, cardsErr, privErr, pagesErr, clearedErr)
+	told, toldErr := m.store.StoryChaptersTold()
+	m.loadErr = errors.Join(readErr, cardsErr, privErr, pagesErr, clearedErr, toldErr)
+	// A chapter told while the learner was away was saved, though its reply
+	// never reached this screen, so stop waiting for it.
+	m.chapters, m.known, m.story, m.telling = told, knownWords(cards, pages), false, false
 	m.items = nil
 	for i := range readings {
 		m.items = append(m.items, item{title: readings[i].Title, tag: readings[i].Level, page: &readings[i]})
@@ -146,7 +171,7 @@ func (m Model) OpenText(title string, lines []string, vocab []model.Card) Model 
 		known[w] = true
 	}
 	m.title, m.lines, m.words, m.english, m.showEnglish = title, nil, nil, nil, false
-	m.audio, m.clips = "", nil
+	m.audio, m.clips, m.chapterOpen = "", nil, false
 	for _, l := range lines {
 		toks := segment.Split(l, known)
 		for i, t := range toks {
@@ -237,9 +262,15 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		}
 		return m, nil
 	}
+	if told, ok := msg.(toldMsg); ok {
+		return m.onTold(told), nil
+	}
 	k, ok := msg.(tea.KeyMsg)
 	if !ok {
 		return m, nil
+	}
+	if m.story && !m.open {
+		return m.updateShelf(k)
 	}
 	if !m.open {
 		switch {
@@ -247,6 +278,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.listCursor--
 		case key.Matches(k, m.gkeys.Down) && m.listCursor < len(m.items)-1:
 			m.listCursor++
+		case k.String() == "s":
+			m = m.openShelf()
 		case key.Matches(k, m.gkeys.Enter) && len(m.items) > 0:
 			if it := m.items[m.listCursor]; it.page != nil {
 				m = m.openReading(*it.page)

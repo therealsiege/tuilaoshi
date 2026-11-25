@@ -17,9 +17,14 @@ func (m Model) View() string {
 		b.WriteString(ui.ErrorStyle.Render(fmt.Sprintf("  Could not save progress: %v", m.saveErr)))
 		b.WriteString("\n\n")
 	}
-	if m.open {
+	switch {
+	case m.open && m.chapterOpen:
+		b.WriteString(m.TextView("  ←→ word · ↑↓ line · enter didn't know it (review tomorrow) · ctrl+r hear it · esc chapters"))
+	case m.open:
 		b.WriteString(m.TextView("  ←→ word · ↑↓ line · enter didn't know it (review tomorrow) · esc readings"))
-	} else {
+	case m.story:
+		b.WriteString(m.viewShelf())
+	default:
 		b.WriteString(m.viewList())
 	}
 	return b.String()
@@ -27,6 +32,8 @@ func (m Model) View() string {
 
 func (m Model) viewList() string {
 	var b strings.Builder
+	b.WriteString(ui.UnselectedStyle.Render("  " + m.storyRow()))
+	b.WriteString("\n\n")
 	if len(m.items) == 0 {
 		b.WriteString(ui.MutedStyle.Render("  No readings or episodes yet."))
 		b.WriteString("\n")
@@ -43,7 +50,7 @@ func (m Model) viewList() string {
 	b.WriteString("\n")
 	b.WriteString(ui.MutedStyle.Render("  Add your own episodes: .srt or .txt subtitle files in wiki/" + wiki.PrivateEpisodesDir + " (kept private)."))
 	b.WriteString("\n\n")
-	b.WriteString(ui.HelpStyle.Render("  ↑↓ choose · enter read · esc back"))
+	b.WriteString(ui.HelpStyle.Render("  ↑↓ choose · enter read · s storyteller · esc back"))
 	return b.String()
 }
 
