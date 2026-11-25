@@ -1,0 +1,27 @@
+# The 24 solar terms (二十四节气), each starting when the sun reaches its
+# longitude (degrees). `weather` sets the trail: cold terms eat more 斋饭,
+# hot ones drink more water, rainy ones refill the gourds. Original text.
+- {name: 立春, pinyin: lìchūn, english: Start of Spring, longitude: 315, text: 春天开始了，天气慢慢暖和起来。, text_english: "Spring begins, and the weather slowly warms."}
+- {name: 雨水, pinyin: yǔshuǐ, english: Rain Water, longitude: 330, weather: rain, text: 雪少了，雨多了。, text_english: "Less snow now, more rain."}
+- {name: 惊蛰, pinyin: jīngzhé, english: Awakening of Insects, longitude: 345, text: 春雷响了，地下的小虫都醒了。, text_english: "Spring thunder rolls, and the insects underground wake up."}
+- {name: 春分, pinyin: chūnfēn, english: Spring Equinox, longitude: 0, text: 这一天白天和黑夜一样长。, text_english: "Today day and night are the same length."}
+- {name: 清明, pinyin: qīngmíng, english: Clear and Bright, longitude: 15, text: 天气清新明朗，人们去扫墓、踏青。, text_english: "The air is fresh and bright; people tend graves and walk in the spring countryside."}
+- {name: 谷雨, pinyin: gǔyǔ, english: Grain Rain, longitude: 30, weather: rain, text: 雨水多了，田里的庄稼长得很快。, text_english: "The rains come, and the crops in the fields grow fast."}
+- {name: 立夏, pinyin: lìxià, english: Start of Summer, longitude: 45, text: 夏天开始了，天越来越热。, text_english: "Summer begins, and the days grow hotter."}
+- {name: 小满, pinyin: xiǎomǎn, english: Grain Buds, longitude: 60, text: 麦子开始饱满，但还没有熟。, text_english: "The wheat is filling out but not yet ripe."}
+- {name: 芒种, pinyin: mángzhòng, english: Grain in Ear, longitude: 75, weather: rain, text: 农民忙着收麦子、种稻子，雨也多。, text_english: "Farmers are busy harvesting wheat and planting rice, and it rains often."}
+- {name: 夏至, pinyin: xiàzhì, english: Summer Solstice, longitude: 90, weather: heat, text: 这一天白天最长，黑夜最短。, text_english: "Today is the longest day and the shortest night."}
+- {name: 小暑, pinyin: xiǎoshǔ, english: Lesser Heat, longitude: 105, weather: heat, text: 天气很热了，路上要多喝水。, text_english: "It's hot now; drink plenty on the road."}
+- {name: 大暑, pinyin: dàshǔ, english: Greater Heat, longitude: 120, weather: heat, text: 一年中最热的时候到了。, text_english: "The hottest time of the year has come."}
+- {name: 立秋, pinyin: lìqiū, english: Start of Autumn, longitude: 135, text: 秋天开始了，早晚凉快一些。, text_english: "Autumn begins; mornings and evenings are a little cooler."}
+- {name: 处暑, pinyin: chǔshǔ, english: End of Heat, longitude: 150, text: 热天快要过去了。, text_english: "The hot days are nearly over."}
+- {name: 白露, pinyin: báilù, english: White Dew, longitude: 165, text: 早上草叶上有白白的露水。, text_english: "In the mornings there is white dew on the grass."}
+- {name: 秋分, pinyin: qiūfēn, english: Autumn Equinox, longitude: 180, text: 白天和黑夜又一样长了。, text_english: "Day and night are the same length again."}
+- {name: 寒露, pinyin: hánlù, english: Cold Dew, longitude: 195, text: 露水更凉了，天气渐渐冷了。, text_english: "The dew is colder, and the weather is gradually turning cold."}
+- {name: 霜降, pinyin: shuāngjiàng, english: Frost's Descent, longitude: 210, text: 早上开始结霜了。, text_english: "Frost begins to form in the mornings."}
+- {name: 立冬, pinyin: lìdōng, english: Start of Winter, longitude: 225, weather: cold, text: 冬天开始了，要多穿衣服。, text_english: "Winter begins; wear more layers."}
+- {name: 小雪, pinyin: xiǎoxuě, english: Lesser Snow, longitude: 240, weather: cold, text: 天气渐冷，开始下雪了。, text_english: "It's getting colder, and the first snow falls."}
+- {name: 大雪, pinyin: dàxuě, english: Greater Snow, longitude: 255, weather: cold, text: 雪越下越大，路也难走了。, text_english: "The snow grows heavier, and the roads get hard going."}
+- {name: 冬至, pinyin: dōngzhì, english: Winter Solstice, longitude: 270, weather: cold, text: 这一天白天最短，北方人吃饺子。, text_english: "Today is the shortest day; in the north people eat dumplings."}
+- {name: 小寒, pinyin: xiǎohán, english: Lesser Cold, longitude: 285, weather: cold, text: 天气很冷了，路上要多吃点儿东西。, text_english: "It's very cold now; eat a little more on the road."}
+- {name: 大寒, pinyin: dàhán, english: Greater Cold, longitude: 300, weather: cold, text: 一年中最冷的时候到了。, text_english: "The coldest time of the year has come."}

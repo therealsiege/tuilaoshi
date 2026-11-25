@@ -31,8 +31,9 @@ func roadWith(t *testing.T, cleared, learned int) Model {
 			t.Fatal(err)
 		}
 	}
-	encounterRoll = func() int { return 99 } // no wild encounters unless a test asks
-	eventRoll = func() int { return 99 }     // nor trail events
+	encounterRoll = func() int { return 99 }                            // no wild encounters unless a test asks
+	eventRoll = func() int { return 99 }                                // nor trail events
+	termToday = func() journey.SolarTerm { return journey.SolarTerm{} } // nor the season's weather
 	return New(store).SetSize(120, 45).Refresh()
 }
 

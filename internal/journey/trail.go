@@ -33,6 +33,8 @@ type Trail struct {
 	Crossed []string       `yaml:"crossed,omitempty"` // regions whose obstacle has been crossed
 
 	SandalDays int `yaml:"sandal_days,omitempty"` // days walked on the party's sandals (see supplies.go)
+
+	Weather string `yaml:"-"` // the solar term's weather (see solarterms.go), set by the caller each day
 }
 
 // Supplies a journey starts with, and the most water the party carries.
@@ -105,16 +107,25 @@ func (t *Trail) PassDay(members []string, terrain string, rest bool) {
 	t.Notes = nil
 	n := len(members)
 	eat := foodPerMember[t.Rations] * n
+	if t.Weather == "cold" {
+		eat += coldFood * n
+	}
 	hungry := t.Food < eat
 	t.Food = max(t.Food-eat, 0)
 	drink := n
 	if terrain == "desert" || terrain == "fire" {
 		drink *= 2
 	}
+	if t.Weather == "heat" {
+		drink += heatWater * n
+	}
 	thirsty := t.Water < drink
 	t.Water = max(t.Water-drink, 0)
 	if terrain == "river" {
 		t.Water = MaxWater // rivers refill the gourds
+	}
+	if t.Weather == "rain" {
+		t.Water = min(t.Water+rainWater, MaxWater)
 	}
 	health, morale := rationHealth[t.Rations]+paceHealth[t.Pace], paceMorale[t.Pace]
 	if rest {

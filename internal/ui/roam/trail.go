@@ -3,6 +3,7 @@ package roam
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -30,8 +31,21 @@ func (m *Model) saveTrail() {
 	}
 }
 
+// weatherShort says what a term's weather does on the road.
+var weatherShort = map[string]string{"cold": "more 斋饭 a day", "heat": "more water a day", "rain": "rain fills the gourds"}
+
+// termToday is today's solar term; tests fix it.
+var termToday = func() journey.SolarTerm {
+	t, _ := journey.TermOn(time.Now())
+	return t
+}
+
+// termWeather is today's solar term weather: cold, heat, rain or "".
+func termWeather() string { return termToday().Weather }
+
 // walked counts a step on the trail, passing a day when the walking is done.
 func (m Model) walked() Model {
+	m.trail.Weather = termWeather()
 	if m.region.At(m.pos) == journey.TileTown {
 		m.trail.Water = journey.MaxWater // wells in every town
 	}
@@ -73,6 +87,7 @@ func (m Model) trailKey(k tea.KeyMsg) (Model, bool) {
 		m.trail.Rations = journey.Next(journey.Rations, m.trail.Rations)
 		m.note = "Rations: " + m.trail.Rations + rationNote[m.trail.Rations]
 	case "r", "w": // r, as at the inn; w kept for habit
+		m.trail.Weather = termWeather()
 		m.trail.PassDay(m.members, m.region.Region.Terrain, true)
 		m.note = strings.Join(append([]string{fmt.Sprintf("Day %d. The party rests.", m.trail.Day)}, m.trail.Notes...), " ")
 	default:
@@ -101,6 +116,9 @@ func (m Model) trailView() string {
 	}
 	fmt.Fprintf(&b, "%s · %s · %s\n", ui.SubtitleStyle.Render(fmt.Sprintf("Day %d", t.Day)), food, water)
 	b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("%s pace (p) · %s rations (f)", t.Pace, t.Rations)) + "\n")
+	if term := termToday(); term.Name != "" && term.Weather != "" {
+		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("节气 %s %s: %s", term.Name, term.English, weatherShort[term.Weather])) + "\n")
+	}
 	if t.SandalsWorn() {
 		b.WriteString(ui.ErrorStyle.Render("草鞋 worn out: buy new in a town") + "\n")
 	} else {

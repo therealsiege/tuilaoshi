@@ -78,6 +78,9 @@ func (m Model) renderCompact() string {
 			week = append(week, fmt.Sprintf("%s in %d days", o.Name, o.DaysUntil(m.now())))
 		}
 	}
+	if t, _ := journey.TermOn(m.now()); t.Name != "" {
+		week = append(week, "节气 "+t.Name)
+	}
 	if m.missed >= journey.InnerDemonWakes {
 		week = append(week, ui.ErrorStyle.Render("心魔 wakes (m)"))
 	} else {
@@ -162,7 +165,31 @@ func (m Model) renderBounties() string {
 	if m.shields > 0 {
 		note += fmt.Sprintf(" · %d %s held", m.shields, plural(m.shields, "shield", "shields"))
 	}
-	return b.String() + "            " + ui.MutedStyle.Render(note) + m.renderFestival() + m.renderInnerDemon()
+	return b.String() + "            " + ui.MutedStyle.Render(note) + m.renderFestival() + m.renderTerm() + m.renderInnerDemon()
+}
+
+// weatherNote says what a term's weather does on the road.
+var weatherNote = map[string]string{
+	"cold": "cold: the party eats more",
+	"heat": "hot: the party drinks more",
+	"rain": "rain fills the gourds",
+}
+
+// renderTerm is the solar term (节气) in effect, and its weather on the road.
+func (m Model) renderTerm() string {
+	t, starts := journey.TermOn(m.now())
+	if t.Name == "" {
+		return ""
+	}
+	name := t.Name
+	if starts {
+		name = "今日" + t.Name
+	}
+	line := "\n  " + ui.SubtitleStyle.Render("节气") + "      " + ui.ChineseStyle.Render(name) + " " + t.English + " " + ui.MutedStyle.Render(t.Text)
+	if w := weatherNote[t.Weather]; w != "" {
+		line += ui.MutedStyle.Render(" · " + w)
+	}
+	return line
 }
 
 // renderFestival names the festival on today, or counts down to the next.
