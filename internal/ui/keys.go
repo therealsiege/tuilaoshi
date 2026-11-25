@@ -276,6 +276,8 @@ func HelpText(v View) string {
 		return "Road Keys\n\n" +
 			"  arrows/hjkl  Walk\n" +
 			"  enter        Enter a town / face a tribulation\n" +
+			"  p            Pace · f rations\n" +
+			"  r            Rest a day\n" +
 			"  c / esc      Camp: study, party, shrine\n\n" +
 			"  @ you   · road (safe)   , wild (clans)\n" +
 			"  H town  ! tribulation   & demon's lair\n" +

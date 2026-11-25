@@ -53,7 +53,7 @@ func (m Model) View() string {
 	if m.note != "" {
 		b.WriteString(ui.WarningStyle.Render("  "+m.note) + "\n")
 	}
-	b.WriteString(ui.HelpStyle.Render("  arrows walk · enter act · p pace · f rations · w rest a day · c camp · ? help"))
+	b.WriteString(ui.HelpStyle.Render("  arrows walk · enter act · p pace · f rations · r rest a day · c camp · ? help"))
 	return b.String()
 }
 

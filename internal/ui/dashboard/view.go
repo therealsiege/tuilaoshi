@@ -168,7 +168,7 @@ func (m Model) renderJourney() string {
 	if s := st.Stage; s != nil {
 		next := fmt.Sprintf("\n  %s %s %s", ui.MutedStyle.Render("Next:"), s.Opponent.Name, s.Opponent.English)
 		if s.Status == journey.StageOpen {
-			next += ui.WarningStyle.Render(" (ready, f)")
+			next += ui.WarningStyle.Render(" (ready: walk to its red ! on the road)")
 		} else {
 			next += ui.MutedStyle.Render(" (" + journey.NeedText(*s, st.Counts) + ")")
 		}

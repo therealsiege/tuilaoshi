@@ -72,7 +72,7 @@ func (m Model) trailKey(k tea.KeyMsg) (Model, bool) {
 	case "f":
 		m.trail.Rations = journey.Next(journey.Rations, m.trail.Rations)
 		m.note = "Rations: " + m.trail.Rations + rationNote[m.trail.Rations]
-	case "w":
+	case "r", "w": // r, as at the inn; w kept for habit
 		m.trail.PassDay(m.members, m.region.Region.Terrain, true)
 		m.note = strings.Join(append([]string{fmt.Sprintf("Day %d. The party rests.", m.trail.Day)}, m.trail.Notes...), " ")
 	default:

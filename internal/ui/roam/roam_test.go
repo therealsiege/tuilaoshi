@@ -217,7 +217,7 @@ func TestTheTrailRunsOnDaysAndSupplies(t *testing.T) {
 	if m.trail.Pace != "brisk" || m.trail.Rations != "meager" {
 		t.Fatalf("pace %s rations %s", m.trail.Pace, m.trail.Rations)
 	}
-	m, _ = m.Update(press("w")) // rest a day
+	m, _ = m.Update(press("r")) // rest a day
 	saved, _, err := journey.LoadTrail(m.store, m.cleared)
 	if err != nil || saved.Day != 2 || saved.Pace != "brisk" || saved.Food != journey.StartFood-2 {
 		t.Fatalf("after resting: %+v %v", saved, err)
