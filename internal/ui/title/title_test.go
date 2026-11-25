@@ -15,6 +15,7 @@ var day = time.Date(2026, 11, 22, 9, 0, 0, 0, time.Local)
 
 func titleFor(t *testing.T, store *wiki.Store) Model {
 	t.Helper()
+	t.Setenv("ANTHROPIC_API_KEY", "") // snapshots show the offline notice wherever they run
 	m := New(store, nil)
 	m.now = func() time.Time { return day }
 	return m.SetSize(100, 40).Refresh()

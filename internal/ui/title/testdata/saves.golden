@@ -6,6 +6,9 @@
       西 行 · 推 老 师
       TuīLǎoShī · a Mandarin journey to the West
 
+      No Claude key: reviews, flashcards, battles and the road work offline;
+      chat, talks, duels, writing and the diary need ANTHROPIC_API_KEY in ~/.config/tuilaoshi/env.
+
       ▸ Continue        newer · 0/81 tribulations · 0 铜钱 · played 1 h ago
         New journey     your words and reviews come with you
         Load journey    2 saved

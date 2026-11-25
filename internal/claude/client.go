@@ -60,7 +60,11 @@ type ChatMessage struct {
 }
 
 // EvaluateDrill sends a card + user answer to Claude for evaluation.
+// With no API key the answer is checked locally (see LocalGrade).
 func (c *Client) EvaluateDrill(ctx context.Context, card model.Card, userAnswer string, mode model.DrillMode) (model.DrillResult, error) {
+	if !c.Ready() {
+		return LocalGrade(card, userAnswer, mode), nil
+	}
 	var modeDesc string
 	switch mode {
 	case model.ModeRecognition:

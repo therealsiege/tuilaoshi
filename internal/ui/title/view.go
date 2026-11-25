@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/therealsiege/tuilaoshi/internal/claude"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -27,6 +28,10 @@ func (m Model) View() string {
 	b.WriteString(ui.TitleStyle.MarginBottom(0).Render("      西 行 · 推 老 师") + "\n")
 	b.WriteString(ui.MutedStyle.Render("      TuīLǎoShī · a Mandarin journey to the West") + "\n\n")
 	b.WriteString(ui.LoadError(m.loadErr))
+	if !claude.KeyPresent() {
+		b.WriteString(ui.MutedStyle.Render("      No Claude key: reviews, flashcards, battles and the road work offline;") + "\n")
+		b.WriteString(ui.MutedStyle.Render("      chat, talks, duels, writing and the diary need ANTHROPIC_API_KEY in ~/.config/tuilaoshi/env.") + "\n\n")
+	}
 	switch m.screen {
 	case screenName:
 		b.WriteString(ui.SubtitleStyle.Render("      Name your journey") + "\n\n")

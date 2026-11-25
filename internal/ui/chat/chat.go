@@ -124,7 +124,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				return m, nil
 			}
 			text := strings.TrimSpace(m.input.Value())
-			if text == "" {
+			if text == "" || !m.claude.Ready() {
 				return m, nil
 			}
 			m.messages = append(m.messages, Message{
@@ -175,6 +175,9 @@ func (m Model) View() string {
 	title := ui.TitleStyle.Render("Chat 对话")
 	b.WriteString(title)
 	b.WriteString("\n\n")
+	if !m.claude.Ready() {
+		b.WriteString(ui.WarningStyle.Render("  Chat with the tutor "+claude.NeedsKey+". Reviews and flashcards still work, checked without Claude.") + "\n\n")
+	}
 	b.WriteString(ui.AudioError(m.ttsErr))
 
 	// Messages viewport

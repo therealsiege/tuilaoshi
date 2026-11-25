@@ -88,6 +88,7 @@ type Model struct {
 func New(wikiDir string) (Model, error) {
 	store := wiki.NewStore(wikiDir)
 	claudeClient := claude.New()
+	ai := claudeClient.IfReady() // nil without a key: those screens say what they need
 	ttsClient := audio.New()
 
 	pages, err := store.ListPages()
@@ -109,9 +110,9 @@ func New(wikiDir string) (Model, error) {
 		title:       title.New(store, dict).Refresh(),
 		roam:        roam.New(store),
 		theatre:     theatre.New(store, dict),
-		forge:       forgeview.New(store, claudeClient),
+		forge:       forgeview.New(store, ai),
 		festival:    festival.New(store),
-		diary:       diary.New(store, claudeClient, dict),
+		diary:       diary.New(store, ai, dict),
 		settings:    settings.New(store),
 		dashboard:   dashboard.New(store, ttsClient),
 		drill:       drill.New(store, claudeClient, ttsClient, dict),
@@ -123,8 +124,8 @@ func New(wikiDir string) (Model, error) {
 		radicals:    radicals.New(),
 		shrine:      shrine.New(store),
 		cards:       collection.New(store),
-		party:       party.New(store, claudeClient, dict),
-		world:       world.New(store, claudeClient, dict),
+		party:       party.New(store, ai, dict),
+		world:       world.New(store, ai, dict),
 		battle:      rpgview.New(store, ttsClient, dict),
 		reader:      reader.New(store),
 		assess:      assessment.New(store),
