@@ -13,6 +13,8 @@ import (
 func (m Model) View() string {
 	var b strings.Builder
 	switch m.screen {
+	case screenHaggle:
+		b.WriteString(m.haggleView())
 	case screenGate:
 		b.WriteString(m.gateView())
 	case screenPassport:
@@ -73,7 +75,7 @@ func (m Model) townView() string {
 		fmt.Fprintf(&b, "  %s%s · %s  %s\n", marker, ui.ChineseStyle.Render(q.Title), q.Giver, status)
 	}
 	b.WriteString("\n  " + ui.MutedStyle.Render(fmt.Sprintf("客栈 The inn: a night's rest heals you and the party for %d 铜钱 (r)", t.Price(journey.InnPrice))) + "\n")
-	b.WriteString("  " + ui.MutedStyle.Render(fmt.Sprintf("杂货铺 The store: %d 斋饭 for %d 铜钱 (b), or %d for a material (t); 草鞋 at %d a pair (x) · the well fills your water",
+	b.WriteString("  " + ui.MutedStyle.Render(fmt.Sprintf("杂货铺 The store: %d 斋饭 for %d 铜钱 (b), or %d for a material (t); 草鞋 at %d a pair (x) · haggle for a sack (h) · the well fills your water",
 		journey.FoodBundle, t.Price(journey.FoodPrice), journey.Barter, t.Price(journey.SandalPrice))) + "\n")
 	b.WriteString("  " + ui.MutedStyle.Render(fmt.Sprintf("寺庙 The temple: an offering of %d 铜钱 lifts the party's spirits, once a day (o)", t.Price(journey.OfferingPrice))) + "\n")
 	b.WriteString("  " + ui.MutedStyle.Render(fmt.Sprintf("化缘 Ask the townsfolk for alms, once a day: +%d 斋饭 if asked well (a)", journey.AlmsFood)) + "\n")
@@ -87,7 +89,7 @@ func (m Model) townView() string {
 	} else {
 		b.WriteString("  " + ui.MutedStyle.Render(fmt.Sprintf("通关文牒 Your travel rescript: %d of %d seals (p)", len(m.stamps), len(journey.Gates()))) + "\n")
 	}
-	help := "  ↑↓ choose · enter read · r rest · b buy · x sandals · o offering · t trade · a alms · l riddle · p papers · g shrine · esc back"
+	help := "  ↑↓ choose · enter read · r rest · b buy · x sandals · o offering · t trade · a alms · h haggle · l riddle · p papers · g shrine · esc"
 	if t.Stone != nil {
 		if slices.Contains(m.stones, t.ID) {
 			b.WriteString("\n  " + ui.MutedStyle.Render("石碑 The roadside stone stands open: ") + ui.ChineseStyle.Render(t.Stone.Idiom) + "\n")

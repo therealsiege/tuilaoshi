@@ -313,6 +313,7 @@ func HelpText(v View) string {
 			"  o      Make a temple offering, once a day\n" +
 			"  l      Guess a lantern riddle (灯谜)\n" +
 			"  p      Show your travel papers (通关文牒)\n" +
+			"  h      Haggle with the merchant (讨价还价)\n" +
 			"  t      Trade a material for 斋饭\n" +
 			"  a      Ask for alms (化缘), once a day\n" +
 			"  ctrl+r Hear the Chinese on screen\n" +

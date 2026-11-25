@@ -31,6 +31,7 @@ const (
 	screenRiddle   // a lantern riddle (see riddle.go)
 	screenGate     // a kingdom's gate questions (see passport.go)
 	screenPassport // the stamps collected
+	screenHaggle   // bargaining with the merchant (see haggle.go)
 )
 
 // Model is the world map view model.
@@ -70,6 +71,9 @@ type Model struct {
 	gateQ  int          // its question being asked
 	misses int          // wrong answers to it
 
+	talker Talker    // the merchant's voice; nil without Claude
+	haggle *haggling // the haggle open
+
 	note          string
 	width, height int
 	loadErr       error
@@ -83,14 +87,14 @@ func New(store *wiki.Store, client *claude.Client, dict *input.Dict) Model {
 	in.SetCharLimit(200)
 	m := Model{store: store, gkeys: ui.DefaultGlobalKeys(), towns: journey.Towns(), now: time.Now, input: in}
 	if client != nil {
-		m.grader = client.GradeWriting
+		m.grader, m.talker = client.GradeWriting, client.ChatAs
 	}
 	return m
 }
 
 // Typing reports whether a writing request or a stone has the keyboard.
 func (m Model) Typing() bool {
-	return m.screen == screenStone || m.screen == screenRiddle || m.screen == screenGate || (m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing())
+	return m.screen == screenStone || m.screen == screenRiddle || m.screen == screenGate || (m.screen == screenHaggle && !m.haggle.bought) || (m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing())
 }
 
 func (m Model) Init() tea.Cmd { return nil }
@@ -127,12 +131,21 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	if g, ok := msg.(gradeMsg); ok {
 		return m.onGrade(g), nil
 	}
+	if h, ok := msg.(haggleMsg); ok {
+		return m.onHaggle(h), nil
+	}
 	k, ok := msg.(tea.KeyMsg)
 	if !ok {
 		return m, nil
 	}
 	back := key.Matches(k, m.gkeys.Back)
 	switch m.screen {
+	case screenHaggle:
+		if back && !m.input.Composing() {
+			m.screen, m.note = screenTown, ""
+			return m.Refresh(), nil
+		}
+		return m.updateHaggle(k)
 	case screenPassport:
 		if back {
 			m.screen = screenTown
@@ -208,6 +221,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m.openRiddle()
 		case k.String() == "p":
 			return m.openPassport()
+		case k.String() == "h":
+			return m.openHaggle()
 		}
 		return m, nil
 	}
