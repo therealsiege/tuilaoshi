@@ -73,7 +73,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, nil
 		}
 		switch {
-		case msg.String() == "n" && m.letter != nil:
+		case key.Matches(msg, m.keys.Letter) && m.letter != nil:
 			m.reading = true
 			if !m.letter.Read {
 				m.letter.Read = true
