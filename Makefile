@@ -1,4 +1,4 @@
-.PHONY: build run test fmt check lint golden recordings launcher demonart freqlist clean
+.PHONY: build run test fmt check lint golden recordings launcher demonart freqlist proofsheet clean
 
 GOLANGCI_LINT = go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 
@@ -47,6 +47,11 @@ launcher:
 # make freqlist IN="$$HOME/Desktop/list.xlsx".
 freqlist:
 	go run ./cmd/freqlist -in "$(IN)" -wiki wiki
+
+# Every Chinese line of the content in one sheet for a native speaker, e.g.
+# make proofsheet OUT="$$HOME/Desktop/proofsheet.md".
+proofsheet:
+	go run ./cmd/proofsheet -out "$(OUT)"
 
 demonart:
 	zsh -c 'source ~/.config/tuilaoshi/env 2>/dev/null; go run ./cmd/demonart $(ARGS)'
