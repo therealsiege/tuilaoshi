@@ -167,6 +167,11 @@ func (m Model) Hear() string {
 	switch m.screen {
 	case screenRiddle:
 		return m.riddle.Riddle
+	case screenGate:
+		if m.gateQ < len(m.gate.Questions) {
+			return m.gate.Questions[m.gateQ].Ask
+		}
+		return m.gate.Greeting
 	case screenQuest:
 		return t.Quests[m.quest].Text
 	case screenAlms:

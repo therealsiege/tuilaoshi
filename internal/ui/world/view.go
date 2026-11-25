@@ -13,6 +13,10 @@ import (
 func (m Model) View() string {
 	var b strings.Builder
 	switch m.screen {
+	case screenGate:
+		b.WriteString(m.gateView())
+	case screenPassport:
+		b.WriteString(m.passportView())
 	case screenRiddle:
 		b.WriteString(m.riddleView())
 	case screenAlms:
@@ -78,7 +82,12 @@ func (m Model) townView() string {
 		lantern = "元宵灯会 The Lantern Festival fair: three riddles today, double pay (l)"
 	}
 	b.WriteString("  " + ui.MutedStyle.Render(lantern) + "\n")
-	help := "  ↑↓ choose · enter read · r rest · b buy · x sandals · o offering · t trade · a alms · l riddle · g shrine · esc back"
+	if _, gate := journey.GateFor(t.ID); gate && !slices.Contains(m.stamps, t.ID) {
+		b.WriteString("  " + ui.WarningStyle.Render("通关文牒 The gate officer asks to see your travel papers (p)") + "\n")
+	} else {
+		b.WriteString("  " + ui.MutedStyle.Render(fmt.Sprintf("通关文牒 Your travel rescript: %d of %d seals (p)", len(m.stamps), len(journey.Gates()))) + "\n")
+	}
+	help := "  ↑↓ choose · enter read · r rest · b buy · x sandals · o offering · t trade · a alms · l riddle · p papers · g shrine · esc back"
 	if t.Stone != nil {
 		if slices.Contains(m.stones, t.ID) {
 			b.WriteString("\n  " + ui.MutedStyle.Render("石碑 The roadside stone stands open: ") + ui.ChineseStyle.Render(t.Stone.Idiom) + "\n")

@@ -45,6 +45,7 @@ type journeyRecord struct {
 	Diary        []DiaryEntry      `yaml:"diary,omitempty"`   // the travel diary, oldest first
 	Offered      map[string]string `yaml:"offered,omitempty"` // town id -> the day an offering was last made there
 	Riddles      map[string]int    `yaml:"riddles,omitempty"` // town@day -> lantern riddles finished there today
+	Stamps       []string          `yaml:"stamps,omitempty"`  // kingdoms (by town) that stamped the travel rescript
 }
 
 // journeyDoc names the save of the journey being played (see progress.go).

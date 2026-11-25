@@ -26,9 +26,11 @@ type screen int
 const (
 	screenTown screen = iota
 	screenQuest
-	screenStone  // a town's secret stone (see stone.go)
-	screenAlms   // asking a townsperson for alms (see alms.go)
-	screenRiddle // a lantern riddle (see riddle.go)
+	screenStone    // a town's secret stone (see stone.go)
+	screenAlms     // asking a townsperson for alms (see alms.go)
+	screenRiddle   // a lantern riddle (see riddle.go)
+	screenGate     // a kingdom's gate questions (see passport.go)
+	screenPassport // the stamps collected
 )
 
 // Model is the world map view model.
@@ -63,6 +65,11 @@ type Model struct {
 	riddle journey.Riddle // the lantern riddle open
 	tries  int            // wrong guesses at it
 
+	stamps []string     // kingdoms that stamped the rescript, by town
+	gate   journey.Gate // the gate being passed
+	gateQ  int          // its question being asked
+	misses int          // wrong answers to it
+
 	note          string
 	width, height int
 	loadErr       error
@@ -83,7 +90,7 @@ func New(store *wiki.Store, client *claude.Client, dict *input.Dict) Model {
 
 // Typing reports whether a writing request or a stone has the keyboard.
 func (m Model) Typing() bool {
-	return m.screen == screenStone || m.screen == screenRiddle || (m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing())
+	return m.screen == screenStone || m.screen == screenRiddle || m.screen == screenGate || (m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing())
 }
 
 func (m Model) Init() tea.Cmd { return nil }
@@ -109,7 +116,9 @@ func (m Model) Refresh() Model {
 	states, questErr := m.store.Quests(m.now())
 	stones, stoneErr := m.store.StonesOpened()
 	hunts, huntErr := m.store.Hunts()
-	m.loadErr = errors.Join(questErr, stoneErr, huntErr)
+	stamps, stampErr := m.store.Stamps()
+	m.loadErr = errors.Join(questErr, stoneErr, huntErr, stampErr)
+	m.stamps = stamps
 	m.hunts, m.stones, m.states = hunts, stones, states
 	return m
 }
@@ -124,6 +133,17 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	}
 	back := key.Matches(k, m.gkeys.Back)
 	switch m.screen {
+	case screenPassport:
+		if back {
+			m.screen = screenTown
+		}
+		return m, nil
+	case screenGate:
+		if back && !m.input.Composing() {
+			m.screen, m.note = screenTown, ""
+			return m.Refresh(), nil
+		}
+		return m.updateGate(k)
 	case screenRiddle:
 		if back && !m.input.Composing() {
 			m.screen, m.note = screenTown, ""
@@ -186,6 +206,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m.offer(), nil
 		case k.String() == "l":
 			return m.openRiddle()
+		case k.String() == "p":
+			return m.openPassport()
 		}
 		return m, nil
 	}

@@ -1,0 +1,105 @@
+# The travel rescript (通关文牒): at each kingdom's gate an officer asks the
+# pilgrim four questions in official Chinese, of four kinds (name: who you
+# are; from: where you come from; to: where you are going; purpose: why).
+# Typed answers are checked for the facts (see passport.go). The phrasing
+# differs by kingdom. Original text, written for TuiLaoShi.
+- town: changan
+  officer: 礼部官员
+  officer_english: an official of the Ministry of Rites
+  greeting: 陛下要给你写通关文牒，请回答几个问题。
+  greeting_english: His Majesty will write you a travel rescript. Please answer a few questions.
+  questions:
+    - {kind: name, ask: "请问法师的法名是什么？", english: "May I ask the master's Buddhist name?"}
+    - {kind: from, ask: "法师是哪里人？", english: "Where is the master from?"}
+    - {kind: to, ask: "法师要去哪里？", english: "Where is the master going?"}
+    - {kind: purpose, ask: "去那里做什么？", english: "To do what there?"}
+- town: baoxiang
+  officer: 守门官
+  officer_english: the gate officer
+  greeting: 站住！进城的人都要看文牒。
+  greeting_english: Halt! Everyone entering the city must show papers.
+  questions:
+    - {kind: name, ask: "来者何人？报上名来。", english: "Who comes? State your name."}
+    - {kind: from, ask: "从哪里来？", english: "Where do you come from?"}
+    - {kind: to, ask: "往哪里去？", english: "Where are you headed?"}
+    - {kind: purpose, ask: "有何贵干？", english: "What is your business?"}
+- town: wuji
+  officer: 关令
+  officer_english: the pass commander
+  greeting: 本国最近不太平，过关的人都要好好盘问。
+  greeting_english: Our kingdom is troubled lately; everyone passing must be questioned closely.
+  questions:
+    - {kind: name, ask: "你叫什么名字？", english: "What is your name?"}
+    - {kind: from, ask: "你是从哪个国家来的？", english: "Which country do you come from?"}
+    - {kind: purpose, ask: "你们来本国做什么？", english: "What are you doing in our kingdom?"}
+    - {kind: to, ask: "离开本国以后，要去哪里？", english: "Where will you go after leaving our kingdom?"}
+- town: chechi
+  officer: 道士
+  officer_english: a Daoist priest who keeps the gate
+  greeting: 哼，又是和尚。本国敬道不敬佛，说清楚再进城。
+  greeting_english: Hmph, monks again. This kingdom honours the Dao, not the Buddha. Explain yourselves before you enter.
+  questions:
+    - {kind: name, ask: "你这个和尚叫什么？", english: "What are you called, monk?"}
+    - {kind: from, ask: "你从哪里来的？", english: "Where did you come from?"}
+    - {kind: purpose, ask: "和尚到这里来干什么？", english: "What is a monk doing here?"}
+    - {kind: to, ask: "你们最后要去哪儿？", english: "Where are you finally going?"}
+- town: xiliang
+  officer: 女官
+  officer_english: a woman official
+  greeting: 我们国里都是女子，很少见到男人。请问几句话。
+  greeting_english: Our kingdom is all women; we rarely see men. A few questions, please.
+  questions:
+    - {kind: from, ask: "你们是从哪里来的？", english: "Where have you come from?"}
+    - {kind: name, ask: "这位长老怎么称呼？", english: "How should we address this elder?"}
+    - {kind: to, ask: "长老要往哪里去？", english: "Where is the elder going?"}
+    - {kind: purpose, ask: "去那么远的地方做什么？", english: "Why go so far?"}
+- town: jisai
+  officer: 守城的士兵
+  officer_english: a soldier on the city wall
+  greeting: 我们的宝塔被偷了，现在外人进城都要检查。
+  greeting_english: Our pagoda's treasure was stolen; outsiders entering the city are all checked now.
+  questions:
+    - {kind: name, ask: "报上你的名字。", english: "State your name."}
+    - {kind: from, ask: "你家乡在哪儿？", english: "Where is your home?"}
+    - {kind: to, ask: "你要去什么地方？", english: "What place are you going to?"}
+    - {kind: purpose, ask: "去干什么？说清楚。", english: "To do what? Speak clearly."}
+- town: zhuzi
+  officer: 门官
+  officer_english: the gatekeeper
+  greeting: 国王病了很久，城里人人都着急。客人请先说明来意。
+  greeting_english: The king has been ill a long time and the whole city worries. Guests, first say why you've come.
+  questions:
+    - {kind: purpose, ask: "你们来做什么？", english: "What have you come for?"}
+    - {kind: name, ask: "师父叫什么名字？", english: "What is the master's name?"}
+    - {kind: from, ask: "是从东边来的吗？哪个国家？", english: "From the east? Which country?"}
+    - {kind: to, ask: "下一站去哪里？", english: "Where next?"}
+- town: biqiu
+  officer: 驿丞
+  officer_english: the post-station master
+  greeting: 请在驿馆休息。按规矩，我要问几句。
+  greeting_english: Please rest at the post station. By the rules, I must ask a few things.
+  questions:
+    - {kind: name, ask: "请问尊姓大名？", english: "May I ask your honoured name?"}
+    - {kind: from, ask: "从哪国来？", english: "From which kingdom?"}
+    - {kind: to, ask: "要到哪里去？", english: "Where are you going?"}
+    - {kind: purpose, ask: "所为何事？", english: "On what business?"}
+- town: miefa
+  officer: 守门的军官
+  officer_english: an army officer at the gate
+  greeting: 本国国王发誓要杀一万个和尚！你们……你们是什么人？
+  greeting_english: Our king has sworn to kill ten thousand monks! You... who are you?
+  questions:
+    - {kind: name, ask: "你叫什么？", english: "What are you called?"}
+    - {kind: from, ask: "你们是哪里来的客人？", english: "Where are you guests from?"}
+    - {kind: purpose, ask: "到底要做什么？", english: "What exactly do you intend to do?"}
+    - {kind: to, ask: "去哪儿？快说！", english: "Going where? Speak, quickly!"}
+- town: tianzhu
+  officer: 天竺国的官员
+  officer_english: an official of Tianzhu
+  greeting: 远方的客人，欢迎来到天竺。灵山已经不远了。
+  greeting_english: Guests from afar, welcome to Tianzhu. Vulture Peak is not far now.
+  questions:
+    - {kind: from, ask: "你们走了多远？从哪里出发的？", english: "How far have you come? Where did you set out from?"}
+    - {kind: name, ask: "长老的法名是？", english: "The elder's Buddhist name is?"}
+    - {kind: to, ask: "前面要去哪座山？", english: "Which mountain are you heading for?"}
+    - {kind: purpose, ask: "到了灵山，要做什么？", english: "What will you do at Vulture Peak?"}

@@ -40,6 +40,7 @@ type Content struct {
 	Alms         []Alms
 	Riddles      []Riddle
 	SolarTerms   []SolarTerm
+	Gates        []Gate
 	Plots        []Plot
 }
 
@@ -101,6 +102,7 @@ func LoadContent() (Content, error) {
 		{"alms", &c.Alms},
 		{"riddles", &c.Riddles},
 		{"solarterms", &c.SolarTerms},
+		{"passport", &c.Gates},
 		{"plots", &c.Plots},
 	}
 	for _, f := range files {

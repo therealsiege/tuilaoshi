@@ -336,3 +336,35 @@ func TestALanternRiddleADay(t *testing.T) {
 		t.Errorf("after %d misses the answer shows:\n%s", journey.RiddleTries, m.View())
 	}
 }
+
+func TestAKingdomsGateStampsTheRescript(t *testing.T) {
+	m := worldAt(t, 25).OpenTown("baoxiang")
+	if !strings.Contains(m.View(), "asks to see your travel papers") {
+		t.Fatalf("no gate in a kingdom:\n%s", m.View())
+	}
+	m, _ = m.Update(press("p"))
+	if m.screen != screenGate {
+		t.Fatalf("gate not open: %d", m.screen)
+	}
+	uitest.Golden(t, "gate", m.View())
+	m.input.SetValue("我是小明。")
+	m, _ = m.Update(enter)
+	m, _ = m.Update(enter) // the same wrong answer twice
+	if m.gateQ != 0 || !strings.Contains(m.View(), "e.g. ") {
+		t.Fatalf("two misses should show a sample:\n%s", m.View())
+	}
+	for range m.gate.Questions {
+		m.input.SetValue(m.gate.Questions[m.gateQ].Sample())
+		m, _ = m.Update(enter)
+	}
+	stamps, err := m.store.Stamps()
+	w, werr := m.store.Wallet()
+	if err != nil || werr != nil || len(stamps) != 1 || stamps[0] != "baoxiang" || w.Tongqian != journey.StampPay || !strings.Contains(m.View(), "宝象国 印") {
+		t.Fatalf("stamp %v %v, purse %+v\n%s", stamps, err, w, m.View())
+	}
+	m, _ = m.Update(enter)
+	m, _ = m.Update(press("p"))
+	if m.screen != screenPassport || !strings.Contains(m.View(), "1 of 10 seals") {
+		t.Errorf("passport:\n%s", m.View())
+	}
+}
