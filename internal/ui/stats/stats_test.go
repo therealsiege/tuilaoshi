@@ -68,3 +68,16 @@ func TestHardWordsAndTheWeekAhead(t *testing.T) {
 		}
 	}
 }
+
+func TestKnownByLevel(t *testing.T) {
+	m := Model{pages: []model.Page{
+		{Type: "character", Level: "HSK1", ReviewInterval: journey.LearnedInterval()},
+		{Type: "character", Level: "HSK1"},
+		{Type: "vocabulary", Level: "HSK4", ReviewInterval: 90},
+		{Type: "grammar", Level: "HSK4", ReviewInterval: 90},
+	}}
+	out := strings.Join(m.renderKnownByLevel(), "\n")
+	if !strings.Contains(out, "HSK1") || !strings.Contains(out, "1/2") || !strings.Contains(out, "1/1") || strings.Contains(out, "HSK2") {
+		t.Errorf("known by level:\n%s", out)
+	}
+}

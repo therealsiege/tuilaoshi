@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -105,4 +106,31 @@ func (m Model) renderHardWords() string {
 	}
 	lines = append(lines, "", ui.MutedStyle.Render("  Try them in the forge (z)."))
 	return lipgloss.JoinVertical(lipgloss.Left, lines...)
+}
+
+// hskLevels are the levels the known-words lines count.
+var hskLevels = []string{"HSK1", "HSK2", "HSK3", "HSK4", "HSK5", "HSK6"}
+
+// renderKnownByLevel counts, for each HSK level, the character and
+// vocabulary pages learned (interval at the journey's learned mark) of all
+// the pages at that level.
+func (m Model) renderKnownByLevel() []string {
+	known, all := map[string]int{}, map[string]int{}
+	for _, p := range m.pages {
+		if p.Type != "character" && p.Type != "vocabulary" {
+			continue
+		}
+		all[p.Level]++
+		if p.ReviewInterval >= journey.LearnedInterval() {
+			known[p.Level]++
+		}
+	}
+	lines := []string{"", ui.SubtitleStyle.Render("  Known by level")}
+	for _, l := range hskLevels {
+		if all[l] == 0 {
+			continue
+		}
+		lines = append(lines, fmt.Sprintf("  %-5s %s %d/%d", l, miniBar(known[l]*15/all[l], 15), known[l], all[l]))
+	}
+	return lines
 }

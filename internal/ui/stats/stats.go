@@ -294,6 +294,7 @@ func (m Model) renderMasteryLevels() string {
 
 	// "Mastered" means one thing across the app: the journey's rule.
 	lines = append(lines, "", fmt.Sprintf("  Characters mastered: %d", journey.CountMastered(m.pages)))
+	lines = append(lines, m.renderKnownByLevel()...)
 	return lipgloss.JoinVertical(lipgloss.Left, lines...)
 }
 
