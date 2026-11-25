@@ -9,6 +9,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -22,28 +23,25 @@ func main() {
 	dir := flag.String("content", "internal/journey/content", "the content folder")
 	out := flag.String("out", "", "where to write the sheet (default: standard output)")
 	flag.Parse()
-	w := io.Writer(os.Stdout)
-	if *out != "" {
-		f, err := os.Create(*out)
-		if err != nil {
-			fail(err)
-		}
-		defer f.Close() //nolint:errcheck // written and synced below
-		w = f
-	}
-	n, err := write(w, *dir)
+	log.SetFlags(0)
+	var b strings.Builder
+	n, err := write(&b, *dir)
 	if err != nil {
 		fail(err)
 	}
-	if *out != "" {
-		fmt.Fprintf(os.Stderr, "%d lines written to %s\n", n, *out)
+	if *out == "" {
+		if _, err := io.WriteString(os.Stdout, b.String()); err != nil {
+			fail(err)
+		}
+		return
 	}
+	if err := os.WriteFile(*out, []byte(b.String()), 0644); err != nil {
+		fail(err)
+	}
+	log.Printf("%d lines written to %s", n, *out)
 }
 
-func fail(err error) {
-	fmt.Fprintln(os.Stderr, "proofsheet:", err)
-	os.Exit(1)
-}
+func fail(err error) { log.Fatal("proofsheet: ", err) }
 
 // line is one piece of Chinese to check: where it is, and its English.
 type line struct {
@@ -52,7 +50,7 @@ type line struct {
 
 // write writes the sheet for every YAML file in dir and returns how many
 // lines it holds.
-func write(w io.Writer, dir string) (int, error) {
+func write(w *strings.Builder, dir string) (int, error) {
 	files, err := filepath.Glob(filepath.Join(dir, "*.yaml"))
 	if err != nil {
 		return 0, err
