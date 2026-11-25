@@ -21,6 +21,20 @@ func TestDashboardScreens(t *testing.T) {
 	uitest.Golden(t, "narrow", dashboardFor(t, 72).View())
 }
 
+func TestASmallWindowFoldsCamp(t *testing.T) {
+	m := dashboardFor(t, 80).SetSize(80, 24)
+	out := m.View()
+	uitest.Golden(t, "small", out)
+	if lines := strings.Count(out, "\n") + 1; lines > 24 {
+		t.Errorf("camp takes %d lines in a 24-line window", lines)
+	}
+	for _, want := range []string{"Start here", "w Travel diary", ", Settings", "bounties 0/3"} {
+		if !strings.Contains(uitest.Plain(out), want) {
+			t.Errorf("short camp lacks %q:\n%s", want, out)
+		}
+	}
+}
+
 func TestStartHereSuggestsOneNextStep(t *testing.T) {
 	m := dashboardFor(t, 110)
 	if v := uitest.Plain(m.renderStartHere()); !strings.Contains(v, "r  Review your 1 due word") {

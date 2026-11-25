@@ -43,13 +43,17 @@ func (m Model) View() string {
 	if m.event != nil {
 		grid = m.eventView()
 	}
-	side := m.sideView()
-	if m.width == 0 || m.width >= m.region.W+40 {
-		b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, grid, "   ", side))
+	if m.compact() {
+		b.WriteString(grid + "\n" + m.compactSide())
 	} else {
-		b.WriteString(grid + "\n" + side)
+		side := m.sideView()
+		if m.width == 0 || m.width >= m.region.W+40 {
+			b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, grid, "   ", side))
+		} else {
+			b.WriteString(grid + "\n" + side)
+		}
+		b.WriteString("\n" + m.roadStrip() + "\n")
 	}
-	b.WriteString("\n" + m.roadStrip() + "\n")
 	if m.note != "" {
 		b.WriteString(ui.WarningStyle.Render("  "+m.note) + "\n")
 	}
@@ -182,6 +186,49 @@ func (m Model) hpBar() string {
 }
 
 // sideView says what is ahead, the purse, and the legend.
+// compactRows is the terminal height below which the map drops its legend,
+// tutorial and road strip for a few summary lines, so the grid stays on
+// screen (the full sidebar needs about 40 rows when stacked under it).
+const compactRows = 40
+
+// compact reports whether the map should use its short layout: a short
+// window, or one too narrow for the sidebar beside the grid.
+func (m Model) compact() bool {
+	return m.height > 0 && (m.height < compactRows || (m.width < m.region.W+40 && m.height < 2*compactRows))
+}
+
+// compactSide is the sidebar in a few lines under the grid: the
+// tribulation, the trail, the party, the pilgrim's HP and purse, and for a
+// new journey how the road works.
+func (m Model) compactSide() string {
+	var lines []string
+	if s := m.stage; s != nil && s.Number <= m.region.Region.To && s.Number >= m.region.Region.From {
+		state := ui.WarningStyle.Render("ready: walk into the red !")
+		if s.Status != journey.StageOpen {
+			state = ui.WarningStyle.Render("sealed: " + journey.NeedText(*s, m.counts))
+		}
+		lines = append(lines, fmt.Sprintf("%s vs %s · %s", ui.SubtitleStyle.Render(fmt.Sprintf("Tribulation %d", s.Number)), s.Opponent.Name, state))
+	} else if s != nil && s.Number > m.region.Region.To {
+		lines = append(lines, ui.SuccessStyle.Render("This region is cleared: the road west (<) is open."))
+	}
+	t := m.trail
+	lines = append(lines, fmt.Sprintf("%s · 斋饭 %d · 水 %d · %s, %s", ui.SubtitleStyle.Render(fmt.Sprintf("Day %d", t.Day)), t.Food, t.Water, t.Pace, t.Rations))
+	var party []string
+	for _, name := range m.members {
+		status := fmt.Sprintf("%s ♥%d ☺%d", name, t.Health[name], t.Morale[name])
+		if t.Ill(name) {
+			status = ui.ErrorStyle.Render(status + " ill")
+		}
+		party = append(party, status)
+	}
+	lines = append(lines, strings.Join(party, " · "))
+	lines = append(lines, strings.TrimRight(m.hpBar(), "\n")+"  "+ui.WarningStyle.Render(fmt.Sprintf("%d 铜钱 · %d 元宝", m.wallet.Tongqian, m.wallet.Yuanbao)))
+	if len(m.cleared) == 0 {
+		lines = append(lines, ui.MutedStyle.Render("Walk west (←) to the red ! to fight; study at camp (c) to open the rest."))
+	}
+	return "  " + strings.Join(lines, "\n  ") + "\n"
+}
+
 func (m Model) sideView() string {
 	var b strings.Builder
 	if s := m.stage; s != nil && s.Number <= m.region.Region.To && s.Number >= m.region.Region.From {

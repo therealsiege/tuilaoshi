@@ -33,7 +33,7 @@ func roadWith(t *testing.T, cleared, learned int) Model {
 	}
 	encounterRoll = func() int { return 99 } // no wild encounters unless a test asks
 	eventRoll = func() int { return 99 }     // nor trail events
-	return New(store).SetSize(100, 30).Refresh()
+	return New(store).SetSize(120, 45).Refresh()
 }
 
 // walkTo moves the pilgrim along the shortest walkable route until next
@@ -85,6 +85,18 @@ func nextStep(rm journey.RegionMap, p, target journey.Point) (journey.Point, boo
 		}
 	}
 	return journey.Point{}, false
+}
+
+func TestASmallWindowKeepsTheMapOnScreen(t *testing.T) {
+	m := roadWith(t, 0, 0).SetSize(80, 24)
+	out := m.View()
+	uitest.Golden(t, "small-window", out)
+	if lines := strings.Count(out, "\n") + 1; lines > 24 {
+		t.Errorf("the map takes %d lines in a 24-line window", lines)
+	}
+	if !strings.Contains(out, "Tribulation 1 vs") || strings.Contains(out, "How the road works") {
+		t.Errorf("small window should show the short summary, not the full sidebar:\n%s", out)
+	}
 }
 
 func TestTheRoadStartsInTheFirstRegion(t *testing.T) {

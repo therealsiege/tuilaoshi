@@ -24,23 +24,92 @@ func (m Model) View() string {
 	b.WriteString("\n\n")
 	b.WriteString(ui.LoadError(m.loadErr))
 
-	b.WriteString(m.renderToday())
-	b.WriteString("\n\n")
-	b.WriteString(m.renderStartHere())
-	b.WriteString("\n\n")
-	b.WriteString(m.renderMenu())
-	b.WriteString("\n\n")
-	b.WriteString(m.renderJourney())
-	b.WriteString("\n")
+	if m.compact() {
+		b.WriteString(m.renderCompact())
+	} else {
+		b.WriteString(m.renderToday())
+		b.WriteString("\n\n")
+		b.WriteString(m.renderStartHere())
+		b.WriteString("\n\n")
+		b.WriteString(m.renderMenu())
+		b.WriteString("\n\n")
+		b.WriteString(m.renderJourney())
+		b.WriteString("\n")
+	}
 
 	if m.note != "" {
 		b.WriteString(ui.WarningStyle.Render("  "+m.note) + "\n")
 	}
 	footer := "  ? help · esc back on the road · T journeys · q quit"
-	if m.tts != nil && m.tts.Available() {
+	if m.tts != nil && m.tts.Available() && !m.compact() {
 		footer += " · audio on (" + m.tts.ChineseVoice().Name + " / " + m.tts.EnglishVoice().Name + ")"
 	}
 	b.WriteString(ui.MutedStyle.Render(footer))
+	return b.String()
+}
+
+// compactRows is the terminal height below which camp folds into its
+// short layout; the full one needs about 32 rows.
+const compactRows = 32
+
+// compact reports whether camp should use its short layout.
+func (m Model) compact() bool { return m.height > 0 && m.height < compactRows }
+
+// renderCompact is camp in about fifteen lines: today and the purse, one
+// line each for bounties and the week's events, the next step, the menu as
+// wrapped keys, and the journey.
+func (m Model) renderCompact() string {
+	var b strings.Builder
+	b.WriteString(strings.SplitN(m.renderToday(), "\n", 2)[0] + "\n")
+	purse := fmt.Sprintf("%s 铜钱 · %s 元宝", thousands(m.wallet.Tongqian), thousands(m.wallet.Yuanbao))
+	done := 0
+	for _, bt := range m.bounties {
+		if bt.Done {
+			done++
+		}
+	}
+	b.WriteString("  " + ui.SubtitleStyle.Render("Purse") + "  " + ui.WarningStyle.Render(purse) +
+		ui.MutedStyle.Render(fmt.Sprintf(" · bounties %d/%d", done, len(m.bounties))) + "\n")
+	week := []string{}
+	if o, on, ok := journey.FestivalNow(m.now()); ok {
+		if on {
+			week = append(week, ui.WarningStyle.Render(o.Name+"快乐！")+" (y)")
+		} else {
+			week = append(week, fmt.Sprintf("%s in %d days", o.Name, o.DaysUntil(m.now())))
+		}
+	}
+	if m.missed >= journey.InnerDemonWakes {
+		week = append(week, ui.ErrorStyle.Render("心魔 wakes (m)"))
+	} else {
+		week = append(week, fmt.Sprintf("心魔 %d/%d", m.missed, journey.InnerDemonWakes))
+	}
+	b.WriteString("  " + ui.MutedStyle.Render(strings.Join(week, " · ")) + "\n\n")
+	b.WriteString(m.renderStartHere() + "\n\n")
+	var keys []string
+	for _, g := range ui.DashboardMenu {
+		for _, it := range g.Items {
+			keys = append(keys, ui.ChineseStyle.Render(it.Key)+" "+it.Label)
+		}
+	}
+	width := m.width - 4
+	if width <= 0 {
+		width = 76
+	}
+	line := ""
+	for _, k := range keys {
+		if line != "" && lipgloss.Width(line)+3+lipgloss.Width(k) > width {
+			b.WriteString("  " + line + "\n")
+			line = ""
+		}
+		if line != "" {
+			line += ui.MutedStyle.Render(" · ")
+		}
+		line += k
+	}
+	b.WriteString("  " + line + "\n\n")
+	st := m.journeyState
+	fmt.Fprintf(&b, "  %s  Level %d · %s · Tribulation %d %s\n", ui.SubtitleStyle.Render("Journey"),
+		st.Level.N, ui.ChineseStyle.Render(st.Rank.Name), st.Progress.Tribulation, st.Progress.Location)
 	return b.String()
 }
 
