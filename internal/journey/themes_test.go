@@ -61,6 +61,7 @@ func TestThemesResolveAgainstRealWiki(t *testing.T) {
 		t.Skip("needs the wiki")
 	}
 	store := wiki.NewStore(dir)
+	store.Progress = t.TempDir() // never the real wiki's progress
 	pages, err := store.ListPages()
 	if err != nil {
 		t.Fatal(err)

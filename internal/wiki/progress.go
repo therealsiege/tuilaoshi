@@ -52,7 +52,7 @@ CREATE INDEX IF NOT EXISTS reviews_card ON reviews(card_id);
 // in the YAML files kept before it existed.
 func (s *Store) progress() (*sql.DB, error) {
 	s.dbOnce.Do(func() {
-		path := filepath.Join(s.Dir, progressFile)
+		path := filepath.Join(s.progressDir(), progressFile)
 		_, statErr := os.Stat(path)
 		fresh := os.IsNotExist(statErr)
 		db, err := sql.Open("sqlite", "file:"+path+"?_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)")
@@ -60,7 +60,7 @@ func (s *Store) progress() (*sql.DB, error) {
 			db.SetMaxOpenConns(1) // one writer; keeps reads and writes in order
 			_, err = db.Exec(schema)
 		}
-		if err == nil && fresh {
+		if err == nil && fresh && s.progressDir() == s.Dir {
 			err = s.importFiles(db)
 		}
 		if err == nil {
@@ -79,6 +79,14 @@ func (s *Store) progress() (*sql.DB, error) {
 		s.db = db
 	})
 	return s.db, s.dbErr
+}
+
+// progressDir is the folder holding the progress file.
+func (s *Store) progressDir() string {
+	if s.Progress != "" {
+		return s.Progress
+	}
+	return s.Dir
 }
 
 // Close closes the progress file.

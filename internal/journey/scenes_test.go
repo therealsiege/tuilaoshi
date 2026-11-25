@@ -42,7 +42,9 @@ func TestScenesAreGlossedByRealWiki(t *testing.T) {
 	if _, err := os.Stat(dir); err != nil || testing.Short() {
 		t.Skip("needs the wiki")
 	}
-	cards, err := wiki.NewStore(dir).DrillableCards()
+	store := wiki.NewStore(dir)
+	store.Progress = t.TempDir() // never the real wiki's progress
+	cards, err := store.DrillableCards()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +106,9 @@ func TestEpisodesAreGlossedByRealWiki(t *testing.T) {
 	if _, err := os.Stat(dir); err != nil || testing.Short() {
 		t.Skip("needs the wiki")
 	}
-	cards, err := wiki.NewStore(dir).DrillableCards()
+	store := wiki.NewStore(dir)
+	store.Progress = t.TempDir() // never the real wiki's progress
+	cards, err := store.DrillableCards()
 	if err != nil {
 		t.Fatal(err)
 	}

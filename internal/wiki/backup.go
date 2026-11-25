@@ -28,7 +28,7 @@ const (
 
 // backupDaily copies the progress file once a day and prunes old copies.
 func (s *Store) backupDaily(db *sql.DB, now time.Time) error {
-	dir := filepath.Join(s.Dir, backupsDir)
+	dir := filepath.Join(s.progressDir(), backupsDir)
 	path := filepath.Join(dir, "progress-"+now.Format(dateFmt)+".db")
 	if _, err := os.Stat(path); err == nil {
 		return nil

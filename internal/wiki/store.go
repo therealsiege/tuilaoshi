@@ -25,6 +25,10 @@ type Store struct {
 	mu    sync.Mutex
 	pages map[string]cachedPage
 
+	// Progress is the folder for the progress file and its backups; empty
+	// means Dir. Tests reading the real wiki point it elsewhere.
+	Progress string
+
 	// The progress file (see progress.go), opened on first use.
 	dbOnce sync.Once
 	db     *sql.DB

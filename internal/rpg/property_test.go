@@ -119,7 +119,9 @@ func TestRealWikiQuestionsHaveExactlyOneRightAnswer(t *testing.T) {
 	if testing.Short() {
 		t.Skip("loads the whole wiki")
 	}
-	cards, err := wiki.NewStore(dir).DrillableCards()
+	store := wiki.NewStore(dir)
+	store.Progress = t.TempDir() // never the real wiki's progress
+	cards, err := store.DrillableCards()
 	if err != nil {
 		t.Fatal(err)
 	}
