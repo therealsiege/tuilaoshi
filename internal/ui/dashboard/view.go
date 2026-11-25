@@ -60,6 +60,8 @@ func (m Model) renderToday() string {
 	today := "  " + ui.SubtitleStyle.Render("Today") + "  " + strings.Join(parts, " · ") + " · " + due + "\n"
 	if m.newWords > 0 {
 		today += ui.SuccessStyle.Render(fmt.Sprintf("         +%d new words from your frequency list joined your reviews", m.newWords)) + "\n"
+	} else if m.paused != "" {
+		today += ui.MutedStyle.Render("         New words wait: "+m.paused+". Review to bring them back.") + "\n"
 	}
 	return today + m.renderPurse()
 }

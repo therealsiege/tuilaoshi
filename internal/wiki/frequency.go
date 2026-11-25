@@ -53,10 +53,14 @@ const knownHSK = 3
 
 // IntroduceFrequency adds the next n most frequent words the learner
 // doesn't have yet (not a name, not already a card, above knownHSK) to the
-// reviews, once a day, and returns how many it added.
+// reviews, once a day, and returns how many it added. It adds none while
+// NewWordsPaused gives a reason.
 func (s *Store) IntroduceFrequency(n int, now time.Time) (int, error) {
 	study, err := s.readStudy()
 	if err != nil || n <= 0 || study.FreqDay == now.Format(dateFmt) {
+		return 0, err
+	}
+	if why, err := s.NewWordsPaused(n, now); err != nil || why != "" {
 		return 0, err
 	}
 	list, err := s.Frequency()

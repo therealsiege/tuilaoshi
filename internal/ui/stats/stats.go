@@ -22,6 +22,8 @@ type Model struct {
 	week    [7]wiki.DailyStats
 	streak  int
 	pages   []model.Page
+	hist    history // the review log: week ahead, retention, hard words (ahead.go)
+	now     func() time.Time
 	loadErr error // why the wiki could not be read, shown above the numbers
 	width   int
 	height  int
@@ -31,6 +33,7 @@ type Model struct {
 func New(store *wiki.Store) Model {
 	return Model{
 		store: store,
+		now:   time.Now,
 	}
 }
 
@@ -78,7 +81,13 @@ func (m Model) View() string {
 	b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, leftCol2, "  ", rightCol2))
 	b.WriteString("\n\n")
 
-	// Section 5: Streak
+	// Section 5: the week ahead and the hard words, from the review log
+	leftCol3 := ui.BorderStyle.Width(34).Render(m.renderAhead())
+	rightCol3 := ui.BorderStyle.Width(42).Render(m.renderHardWords())
+	b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, leftCol3, "  ", rightCol3))
+	b.WriteString("\n\n")
+
+	// Section 6: Streak
 	b.WriteString(m.renderStreak())
 	b.WriteString("\n\n")
 
@@ -348,6 +357,8 @@ func (m Model) Refresh() Model {
 	m.streak = m.store.Streak()
 	m.week = m.store.WeekStats()
 	m.pages, pagesErr = m.store.ListPages()
-	m.loadErr = errors.Join(statsErr, pagesErr)
+	var histErr error
+	m.hist, histErr = loadHistory(m.store, m.now())
+	m.loadErr = errors.Join(statsErr, pagesErr, histErr)
 	return m
 }

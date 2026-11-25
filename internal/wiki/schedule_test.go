@@ -1,6 +1,7 @@
 package wiki
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -158,11 +159,12 @@ func TestUpdateSRSPassingReviewAlwaysGrows(t *testing.T) {
 		{"hard grows a two-day interval", 2, model.DiffHard, 3},
 		{"hard multiplies longer intervals", 10, model.DiffHard, 12},
 		{"good multiplies", 4, model.DiffGood, 10},
-		{"again resets", 30, model.DiffAgain, 1},
+		{"again keeps a quarter", 30, model.DiffAgain, 7},
+		{"again keeps at least a day", 3, model.DiffAgain, 1},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			card := model.Card{ReviewInterval: tt.interval}
+			card := model.Card{ID: "characters/shu1.md", ReviewInterval: tt.interval}
 			updateSRS(&card, tt.diff, time.Now())
 			if card.ReviewInterval != tt.want {
 				t.Errorf("interval = %d, want %d", card.ReviewInterval, tt.want)
@@ -196,5 +198,25 @@ func TestTotalXPSumsBattleSessions(t *testing.T) {
 	}
 	if !strings.Contains(string(data), "- **XP**: 40") {
 		t.Errorf("session file is missing its XP line:\n%s", data)
+	}
+}
+
+func TestLongIntervalsSpreadAndCap(t *testing.T) {
+	now := time.Date(2026, 11, 25, 9, 0, 0, 0, time.Local)
+	seen := map[int]bool{}
+	for i := range 40 {
+		card := model.Card{ID: fmt.Sprintf("characters/c%d.md", i), ReviewInterval: 40}
+		updateSRS(&card, model.DiffGood, now) // 100 days, ±5
+		if card.ReviewInterval < 95 || card.ReviewInterval > 105 {
+			t.Fatalf("interval %d outside 95-105", card.ReviewInterval)
+		}
+		seen[card.ReviewInterval] = true
+	}
+	if len(seen) < 4 {
+		t.Errorf("40 cards reviewed together landed on only %d days", len(seen))
+	}
+	card := model.Card{ID: "characters/a.md", ReviewInterval: 300}
+	if updateSRS(&card, model.DiffEasy, now); card.ReviewInterval > maxInterval {
+		t.Errorf("interval %d passes the cap %d", card.ReviewInterval, maxInterval)
 	}
 }

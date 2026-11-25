@@ -220,7 +220,7 @@ func (m Model) mark() Model {
 	}
 	for _, c := range cards {
 		card := c
-		if err := m.store.RecordReview(&card, model.DiffAgain, time.Now()); err != nil {
+		if err := m.store.RecordForgotten(&card, time.Now()); err != nil {
 			m.saveErr = err
 			return m
 		}

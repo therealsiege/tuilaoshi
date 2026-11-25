@@ -53,14 +53,15 @@ func scheduleFor(t *testing.T, m Model, id string) model.Card {
 	return model.Card{}
 }
 
-func TestMissReschedulesWordForTomorrow(t *testing.T) {
+func TestMissShortensTheWordsInterval(t *testing.T) {
 	m := storeModel(t)
 	missed := m.battle.Question.Card.ID
+	was := scheduleFor(t, m, missed).ReviewInterval
 
 	m = missQuestion(m)
 
-	if got := scheduleFor(t, m, missed); got.ReviewInterval != 1 {
-		t.Errorf("missed word interval = %d, want 1", got.ReviewInterval)
+	if got, want := scheduleFor(t, m, missed).ReviewInterval, max(was/4, 1); got != want {
+		t.Errorf("missed word interval %d -> %d, want a quarter (%d)", was, got, want)
 	}
 }
 

@@ -83,6 +83,21 @@ func (s *Store) DrillableCards() ([]model.Card, error) {
 func (s *Store) RecordReview(card *model.Card, difficulty model.DrillDifficulty, now time.Time) error {
 	was := card.ReviewInterval
 	updateSRS(card, difficulty, now)
+	return s.saveReview(card, difficulty, was, now)
+}
+
+// RecordForgotten starts a card over, due tomorrow: the learner marked it
+// unknown (while reading, say) rather than missing it in a review. It is
+// logged and counted as a miss.
+func (s *Store) RecordForgotten(card *model.Card, now time.Time) error {
+	was := card.ReviewInterval
+	card.ReviewInterval = 0
+	updateSRS(card, model.DiffAgain, now)
+	return s.saveReview(card, model.DiffAgain, was, now)
+}
+
+// saveReview saves a card's new schedule and logs the answer.
+func (s *Store) saveReview(card *model.Card, difficulty model.DrillDifficulty, was int, now time.Time) error {
 	db, err := s.progress()
 	if err != nil {
 		return err
