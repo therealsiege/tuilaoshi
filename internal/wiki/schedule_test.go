@@ -115,12 +115,23 @@ func TestRecordReviewKeepsThePageUnchanged(t *testing.T) {
 	if got := findCard(t, cards, "characters/shu1.md"); got.ReviewInterval != 7 {
 		t.Errorf("saved interval = %d, want 7 (3 × 2.5)", got.ReviewInterval)
 	}
-	page, err := store.ReadPage("characters/shu1.md")
+	raw, err := os.ReadFile(filepath.Join(store.Dir, "characters/shu1.md"))
+	if err != nil || !strings.Contains(string(raw), "review_interval: 3") {
+		t.Errorf("the page file changed; pages are content only (%v):\n%s", err, raw)
+	}
+	// Everything reading pages sees the saved schedule: progression counts
+	// characters by their pages' intervals.
+	pages, err := store.ListPages()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if page.ReviewInterval != 3 {
-		t.Errorf("the page changed to interval %d; pages are content only", page.ReviewInterval)
+	for _, p := range pages {
+		if p.Path == "characters/shu1.md" && p.ReviewInterval != 7 {
+			t.Errorf("ListPages shows interval %d, want the saved 7", p.ReviewInterval)
+		}
+	}
+	if page, err := store.ReadPage("characters/shu1.md"); err != nil || page.ReviewInterval != 7 {
+		t.Errorf("ReadPage shows interval %d %v, want the saved 7", page.ReviewInterval, err)
 	}
 }
 

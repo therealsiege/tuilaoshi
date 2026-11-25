@@ -48,7 +48,15 @@ func (s *Store) ReadPage(relPath string) (model.Page, error) {
 	if err != nil {
 		return model.Page{}, fmt.Errorf("read page %s: %w", relPath, err)
 	}
-	return ParsePage(relPath, data)
+	page, err := ParsePage(relPath, data)
+	if err != nil {
+		return page, err
+	}
+	schedules, err := s.readSchedules()
+	if sch, ok := schedules[relPath]; ok {
+		withSchedule(&page, sch)
+	}
+	return page, err
 }
 
 // ListPages returns all markdown pages under the wiki directory. Files
@@ -86,10 +94,30 @@ func (s *Store) ListPages() ([]model.Page, error) {
 		pages = append(pages, page)
 		return nil
 	})
-	if err == nil {
-		s.pages = fresh // drops deleted files
+	if err != nil {
+		return pages, err
 	}
-	return pages, err
+	s.pages = fresh // drops deleted files
+	schedules, err := s.readSchedules()
+	if err != nil {
+		return pages, err
+	}
+	for i := range pages {
+		if sch, ok := schedules[pages[i].Path]; ok {
+			withSchedule(&pages[i], sch)
+		}
+	}
+	return pages, nil
+}
+
+// withSchedule puts a page's saved review schedule over its frontmatter:
+// pages are content, and a reviewed page's schedule lives in the progress
+// file.
+func withSchedule(p *model.Page, sch wordSchedule) {
+	p.Introduced = parseDate(sch.Introduced)
+	p.LastReviewed = parseDate(sch.LastReviewed)
+	p.ReviewInterval = sch.ReviewInterval
+	p.NextReview = parseDate(sch.NextReview)
 }
 
 // ListPagesByType returns pages matching the given type.
