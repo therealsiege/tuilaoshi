@@ -13,6 +13,8 @@ import (
 func (m Model) View() string {
 	var b strings.Builder
 	switch m.screen {
+	case screenEyes:
+		b.WriteString(m.eyesView())
 	case screenRiddle:
 		b.WriteString(m.riddleView())
 	case screenAlms:
@@ -78,6 +80,7 @@ func (m Model) townView() string {
 		lantern = "元宵灯会 The Lantern Festival fair: three riddles today, double pay (l)"
 	}
 	b.WriteString("  " + ui.MutedStyle.Render(lantern) + "\n")
+	b.WriteString("  " + eyesLine() + "\n")
 	help := "  ↑↓ choose · enter read · r rest · b buy · x sandals · o offering · t trade · a alms · l riddle · g shrine · esc back"
 	if t.Stone != nil {
 		if slices.Contains(m.stones, t.ID) {

@@ -1,0 +1,236 @@
+# 火眼金睛 Fiery Eyes: a town's mystery, three villagers to question, and
+# one of them a demon in disguise. Which villager is the demon is drawn at
+# play time, so each villager has a true story (consistent with the facts)
+# and a lie (the demon's story, with one impossible detail: the flaw).
+# Claude plays each villager from these. Keep the Chinese HSK3-4.
+# Original text, written for TuiLaoShi.
+- id: chickens
+  title: 鸡不见了
+  english: The missing chickens
+  situation: 村长说：李大爷家的鸡昨天晚上全不见了。村里的人都很害怕，说可能有妖怪。
+  situation_english: "The village head says: all of old Li's chickens vanished last night. The villagers are frightened and say it may be a demon."
+  facts:
+    - 昨天晚上下了很大的雨，到半夜才停。
+    - 鸡笼在李大爷家后院，笼子的门是从外面打开的。
+    - 今天早上后院的地上都是泥，泥上有很小的脚印。
+  facts_english:
+    - "Last night it rained hard, until midnight."
+    - "The coop is in old Li's back yard, and its door was opened from outside."
+    - "This morning the yard is all mud, with very small footprints in it."
+  villagers:
+    - name: 李大爷
+      role: 养鸡的老人
+      english: "Old Li, who keeps the chickens"
+      persona: "A kind, slow-speaking old farmer who loves his hens and is upset."
+      story: 我昨天晚上九点就睡了。雨声很大，我什么也没听见。早上起来，鸡笼的门开着，鸡全不见了。
+      lie: 我昨天晚上在院子里看月亮，月亮又大又亮，可是我没看见有人来。
+      flaw: 昨晚一直下大雨，不可能看见又大又亮的月亮。
+      flaw_english: "It rained hard all evening: no one could have seen a big bright moon."
+    - name: 张婶
+      role: 卖豆腐的邻居
+      english: "Aunt Zhang, the tofu seller next door"
+      persona: "A busy, talkative neighbour who gets up very early to make tofu."
+      story: 我每天早上四点起来做豆腐。今天早上路过李大爷家，看见后院的地上都是泥，还有小脚印。
+      lie: 我今天早上路过李大爷家，后院的地又干又硬，一个脚印也没有。
+      flaw: 昨晚下了大雨，后院的地上都是泥，还有小脚印，不可能又干又硬。
+      flaw_english: "After the night's rain the yard was all mud with small footprints, not dry and hard."
+    - name: 小刚
+      role: 放鸭子的孩子
+      english: "Xiaogang, the boy who herds ducks"
+      persona: "A shy ten-year-old boy who answers quickly and a little nervously."
+      story: 昨天晚上我在家写作业。雨太大了，我没出门。半夜我家的狗叫了一会儿。
+      lie: 昨天晚上天气很好，我一直在河边放鸭子，到十点才回家。
+      flaw: 昨晚下大雨，天气一点也不好。
+      flaw_english: "Last night was pouring rain, not fine weather."
+- id: well
+  title: 井水变黑了
+  english: The blackened well
+  situation: 村长说：今天早上，村里唯一的一口井，水变成了黑色，不能喝了。
+  situation_english: "The village head says: this morning the water in the village's only well turned black and can't be drunk."
+  facts:
+    - 昨天晚上刮大风，很冷，村里的灯笼都被风吹灭了。
+    - 井口晚上用一块很重的石头盖着，要两个人才搬得动。
+    - 今天早上，石头被搬开了，井水变成了黑色。
+  facts_english:
+    - "Last night a strong wind blew, it was cold, and every lantern in the village blew out."
+    - "At night the well is covered with a heavy stone that takes two people to move."
+    - "This morning the stone had been moved and the water had turned black."
+  villagers:
+    - name: 王奶奶
+      role: 卖菜的老奶奶
+      english: "Granny Wang, who sells vegetables"
+      persona: "A small, frail old woman, gentle and a bit forgetful."
+      story: 昨天晚上风太大了，我早早就睡了。早上去打水，才发现石头被搬开了，水是黑的。
+      lie: 昨天晚上我一个人把井口的石头搬开，打了一桶水，那时候水还是干净的。
+      flaw: 那块石头要两个人才搬得动，老奶奶一个人搬不动。
+      flaw_english: "The stone takes two people to move: a frail old woman couldn't move it alone."
+    - name: 赵师傅
+      role: 铁匠
+      english: "Master Zhao, the blacksmith"
+      persona: "A big, loud, honest blacksmith who works late."
+      story: 昨天晚上我在铺子里打铁，打到十点。风很大，我把门关上了。
+      lie: 昨天晚上一点风也没有，很安静，我开着门打铁，一直打到十点。
+      flaw: 昨晚刮大风，灯笼都吹灭了，不可能一点风也没有。
+      flaw_english: "A strong wind blew out every lantern last night: it can't have been still."
+    - name: 小红
+      role: 做灯笼的姑娘
+      english: "Xiaohong, the lantern maker's daughter"
+      persona: "A cheerful young woman who notices everything about lanterns and light."
+      story: 昨天晚上风把我家门口的灯笼吹灭了。我出去看了一下，外面很黑，什么也看不见。
+      lie: 昨天晚上村里的灯笼都亮着，我看得很清楚，井边一个人也没有。
+      flaw: 昨晚灯笼都被风吹灭了，外面很黑。
+      flaw_english: "The wind blew out every lantern: it was dark, not lit."
+- id: temple-money
+  title: 香火钱丢了
+  english: The stolen temple money
+  situation: 老和尚说：庙里的香火钱昨天中午丢了。钱箱是空的。
+  situation_english: "The old monk says: the temple's offering money went missing yesterday at noon. The money box is empty."
+  facts:
+    - 钱是昨天中午十二点到两点之间丢的。
+    - 那时候庙门锁着，后墙上只有一个很小的窗户开着。
+    - 昨天中午镇上在唱戏，从十二点唱到两点，唱的是《白蛇传》。
+  facts_english:
+    - "The money went missing between twelve and two yesterday."
+    - "The temple gate was locked then; only a very small window in the back wall was open."
+    - "From twelve to two the town had an opera on: The Legend of the White Snake."
+  villagers:
+    - name: 刘和尚
+      role: 扫地的小和尚
+      english: "Monk Liu, the young monk who sweeps the temple"
+      persona: "A polite young monk who says 阿弥陀佛 and loves opera."
+      story: 中午我锁好庙门，去镇上看《白蛇传》了，两点才回来。
+      lie: 中午我锁好庙门，去镇上看戏了。唱的是《三国》，特别好看。
+      flaw: 昨天中午唱的是《白蛇传》，不是《三国》。
+      flaw_english: "The opera at noon was The White Snake, not Three Kingdoms."
+    - name: 陈老板
+      role: 茶馆老板
+      english: "Boss Chen, who runs the teahouse"
+      persona: "A careful, polite businessman who counts everything."
+      story: 中午茶馆的客人都去看戏了，我一个人在店里算账。
+      lie: 中午十二点，我从庙的正门走进去上香，看见钱箱还在。
+      flaw: 中午庙门锁着，谁也不能从正门走进去。
+      flaw_english: "The gate was locked at noon: no one could walk in through the front."
+    - name: 小胖
+      role: 爱吃糖的孩子
+      english: "Xiaopang, a chubby boy who loves sweets"
+      persona: "A greedy, cheerful boy who talks about food a lot."
+      story: 中午我跟奶奶去看戏了。戏里的白蛇特别漂亮，奶奶还给我买了糖。
+      lie: 中午我在庙后面玩。后墙上的窗户很大，大人也能走进去。
+      flaw: 后墙上的窗户很小，不是很大。
+      flaw_english: "The window in the back wall is very small, not big."
+- id: rice
+  title: 米仓里的米
+  english: The rice store
+  situation: 村长说：前天晚上，王家米仓里的米少了一半。
+  situation_english: "The village head says: the night before last, half the rice in the Wang family's store vanished."
+  facts:
+    - 米是前天晚上丢的。那天是十五，月亮又圆又亮。
+    - 村口的小桥前天下午断了，到现在还没修好。
+    - 米仓的门上有一把新锁，锁没有坏。
+  facts_english:
+    - "The rice went the night before last. It was the fifteenth, and the moon was full and bright."
+    - "The little bridge at the village entrance broke that afternoon and still isn't mended."
+    - "The store's door has a new lock, and the lock isn't broken."
+  villagers:
+    - name: 孙大哥
+      role: 撑船的渔夫
+      english: "Brother Sun, the fisherman with the boat"
+      persona: "A relaxed fisherman who talks about fish and the river."
+      story: 前天晚上我在河边钓鱼。月亮很亮，我钓了三条大鱼。
+      lie: 前天晚上天特别黑，什么也看不见，我早早就回家睡觉了。
+      flaw: 那天是十五，月亮又圆又亮，天不黑。
+      flaw_english: "It was the fifteenth with a full bright moon: the night wasn't dark."
+    - name: 周阿姨
+      role: 住在河对面的裁缝
+      english: "Auntie Zhou, the seamstress from across the river"
+      persona: "A neat, quick-talking seamstress who lives across the river."
+      story: 我住在河对面。桥断了，我这两天都没过来。今天是坐孙大哥的船来的。
+      lie: 前天晚上我从河对面走过小桥，来村里买东西。
+      flaw: 小桥前天下午就断了，晚上不可能走过来。
+      flaw_english: "The bridge broke that afternoon: she couldn't have walked across it that night."
+    - name: 马老师
+      role: 村里的老师
+      english: "Teacher Ma, the village teacher"
+      persona: "A serious teacher who likes to explain things carefully."
+      story: 前天晚上我在家看书，看到很晚。窗外的月亮很亮，我都不用点灯。
+      lie: 前天晚上我路过米仓，看见门上的锁被打坏了。
+      flaw: 米仓的锁没有坏。
+      flaw_english: "The store's lock isn't broken."
+- id: red-shoes
+  title: 新娘的红鞋
+  english: The bride's red shoes
+  situation: 新娘的妈妈说：明天就要结婚了，可是新娘的红鞋不见了！
+  situation_english: "The bride's mother says: the wedding is tomorrow, and the bride's red shoes have vanished!"
+  facts:
+    - 红鞋昨天下午放在新娘的房间里，房间在二楼。
+    - 昨天下午三点到五点，家里在院子里请客，大家都在院子里喝喜酒。
+    - 楼梯昨天刚刷了红漆，走过楼梯的人，鞋上都会有红漆。
+  facts_english:
+    - "Yesterday afternoon the red shoes were in the bride's room, upstairs."
+    - "From three to five yesterday the family held a feast in the courtyard; everyone was there drinking."
+    - "The stairs were painted red yesterday: anyone who climbed them got red paint on their shoes."
+  villagers:
+    - name: 钱大婶
+      role: 媒人
+      english: "Aunt Qian, the matchmaker"
+      persona: "A loud, cheerful matchmaker who loves weddings and gossip."
+      story: 下午我一直在院子里帮忙招呼客人，一次也没上楼。
+      lie: 下午我上楼去看新娘。你看，我的鞋很干净，什么也没有。
+      flaw: 楼梯刚刷了红漆，上过楼的人鞋上都会有红漆，她的鞋不可能干净。
+      flaw_english: "The stairs were freshly painted: anyone who went up has red paint on their shoes."
+    - name: 吴师傅
+      role: 做喜酒的厨师
+      english: "Master Wu, the wedding cook"
+      persona: "A tired, proud cook who talks about the dishes he made."
+      story: 我在厨房做菜，从中午忙到晚上，一步也没离开。院子里客人特别多。
+      lie: 下午院子里没有客人，很安静，我一个人在厨房慢慢做菜。
+      flaw: 下午院子里在请客，人很多，不可能很安静。
+      flaw_english: "The courtyard was full of feasting guests that afternoon: it wasn't quiet."
+    - name: 小月
+      role: 新娘的妹妹
+      english: "Xiaoyue, the bride's younger sister"
+      persona: "A lively teenage girl who adores her older sister."
+      story: 下午我在院子里给客人倒酒，姐姐也在院子里，大家都很高兴。
+      lie: 下午三点到五点我在家里睡觉，家里没有人，也没有客人。
+      flaw: 三点到五点家里在请客，大家都在院子里。
+      flaw_english: "From three to five the family was feasting in the courtyard: the house wasn't empty."
+- id: songbird
+  title: 茶馆的小鸟
+  english: The teahouse songbird
+  situation: 茶馆老板说：我最喜欢的小鸟今天早上不见了，笼子是空的。
+  situation_english: "The teahouse owner says: my favourite little bird vanished this morning; the cage is empty."
+  facts:
+    - 鸟是今天早上七点到八点之间不见的。
+    - 今天早上一直在下雪，路上的雪很厚。
+    - 那是一只黄色的小鸟，每天早上都在门口唱歌。
+    - 茶馆七点才开门，开门以前门锁着，钥匙只有老板有。
+  facts_english:
+    - "The bird vanished between seven and eight this morning."
+    - "It snowed all morning, and the snow on the road is deep."
+    - "It's a little yellow bird that sings by the door every morning."
+    - "The teahouse only opens at seven; before that it's locked, and only the owner has the key."
+  villagers:
+    - name: 郑老板
+      role: 茶馆老板
+      english: "Boss Zheng, the teahouse owner"
+      persona: "A worried, warm-hearted owner who talks about his bird like a child."
+      story: 我七点开门，把鸟笼挂在门口，就去烧水了。八点出来一看，笼子空了。
+      lie: 我七点开门，把鸟笼挂在门口。我那只红色的小鸟唱得特别好听。
+      flaw: 那只小鸟是黄色的，老板不会说错。
+      flaw_english: "The bird is yellow: its real owner would never call it red."
+    - name: 何大爷
+      role: 每天来喝茶的老人
+      english: "Grandpa He, who comes for tea every morning"
+      persona: "A chatty retired man who comes to the teahouse every single day."
+      story: 我七点半来喝茶。雪太大了，我走得很慢，鞋都湿了。
+      lie: 我七点半来喝茶。今天天气真好，太阳很大，路上干干净净的。
+      flaw: 今天早上一直在下雪，没有太阳，路上的雪很厚。
+      flaw_english: "It snowed all morning: no sun, and deep snow on the road."
+    - name: 小李
+      role: 扫雪的年轻人
+      english: "Xiao Li, the young man who sweeps the snow"
+      persona: "A hard-working young man, quiet and polite."
+      story: 我早上六点就开始扫雪，可是雪一直下，扫不完。七点以后我在桥那边扫。
+      lie: 我早上六点半就进茶馆帮忙了，那时候小鸟还在笼子里。
+      flaw: 茶馆七点才开门，以前门锁着，钥匙只有老板有。
+      flaw_english: "The teahouse was locked until seven, and only the owner has the key."

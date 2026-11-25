@@ -29,6 +29,7 @@ const (
 	screenStone  // a town's secret stone (see stone.go)
 	screenAlms   // asking a townsperson for alms (see alms.go)
 	screenRiddle // a lantern riddle (see riddle.go)
+	screenEyes   // a mystery: find the demon among villagers (see eyes.go)
 )
 
 // Model is the world map view model.
@@ -63,6 +64,8 @@ type Model struct {
 	riddle journey.Riddle // the lantern riddle open
 	tries  int            // wrong guesses at it
 
+	eyes eyes // the town's Fiery Eyes mystery
+
 	note          string
 	width, height int
 	loadErr       error
@@ -77,13 +80,14 @@ func New(store *wiki.Store, client *claude.Client, dict *input.Dict) Model {
 	m := Model{store: store, gkeys: ui.DefaultGlobalKeys(), towns: journey.Towns(), now: time.Now, input: in}
 	if client != nil {
 		m.grader = client.GradeWriting
+		m.eyes.talker, m.eyes.keyed = client.ChatAs, client.Ready
 	}
 	return m
 }
 
 // Typing reports whether a writing request or a stone has the keyboard.
 func (m Model) Typing() bool {
-	return m.screen == screenStone || m.screen == screenRiddle || (m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing())
+	return m.screen == screenStone || m.screen == screenRiddle || (m.screen == screenEyes && m.eyes.asking) || (m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing())
 }
 
 func (m Model) Init() tea.Cmd { return nil }
@@ -118,12 +122,17 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	if g, ok := msg.(gradeMsg); ok {
 		return m.onGrade(g), nil
 	}
+	if r, ok := msg.(eyesReplyMsg); ok {
+		return m.onEyesReply(r), nil
+	}
 	k, ok := msg.(tea.KeyMsg)
 	if !ok {
 		return m, nil
 	}
 	back := key.Matches(k, m.gkeys.Back)
 	switch m.screen {
+	case screenEyes:
+		return m.updateEyes(k, back)
 	case screenRiddle:
 		if back && !m.input.Composing() {
 			m.screen, m.note = screenTown, ""
@@ -186,6 +195,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m.offer(), nil
 		case k.String() == "l":
 			return m.openRiddle()
+		case k.String() == "f":
+			return m.openEyes()
 		}
 		return m, nil
 	}
