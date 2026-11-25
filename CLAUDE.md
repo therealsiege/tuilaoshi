@@ -104,11 +104,20 @@ Wiki health check. Look for:
 
 ## Spaced Review Tracking
 
-Items enter the review cycle when introduced. Track in frontmatter:
-- `introduced`: date first covered
-- `last_reviewed`: date of most recent review
-- `review_interval`: current interval in days (starts at 1, doubles on success, resets on failure)
-- `next_review`: computed from last_reviewed + review_interval
+Review state lives in `wiki/progress.db` (SQLite, ignored by git), not in page frontmatter; pages are content only. A page's `introduced`, `last_reviewed`, `review_interval` and `next_review` frontmatter is only the starting schedule for a card never reviewed in the game.
+
+- `schedules`: one row per card (`card_id` is a page path, or `path#word` for a vocabulary row) with `introduced`, `last_reviewed`, `review_interval` (days), `next_review`, `reps`, `lapses`
+- `reviews`: every answer, with `card_id`, `at`, `rating` (0 again, 1 hard, 2 good, 3 easy), `interval_was`, `interval_now`
+- `docs`: other progress (saves, study bookkeeping, settings) as YAML under their old file names
+
+Read it with the `sqlite3` tool that ships with macOS, e.g. what's due and what keeps slipping:
+
+```bash
+sqlite3 wiki/progress.db "select card_id, next_review from schedules where next_review <= date('now') order by next_review limit 20"
+sqlite3 wiki/progress.db "select card_id, lapses from schedules where lapses > 0 order by lapses desc limit 20"
+```
+
+When a tutoring session reviews items, record them through the app, or note them in the session page; don't write review dates into page frontmatter. `tuilaoshi -export DIR` writes the progress as readable files.
 
 Priority review items surface at the start of each session.
 
