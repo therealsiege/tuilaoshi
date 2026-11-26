@@ -63,6 +63,7 @@ func (s *Store) backupDaily(db *sql.DB, now time.Time) error {
 const (
 	exportSchedules = "schedules.yaml"
 	exportReviews   = "reviews.csv"
+	exportUpdated   = "updated.yaml" // when each doc was last saved, for merging (sync.go)
 )
 
 // exportedSchedule is a card's schedule as exported.
@@ -84,10 +85,14 @@ func (s *Store) Export(dir string) error {
 	if err != nil {
 		return err
 	}
+	updated := map[string]string{}
 	for _, name := range names {
 		body, _, err := s.readDoc(name)
 		if err != nil {
 			return err
+		}
+		if at, err := s.docUpdated(name); err == nil {
+			updated[name] = at.Format(time.RFC3339)
 		}
 		if err := writeExport(dir, name, body); err != nil {
 			return err
@@ -115,6 +120,12 @@ func (s *Store) Export(dir string) error {
 		return err
 	}
 	if err := writeExport(dir, exportSchedules, data); err != nil {
+		return err
+	}
+	if data, err = yaml.Marshal(updated); err != nil {
+		return err
+	}
+	if err := writeExport(dir, exportUpdated, data); err != nil {
 		return err
 	}
 	return s.exportReviews(db, filepath.Join(dir, exportReviews))
@@ -163,7 +174,12 @@ func (s *Store) exportReviews(db *sql.DB, path string) (err error) {
 // Import reads an exported folder into the progress file, replacing the
 // docs and schedules it holds and adding reviews not already logged. The
 // day's backup is made first.
-func (s *Store) Import(dir string) error {
+func (s *Store) Import(dir string) error { return s.importFolder(dir, false) }
+
+// importFolder reads an exported folder in. Merging (sync.go) keeps
+// whichever copy of each doc and schedule is newer; otherwise the folder's
+// replace them.
+func (s *Store) importFolder(dir string, merge bool) error {
 	db, err := s.progress()
 	if err != nil {
 		return err
@@ -176,6 +192,12 @@ func (s *Store) Import(dir string) error {
 		return err
 	}
 	defer tx.Rollback() //nolint:errcheck // a no-op after Commit
+	updated := map[string]string{}
+	if data, err := os.ReadFile(filepath.Join(dir, exportUpdated)); err == nil {
+		if err := yaml.Unmarshal(data, &updated); err != nil {
+			return fmt.Errorf("import %s: %w", exportUpdated, err)
+		}
+	}
 	err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
 			return err
@@ -185,16 +207,22 @@ func (s *Store) Import(dir string) error {
 			return err
 		}
 		name := filepath.ToSlash(rel)
-		if name == exportSchedules || name == exportReviews || !strings.HasSuffix(name, ".yaml") {
+		if name == exportSchedules || name == exportUpdated || name == exportReviews || !strings.HasSuffix(name, ".yaml") {
 			return nil
 		}
 		body, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
+		stamp := time.Now().Format(time.RFC3339)
+		if merge {
+			if stamp = updated[name]; stamp == "" || !newerDoc(tx, name, stamp) {
+				return nil
+			}
+		}
 		_, err = tx.Exec(`INSERT INTO docs (name, body, updated) VALUES (?, ?, ?)
 			ON CONFLICT(name) DO UPDATE SET body = excluded.body, updated = excluded.updated`,
-			name, string(body), time.Now().Format(time.RFC3339))
+			name, string(body), stamp)
 		return err
 	})
 	if err != nil {
@@ -206,6 +234,9 @@ func (s *Store) Import(dir string) error {
 			return fmt.Errorf("import %s: %w", exportSchedules, err)
 		}
 		for id, e := range schedules {
+			if merge && !newerSchedule(tx, id, e.LastReviewed) {
+				continue
+			}
 			if _, err := tx.Exec(`INSERT OR REPLACE INTO schedules (card_id, introduced, last_reviewed, review_interval, next_review, reps, lapses, stability, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 				id, e.Introduced, e.LastReviewed, e.ReviewInterval, e.NextReview, e.Reps, e.Lapses, e.Stability, e.Difficulty); err != nil {
 				return fmt.Errorf("import %s: %w", exportSchedules, err)

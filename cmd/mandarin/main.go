@@ -19,6 +19,7 @@ func main() {
 	export := flag.String("export", "", "write your progress as readable files into this folder, then exit")
 	importDir := flag.String("import", "", "read progress exported with -export (e.g. from another Mac), then exit")
 	deck := flag.String("deck", "", "write your studied and hard words to this CSV file for Anki or Pleco, then exit")
+	syncDir := flag.String("sync", os.Getenv(SyncDirEnv), "a shared folder (iCloud Drive, say) to sync progress through with your other Macs; alone, sync once and exit")
 	remindNow := flag.Bool("remind", false, "show today's study reminder as a notification, then exit (make reminder schedules it)")
 	flag.Parse()
 
@@ -30,6 +31,19 @@ func main() {
 	if info, err := os.Stat(dir); err != nil || !info.IsDir() {
 		fmt.Fprintf(os.Stderr, "mandarin: wiki directory %s not found; run from the repo root or pass -wiki <dir>\n", dir)
 		os.Exit(1)
+	}
+
+	if syncOnly := isFlagSet("sync"); syncOnly || *syncDir != "" {
+		if err := syncProgress(dir, *syncDir); err != nil {
+			fmt.Fprintf(os.Stderr, "mandarin: sync: %v\n", err)
+			if syncOnly {
+				os.Exit(1)
+			}
+		}
+		if syncOnly {
+			fmt.Println("Progress synced with", *syncDir)
+			return
+		}
 	}
 
 	if *remindNow {
@@ -64,6 +78,9 @@ func main() {
 	stop := logStderr(dir)
 	_, err = tea.NewProgram(m).Run()
 	stop()
+	if serr := syncProgress(dir, *syncDir); serr != nil {
+		fmt.Fprintf(os.Stderr, "mandarin: sync: %v\n", serr)
+	}
 	if errors.Is(err, tea.ErrProgramPanic) {
 		fmt.Fprintf(os.Stderr, "\nTuiLaoShi crashed. The details are in %s; your progress up to the last answer is saved.\n", filepath.Join(dir, crashLog))
 		os.Exit(1)
@@ -111,4 +128,11 @@ func moveProgress(dir, export, importDir string) error {
 	}
 	fmt.Println("Progress read from", importDir, "(today's backup is in", filepath.Join(dir, "backups")+")")
 	return nil
+}
+
+// isFlagSet reports whether a flag was given on the command line.
+func isFlagSet(name string) bool {
+	set := false
+	flag.Visit(func(f *flag.Flag) { set = set || f.Name == name })
+	return set
 }
