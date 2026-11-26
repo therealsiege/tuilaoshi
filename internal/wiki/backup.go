@@ -68,8 +68,10 @@ const (
 // exportedSchedule is a card's schedule as exported.
 type exportedSchedule struct {
 	wordSchedule `yaml:",inline"`
-	Reps         int `yaml:"reps,omitempty"`
-	Lapses       int `yaml:"lapses,omitempty"`
+	Reps         int     `yaml:"reps,omitempty"`
+	Lapses       int     `yaml:"lapses,omitempty"`
+	Stability    float64 `yaml:"stability,omitempty"`  // FSRS memory (fsrs.go)
+	Difficulty   float64 `yaml:"difficulty,omitempty"` // FSRS memory
 }
 
 // Export writes the learner's progress into dir as readable files.
@@ -91,7 +93,7 @@ func (s *Store) Export(dir string) error {
 			return err
 		}
 	}
-	rows, err := db.Query(`SELECT card_id, introduced, last_reviewed, review_interval, next_review, reps, lapses FROM schedules ORDER BY card_id`)
+	rows, err := db.Query(`SELECT card_id, introduced, last_reviewed, review_interval, next_review, reps, lapses, stability, difficulty FROM schedules ORDER BY card_id`)
 	if err != nil {
 		return err
 	}
@@ -99,7 +101,7 @@ func (s *Store) Export(dir string) error {
 	for rows.Next() {
 		var id string
 		var e exportedSchedule
-		if err := rows.Scan(&id, &e.Introduced, &e.LastReviewed, &e.ReviewInterval, &e.NextReview, &e.Reps, &e.Lapses); err != nil {
+		if err := rows.Scan(&id, &e.Introduced, &e.LastReviewed, &e.ReviewInterval, &e.NextReview, &e.Reps, &e.Lapses, &e.Stability, &e.Difficulty); err != nil {
 			_ = rows.Close() //nolint:errcheck // the scan error is the one to report
 			return err
 		}
@@ -204,8 +206,8 @@ func (s *Store) Import(dir string) error {
 			return fmt.Errorf("import %s: %w", exportSchedules, err)
 		}
 		for id, e := range schedules {
-			if _, err := tx.Exec(`INSERT OR REPLACE INTO schedules (card_id, introduced, last_reviewed, review_interval, next_review, reps, lapses) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-				id, e.Introduced, e.LastReviewed, e.ReviewInterval, e.NextReview, e.Reps, e.Lapses); err != nil {
+			if _, err := tx.Exec(`INSERT OR REPLACE INTO schedules (card_id, introduced, last_reviewed, review_interval, next_review, reps, lapses, stability, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				id, e.Introduced, e.LastReviewed, e.ReviewInterval, e.NextReview, e.Reps, e.Lapses, e.Stability, e.Difficulty); err != nil {
 				return fmt.Errorf("import %s: %w", exportSchedules, err)
 			}
 		}

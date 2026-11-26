@@ -176,4 +176,8 @@ func TestExportThenImportOnAnotherMac(t *testing.T) {
 	if lapses != 1 || logged != 1 {
 		t.Errorf("lapses %d, reviews %d; want 1 and 1", lapses, logged)
 	}
+	var stability float64
+	if err := db.QueryRow(`SELECT stability FROM schedules WHERE card_id = ?`, book.ID).Scan(&stability); err != nil || stability == 0 {
+		t.Errorf("FSRS stability didn't travel: %v %v", stability, err)
+	}
 }
