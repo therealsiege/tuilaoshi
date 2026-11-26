@@ -36,5 +36,5 @@ wiki/forge.yaml
 wiki/vocabulary/chengyu-duels.md
 wiki/vocabulary/festivals.md
 
-# Claude Code worktrees for parallel work
-.claude/worktrees/
+# Claude Code local files: worktrees, settings, the session goal
+.claude/
