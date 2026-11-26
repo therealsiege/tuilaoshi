@@ -273,3 +273,13 @@ func WrapDisplay(text string, width int) []string {
 	}
 	return append(lines, line)
 }
+
+// WrapIndent wraps text two spaces in, to a window width columns wide (76
+// columns at most; 0 for a window of unknown width).
+func WrapIndent(text string, width int) string {
+	w := 76
+	if width > 0 {
+		w = min(w, width-4)
+	}
+	return "  " + strings.Join(WrapDisplay(text, w), "\n  ")
+}

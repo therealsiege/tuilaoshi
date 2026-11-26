@@ -29,7 +29,7 @@ func (m Model) View() string {
 			words = append(words, w.Chinese)
 		}
 		b.WriteString(ui.MutedStyle.Render("  Its words: "+strings.Join(words, " ")) + "\n")
-		b.WriteString(ui.MutedStyle.Render("  When it comes, its story, two questions and a 元宝 will be here, and its words join your reviews.") + "\n")
+		b.WriteString(ui.MutedStyle.Render(ui.WrapIndent("When it comes, its story, two questions and a 元宝 will be here, and its words join your reviews.", m.width)) + "\n")
 		b.WriteString("\n" + ui.HelpStyle.Render("  esc back"))
 		return b.String()
 	}

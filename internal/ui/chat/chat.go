@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/claude"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
@@ -170,42 +171,43 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	var b strings.Builder
-
-	title := ui.TitleStyle.Render("Chat 对话")
-	b.WriteString(title)
-	b.WriteString("\n\n")
+	var head strings.Builder
+	head.WriteString(ui.TitleStyle.Render("Chat 对话"))
+	head.WriteString("\n\n")
 	if !m.claude.Ready() {
-		b.WriteString(ui.WarningStyle.Render("  Chat with the tutor "+claude.NeedsKey+". Reviews and flashcards still work, checked without Claude.") + "\n\n")
+		head.WriteString(ui.WarningStyle.Render(ui.WrapIndent("Chat with the tutor "+claude.NeedsKey+". Reviews and flashcards still work, checked without Claude.", m.width)) + "\n\n")
 	}
-	b.WriteString(ui.AudioError(m.ttsErr))
+	head.WriteString(ui.AudioError(m.ttsErr))
 
-	// Messages viewport
-	contentHeight := m.height - 8
-	if contentHeight < 10 {
-		contentHeight = 10
-	}
 	contentWidth := m.width - 4
 	if contentWidth < 40 {
 		contentWidth = 60
 	}
+	var tail strings.Builder
+	if m.state == stateWaiting {
+		tail.WriteString(ui.MutedStyle.Render("  Claude is thinking..."))
+	} else {
+		m.input.SetWidth(contentWidth - 8)
+		tail.WriteString("  " + m.input.View())
+	}
+	tail.WriteString("\n")
+	tail.WriteString(ui.HelpStyle.Render("  enter send · ctrl+space toggle input · pgup/pgdn scroll · esc back"))
+
+	// The messages fill what the title, the box's border and the input
+	// leave of the window.
+	box := ui.BorderStyle.Width(contentWidth)
+	chrome := lipgloss.Height(box.Render("")) - 1
+	contentHeight := m.height - lipgloss.Height(head.String()) - lipgloss.Height(tail.String()) - chrome
+	switch {
+	case m.height <= 0:
+		contentHeight = 10
+	case contentHeight < 3:
+		contentHeight = 3
+	}
 	m.viewport.Width = contentWidth
 	m.viewport.Height = contentHeight
 
-	b.WriteString(ui.BorderStyle.Width(contentWidth).Render(m.viewport.View()))
-	b.WriteString("\n")
-
-	// Input area
-	if m.state == stateWaiting {
-		b.WriteString(ui.MutedStyle.Render("  Claude is thinking..."))
-	} else {
-		m.input.SetWidth(contentWidth - 8)
-		b.WriteString("  " + m.input.View())
-	}
-	b.WriteString("\n")
-	b.WriteString(ui.HelpStyle.Render("  enter send · ctrl+space toggle input · pgup/pgdn scroll · esc back"))
-
-	return b.String()
+	return head.String() + box.Render(m.viewport.View()) + "\n" + tail.String()
 }
 
 func (m *Model) refreshViewport() {

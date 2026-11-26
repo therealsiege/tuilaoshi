@@ -23,7 +23,7 @@ func (m Model) View() string {
 	}
 	var b strings.Builder
 	b.WriteString(ui.TitleStyle.MarginBottom(0).Render("师徒 Party & Bonds") + "\n")
-	b.WriteString(ui.MutedStyle.Render("  Bonds grow by talking in Chinese (t) and when a companion's assist helps you win with fresh words.") + "\n\n")
+	b.WriteString(ui.MutedStyle.Render(ui.WrapIndent("Bonds grow by talking in Chinese (t) and when a companion's assist helps you win with fresh words.", m.width)) + "\n\n")
 	b.WriteString(ui.LoadError(m.loadErr))
 	list, detail := m.listView(), m.detailView()
 	if m.width == 0 || m.width >= listWidth+50 {

@@ -187,11 +187,11 @@ func (m Model) viewVictory() string {
 		ui.ChineseStyle.Render(m.battle.Enemy.Chinese))
 	switch {
 	case m.stage != nil && m.lastFoe():
-		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  Tribulation %d cleared! The road west opens.", m.stage.Number)))
+		b.WriteString(ui.WarningStyle.Render(ui.WrapIndent(fmt.Sprintf("Tribulation %d cleared! The road west opens.", m.stage.Number), m.width)))
 		b.WriteString("\n\n")
 	case m.stage != nil:
 		b.WriteString(m.renderGauntlet())
-		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  Next: %s. You rest and recover a little.", m.nextFoeName())))
+		b.WriteString(ui.WarningStyle.Render(ui.WrapIndent(fmt.Sprintf("Next: %s. You rest and recover a little.", m.nextFoeName()), m.width)))
 		b.WriteString("\n\n")
 	}
 	b.WriteString(m.renderEarned())
@@ -375,7 +375,7 @@ func (m Model) renderStakes() string {
 		fmt.Fprintf(&b, "  %s %s %s\n", ui.MutedStyle.Render(fmt.Sprintf("Tribulation %d ·", m.stage.Number)),
 			ui.ChineseStyle.Render(m.stage.Name), m.stage.English)
 		if m.stage.Boss != nil {
-			b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  BOSS! It will test your weakest words. Theme: %s", m.stage.Boss.Theme)))
+			b.WriteString(ui.WarningStyle.Render(ui.WrapIndent(fmt.Sprintf("BOSS! It will test your weakest words. Theme: %s", m.stage.Boss.Theme), m.width)))
 			b.WriteString("\n")
 		}
 		if journey.SceneFor(m.stage.Number) == nil {
@@ -390,31 +390,35 @@ func (m Model) renderStakes() string {
 		}
 		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("  Words: %s · %d/%d learned", m.stage.Words.Name, m.words.Learned, m.words.Total)))
 	case m.inner:
-		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  心魔 The Inner Demon: the %d words you missed this week, risen against you.", len(m.cards))))
+		b.WriteString(ui.WarningStyle.Render(ui.WrapIndent(fmt.Sprintf("心魔 The Inner Demon: the %d words you missed this week, risen against you.", len(m.cards)), m.width)))
 		b.WriteString("\n" + ui.MutedStyle.Render("  Beat it to put them right: the first win each week pays 40 铜钱 and a 元宝."))
 	case m.nightmare != nil:
-		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  梦魇 Nightmare: %s returns, half as strong again, asking only your weakest words.", m.nightmare.Name)))
+		b.WriteString(ui.WarningStyle.Render(ui.WrapIndent(fmt.Sprintf("梦魇 Nightmare: %s returns, half as strong again, asking only your weakest words.", m.nightmare.Name), m.width)))
 	case m.road && m.next != nil:
-		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  %s leaps out on the road!", m.battle.Enemy.Chinese)))
-		fmt.Fprintf(&b, "\n  %s", ui.MutedStyle.Render(fmt.Sprintf("Quizzing tribulation %d's words: %s. Your wounds carry on after the fight.", m.next.Number, m.next.Words.Name)))
+		b.WriteString(ui.WarningStyle.Render(ui.WrapIndent(fmt.Sprintf("%s leaps out on the road!", m.battle.Enemy.Chinese), m.width)))
+		b.WriteString("\n" + ui.MutedStyle.Render(ui.WrapIndent(fmt.Sprintf("Quizzing tribulation %d's words: %s. Your wounds carry on after the fight.", m.next.Number, m.next.Words.Name), m.width)))
 	case m.next != nil && m.next.Status == journey.StageOpen && !m.road:
 		b.WriteString(ui.WarningStyle.Render("  Sparring at camp (practice)."))
-		fmt.Fprintf(&b, "\n  %s", ui.MutedStyle.Render(fmt.Sprintf("Tribulation %d, %s, waits on the road: walk to its red marker.", m.next.Number, m.next.English)))
+		b.WriteString("\n" + ui.MutedStyle.Render(ui.WrapIndent(fmt.Sprintf("Tribulation %d, %s, waits on the road: walk to its red marker.", m.next.Number, m.next.English), m.width)))
 	case m.next != nil:
-		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  %s blocks your path! (practice)", m.foeKind())))
+		b.WriteString(ui.WarningStyle.Render(ui.WrapIndent(fmt.Sprintf("%s blocks your path! (practice)", m.foeKind()), m.width)))
 		need := journey.NeedText(*m.next, m.counts)
-		fmt.Fprintf(&b, "\n  %s", ui.MutedStyle.Render(fmt.Sprintf("%s%s to open tribulation %d, %s. Practising its words: %s.",
-			strings.ToUpper(need[:1]), need[1:], m.next.Number, m.next.English, m.next.Words.Name)))
+		b.WriteString("\n" + ui.MutedStyle.Render(ui.WrapIndent(fmt.Sprintf("%s%s to open tribulation %d, %s. Practising its words: %s.",
+			strings.ToUpper(need[:1]), need[1:], m.next.Number, m.next.English, m.next.Words.Name), m.width)))
 	default:
 		b.WriteString(ui.WarningStyle.Render("  All 81 tribulations cleared. Practice freely."))
 	}
 	return b.String() + "\n\n"
 }
 
+// portraitRows is the window height below which battles leave the
+// portrait out: with it, the fight wouldn't fit.
+const portraitRows = 34
+
 // portrait draws an enemy's picture (or its ASCII art), or nothing when
-// the learner has turned portraits off.
+// the learner has turned portraits off or the window is too short.
 func (m Model) portrait(path, art string, w, h int) string {
-	if ui.Prefs.Portraits == "off" {
+	if ui.Prefs.Portraits == "off" || (m.height > 0 && m.height < portraitRows) {
 		return ""
 	}
 	return imgview.RenderWithFallback(path, w, h, art)
