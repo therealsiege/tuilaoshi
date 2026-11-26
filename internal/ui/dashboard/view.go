@@ -41,7 +41,7 @@ func (m Model) View() string {
 	}
 
 	if m.note != "" {
-		b.WriteString(ui.WarningStyle.Render("  "+m.note) + "\n")
+		b.WriteString(ui.WarningStyle.Render(ui.WrapIndent(m.note, m.width)) + "\n")
 	}
 	footer := "  ? help · esc back on the road · T journeys · q quit"
 	if m.tts != nil && m.tts.Available() && !m.compact() {

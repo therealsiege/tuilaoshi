@@ -113,8 +113,9 @@ func (m Model) rest() Model {
 }
 
 // buy buys a bundle of 斋饭 for the road.
-func (m Model) buy() Model {
-	price := m.towns[m.town].Price(journey.FoodPrice)
+// The price rises by markup percent (a wrong measure word, see buy.go).
+func (m Model) buy(markup int) Model {
+	price := m.towns[m.town].Price(journey.FoodPrice) * (100 + markup) / 100
 	if err := m.store.Spend(wiki.Wallet{Tongqian: price}); err != nil {
 		m.note = fmt.Sprintf("%d 斋饭 cost %d 铜钱 here: not enough in the purse.", journey.FoodBundle, price)
 		return m
@@ -129,10 +130,11 @@ func (m Model) buy() Model {
 }
 
 // buySandals puts new straw sandals on the whole party.
-func (m Model) buySandals() Model {
+// The price rises by markup percent (a wrong measure word, see buy.go).
+func (m Model) buySandals(markup int) Model {
 	members := 0
 	m.withTrail(func(_ *journey.Trail, ms []string) { members = len(ms) })
-	price := m.towns[m.town].Price(journey.SandalPrice) * members
+	price := m.towns[m.town].Price(journey.SandalPrice) * members * (100 + markup) / 100
 	if err := m.store.Spend(wiki.Wallet{Tongqian: price}); err != nil {
 		m.note = fmt.Sprintf("草鞋 for the party cost %d 铜钱 here: not enough in the purse.", price)
 		return m

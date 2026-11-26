@@ -1,4 +1,4 @@
-.PHONY: build run test fmt check lint golden recordings launcher demonart freqlist proofsheet clean
+.PHONY: build run test fmt check lint golden recordings launcher demonart freqlist proofsheet sweep clean
 
 GOLANGCI_LINT = go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 
@@ -47,6 +47,11 @@ launcher:
 # make freqlist IN="$$HOME/Desktop/list.xlsx".
 freqlist:
 	go run ./cmd/freqlist -in "$(IN)" -wiki wiki
+
+# Open every screen of the real game at 80x24 and 120x45 (tmux) and fail on
+# a missing title or a cut line. Takes a few minutes.
+sweep:
+	./scripts/sweep.sh
 
 # Every Chinese line of the content in one sheet for a native speaker, e.g.
 # make proofsheet OUT="$$HOME/Desktop/proofsheet.md".

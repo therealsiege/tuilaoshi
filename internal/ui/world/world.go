@@ -33,6 +33,7 @@ const (
 	screenPassport // the stamps collected
 	screenHaggle   // bargaining with the merchant (see haggle.go)
 	screenEyes     // a mystery: find the demon among villagers (see eyes.go)
+	screenBuy      // asking for something at the store (see buy.go)
 )
 
 // Model is the world map view model.
@@ -75,6 +76,7 @@ type Model struct {
 
 	talker Talker    // the merchant's voice; nil without Claude
 	haggle *haggling // the haggle open
+	buying purchase  // the purchase being asked for
 
 	eyes eyes // the town's Fiery Eyes mystery
 
@@ -149,6 +151,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	}
 	back := key.Matches(k, m.gkeys.Back)
 	switch m.screen {
+	case screenBuy:
+		if back && m.buying.picked < 0 {
+			m.screen, m.note = screenTown, ""
+			return m, nil
+		}
+		return m.updateBuy(k), nil
 	case screenHaggle:
 		if back && !m.input.Composing() {
 			m.screen, m.note = screenTown, ""
@@ -219,13 +227,13 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case k.String() == "r":
 			return m.rest(), nil
 		case k.String() == "b":
-			return m.buy(), nil
+			return m.openBuy(false), nil
 		case k.String() == "a":
 			return m.openAlms(), nil
 		case k.String() == "t":
 			return m.trade(), nil
 		case k.String() == "x":
-			return m.buySandals(), nil
+			return m.openBuy(true), nil
 		case k.String() == "o":
 			return m.offer(), nil
 		case k.String() == "l":

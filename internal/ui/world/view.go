@@ -14,6 +14,8 @@ import (
 func (m Model) View() string {
 	var b strings.Builder
 	switch m.screen {
+	case screenBuy:
+		b.WriteString(m.buyView())
 	case screenHaggle:
 		b.WriteString(m.haggleView())
 	case screenGate:

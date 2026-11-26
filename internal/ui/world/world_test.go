@@ -200,14 +200,14 @@ func TestHuntAcceptBeatAndCollect(t *testing.T) {
 
 func TestBuyingFoodAndRestingThePartyInTown(t *testing.T) {
 	m := worldAt(t, 11)
-	m, _ = m.Update(press("b"))
+	m = buyRight(m, "b")
 	if !strings.Contains(m.note, "not enough") {
 		t.Fatalf("bought with an empty purse: %q", m.note)
 	}
 	if err := m.store.Earn(wiki.Wallet{Tongqian: 40}); err != nil {
 		t.Fatal(err)
 	}
-	m, _ = m.Update(press("b"))
+	m = buyRight(m, "b")
 	tr, _, err := journey.LoadTrail(m.store, nil)
 	if err != nil || tr.Food != journey.StartFood+10 {
 		t.Fatalf("after buying: food %d %v", tr.Food, err)
@@ -290,7 +290,7 @@ func TestSandalsAndATempleOffering(t *testing.T) {
 		t.Fatal(err)
 	}
 	m.withTrail(func(tr *journey.Trail, _ []string) { tr.SandalDays = journey.SandalLife + 3 })
-	m, _ = m.Update(press("x"))
+	m = buyRight(m, "x")
 	tr, _, err := journey.LoadTrail(m.store, nil)
 	if err != nil || tr.SandalsWorn() || !strings.Contains(m.note, "New straw sandals") {
 		t.Fatalf("sandals: worn %v %v (%q)", tr.SandalsWorn(), err, m.note)
@@ -399,5 +399,40 @@ func TestTownScreensFitEightyColumns(t *testing.T) {
 	for _, r := range journey.Riddles() {
 		m.riddle, m.answered = r, 1
 		check("riddle " + r.Answer)
+	}
+}
+
+// buyRight asks at the store with key k, picking the right measure word,
+// and goes back to town.
+func buyRight(m Model, k string) Model {
+	m, _ = m.Update(press(k))
+	for i, c := range m.buying.choices {
+		if c == m.buying.right {
+			m, _ = m.Update(press(string(rune('1' + i))))
+		}
+	}
+	m, _ = m.Update(enter)
+	return m
+}
+
+func TestAWrongMeasureWordCostsMore(t *testing.T) {
+	m := worldAt(t, 11)
+	if err := m.store.Earn(wiki.Wallet{Tongqian: 100}); err != nil {
+		t.Fatal(err)
+	}
+	m, _ = m.Update(press("x"))
+	if m.screen != screenBuy || m.buying.right != "双" || !strings.Contains(m.View(), "我要") {
+		t.Fatalf("not asking for sandals:\n%s", m.View())
+	}
+	for i, c := range m.buying.choices {
+		if c != m.buying.right {
+			m, _ = m.Update(press(string(rune('1' + i))))
+			break
+		}
+	}
+	price := m.towns[m.town].Price(journey.SandalPrice) * m.buying.count * (100 + wrongMeasureMarkup) / 100
+	w, err := m.store.Wallet()
+	if err != nil || w.Tongqian != 100-price || !strings.Contains(m.View(), "草鞋论双") {
+		t.Errorf("wrong measure word: purse %d, want %d\n%s", w.Tongqian, 100-price, m.View())
 	}
 }
