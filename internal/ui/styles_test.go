@@ -22,3 +22,16 @@ func TestHeaderIsAClosedBox(t *testing.T) {
 		}
 	}
 }
+
+func TestWrapDisplay(t *testing.T) {
+	got := WrapDisplay("师父别客气，出家人不容易。", 10)
+	if len(got) != 3 || got[0] != "师父别客气，" {
+		t.Errorf("Chinese wraps between characters by width: %q", got)
+	}
+	if got := WrapDisplay("路很好走。", 8); len(got) != 1 {
+		t.Errorf("a closing 。 stays on its line: %q", got)
+	}
+	if got := WrapDisplay("a bit more for you", 8); len(got) != 3 || got[0] != "a bit" {
+		t.Errorf("English wraps at spaces: %q", got)
+	}
+}

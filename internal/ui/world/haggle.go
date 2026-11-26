@@ -177,13 +177,14 @@ func (m Model) haggleView() string {
 	b.WriteString(ui.TitleStyle.MarginBottom(0).Render("讨价还价 Haggling at the store in "+m.towns[m.town].Name) + "  " +
 		ui.WarningStyle.Render(fmt.Sprintf("price now: %d 铜钱 for %d 斋饭", h.price, haggleBundle)) + "\n\n")
 	for _, l := range h.lines[max(len(h.lines)-8, 0):] {
+		who, style := "你  ", ui.UnselectedStyle.UnsetPadding()
 		if l.merchant {
-			b.WriteString("  " + ui.SubtitleStyle.Render("商人") + " " + ui.ChineseStyle.Render(l.zh) + "\n")
-			if l.en != "" {
-				b.WriteString(ui.MutedStyle.Render("       "+l.en) + "\n")
-			}
-		} else {
-			b.WriteString("  " + ui.SubtitleStyle.Render("你  ") + " " + l.zh + "\n")
+			who, style = "商人", ui.ChineseStyle
+		}
+		said := m.lines(style, l.zh, "       ", 100)
+		b.WriteString("  " + ui.SubtitleStyle.Render(who) + " " + strings.TrimPrefix(said, "       "))
+		if l.en != "" {
+			b.WriteString(m.lines(ui.MutedStyle, l.en, "       ", 100))
 		}
 	}
 	b.WriteString("\n")

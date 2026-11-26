@@ -233,3 +233,43 @@ func LoadError(err error) string {
 	}
 	return ErrorStyle.Render(fmt.Sprintf("  Could not read the wiki: %v", err)) + "\n\n"
 }
+
+// closingPunct may run past the width rather than start a line, as in
+// Chinese typesetting.
+const closingPunct = "。，、！？；：”’）》」』…"
+
+// WrapDisplay wraps text to width display columns (Chinese counts two):
+// at spaces where there are any, and between characters inside a run too
+// long to fit, as Chinese has no spaces to break at.
+func WrapDisplay(text string, width int) []string {
+	if width <= 0 {
+		return []string{text}
+	}
+	var lines []string
+	line := ""
+	put := func(word string) {
+		sep := ""
+		if line != "" {
+			sep = " "
+		}
+		if lipgloss.Width(line+sep+word) <= width {
+			line += sep + word
+			return
+		}
+		if line != "" {
+			lines = append(lines, line)
+			line = ""
+		}
+		for _, r := range word {
+			if lipgloss.Width(line+string(r)) > width && !strings.ContainsRune(closingPunct, r) {
+				lines = append(lines, line)
+				line = ""
+			}
+			line += string(r)
+		}
+	}
+	for _, w := range strings.Fields(text) {
+		put(w)
+	}
+	return append(lines, line)
+}

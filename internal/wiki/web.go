@@ -16,10 +16,16 @@ type StudiedWord struct {
 	Lapses int
 }
 
-// StudiedWords returns the character and vocabulary cards reviewed at
-// least once. Grammar cards are left out: they are patterns, not words.
+// StudiedWords returns the character and vocabulary cards reviewed in the
+// game at least once (a review saved in the progress file; a page's
+// starting review dates don't count). Grammar cards are left out: they are
+// patterns, not words.
 func (s *Store) StudiedWords() ([]StudiedWord, error) {
 	cards, err := s.DrillableCards()
+	if err != nil {
+		return nil, err
+	}
+	seen, err := s.reviewed()
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +35,7 @@ func (s *Store) StudiedWords() ([]StudiedWord, error) {
 	}
 	var words []StudiedWord
 	for _, c := range cards {
-		if c.Type == model.CardGrammar || c.LastReviewed.IsZero() || c.Chinese == "" {
+		if c.Type == model.CardGrammar || !seen[c.ID] || c.Chinese == "" {
 			continue
 		}
 		words = append(words, StudiedWord{Card: c, Lapses: lapses[c.ID]})

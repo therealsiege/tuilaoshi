@@ -64,8 +64,8 @@ func weekLetter(store *wiki.Store, now time.Time) (wiki.Letter, bool, error) {
 // composeLetter writes the letter's Chinese and English from the week's
 // numbers.
 func composeLetter(reviews, pct int, hard []string, due, missed int) (string, string) {
-	zh := []string{"圣僧：", fmt.Sprintf("这个星期你复习了%d次，记住了百分之%d。", reviews, pct)}
-	en := []string{"Holy monk,", fmt.Sprintf("This week you reviewed %d times and remembered %d%%.", reviews, pct)}
+	zh := []string{"圣僧：", fmt.Sprintf("上个星期你复习了%d次，记住了百分之%d。", reviews, pct)}
+	en := []string{"Holy monk,", fmt.Sprintf("Last week you reviewed %d times and remembered %d%%.", reviews, pct)}
 	switch {
 	case pct >= 85:
 		zh, en = append(zh, "你学得很认真，我很高兴。"), append(en, "You have studied with care, and I am glad.")
@@ -80,11 +80,11 @@ func composeLetter(reviews, pct int, hard []string, due, missed int) (string, st
 		en = append(en, "A few words keep slipping: "+strings.Join(hard, ", ")+". Look at how they are built in the forge.")
 	}
 	if missed > 0 {
-		zh = append(zh, fmt.Sprintf("这个星期你答错了%d个词，心魔正在等着它们。", missed))
-		en = append(en, fmt.Sprintf("You missed %d words this week, and the Inner Demon is waiting for them.", missed))
+		zh = append(zh, fmt.Sprintf("上个星期你答错了%d个词，心魔正在等着它们。", missed))
+		en = append(en, fmt.Sprintf("You missed %d words last week, and the Inner Demon is waiting for them.", missed))
 	}
-	zh = append(zh, fmt.Sprintf("下个星期有%d个词要复习。西天路远，每天走一点儿就好。", due), "南海 观音")
-	en = append(en, fmt.Sprintf("Next week %d words come up for review. The road west is long; a little each day is enough.", due), "Guanyin of the Southern Sea")
+	zh = append(zh, fmt.Sprintf("这个星期有%d个词要复习。西天路远，每天走一点儿就好。", due), "南海 观音")
+	en = append(en, fmt.Sprintf("This week %d words come up for review. The road west is long; a little each day is enough.", due), "Guanyin of the Southern Sea")
 	return strings.Join(zh, "\n"), strings.Join(en, "\n")
 }
 
@@ -137,12 +137,20 @@ func (m Model) renderLetterLine() string {
 func (m Model) letterView() string {
 	var b strings.Builder
 	b.WriteString(ui.TitleStyle.MarginBottom(0).Render("观音来信 A letter from Guanyin") + "  " + ui.MutedStyle.Render(m.letter.Week) + "\n\n")
+	width := 76
+	if m.width > 0 {
+		width = m.width - 4
+	}
 	for _, l := range strings.Split(m.letter.Text, "\n") {
-		b.WriteString("  " + ui.ChineseStyle.Render(l) + "\n")
+		for _, w := range ui.WrapDisplay(l, width) {
+			b.WriteString("  " + ui.ChineseStyle.Render(w) + "\n")
+		}
 	}
 	b.WriteString("\n")
 	for _, l := range strings.Split(m.letter.English, "\n") {
-		b.WriteString(ui.MutedStyle.Render("  "+l) + "\n")
+		for _, w := range ui.WrapDisplay(l, width) {
+			b.WriteString(ui.MutedStyle.Render("  "+w) + "\n")
+		}
 	}
 	b.WriteString("\n" + ui.HelpStyle.Render("  ctrl+r hear it · enter or esc back to camp"))
 	return b.String()

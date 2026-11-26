@@ -118,6 +118,20 @@ func (m Model) townView() string {
 	return strings.TrimRight(b.String(), "\n")
 }
 
+// lines renders text in style, wrapped to the window (or to most columns,
+// when the window is wider), each line indented by pad.
+func (m Model) lines(style lipgloss.Style, text, pad string, most int) string {
+	width := most
+	if m.width > 0 {
+		width = min(most, m.width-lipgloss.Width(pad)-1)
+	}
+	var b strings.Builder
+	for _, l := range ui.WrapDisplay(text, width) {
+		b.WriteString(pad + style.Render(l) + "\n")
+	}
+	return b.String()
+}
+
 // compactTown is the window height below which the town folds its services
 // into a few lines of keys and prices.
 const compactTown = 34

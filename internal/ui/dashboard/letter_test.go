@@ -13,7 +13,7 @@ import (
 
 func TestComposeLetter(t *testing.T) {
 	zh, en := composeLetter(40, 90, []string{"已", "未"}, 12, 3)
-	for _, want := range []string{"复习了40次", "百分之90", "已、未", "答错了3个词", "有12个词", "南海 观音"} {
+	for _, want := range []string{"上个星期你复习了40次", "百分之90", "已、未", "答错了3个词", "有12个词", "南海 观音"} {
 		if !strings.Contains(zh, want) {
 			t.Errorf("letter lacks %q:\n%s", want, zh)
 		}
@@ -43,7 +43,7 @@ func TestAWeeklyLetterComesAfterAWeekOfReviews(t *testing.T) {
 		t.Fatalf("no unread letter at camp:\n%s", m.View())
 	}
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("n")})
-	if out := m.View(); !strings.Contains(out, "圣僧") || !strings.Contains(out, "复习了1次") || m.Hear() == "" {
+	if out := m.View(); !strings.Contains(out, "圣僧") || !strings.Contains(out, "上个星期你复习了1次") || m.Hear() == "" {
 		t.Errorf("letter view:\n%s", out)
 	}
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEsc})

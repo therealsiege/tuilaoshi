@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 )
@@ -18,15 +19,15 @@ func (m Model) eyesView() string {
 	my := e.mystery
 	var b strings.Builder
 	b.WriteString(ui.TitleStyle.MarginBottom(0).Render("火眼金睛 Fiery Eyes in "+m.towns[m.town].Name) + "  " + ui.MutedStyle.Render(my.Title+" · "+my.English) + "\n\n")
-	b.WriteString("  " + ui.ChineseStyle.Render(ui.WrapText(my.Situation, 36)) + "\n")
+	b.WriteString(m.lines(ui.ChineseStyle, my.Situation, "  ", 72))
 	if e.english {
-		b.WriteString(mutedWrap(my.SituationEnglish, "  ", 72))
+		b.WriteString(m.mutedWrap(my.SituationEnglish, "  ", 72))
 	}
 	b.WriteString("\n  " + ui.SubtitleStyle.Render("大家都知道：") + "\n")
 	for i, f := range my.Facts {
-		b.WriteString("  · " + ui.ChineseStyle.Render(f) + "\n")
+		b.WriteString(m.lines(ui.ChineseStyle, "· "+f, "  ", 72))
 		if e.english {
-			b.WriteString(mutedWrap(my.FactsEnglish[i], "    ", 72))
+			b.WriteString(m.mutedWrap(my.FactsEnglish[i], "    ", 72))
 		}
 	}
 	b.WriteString("\n")
@@ -35,7 +36,11 @@ func (m Model) eyesView() string {
 		if i == e.who && (e.asking || len(e.talks[i]) > 0) {
 			marker = ui.SelectedStyle.UnsetPadding().UnsetMargins().Render("▸ ")
 		}
-		fmt.Fprintf(&b, "  %s%d  %s %s  %s\n", marker, i+1, ui.ChineseStyle.Render(v.Name), v.Role, ui.MutedStyle.Render(v.English))
+		line := fmt.Sprintf("  %s%d  %s %s", marker, i+1, ui.ChineseStyle.Render(v.Name), v.Role)
+		if en := "  " + v.English; m.width == 0 || lipgloss.Width(line+en) < m.width {
+			line += ui.MutedStyle.Render(en)
+		}
+		b.WriteString(line + "\n")
 	}
 	if e.accused >= 0 {
 		b.WriteString(m.verdictView())
@@ -50,7 +55,7 @@ func (m Model) eyesView() string {
 	case e.asking:
 		help = fmt.Sprintf("  enter ask · ctrl+space pinyin/English · esc stop asking · %d left", left)
 	}
-	b.WriteString("\n" + ui.HelpStyle.Render(help))
+	b.WriteString("\n" + m.lines(ui.HelpStyle.UnsetMarginTop(), strings.TrimSpace(help), "  ", 200))
 	return b.String()
 }
 
@@ -69,9 +74,9 @@ func (m Model) talkView() string {
 		b.WriteString("  " + ui.MutedStyle.Render("你：") + x.question + "\n")
 		switch {
 		case x.answer != "":
-			b.WriteString("  " + ui.ChineseStyle.Render(v.Name+"："+ui.WrapText(x.answer, 34)) + "\n")
+			b.WriteString(m.lines(ui.ChineseStyle, v.Name+"："+x.answer, "  ", 72))
 			if e.english && x.english != "" {
-				b.WriteString(mutedWrap(x.english, "      ", 70))
+				b.WriteString(m.mutedWrap(x.english, "      ", 70))
 			}
 		case e.waiting:
 			b.WriteString(ui.MutedStyle.Render("  "+v.Name+" thinks…") + "\n")
@@ -95,9 +100,9 @@ func (m Model) verdictView() string {
 		b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("  %s is only a villager. In the fuss, %s slips away: it was the demon. The party's spirits sink.", e.mystery.Villagers[e.accused].Name, d.Name)) + "\n")
 	}
 	b.WriteString("\n  " + ui.SubtitleStyle.Render("破绽 The flaw in its story") + "\n")
-	b.WriteString("  " + ui.ChineseStyle.Render(d.Lie) + "\n")
-	b.WriteString("  " + ui.ChineseStyle.Render(d.Flaw) + "\n")
-	b.WriteString(mutedWrap(d.FlawEnglish, "  ", 72))
+	b.WriteString(m.lines(ui.ChineseStyle, d.Lie, "  ", 72))
+	b.WriteString(m.lines(ui.ChineseStyle, d.Flaw, "  ", 72))
+	b.WriteString(m.mutedWrap(d.FlawEnglish, "  ", 72))
 	help := "  enter back to town"
 	switch {
 	case e.foe != nil:
@@ -110,11 +115,8 @@ func (m Model) verdictView() string {
 	return b.String()
 }
 
-// mutedWrap wraps English to width, each line indented by pad and dimmed.
-func mutedWrap(text, pad string, width int) string {
-	var b strings.Builder
-	for _, line := range strings.Split(ui.WrapText(text, width), "\n") {
-		b.WriteString(ui.MutedStyle.Render(pad+line) + "\n")
-	}
-	return b.String()
+// mutedWrap wraps English to the window, each line indented by pad and
+// dimmed; width is the most columns used when the window is wider.
+func (m Model) mutedWrap(text, pad string, width int) string {
+	return m.lines(ui.MutedStyle, text, pad, width)
 }

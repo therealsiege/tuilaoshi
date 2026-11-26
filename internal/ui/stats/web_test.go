@@ -1,6 +1,9 @@
 package stats
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -113,6 +116,22 @@ func webWiki(t *testing.T) *wiki.Store {
 	})
 	cards, err := store.DrillableCards()
 	if err != nil {
+		t.Fatal(err)
+	}
+	// The pages' review dates only mark which words the game has reviewed:
+	// save those as the reviews they stand for.
+	var saved strings.Builder
+	for _, c := range cards {
+		if !c.LastReviewed.IsZero() {
+			fmt.Fprintf(&saved, "%q:\n    last_reviewed: %q\n    review_interval: %d\n    next_review: %q\n",
+				c.ID, wiki.FormatDate(c.LastReviewed), c.ReviewInterval, wiki.FormatDate(c.NextReview))
+		}
+	}
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "schedules.yaml"), []byte(saved.String()), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Import(dir); err != nil {
 		t.Fatal(err)
 	}
 	for i := range cards {

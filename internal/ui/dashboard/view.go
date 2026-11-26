@@ -84,13 +84,28 @@ func (m Model) renderCompact() string {
 	if t, _ := journey.TermOn(m.now()); t.Name != "" {
 		week = append(week, "节气 "+t.Name)
 	}
+	if m.letter != nil && !m.letter.Read {
+		week = append(week, ui.WarningStyle.Render("来信 a letter (n)"))
+	}
 	if m.missed >= journey.InnerDemonWakes {
 		week = append(week, ui.ErrorStyle.Render("心魔 wakes (m)"))
 	} else {
 		week = append(week, fmt.Sprintf("心魔 %d/%d", m.missed, journey.InnerDemonWakes))
 	}
 	b.WriteString("  " + ui.MutedStyle.Render(strings.Join(week, " · ")) + "\n\n")
-	b.WriteString(m.renderStartHere() + "\n\n")
+	key, what := m.startHere()
+	startWidth := 76
+	if m.width > 0 {
+		startWidth = m.width - 22
+	}
+	for i, l := range ui.WrapDisplay(what, startWidth) {
+		if i == 0 {
+			b.WriteString("  " + ui.WarningStyle.Render("▶ Start here") + "   " + ui.ChineseStyle.Render(key) + "  " + l + "\n")
+		} else {
+			b.WriteString(strings.Repeat(" ", 20) + l + "\n")
+		}
+	}
+	b.WriteString("\n")
 	var keys []string
 	for _, g := range ui.DashboardMenu {
 		for _, it := range g.Items {
@@ -227,7 +242,13 @@ const firstCheckDue = 500
 // learner facing a big backlog, due reviews, then the open journey stage,
 // then reading.
 func (m Model) renderStartHere() string {
-	key, what := "t", "Read & listen to something new"
+	key, what := m.startHere()
+	return "  " + ui.WarningStyle.Render("▶ Start here") + "   " + ui.ChineseStyle.Render(key) + "  " + what
+}
+
+// startHere is the one next step: its key and what it does.
+func (m Model) startHere() (key, what string) {
+	key, what = "t", "Read & listen to something new"
 	switch s := m.journeyState.Stage; {
 	case !m.assessed && m.due > firstCheckDue:
 		key, what = "a", fmt.Sprintf("Check your level first: words you already know leave today's %s due", thousands(m.due))
@@ -243,7 +264,7 @@ func (m Model) renderStartHere() string {
 	case s != nil && s.Status == journey.StageOpen:
 		key, what = "esc", fmt.Sprintf("Tribulation %d is open: walk to its red marker on the road", s.Number)
 	}
-	return "  " + ui.WarningStyle.Render("▶ Start here") + "   " + ui.ChineseStyle.Render(key) + "  " + what
+	return key, what
 }
 
 // renderMenu lays the menu groups side by side, or stacked when narrow.
