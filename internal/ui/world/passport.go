@@ -73,8 +73,8 @@ func (m Model) gateView() string {
 	g, t := m.gate, m.towns[m.town]
 	var b strings.Builder
 	b.WriteString(ui.TitleStyle.MarginBottom(0).Render("通关文牒 At the gate of "+t.Name) + "  " + ui.MutedStyle.Render(g.Officer+" · "+g.OfficerEnglish) + "\n\n")
-	b.WriteString("  " + ui.ChineseStyle.Render(g.Greeting) + "\n")
-	b.WriteString(ui.MutedStyle.Render("  "+g.GreetingEnglish) + "\n\n")
+	b.WriteString(m.lines(ui.ChineseStyle, g.Greeting, "  ", 76))
+	b.WriteString(m.lines(ui.MutedStyle, g.GreetingEnglish, "  ", 76) + "\n")
 	if m.answered > 0 {
 		b.WriteString("      " + ui.ErrorStyle.Render("【 "+t.Name+" 印 】") + "\n\n")
 		b.WriteString(ui.SuccessStyle.Render(fmt.Sprintf("  The officer stamps your rescript with %s's seal, and the court sends %d 铜钱.", t.Name, journey.StampPay)) + "\n")
@@ -87,7 +87,7 @@ func (m Model) gateView() string {
 	q := g.Questions[m.gateQ]
 	fmt.Fprintf(&b, "  %d. %s\n", m.gateQ+1, ui.ChineseStyle.Render(q.Ask))
 	if m.misses > 0 {
-		b.WriteString(ui.MutedStyle.Render("     "+q.English) + "\n")
+		b.WriteString(m.lines(ui.MutedStyle, q.English, "     ", 76))
 	}
 	if m.misses > 1 {
 		b.WriteString(ui.MutedStyle.Render("     e.g. "+q.Sample()) + "\n")

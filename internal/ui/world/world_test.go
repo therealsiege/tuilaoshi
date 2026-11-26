@@ -8,6 +8,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
@@ -366,5 +367,37 @@ func TestAKingdomsGateStampsTheRescript(t *testing.T) {
 	m, _ = m.Update(press("p"))
 	if m.screen != screenPassport || !strings.Contains(m.View(), "1 of 10 seals") {
 		t.Errorf("passport:\n%s", m.View())
+	}
+}
+
+func TestTownScreensFitEightyColumns(t *testing.T) {
+	m := worldAt(t, 80).SetSize(80, 24)
+	check := func(what string) {
+		t.Helper()
+		out := m.View()
+		for _, l := range strings.Split(out, "\n") {
+			if lipgloss.Width(l) > 80 {
+				t.Errorf("%s: a line %d wide: %s", what, lipgloss.Width(l), l)
+			}
+		}
+		if n := strings.Count(out, "\n") + 1; n > 24 {
+			t.Errorf("%s takes %d lines:\n%s", what, n, out)
+		}
+	}
+	for _, g := range journey.Gates() {
+		m = m.OpenTown(g.Town)
+		check("town " + g.Town)
+		m.gate, m.gateQ, m.misses, m.answered, m.screen = g, 3, 2, -1, screenGate
+		check("gate " + g.Town)
+	}
+	m.screen = screenAlms
+	for _, a := range journey.AlmsScenes() {
+		m.alms, m.almsOrder, m.answered = a, []int{0, 1, 2}, 0
+		check("alms " + a.Text)
+	}
+	m.screen = screenRiddle
+	for _, r := range journey.Riddles() {
+		m.riddle, m.answered = r, 1
+		check("riddle " + r.Answer)
 	}
 }

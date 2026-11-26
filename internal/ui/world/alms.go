@@ -67,9 +67,9 @@ func (m Model) almsView() string {
 	a := m.alms
 	var b strings.Builder
 	b.WriteString(ui.TitleStyle.MarginBottom(0).Render("化缘 Asking for alms in "+m.towns[m.town].Name) + "\n\n")
-	b.WriteString("  " + ui.ChineseStyle.Render(a.Text) + "\n")
+	b.WriteString(m.lines(ui.ChineseStyle, a.Text, "  ", 76))
 	if m.answered >= 0 {
-		b.WriteString(ui.MutedStyle.Render("  "+a.English) + "\n")
+		b.WriteString(m.lines(ui.MutedStyle, a.English, "  ", 76))
 	}
 	b.WriteString("\n  " + ui.SubtitleStyle.Render("你说：") + "\n")
 	for i, j := range m.almsOrder {
@@ -82,7 +82,7 @@ func (m Model) almsView() string {
 		}
 		b.WriteString(line + "\n")
 		if m.answered >= 0 {
-			b.WriteString(ui.MutedStyle.Render("     "+a.EnglishChoices[j]) + "\n")
+			b.WriteString(m.lines(ui.MutedStyle, a.EnglishChoices[j], "     ", 76))
 		}
 	}
 	if m.answered < 0 {
@@ -91,8 +91,8 @@ func (m Model) almsView() string {
 	}
 	b.WriteString("\n")
 	if m.almsOrder[m.answered] == 0 {
-		b.WriteString("  " + ui.ChineseStyle.Render(a.Thanks) + "\n")
-		b.WriteString(ui.MutedStyle.Render("  "+a.ThanksEnglish) + "\n")
+		b.WriteString(m.lines(ui.ChineseStyle, a.Thanks, "  ", 76))
+		b.WriteString(m.lines(ui.MutedStyle, a.ThanksEnglish, "  ", 76))
 		b.WriteString(ui.SuccessStyle.Render(fmt.Sprintf("  +%d 斋饭, and the party's spirits lift.", journey.AlmsFood)) + "\n")
 	} else {
 		b.WriteString(ui.WarningStyle.Render("  They frown and turn away. A monk asks humbly; try again tomorrow.") + "\n")

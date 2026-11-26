@@ -82,7 +82,7 @@ func (m Model) writingView() string {
 	var b strings.Builder
 	b.WriteString(ui.TitleStyle.MarginBottom(0).Render(q.Title) + "  " + ui.MutedStyle.Render(q.Giver+" · "+q.GiverEnglish) + "\n\n")
 	b.WriteString("  " + ui.ChineseStyle.Render(q.Text) + "\n")
-	b.WriteString(ui.MutedStyle.Render("  "+q.English) + "\n\n")
+	b.WriteString(m.lines(ui.MutedStyle, q.English, "  ", 76) + "\n")
 	b.WriteString("  " + m.input.View() + "\n\n")
 	switch {
 	case m.grading:
@@ -93,7 +93,7 @@ func (m Model) writingView() string {
 		b.WriteString(ui.WarningStyle.Render("  Not yet: edit it and send again.") + "\n")
 	}
 	if m.feedback != "" {
-		b.WriteString(ui.MutedStyle.Render("  "+ui.WrapText(m.feedback, 72)) + "\n")
+		b.WriteString(m.lines(ui.MutedStyle, m.feedback, "  ", 76))
 	}
 	help := "  enter send · ctrl+space pinyin/English · esc back"
 	if m.answered > 0 {

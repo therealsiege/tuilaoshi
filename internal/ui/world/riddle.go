@@ -106,8 +106,8 @@ func (m Model) riddleView() string {
 		return b.String()
 	}
 	b.WriteString("      " + ui.ChineseStyle.Render("谜底："+r.Answer) + " " + ui.PinyinStyle.Render(r.Pinyin) + "\n")
-	b.WriteString(ui.MutedStyle.Render("  "+r.English) + "\n")
-	b.WriteString(ui.MutedStyle.Render("  "+r.Explain) + "\n\n")
+	b.WriteString(m.lines(ui.MutedStyle, r.English, "  ", 76))
+	b.WriteString(m.lines(ui.MutedStyle, r.Explain, "  ", 76) + "\n")
 	if m.answered > 0 {
 		pay := journey.RiddlePay
 		if m.feast() {

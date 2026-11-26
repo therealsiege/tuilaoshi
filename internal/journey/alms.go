@@ -24,3 +24,6 @@ func PickAlms(rng *rand.Rand) Alms { return content.Alms[rng.Intn(len(content.Al
 
 // Barter is what a town's store gives in 斋饭 for one material.
 const Barter = 6
+
+// AlmsScenes returns every alms scene.
+func AlmsScenes() []Alms { return content.Alms }

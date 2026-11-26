@@ -58,7 +58,7 @@ func (m Model) huntView() string {
 	var b strings.Builder
 	b.WriteString(ui.TitleStyle.MarginBottom(0).Render(q.Title) + "  " + ui.MutedStyle.Render(q.Giver+" · "+q.GiverEnglish) + "\n\n")
 	b.WriteString("  " + ui.ChineseStyle.Render(ui.WrapText(q.Text, 36)) + "\n\n")
-	b.WriteString(ui.MutedStyle.Render("  "+ui.WrapText(q.English, 72)) + "\n\n")
+	b.WriteString(m.lines(ui.MutedStyle, q.English, "  ", 76) + "\n")
 	target := q.Target
 	if e := journey.EnemyLookup(q.Target); e != nil {
 		target += " " + e.English

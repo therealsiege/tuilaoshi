@@ -40,7 +40,7 @@ func (m Model) View() string {
 		b.WriteString(m.townView())
 	}
 	if m.note != "" {
-		b.WriteString("\n" + ui.WarningStyle.Render("  "+m.note))
+		b.WriteString("\n" + strings.TrimRight(m.lines(ui.WarningStyle, m.note, "  ", 76), "\n"))
 	}
 	return b.String()
 }
