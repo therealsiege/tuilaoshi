@@ -78,7 +78,7 @@ func (m Model) stoneView() string {
 	b.WriteString("  " + s.Meaning + "\n")
 	b.WriteString("  " + ui.MutedStyle.Render(s.Clue) + "\n")
 	if m.hinted || m.answered > 0 {
-		b.WriteString("  " + ui.PinyinStyle.Render(s.Pinyin) + "\n")
+		b.WriteString("  " + ui.Pinyin(s.Pinyin) + "\n")
 	}
 	b.WriteString("\n  " + m.input.View() + "\n\n")
 	if m.answered > 0 {

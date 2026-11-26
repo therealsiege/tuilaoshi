@@ -162,7 +162,7 @@ func renderWordDetail(q *rpgengine.CombatQuestion) string {
 		parts = append(parts, ui.ChineseStyle.Render(q.Chinese))
 	}
 	if q.Pinyin != "" {
-		parts = append(parts, ui.PinyinStyle.Render(q.Pinyin))
+		parts = append(parts, ui.Pinyin(q.Pinyin))
 	}
 	if q.English != "" {
 		parts = append(parts, ui.MutedStyle.Render(q.English))
@@ -215,7 +215,7 @@ func (m Model) viewDefeat() string {
 
 	b.WriteString(ui.MutedStyle.Render("  The demon overwhelms you..."))
 	b.WriteString("\n")
-	b.WriteString(ui.PinyinStyle.Render("  失败乃成功之母 -- Failure is the mother of success."))
+	b.WriteString(ui.Pinyin("  失败乃成功之母 -- Failure is the mother of success."))
 	b.WriteString("\n\n")
 
 	fmt.Fprintf(&b, "  Turns survived:  %d\n", m.battle.Turn)

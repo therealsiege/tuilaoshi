@@ -52,7 +52,7 @@ func (m Model) renderLore() string {
 			b.WriteString("\n\n")
 
 			// Pinyin
-			b.WriteString("  " + ui.PinyinStyle.Render(entry.Pinyin))
+			b.WriteString("  " + ui.Pinyin(entry.Pinyin))
 			b.WriteString("\n\n")
 
 			// English translation

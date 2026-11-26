@@ -14,11 +14,12 @@ type Settings struct {
 	ReviewChunk int    `yaml:"review_chunk"` // due words "Start here" suggests at once
 	NewWords    int    `yaml:"new_words"`    // frequency-list words introduced a day
 	ClaudeCap   int    `yaml:"claude_cap"`   // Claude calls allowed a day; 0 for no limit
+	ToneColours bool   `yaml:"tone_colours"` // pinyin drawn in its tones' colours
 }
 
 // DefaultSettings are the settings before the learner changes any.
 func DefaultSettings() Settings {
-	return Settings{Speech: true, Effects: true, Input: "chinese", Difficulty: "adaptive", Encounters: "normal", Portraits: "large", ReviewChunk: 20, NewWords: 10}
+	return Settings{Speech: true, Effects: true, Input: "chinese", Difficulty: "adaptive", Encounters: "normal", Portraits: "large", ReviewChunk: 20, NewWords: 10, ToneColours: true}
 }
 
 // Settings reads the learner's settings, filling any missing with defaults.

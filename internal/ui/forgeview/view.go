@@ -40,7 +40,7 @@ func (m Model) puzzleView() string {
 	c := m.queue[m.cur]
 	var b strings.Builder
 	fmt.Fprintf(&b, "  %s  %s   %s\n\n", ui.MutedStyle.Render(fmt.Sprintf("%d/%d", m.cur+1, len(m.queue))),
-		ui.PinyinStyle.Render(c.Pinyin), c.English)
+		ui.Pinyin(c.Pinyin), c.English)
 	parts := m.comps[c.Chinese]
 	var slots []string
 	for i := range parts {

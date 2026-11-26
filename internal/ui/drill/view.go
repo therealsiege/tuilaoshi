@@ -201,7 +201,7 @@ func (m Model) renderEncounter() string {
 
 	// Narrative intro
 	b.WriteString("  ")
-	b.WriteString(ui.PinyinStyle.Render(enc.IntroEng))
+	b.WriteString(ui.Pinyin(enc.IntroEng))
 	b.WriteString("\n")
 
 	// Challenge text and progress
@@ -231,12 +231,12 @@ func (m Model) renderCard(card model.Card) string {
 		chinese := ui.ChineseStyle.Render(card.Chinese)
 		content = fmt.Sprintf("  What does this mean?\n\n      %s", chinese)
 		if card.Pinyin != "" {
-			content += "\n      " + ui.PinyinStyle.Render(card.Pinyin)
+			content += "\n      " + ui.Pinyin(card.Pinyin)
 		}
 	case model.ModeProduction:
 		content = fmt.Sprintf("  How do you say this in Chinese?\n\n      %s", card.English)
 		if card.Pinyin != "" {
-			content += "\n      " + ui.PinyinStyle.Render("("+card.Pinyin+")")
+			content += "\n      " + ui.Pinyin("("+card.Pinyin+")")
 		}
 	case model.ModeListening:
 		content = "  What did you hear? Type it in Chinese.\n\n"
@@ -247,7 +247,7 @@ func (m Model) renderCard(card model.Card) string {
 			ex = strings.TrimPrefix(ex, "- ")
 			content = fmt.Sprintf("  Fill in the blank:\n\n      %s\n\n  Hint: %s",
 				blankOut(ex, card.Chinese),
-				ui.PinyinStyle.Render(card.English))
+				ui.Pinyin(card.English))
 		} else {
 			chinese := ui.ChineseStyle.Render(card.Chinese)
 			content = fmt.Sprintf("  What does this mean?\n\n      %s", chinese)

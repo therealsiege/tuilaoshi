@@ -149,7 +149,7 @@ func (m Model) viewGloss() string {
 			continue
 		}
 		seen[g] = true
-		fmt.Fprintf(&b, "\n    %s  %s", ui.PinyinStyle.Render(c.Pinyin), c.English)
+		fmt.Fprintf(&b, "\n    %s  %s", ui.Pinyin(c.Pinyin), c.English)
 	}
 	b.WriteString("\n")
 	if en := m.currentEnglish(); en != "" {

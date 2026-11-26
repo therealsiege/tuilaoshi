@@ -125,7 +125,7 @@ func (m Model) renderHardWords() string {
 		return lipgloss.JoinVertical(lipgloss.Left, lines...)
 	}
 	for _, w := range m.hist.hard {
-		lines = append(lines, fmt.Sprintf("  %s %s %s", ui.ChineseStyle.Render(w.Chinese), ui.PinyinStyle.Render(w.Pinyin),
+		lines = append(lines, fmt.Sprintf("  %s %s %s", ui.ChineseStyle.Render(w.Chinese), ui.Pinyin(w.Pinyin),
 			ui.MutedStyle.Render(fmt.Sprintf("×%d", w.Lapses))))
 	}
 	if more := m.hist.hardCount - len(m.hist.hard); more > 0 {

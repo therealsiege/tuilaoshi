@@ -226,7 +226,7 @@ func (m Model) duelView() string {
 		b.WriteString(ui.MutedStyle.Render("  "+strings.Join(d.chain[:len(d.chain)-1], " → ")+" →") + "\n")
 	}
 	if d.last.Text != "" {
-		fmt.Fprintf(&b, "  %s  %s\n  %s\n\n", ui.ChineseStyle.Bold(true).Render(d.last.Text), ui.PinyinStyle.Render(d.last.Pinyin), ui.MutedStyle.Render(d.last.Meaning))
+		fmt.Fprintf(&b, "  %s  %s\n  %s\n\n", ui.ChineseStyle.Bold(true).Render(d.last.Text), ui.Pinyin(d.last.Pinyin), ui.MutedStyle.Render(d.last.Meaning))
 	}
 	if h := d.hint; h != nil {
 		r := []rune(h.Text)

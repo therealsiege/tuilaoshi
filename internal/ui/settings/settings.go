@@ -56,6 +56,10 @@ var options = []option{
 		[]string{"10", "20", "30", "50"},
 		func(s wiki.Settings) string { return fmt.Sprint(s.ReviewChunk) },
 		func(s *wiki.Settings, v string) { _, _ = fmt.Sscan(v, &s.ReviewChunk) }}, //nolint:errcheck // choices are numbers
+	{"Tone colours", "Pinyin drawn in its tones' colours: first red, second orange, third green, fourth blue",
+		[]string{"on", "off"},
+		func(s wiki.Settings) string { return map[bool]string{true: "on", false: "off"}[s.ToneColours] },
+		func(s *wiki.Settings, v string) { s.ToneColours = v == "on" }},
 	{"Claude calls a day", "A cap on calls to Claude (chat, talks, grading, the storyteller, haggling, Fiery Eyes); My progress shows today's use",
 		[]string{"no limit", "50", "100", "200"},
 		func(s wiki.Settings) string {

@@ -105,7 +105,7 @@ func (m Model) riddleView() string {
 		b.WriteString(ui.HelpStyle.Render("  type the character · enter guess · esc leave"))
 		return b.String()
 	}
-	b.WriteString("      " + ui.ChineseStyle.Render("谜底："+r.Answer) + " " + ui.PinyinStyle.Render(r.Pinyin) + "\n")
+	b.WriteString("      " + ui.ChineseStyle.Render("谜底："+r.Answer) + " " + ui.Pinyin(r.Pinyin) + "\n")
 	b.WriteString(m.lines(ui.MutedStyle, r.English, "  ", 76))
 	b.WriteString(m.lines(ui.MutedStyle, r.Explain, "  ", 76) + "\n")
 	if m.answered > 0 {

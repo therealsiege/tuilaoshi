@@ -207,7 +207,7 @@ func (m Model) graphRows(links []int, rows, width int) []string {
 			strings.Repeat(" ", wordW-lipgloss.Width(word))
 		if pinyin {
 			py := ansi.Truncate(nb.card.Pinyin, 14, "…")
-			row += " " + ui.PinyinStyle.Render(py) + strings.Repeat(" ", 14-lipgloss.Width(py))
+			row += " " + ui.Pinyin(py) + strings.Repeat(" ", 14-lipgloss.Width(py))
 		}
 		out = append(out, row+m.outerRing(j, onScreen, width-lipgloss.Width(row)-1))
 	}
@@ -262,7 +262,7 @@ func wordStyle(w webWord) lipgloss.Style {
 
 // wordLine is a word with its pinyin, meaning and how firmly it is held.
 func wordLine(w webWord) string {
-	return wordStyle(w).Render(w.card.Chinese) + " " + ui.PinyinStyle.Render(w.card.Pinyin) + "  " +
+	return wordStyle(w).Render(w.card.Chinese) + " " + ui.Pinyin(w.card.Pinyin) + "  " +
 		w.card.English + ui.MutedStyle.Render(" · "+holdText(w))
 }
 

@@ -303,7 +303,7 @@ func (m Model) View() string {
 			cardView := fmt.Sprintf("  What does this mean?\n\n  %s",
 				ui.ChineseStyle.Render(card.Chinese))
 			if card.Pinyin != "" {
-				cardView += "\n  " + ui.PinyinStyle.Render(card.Pinyin)
+				cardView += "\n  " + ui.Pinyin(card.Pinyin)
 			}
 			b.WriteString(ui.CardStyle.Render(cardView))
 			b.WriteString("\n\n")

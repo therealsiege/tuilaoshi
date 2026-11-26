@@ -135,7 +135,7 @@ func (m Model) walkView() string {
 		b.WriteString(ui.HelpStyle.Render(fit("  space show · esc back to the web", width)))
 		return b.String()
 	}
-	b.WriteString(fit("    "+ui.PinyinStyle.Render(card.Pinyin)+"  "+card.English, width) + "\n")
+	b.WriteString(fit("    "+ui.Pinyin(card.Pinyin)+"  "+card.English, width) + "\n")
 	if len(card.Examples) > 0 {
 		b.WriteString(fit(ui.MutedStyle.Render("    "+card.Examples[0]), width) + "\n")
 	}
