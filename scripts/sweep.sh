@@ -54,6 +54,7 @@ screens=(
   "gate|Left p|通关文牒|0"
   "haggle|Left h|宝象国|0"
   "rumour|Left f|宝象国|0"
+  "buy|Left b|杂货铺|0"
 )
 failed=0
 for size in 80x24 120x45; do
