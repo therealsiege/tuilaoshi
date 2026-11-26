@@ -16,7 +16,7 @@ func (m Model) View() string {
 	b.WriteString(ui.LoadError(m.loadErr))
 	if !m.written || m.passed > 0 {
 		b.WriteString("  " + ui.ChineseStyle.Render("今天走到了哪里？遇到了什么？心情怎么样？写两三句话。") + "\n")
-		b.WriteString(ui.MutedStyle.Render("  Where did you go today, what happened, how did you feel? Two or three sentences.") + "\n\n")
+		b.WriteString(m.muted("Where did you go today, what happened, how did you feel? Two or three sentences.") + "\n")
 	}
 	if !m.written {
 		b.WriteString("  " + m.input.View() + "\n\n")
@@ -32,13 +32,20 @@ func (m Model) View() string {
 		b.WriteString(ui.WarningStyle.Render("  Not yet: revise it and send again.") + "\n")
 	}
 	if m.feedback != "" {
-		b.WriteString(ui.MutedStyle.Render("  "+ui.WrapText(m.feedback, 72)) + "\n")
+		b.WriteString(m.muted(m.feedback))
 	}
 	if len(m.entries) > 0 {
 		b.WriteString("\n" + ui.SubtitleStyle.Render("  往日 Earlier entries") + "\n")
 		for i := len(m.entries) - 1; i >= max(len(m.entries)-shown, 0); i-- {
 			e := m.entries[i]
-			fmt.Fprintf(&b, "  %s  %s\n", ui.MutedStyle.Render(fmt.Sprintf("%s · 第%d天", e.Date, e.Day)), ui.ChineseStyle.Render(e.Text))
+			b.WriteString("  " + ui.MutedStyle.Render(fmt.Sprintf("%s · 第%d天", e.Date, e.Day)) + "\n")
+			width := 72
+			if m.width > 0 {
+				width = min(width, m.width-6)
+			}
+			for _, l := range ui.WrapDisplay(e.Text, width) {
+				b.WriteString("    " + ui.ChineseStyle.Render(l) + "\n")
+			}
 		}
 	}
 	if m.note != "" {
@@ -49,5 +56,18 @@ func (m Model) View() string {
 		help = "  enter send · ctrl+space pinyin/English · esc back to camp"
 	}
 	b.WriteString("\n" + ui.HelpStyle.Render(help))
+	return b.String()
+}
+
+// muted renders English dimmed, two spaces in, wrapped to the window.
+func (m Model) muted(text string) string {
+	width := 76
+	if m.width > 0 {
+		width = min(width, m.width-4)
+	}
+	var b strings.Builder
+	for _, l := range ui.WrapDisplay(text, width) {
+		b.WriteString(ui.MutedStyle.Render("  "+l) + "\n")
+	}
 	return b.String()
 }
