@@ -26,6 +26,7 @@ type Model struct {
 	now     func() time.Time
 	loadErr error  // why the wiki could not be read, shown above the numbers
 	spider  spider // the web of studied words, shown with w (webview.go)
+	scroll  int    // the first line shown below the title when the page is taller than the window
 	width   int
 	height  int
 }
@@ -59,6 +60,14 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case msg.String() == "w":
 			m.spider.on = true
 			return m.loadWeb(), nil
+		case msg.Type == tea.KeyUp || msg.String() == "k":
+			m.scroll = max(m.scroll-1, 0)
+		case msg.Type == tea.KeyDown || msg.String() == "j":
+			m.scroll = min(m.scroll+1, m.lastScroll())
+		case msg.Type == tea.KeyPgUp:
+			m.scroll = max(m.scroll-10, 0)
+		case msg.Type == tea.KeyPgDown:
+			m.scroll = min(m.scroll+10, m.lastScroll())
 		}
 	}
 	return m, nil
@@ -72,6 +81,34 @@ func (m Model) View() string {
 	case m.spider.on:
 		return m.webView()
 	}
+	return m.scrolled(m.numbersView())
+}
+
+// scrolled shows the numbers through the window when they are taller than
+// it: the title stays, the rest scrolls with ↑↓, and the last line says
+// how to.
+func (m Model) scrolled(page string) string {
+	lines := strings.Split(page, "\n")
+	if m.height <= 0 || len(lines) <= m.height {
+		return page
+	}
+	head, body := lines[:2], lines[2:]
+	room := m.height - len(head) - 1
+	top := min(m.scroll, len(body)-room)
+	more := fmt.Sprintf("  ↑↓ scroll · line %d of %d · w the web · esc back", top+1, len(body))
+	return strings.Join(append(append(head, body[top:top+room]...), ui.HelpStyle.UnsetMarginTop().Render(more)), "\n")
+}
+
+// lastScroll is the furthest the page can scroll in the window.
+func (m Model) lastScroll() int {
+	if m.height <= 0 {
+		return 0
+	}
+	return max(strings.Count(m.numbersView(), "\n")+1-m.height+1, 0)
+}
+
+// numbersView is the whole page of numbers, however tall.
+func (m Model) numbersView() string {
 	var b strings.Builder
 
 	title := ui.TitleStyle.Render("Study Statistics 学习统计")

@@ -235,6 +235,7 @@ func HelpText(v View) string {
 		return menuHelp()
 	case ViewStats:
 		return "Stats Keys\n\n" +
+			"  ↑↓     Scroll the numbers (pgup/pgdn a page)\n" +
 			"  w      Spider's web 盘丝洞 / back to the numbers\n" +
 			"  ↑↓     Web: pick a strand\n" +
 			"  →/←    Web: follow it / go back\n" +

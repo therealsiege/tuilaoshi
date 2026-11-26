@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
@@ -79,5 +80,19 @@ func TestKnownByLevel(t *testing.T) {
 	out := strings.Join(m.renderKnownByLevel(), "\n")
 	if !strings.Contains(out, "HSK1") || !strings.Contains(out, "1/2") || !strings.Contains(out, "1/1") || strings.Contains(out, "HSK2") {
 		t.Errorf("known by level:\n%s", out)
+	}
+}
+
+func TestTheNumbersScrollInASmallWindow(t *testing.T) {
+	m := New(uitest.Wiki(t, nil)).SetSize(80, 24).Refresh()
+	out := m.View()
+	if n := strings.Count(out, "\n") + 1; n > 24 || !strings.Contains(out, "学习统计") || !strings.Contains(out, "↑↓ scroll") {
+		t.Fatalf("%d lines, or no title or scroll hint:\n%s", n, out)
+	}
+	for range 100 {
+		m, _ = m.Update(tea.KeyMsg{Type: tea.KeyDown})
+	}
+	if out = m.View(); !strings.Contains(out, "学习统计") || !strings.Contains(out, "Streak") {
+		t.Errorf("scrolled to the end, the title stays and the last section shows:\n%s", out)
 	}
 }
