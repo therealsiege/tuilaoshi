@@ -261,7 +261,9 @@ func WrapDisplay(text string, width int) []string {
 			line = ""
 		}
 		for _, r := range word {
-			if lipgloss.Width(line+string(r)) > width && !strings.ContainsRune(closingPunct, r) {
+			// One closing mark may hang past the width; never a run of them.
+			hang := strings.ContainsRune(closingPunct, r) && lipgloss.Width(line) <= width
+			if lipgloss.Width(line+string(r)) > width && !hang {
 				lines = append(lines, line)
 				line = ""
 			}

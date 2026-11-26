@@ -76,12 +76,16 @@ func gatherFacts(store *wiki.Store, monday time.Time) (weekFacts, error) {
 	if err != nil {
 		return f, err
 	}
+	var numbers []int
 	for n, day := range cleared {
-		if tr := journey.TribulationAt(n); tr != nil && in(day) {
-			f.Cleared = append(f.Cleared, fmt.Sprintf("第%d难「%s」", n, tr.Name))
+		if journey.TribulationAt(n) != nil && in(day) {
+			numbers = append(numbers, n)
 		}
 	}
-	slices.Sort(f.Cleared)
+	slices.Sort(numbers) // by number: 第2难 before 第10难
+	for _, n := range numbers {
+		f.Cleared = append(f.Cleared, fmt.Sprintf("第%d难「%s」", n, journey.TribulationAt(n).Name))
+	}
 	settled, err := store.MysteriesSettled()
 	if err != nil {
 		return f, err

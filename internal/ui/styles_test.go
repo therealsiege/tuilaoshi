@@ -31,6 +31,9 @@ func TestWrapDisplay(t *testing.T) {
 	if got := WrapDisplay("路很好走。", 8); len(got) != 1 {
 		t.Errorf("a closing 。 stays on its line: %q", got)
 	}
+	if got := WrapDisplay("第一难「金蝉」、第二难", 12); lipgloss.Width(got[0]) > 14 {
+		t.Errorf("only one closing mark may hang past the width: %q", got)
+	}
 	if got := WrapDisplay("a bit more for you", 8); len(got) != 3 || got[0] != "a bit" {
 		t.Errorf("English wraps at spaces: %q", got)
 	}
