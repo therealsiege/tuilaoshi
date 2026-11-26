@@ -1,0 +1,19 @@
+任务 An errand in 长安  客栈掌柜 王掌柜 · innkeeper
+  目标：在客栈订一间五个人住的房间，再要一些热水。
+  Book a room at the inn for five people, and ask for some hot water.
+  ✓ 要住店，订一间房 you want a room for the night
+  ✓ 一共五个人 there are five of you
+  ☐ 要热水 you would like hot water
+
+  王掌柜 客官，里边请！您是吃饭还是住店？
+         Come in, sir! Are you here to eat or to stay the night?
+  你     掌柜的，我们要住店。
+  王掌柜 好，住店。几位？
+         Right, a room. How many?
+  你     我们一共五个人。
+  王掌柜 五位，好的。
+         Five, fine.
+
+   EN  > write in Chinese: type pinyin, then pick characters
+
+  enter say it in Chinese (6 left) · ctrl+space pinyin/English · esc leave

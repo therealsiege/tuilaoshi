@@ -160,6 +160,9 @@ func (m Model) buyHaggled() Model {
 		m.note = fmt.Sprintf("The sack is %d 铜钱: not enough in the purse.", h.price)
 		return m
 	}
+	if err := m.store.AddDeed(wiki.Deed{Date: m.now().Format("2006-01-02"), Kind: wiki.DeedHaggle, Town: m.towns[m.town].ID, What: fmt.Sprintf("%d份斋饭", haggleBundle), Coins: h.price}); err != nil {
+		m.loadErr = err // kept for the gazette
+	}
 	food := 0
 	m.withTrail(func(t *journey.Trail, _ []string) {
 		t.Food += haggleBundle

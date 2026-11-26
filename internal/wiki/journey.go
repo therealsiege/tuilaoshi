@@ -47,6 +47,8 @@ type journeyRecord struct {
 	Riddles      map[string]int    `yaml:"riddles,omitempty"` // town@day -> lantern riddles finished there today
 	Stamps       []string          `yaml:"stamps,omitempty"`  // kingdoms (by town) that stamped the travel rescript
 	Mysteries    map[string]string `yaml:"eyes,omitempty"`    // town id -> the day its Fiery Eyes mystery was settled
+	Errands      map[string]string `yaml:"errands,omitempty"` // town id -> the day its errand was taken
+	Deeds        []Deed            `yaml:"deeds,omitempty"`   // errands done and sacks haggled, for the gazette
 }
 
 // journeyDoc names the save of the journey being played (see progress.go).

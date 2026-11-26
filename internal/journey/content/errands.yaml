@@ -1,0 +1,247 @@
+# Errands (任务对话) in a town: a person, a goal and the points the
+# learner has to get across in Chinese. Claude plays the person from the
+# persona and checks a point off once its "listen" fact has been said.
+# The opening is the person's first line. Original text, written for
+# TuiLaoShi.
+- id: inn-room
+  role: 客栈掌柜
+  name: 王掌柜
+  role_english: innkeeper
+  persona: A busy, cheerful innkeeper who likes to know exactly how many guests are coming and talks a little fast.
+  opening: 客官，里边请！您是吃饭还是住店？
+  opening_english: Come in, sir! Are you here to eat or to stay the night?
+  goal: 在客栈订一间五个人住的房间，再要一些热水。
+  goal_english: Book a room at the inn for five people, and ask for some hot water.
+  points:
+    - id: room
+      zh: 要住店，订一间房
+      en: you want a room for the night
+      listen: the traveller wants to stay the night or book a room
+    - id: five
+      zh: 一共五个人
+      en: there are five of you
+      listen: the room is for five people in all
+    - id: water
+      zh: 要热水
+      en: you would like hot water
+      listen: the traveller asks for hot water
+  reward: 30
+- id: ferry
+  role: 船夫
+  name: 老李
+  role_english: ferryman
+  persona: An old ferryman of few words who knows the river well and is careful about the weather and the water level.
+  opening: 这几天下大雨，河水涨得很高啊。你们要过河吗？
+  opening_english: It has rained hard these few days and the river is very high. Do you want to cross?
+  goal: 问船夫河水什么时候会低，什么时候能过河，过河要多少钱，还要告诉他你们有一匹马。
+  goal_english: Ask the ferryman when the river will be low and when you can cross, how much the crossing costs, and tell him you have a horse.
+  points:
+    - id: when
+      zh: 问什么时候水低、能过河
+      en: when the water is low enough to cross
+      listen: the traveller asks when the river will go down or when they can cross
+    - id: fare
+      zh: 问船钱多少
+      en: how much the crossing costs
+      listen: the traveller asks the price of the crossing
+    - id: horse
+      zh: 说有一匹马
+      en: you have a horse with you
+      listen: the traveller says a horse has to cross too
+  reward: 30
+- id: fever
+  role: 药铺大夫
+  name: 孙大夫
+  role_english: herbalist
+  persona: A calm, kind herbalist who asks how long someone has been ill before giving anything, and explains slowly.
+  opening: 请坐。哪里不舒服？
+  opening_english: Please sit. What seems to be the trouble?
+  goal: 八戒发烧了。去药铺告诉大夫他发烧，从昨天开始的，买退烧的药，再问一天吃几次。
+  goal_english: Bajie has a fever. Tell the herbalist he has a fever that started yesterday, buy something to bring it down, and ask how many times a day to take it.
+  points:
+    - id: fever
+      zh: 有人发烧了
+      en: someone has a fever
+      listen: the traveller says someone (their companion) has a fever
+    - id: since
+      zh: 从昨天开始
+      en: it started yesterday
+      listen: the traveller says the fever began yesterday
+    - id: medicine
+      zh: 买退烧的药
+      en: you want medicine for it
+      listen: the traveller asks for medicine to bring the fever down
+    - id: dose
+      zh: 问一天吃几次
+      en: how many times a day to take it
+      listen: the traveller asks how often or how many times a day to take the medicine
+  reward: 40
+- id: sandals
+  role: 鞋匠
+  name: 张师傅
+  role_english: shoemaker
+  persona: A proud shoemaker who loves his craft, grumbles about cheap shoes and is honest about how long a job takes.
+  opening: 来来来，看看我的鞋，又结实又便宜！
+  opening_english: Come, come, have a look at my shoes, sturdy and cheap!
+  goal: 师父的鞋破了。请鞋匠修鞋，不买新的，再问什么时候能修好。
+  goal_english: The master's shoes are worn through. Ask the shoemaker to mend them rather than buy new ones, and ask when they will be ready.
+  points:
+    - id: broken
+      zh: 鞋破了
+      en: the shoes are worn through
+      listen: the traveller says the shoes are broken or have a hole
+    - id: mend
+      zh: 请他修，不买新的
+      en: you want them mended, not new ones
+      listen: the traveller asks for the shoes to be repaired rather than buying new ones
+    - id: ready
+      zh: 问什么时候修好
+      en: when they will be ready
+      listen: the traveller asks when the repair will be finished
+  reward: 30
+- id: road-west
+  role: 卖茶的老奶奶
+  name: 刘奶奶
+  role_english: old tea seller
+  persona: A chatty old woman selling tea by the road who has heard every rumour and worries about young travellers.
+  opening: 走累了吧？喝碗茶，歇一歇。
+  opening_english: Tired from walking? Have a bowl of tea and rest a while.
+  goal: 向老奶奶问去西边的路怎么走，要走几天，山上有没有妖怪。
+  goal_english: Ask the old woman which way the road west goes, how many days' walk it is, and whether there are demons in the mountains.
+  points:
+    - id: way
+      zh: 问去西边的路
+      en: which way the road west goes
+      listen: the traveller asks the way west or which road to take
+    - id: days
+      zh: 问要走几天
+      en: how many days it takes
+      listen: the traveller asks how far it is or how many days the walk takes
+    - id: demons
+      zh: 问山上有没有妖怪
+      en: whether there are demons in the mountains
+      listen: the traveller asks if there are demons or danger in the mountains
+  reward: 30
+- id: letter-home
+  role: 驿站的驿丞
+  name: 赵驿丞
+  role_english: post station clerk
+  persona: A tidy, slightly self-important post clerk who insists on exact addresses and likes to talk about how fast his horses are.
+  opening: 驿站重地，有什么事吗？
+  opening_english: This is the post station. What is your business?
+  goal: 在驿站给长安寄一封信，问几天能到，再问要多少钱。
+  goal_english: Send a letter to Chang'an from the post station, ask how many days it takes to arrive, and how much it costs.
+  points:
+    - id: letter
+      zh: 要寄一封信
+      en: you want to send a letter
+      listen: the traveller wants to send a letter
+    - id: changan
+      zh: 寄到长安
+      en: it goes to Chang'an
+      listen: the traveller says the letter is going to Chang'an
+    - id: days
+      zh: 问几天能到
+      en: how many days it takes
+      listen: the traveller asks how long or how many days until it arrives
+    - id: cost
+      zh: 问多少钱
+      en: what it costs
+      listen: the traveller asks the price of sending it
+  reward: 40
+- id: robe
+  role: 裁缝
+  name: 陈裁缝
+  role_english: tailor
+  persona: A quick, sharp-eyed tailor who notices every tear and bargains a little but is fair.
+  opening: 哎呀，师父，您这件衣服可不能再穿了！
+  opening_english: Oh my, master, you really can't keep wearing that!
+  goal: 沙僧的袈裟破了一个洞。请裁缝补一补，问要多少钱，明天早上要穿。
+  goal_english: Sha Wujing's robe has a hole in it. Ask the tailor to patch it, ask the price, and say it is needed tomorrow morning.
+  points:
+    - id: hole
+      zh: 袈裟破了一个洞
+      en: the robe has a hole
+      listen: the traveller says the robe or clothing is torn or has a hole
+    - id: patch
+      zh: 请他补一补
+      en: you want it patched
+      listen: the traveller asks the tailor to mend or patch it
+    - id: price
+      zh: 问多少钱
+      en: how much it costs
+      listen: the traveller asks the price
+    - id: morning
+      zh: 明天早上要穿
+      en: it is needed tomorrow morning
+      listen: the traveller says they need it by tomorrow morning
+  reward: 40
+- id: horse-feed
+  role: 马房的伙计
+  name: 小周
+  role_english: stable hand
+  persona: A shy young stable hand who loves horses, is amazed by a white horse, and speaks simply.
+  opening: 哇，好漂亮的白马！是您的马吗？
+  opening_english: Wow, what a beautiful white horse! Is it yours?
+  goal: 请马房的伙计今天晚上照顾白龙马，给它吃草料，喝干净的水。
+  goal_english: Ask the stable hand to look after the white dragon horse tonight, feed it hay and give it clean water.
+  points:
+    - id: tonight
+      zh: 今天晚上照顾马
+      en: look after the horse tonight
+      listen: the traveller asks him to keep or look after the horse tonight
+    - id: hay
+      zh: 给它吃草料
+      en: give it hay
+      listen: the traveller asks for the horse to be fed hay or fodder
+    - id: water
+      zh: 给它喝干净的水
+      en: give it clean water
+      listen: the traveller asks for clean water for the horse
+  reward: 30
+- id: temple-night
+  role: 村长
+  name: 何村长
+  role_english: village head
+  persona: A cautious village head who has been fooled by fake monks before, so wants to know who the travellers are before helping.
+  opening: 你们是从哪儿来的？我们村子很少有外人来。
+  opening_english: Where have you come from? Outsiders rarely come to our village.
+  goal: 告诉村长你们是从东土大唐来、去西天取经的和尚，问能不能在村里的庙里住一晚。
+  goal_english: Tell the village head you are monks from the Tang lands in the east on the way west for the scriptures, and ask if you may stay one night in the village temple.
+  points:
+    - id: who
+      zh: 说你们是取经的和尚
+      en: you are monks going for the scriptures
+      listen: the traveller explains they are monks travelling west for the scriptures
+    - id: tang
+      zh: 从东土大唐来
+      en: you come from the Tang lands
+      listen: the traveller says they come from the east, from Tang China or Chang'an
+    - id: stay
+      zh: 问能不能在庙里住一晚
+      en: may you stay a night in the temple
+      listen: the traveller asks to stay one night in the temple
+  reward: 35
+- id: noodles
+  role: 饭馆伙计
+  name: 小马
+  role_english: waiter
+  persona: A busy, friendly waiter in a noisy noodle shop who keeps recommending the beef noodles.
+  opening: 几位客官，吃点儿什么？我们的牛肉面最有名！
+  opening_english: What will you have, gentlemen? Our beef noodles are the most famous!
+  goal: 在饭馆点五碗素面，不要肉，也不要放葱和蒜。
+  goal_english: Order five bowls of plain vegetable noodles at the noodle shop, no meat, and no spring onion or garlic.
+  points:
+    - id: five
+      zh: 要五碗面
+      en: five bowls of noodles
+      listen: the traveller orders five bowls of noodles
+    - id: meatless
+      zh: 不要肉，要素的
+      en: no meat, vegetarian
+      listen: the traveller says no meat or that they want vegetarian food
+    - id: onion
+      zh: 不要葱和蒜
+      en: no spring onion or garlic
+      listen: the traveller asks for no spring onion and no garlic
+  reward: 30
