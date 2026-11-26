@@ -7,6 +7,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
@@ -308,5 +309,42 @@ func TestCrossingTheRegionsRiver(t *testing.T) {
 	}
 	if reloaded := New(m.store, nil).Refresh(); !reloaded.hasCrossed() {
 		t.Error("the crossing wasn't saved")
+	}
+}
+
+func TestASmallWindowShowsAWholeEvent(t *testing.T) {
+	m := roadWith(t, 0, 0).SetSize(80, 24)
+	defer func(roll func() int) { eventRoll = roll }(eventRoll)
+	eventRoll = func() int { return 0 }
+	m.trail.Steps = 5
+	m.pos = m.region.Start
+	m, _ = m.step(-1, 0)
+	if m.event == nil {
+		t.Fatal("no event")
+	}
+	m, _ = m.Update(press("1")) // the result, with its English, is the longest
+	out := m.View()
+	if lines := strings.Count(out, "\n") + 1; lines > 24 || !strings.Contains(out, m.event.Text[:9]) {
+		t.Errorf("the event takes %d lines or lost its opening:\n%s", lines, out)
+	}
+	for _, e := range journey.Events() {
+		m.event = &trailEvent{Event: e, chose: 0}
+		for _, l := range strings.Split(m.View(), "\n") {
+			if lipgloss.Width(l) > 80 {
+				t.Errorf("event %s: a line %d wide:\n%s", e.ID, lipgloss.Width(l), l)
+			}
+		}
+	}
+	m.event = nil
+	for _, p := range journey.Plots() {
+		m.plot = &overheard{Plot: p, order: []int{0, 1, 2}, chose: 0}
+		if n := strings.Count(m.View(), "\n") + 1; n > 24 {
+			t.Errorf("an answered plot takes %d lines:\n%s", n, m.View())
+		}
+		for _, l := range strings.Split(m.View(), "\n") {
+			if lipgloss.Width(l) > 80 {
+				t.Errorf("plot: a line %d wide:\n%s", lipgloss.Width(l), l)
+			}
+		}
 	}
 }

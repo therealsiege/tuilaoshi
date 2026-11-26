@@ -76,3 +76,6 @@ func (t *Trail) Apply(o Outcome, members []string) {
 		}
 	}
 }
+
+// Events returns every trail event.
+func Events() []Event { return content.Events }

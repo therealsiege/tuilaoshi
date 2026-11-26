@@ -8,6 +8,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
@@ -118,19 +119,23 @@ func (m Model) eventView() string {
 	e := m.event
 	var b strings.Builder
 	b.WriteString(ui.SubtitleStyle.Render(fmt.Sprintf("  Day %d on the road", m.trail.Day)) + "\n\n")
-	b.WriteString("  " + ui.ChineseStyle.Render(ui.WrapText(e.Text, 36)) + "\n\n")
+	b.WriteString(m.wrapped(ui.ChineseStyle, e.Text, "  ") + "\n")
 	if e.chose >= 0 {
-		b.WriteString(ui.MutedStyle.Render("  "+ui.WrapText(e.English, 72)) + "\n\n")
+		b.WriteString(m.wrapped(ui.MutedStyle, e.English, "  ") + "\n")
 	}
 	for i, c := range e.Choices {
-		line := fmt.Sprintf("  %d  %s", i+1, c.Text)
+		line := fmt.Sprintf("%d  %s", i+1, c.Text)
 		switch {
 		case i == e.chose:
-			line = ui.WarningStyle.Render(line+"  ◀") + ui.MutedStyle.Render("  "+c.English)
+			b.WriteString(m.wrapped(ui.WarningStyle, line+"  ◀", "  "))
 		case e.chose >= 0:
-			line = ui.MutedStyle.Render(line + "  " + c.English)
+			b.WriteString(m.wrapped(ui.MutedStyle, line, "  "))
+		default:
+			b.WriteString(m.wrapped(ui.UnselectedStyle, line, "  "))
 		}
-		b.WriteString(line + "\n")
+		if e.chose >= 0 {
+			b.WriteString(m.wrapped(ui.MutedStyle, c.English, "     "))
+		}
 	}
 	if e.chose < 0 {
 		if m.trail.Forewarned {
@@ -140,9 +145,9 @@ func (m Model) eventView() string {
 		return b.String()
 	}
 	c := e.Choices[e.chose]
-	b.WriteString("\n  " + ui.ChineseStyle.Render(c.Result) + "\n")
-	b.WriteString(ui.MutedStyle.Render("  "+c.ResultEnglish) + "\n")
-	b.WriteString("  " + ui.WarningStyle.Render(e.effect) + "\n")
+	b.WriteString("\n" + m.wrapped(ui.ChineseStyle, c.Result, "  "))
+	b.WriteString(m.wrapped(ui.MutedStyle, c.ResultEnglish, "  "))
+	b.WriteString(m.wrapped(ui.WarningStyle, e.effect, "  "))
 	b.WriteString("\n" + ui.HelpStyle.Render("  enter walk on"))
 	return b.String()
 }
@@ -180,4 +185,23 @@ func (m Model) Hear() string {
 		return e.Text + "\n" + e.Choices[e.chose].Result
 	}
 	return e.Text
+}
+
+// wrapped renders text in style wrapped to the window (80 columns at most
+// is plenty), each line indented by pad. Beside the sidebar it wraps to
+// the space left of it.
+func (m Model) wrapped(style lipgloss.Style, text, pad string) string {
+	room := 78
+	switch {
+	case m.width > 0 && !m.compact() && m.width >= m.region.W+40:
+		room = max(m.region.W, m.width-53) // the sidebar and its gap take about 50
+	case m.width > 0:
+		room = min(room, m.width-1)
+	}
+	width := room - lipgloss.Width(pad)
+	var b strings.Builder
+	for _, l := range ui.WrapDisplay(text, width) {
+		b.WriteString(pad + style.Render(l) + "\n")
+	}
+	return b.String()
 }

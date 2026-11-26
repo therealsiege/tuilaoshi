@@ -99,33 +99,42 @@ func (m Model) plotView() string {
 	answered := p.chose >= 0
 	var b strings.Builder
 	b.WriteString(ui.SubtitleStyle.Render(fmt.Sprintf("  Night %d on the road · 妖怪密谋", m.trail.Day)) + "\n")
-	b.WriteString(ui.MutedStyle.Render("  The fire burns low. In the dark, two demons are whispering...") + "\n\n")
+	if !answered {
+		b.WriteString(ui.MutedStyle.Render("  The fire burns low. In the dark, two demons are whispering...") + "\n\n")
+	}
 	for _, l := range p.Lines {
-		text := ui.ChineseStyle.Render(l.Text)
 		if p.heard && !answered {
-			text = ui.MutedStyle.Render("……")
+			b.WriteString("  " + ui.WarningStyle.Render(l.Who) + "  " + ui.MutedStyle.Render("……") + "\n")
+			continue
 		}
-		b.WriteString("  " + ui.WarningStyle.Render(l.Who) + "  " + text + "\n")
+		said := strings.TrimPrefix(m.wrapped(ui.ChineseStyle, l.Text, "      "), "    ")
+		b.WriteString(strings.Replace(said, "  ", "  "+ui.WarningStyle.Render(l.Who)+" ", 1))
 		if answered {
-			english := strings.ReplaceAll(ui.WrapText(l.English, 64), "\n", "\n      ")
-			b.WriteString(ui.MutedStyle.Render("      "+english) + "\n")
+			b.WriteString(m.wrapped(ui.MutedStyle, l.English, "      "))
 		}
 	}
-	b.WriteString("\n  " + ui.ChineseStyle.Render(p.Question) + "\n")
+	if !answered {
+		b.WriteString("\n")
+	}
+	b.WriteString(m.wrapped(ui.ChineseStyle, p.Question, "  "))
 	if answered {
-		b.WriteString(ui.MutedStyle.Render("  "+p.QuestionEnglish) + "\n")
+		b.WriteString(m.wrapped(ui.MutedStyle, p.QuestionEnglish, "  "))
 	}
 	for i, c := range p.order {
-		line := fmt.Sprintf("  %d  %s", i+1, p.Choices[c])
+		line := fmt.Sprintf("%d  %s", i+1, p.Choices[c])
 		switch {
 		case answered && c == 0:
-			line = ui.SuccessStyle.Render(line+"  ✓") + ui.MutedStyle.Render("  "+p.EnglishChoices[c])
+			b.WriteString(m.wrapped(ui.SuccessStyle, line+"  ✓", "  "))
 		case i == p.chose:
-			line = ui.ErrorStyle.Render(line+"  ◀") + ui.MutedStyle.Render("  "+p.EnglishChoices[c])
+			b.WriteString(m.wrapped(ui.ErrorStyle, line+"  ◀", "  "))
 		case answered:
-			line = ui.MutedStyle.Render(line + "  " + p.EnglishChoices[c])
+			b.WriteString(m.wrapped(ui.MutedStyle, line, "  "))
+		default:
+			b.WriteString(m.wrapped(ui.UnselectedStyle, line, "  "))
 		}
-		b.WriteString(line + "\n")
+		if answered && (c == 0 || i == p.chose) {
+			b.WriteString(m.wrapped(ui.MutedStyle, p.EnglishChoices[c], "     "))
+		}
 	}
 	if !answered {
 		help := "  1-3 answer"
@@ -136,8 +145,8 @@ func (m Model) plotView() string {
 		return b.String()
 	}
 	if p.right() {
-		b.WriteString("\n  " + ui.ChineseStyle.Render(p.Warning) + "\n")
-		b.WriteString(ui.MutedStyle.Render("  "+p.WarningEnglish) + "\n")
+		b.WriteString("\n" + m.wrapped(ui.ChineseStyle, p.Warning, "  "))
+		b.WriteString(m.wrapped(ui.MutedStyle, p.WarningEnglish, "  "))
 		b.WriteString("  " + ui.SuccessStyle.Render("Forewarned: the next danger on the road does half its harm.") + "\n")
 	} else {
 		b.WriteString("\n  " + ui.WarningStyle.Render("The demons slip away into the night. The road ahead is as it was.") + "\n")

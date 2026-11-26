@@ -45,9 +45,15 @@ func (m Model) View() string {
 	} else if m.plot != nil {
 		grid = m.plotView()
 	}
-	if m.compact() {
+	switch {
+	case m.compact() && (m.event != nil || m.plot != nil):
+		// An event or plot has the short window to itself; it carries its
+		// own keys.
+		b.WriteString(grid)
+		return b.String()
+	case m.compact():
 		b.WriteString(grid + "\n" + m.compactSide())
-	} else {
+	default:
 		side := m.sideView()
 		if m.width == 0 || m.width >= m.region.W+40 {
 			b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, grid, "   ", side))
