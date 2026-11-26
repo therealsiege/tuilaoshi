@@ -24,6 +24,8 @@ func (m Model) View() string {
 		b.WriteString(m.passportView())
 	case screenEyes:
 		b.WriteString(m.eyesView())
+	case screenErrand:
+		b.WriteString(m.errandView())
 	case screenRiddle:
 		b.WriteString(m.riddleView())
 	case screenAlms:
@@ -81,7 +83,7 @@ func (m Model) townView() string {
 	}
 	b.WriteString("\n")
 	if m.height > 0 && m.height < compactTown {
-		b.WriteString(m.wrap(ui.MutedStyle, fmt.Sprintf("客栈 inn %d (r) · 斋饭 %d (b) · 草鞋 %d (x) · 寺庙 offering %d (o) · trade (t) · alms (a) · haggle (h) · riddle (l) · papers (p) · rumour (f)",
+		b.WriteString(m.wrap(ui.MutedStyle, fmt.Sprintf("客栈 inn %d (r) · 斋饭 %d (b) · 草鞋 %d (x) · 寺庙 offering %d (o) · trade (t) · alms (a) · haggle (h) · riddle (l) · papers (p) · rumour (f) · errand (e)",
 			t.Price(journey.InnPrice), t.Price(journey.FoodPrice), t.Price(journey.SandalPrice), t.Price(journey.OfferingPrice))))
 	} else {
 		b.WriteString(m.wrap(ui.MutedStyle, fmt.Sprintf("客栈 The inn: a night's rest heals you and the party for %d 铜钱 (r)", t.Price(journey.InnPrice))))
@@ -95,13 +97,14 @@ func (m Model) townView() string {
 		}
 		b.WriteString(m.wrap(ui.MutedStyle, lantern))
 		b.WriteString(m.wrap(ui.MutedStyle, eyesLine()))
+		b.WriteString(m.wrap(ui.MutedStyle, "任务 Someone in town needs an errand done, once a day: get it across in Chinese (e)"))
 	}
 	if _, gate := journey.GateFor(t.ID); gate && !slices.Contains(m.stamps, t.ID) {
 		b.WriteString(m.wrap(ui.WarningStyle, "通关文牒 The gate officer asks to see your travel papers (p)"))
 	} else if m.height == 0 || m.height >= compactTown {
 		b.WriteString(m.wrap(ui.MutedStyle, fmt.Sprintf("通关文牒 Your travel rescript: %d of %d seals (p)", len(m.stamps), len(journey.Gates()))))
 	}
-	help := "↑↓ choose · enter read · r rest · b buy · x sandals · o offering · t trade · a alms · h haggle · l riddle · p papers · f rumour · g shrine · esc back"
+	help := "↑↓ choose · enter read · r rest · b buy · x sandals · o offering · t trade · a alms · h haggle · l riddle · p papers · f rumour · e errand · g shrine · esc back"
 	if t.Stone != nil {
 		if slices.Contains(m.stones, t.ID) {
 			b.WriteString("  " + ui.MutedStyle.Render("石碑 The roadside stone stands open: ") + ui.ChineseStyle.Render(t.Stone.Idiom) + "\n")

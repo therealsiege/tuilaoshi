@@ -132,6 +132,7 @@ type DashboardKeys struct {
 	Inner    key.Binding
 	Diary    key.Binding
 	Letter   key.Binding
+	Gazette  key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -216,6 +217,10 @@ func DefaultDashboardKeys() DashboardKeys {
 		Letter: key.NewBinding(
 			key.WithKeys("n"),
 			key.WithHelp("n", "letter"),
+		),
+		Gazette: key.NewBinding(
+			key.WithKeys("u"),
+			key.WithHelp("u", "gazette"),
 		),
 		Reading: key.NewBinding(
 			key.WithKeys("t"),
@@ -320,6 +325,8 @@ func HelpText(v View) string {
 			"  a      Ask for alms (化缘), once a day\n" +
 			"  f      Fiery Eyes (火眼金睛): question three\n" +
 			"         villagers in Chinese, accuse the demon\n" +
+			"  e      An errand (任务): get its points across\n" +
+			"         to a townsperson in Chinese, once a day\n" +
 			"  ctrl+r Hear the Chinese on screen\n" +
 			"  g      Shrine\n" +
 			"  esc    Back on the road"

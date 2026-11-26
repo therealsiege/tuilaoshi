@@ -171,6 +171,8 @@ func (m Model) Hear() string {
 		return m.riddle.Riddle
 	case screenHaggle:
 		return m.haggle.lines[len(m.haggle.lines)-1].zh
+	case screenErrand:
+		return m.errandHear()
 	case screenGate:
 		if m.gateQ < len(m.gate.Questions) {
 			return m.gate.Questions[m.gateQ].Ask

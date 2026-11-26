@@ -18,6 +18,9 @@ const menuColumnWidth = 28
 // View shows, top to bottom: today's numbers, one suggested next step, the
 // menu grouped by purpose, and where the journey stands.
 func (m Model) View() string {
+	if m.gazetteOpen && m.gazette != nil {
+		return m.gazetteView()
+	}
 	if m.reading && m.letter != nil {
 		return m.letterView()
 	}

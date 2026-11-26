@@ -1,6 +1,9 @@
 package claude
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/therealsiege/tuilaoshi/internal/model"
@@ -40,5 +43,22 @@ func TestWithoutAKeyDrillsAreGradedLocally(t *testing.T) {
 	res, err := c.EvaluateDrill(t.Context(), model.Card{Chinese: "书", Pinyin: "shū", English: "book"}, "book", model.ModeRecognition)
 	if err != nil || !res.Correct {
 		t.Errorf("local grade %+v %v", res, err)
+	}
+}
+
+// Every call to Claude must go through send, so the meter sees it.
+func TestEveryCallGoesThroughTheMeter(t *testing.T) {
+	files, err := filepath.Glob("*.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range files {
+		data, err := os.ReadFile(f)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if f != "usage.go" && !strings.HasSuffix(f, "_test.go") && strings.Contains(string(data), "Messages.New(") {
+			t.Errorf("%s calls Claude directly; use c.send", f)
+		}
 	}
 }

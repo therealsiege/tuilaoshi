@@ -113,8 +113,11 @@ func (m Model) loadLetter() (*wiki.Letter, error) {
 	return &letters[len(letters)-1], nil
 }
 
-// Hear is the open letter's Chinese, to read aloud.
+// Hear is the open gazette's or letter's Chinese, to read aloud.
 func (m Model) Hear() string {
+	if m.gazetteOpen && m.gazette != nil {
+		return m.gazette.Text
+	}
 	if m.reading && m.letter != nil {
 		return m.letter.Text
 	}

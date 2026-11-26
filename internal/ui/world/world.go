@@ -34,6 +34,7 @@ const (
 	screenHaggle   // bargaining with the merchant (see haggle.go)
 	screenEyes     // a mystery: find the demon among villagers (see eyes.go)
 	screenBuy      // asking for something at the store (see buy.go)
+	screenErrand   // an errand done by talking (see errand.go)
 )
 
 // Model is the world map view model.
@@ -80,6 +81,8 @@ type Model struct {
 
 	eyes eyes // the town's Fiery Eyes mystery
 
+	errand *errandTalk // the errand open
+
 	note          string
 	width, height int
 	loadErr       error
@@ -101,7 +104,7 @@ func New(store *wiki.Store, client *claude.Client, dict *input.Dict) Model {
 
 // Typing reports whether a writing request or a stone has the keyboard.
 func (m Model) Typing() bool {
-	return m.screen == screenStone || m.screen == screenRiddle || m.screen == screenGate || (m.screen == screenHaggle && !m.haggle.bought) || (m.screen == screenEyes && m.eyes.asking) || (m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing())
+	return m.screen == screenStone || m.screen == screenRiddle || m.screen == screenGate || (m.screen == screenHaggle && !m.haggle.bought) || (m.screen == screenEyes && m.eyes.asking) || (m.screen == screenErrand && !m.errand.over()) || (m.screen == screenQuest && m.towns[m.town].Quests[m.quest].Writing())
 }
 
 func (m Model) Init() tea.Cmd { return nil }
@@ -145,6 +148,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	if r, ok := msg.(eyesReplyMsg); ok {
 		return m.onEyesReply(r), nil
 	}
+	if e, ok := msg.(errandMsg); ok {
+		return m.onErrand(e), nil
+	}
 	k, ok := msg.(tea.KeyMsg)
 	if !ok {
 		return m, nil
@@ -176,6 +182,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m.updateGate(k)
 	case screenEyes:
 		return m.updateEyes(k, back)
+	case screenErrand:
+		return m.updateErrand(k, back)
 	case screenRiddle:
 		if back && !m.input.Composing() {
 			m.screen, m.note = screenTown, ""
@@ -244,6 +252,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m.openHaggle()
 		case k.String() == "f":
 			return m.openEyes()
+		case k.String() == "e":
+			return m.openErrand()
 		}
 		return m, nil
 	}
