@@ -296,6 +296,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.battle = m.battle.Leave()
 					return m, ui.SwitchTo(ui.ViewMap)
 				}
+				m.review, m.drill = m.review.Leave(), m.drill.Leave() // keep answers given so far
 				m.currentView = ui.ViewDashboard
 				m.dashboard = m.dashboard.Refresh()
 				return m, m.dashboard.Init()

@@ -381,3 +381,21 @@ func (m Model) Refresh() Model {
 	m.input.Reset()
 	return m
 }
+
+// Leave saves the answers given so far, when the learner leaves before
+// the deck is done: their coins, streak, bounties and misses count.
+func (m Model) Leave() Model {
+	if m.state == stateDone || len(m.session.Items) == 0 {
+		return m
+	}
+	m.session.EndedAt = time.Now()
+	m.session.CardsTotal, m.session.CardsCorrect = len(m.session.Items), 0
+	for _, it := range m.session.Items {
+		if it.Correct {
+			m.session.CardsCorrect++
+		}
+	}
+	m.noteSaveErr(m.store.WriteSession(m.session))
+	m.session = model.Session{StartedAt: time.Now(), Type: m.session.Type}
+	return m
+}

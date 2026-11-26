@@ -415,3 +415,22 @@ func frequencyNext(due []model.Card) []model.Card {
 	}
 	return append(freq, rest...)
 }
+
+// Leave saves the answers given so far, when the learner leaves before
+// the queue is done: their coins, streak, bounties and misses count. The
+// next answers start a new session.
+func (m Model) Leave() Model {
+	if len(m.session.Items) == 0 {
+		return m
+	}
+	m.session.EndedAt = time.Now()
+	m.session.CardsTotal, m.session.CardsCorrect = len(m.session.Items), 0
+	for _, it := range m.session.Items {
+		if it.Correct {
+			m.session.CardsCorrect++
+		}
+	}
+	m.noteSaveErr(m.store.WriteSession(m.session))
+	m.session = model.Session{StartedAt: time.Now(), Type: "review"}
+	return m
+}
