@@ -19,6 +19,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
+	"github.com/therealsiege/tuilaoshi/internal/ui/input"
 	rpgview "github.com/therealsiege/tuilaoshi/internal/ui/rpg"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -68,6 +69,10 @@ type Model struct {
 	plot    *overheard                 // demons overheard plotting (see plots.go)
 	tts     *audio.Client              // speaks the overheard demons; nil: read them
 	states  map[string]wiki.QuestState // side quests' states, for the road strip
+	gates   []string                   // regions whose grammar gate is passed
+	gate    *gateRun                   // the grammar gate being taken (see gate.go)
+	grader  Grader                     // Claude judging the gate's typed round; nil: tiles only
+	gateIn  input.Model                // the gate's typed round
 	note    string
 
 	width, height int
@@ -76,7 +81,7 @@ type Model struct {
 
 // New creates the walking map; tts (nil for none) voices overheard demons.
 func New(store *wiki.Store, tts *audio.Client) Model {
-	return Model{store: store, gkeys: ui.DefaultGlobalKeys(), tts: tts}
+	return Model{store: store, gkeys: ui.DefaultGlobalKeys(), tts: tts, gateIn: gateInput(nil)}
 }
 
 func (m Model) Init() tea.Cmd { return nil }
@@ -94,8 +99,9 @@ func (m Model) Refresh() Model {
 	cleared, clearedErr := m.store.ClearedStages()
 	place, placeErr := m.store.Place()
 	wallet, walletErr := m.store.Wallet()
-	m.loadErr = errors.Join(pagesErr, clearedErr, placeErr, walletErr)
-	m.cleared, m.wallet = cleared, wallet
+	gates, gatesErr := m.store.GrammarGates()
+	m.loadErr = errors.Join(pagesErr, clearedErr, placeErr, walletErr, gatesErr)
+	m.cleared, m.wallet, m.gates, m.gate = cleared, wallet, gates, nil
 	states, questErr := m.store.Quests(time.Now())
 	m.states, m.loadErr = states, errors.Join(m.loadErr, questErr)
 	m.quests = m.questLog()
@@ -151,9 +157,20 @@ func (m *Model) save() {
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	if g, ok := msg.(gateGradeMsg); ok {
+		return m.onGateGrade(g), nil
+	}
 	k, ok := msg.(tea.KeyMsg)
 	if !ok {
+		if m.Typing() {
+			var cmd tea.Cmd
+			m.gateIn, cmd = m.gateIn.Update(msg) // the cursor's blink
+			return m, cmd
+		}
 		return m, nil
+	}
+	if m.gate != nil {
+		return m.updateGate(k)
 	}
 	if m.event != nil {
 		return m.updateEvent(k)
@@ -251,8 +268,9 @@ func (m Model) act() (Model, tea.Cmd) {
 	return m, nil
 }
 
-// face meets the tribulation at p: its battle when it is the open stage,
-// otherwise what it still needs.
+// face meets the tribulation at p: its battle when it is the open stage
+// (for the demon's lair, once its grammar gate is passed), otherwise what
+// it still needs.
 func (m Model) face(p journey.Point) (Model, tea.Cmd) {
 	n := m.region.Stages[p]
 	s := m.stage
@@ -261,6 +279,8 @@ func (m Model) face(p journey.Point) (Model, tea.Cmd) {
 		m.note = "An earlier tribulation still waits on the road behind you."
 	case s.Status != journey.StageOpen:
 		m.note = fmt.Sprintf("Tribulation %d is sealed: %s. %s", n, journey.NeedText(*s, m.counts), journey.HowToOpen(*s))
+	case n == m.region.Region.To && !m.gatePassed():
+		return m.openGate(), nil // the gate stands before the lair
 	default:
 		return m, func() tea.Msg { return FightMsg{} }
 	}

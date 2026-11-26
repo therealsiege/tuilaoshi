@@ -1,0 +1,424 @@
+# Grammar gates (语法关), one per region (see grammargates.go): the pattern
+# guarding the region's demon's lair, a one-line explanation, model
+# sentences (from the wiki's grammar pages where they have them), and tile
+# sentences to rebuild, written for HSK3-4 on the road west.
+#
+# markers are the pattern's words in the order they must appear in a typed
+# sentence ("a|b" takes either); tail is how many characters must follow
+# the last one (1 unless set), and ends lets the last one close the
+# sentence. A tile sentence's words are shuffled on screen; also lists
+# other orders of the same words that are just as right.
+
+- region: lingshan-origins
+  pattern: 把
+  pinyin: bǎ
+  explain: "把 brings the object before the verb to say what is done to it: subject 把 object verb + result."
+  markers: [把]
+  tail: 2
+  examples:
+    - {chinese: "请把门关上。", english: "Please close the door."}
+    - {chinese: "他把作业做完了。", english: "He finished his homework."}
+    - {chinese: "渔夫把木盆拉到了岸边。", english: "The fisherman pulled the wooden tub to the bank."}
+  sentences:
+    - {words: [母亲, 把, 孩子, 放在, 木盆里], english: "Mother put the baby in a wooden tub."}
+    - {words: [老和尚, 把, 木盆, 拉上了, 岸], english: "The old monk pulled the tub up onto the bank."}
+    - {words: [玄奘, 把, 这封信, 交给了, 母亲], english: "Xuanzang handed this letter to his mother."}
+    - {words: [请你, 把, 经书, 带回, 东土], english: "Please bring the scriptures back to the Eastern Land."}
+    - {words: [大风, 把, 小船, 吹到了, 江心], english: "The wind blew the little boat into the middle of the river."}
+    - {words: [和尚们, 把, 寺庙, 打扫得, 很干净], english: "The monks swept the temple very clean."}
+
+- region: changan
+  pattern: 被
+  pinyin: bèi
+  explain: "被 makes a passive: the thing done to comes first, then 被, who did it, and the verb with its result."
+  markers: [被]
+  tail: 2
+  examples:
+    - {chinese: "我的手机被偷了。", english: "My phone was stolen."}
+    - {chinese: "他被老师批评了。", english: "He was criticized by the teacher."}
+    - {chinese: "唐僧被老虎精抓走了。", english: "Tang Seng was carried off by the tiger spirit."}
+  sentences:
+    - {words: [唐僧, 被, 妖怪, 抓走了], english: "Tang Seng was carried off by demons."}
+    - {words: [两个随从, 被, 老虎, 吃掉了], english: "The two attendants were eaten by the tiger."}
+    - {words: [这件事, 被, 皇帝, 知道了], english: "The emperor came to know of this."}
+    - {words: [山路, 被, 大雪, 盖住了], english: "The mountain road was covered by heavy snow."}
+    - {words: [他的行李, 被, 大风, 吹走了], english: "His luggage was blown away by the wind."}
+    - {words: [我们, 被, 一位老人, 救了], english: "We were rescued by an old man."}
+
+- region: liangjie
+  pattern: 了 / 过
+  pinyin: le / guo
+  explain: "了 after a verb marks an action as done; 过 after a verb says it has happened at some time before."
+  markers: ["了|过"]
+  ends: true
+  examples:
+    - {chinese: "我吃了午饭。", english: "I ate lunch."}
+    - {chinese: "你去过中国吗？", english: "Have you ever been to China?"}
+    - {chinese: "悟空在山下住了五百年。", english: "Wukong lived under the mountain for five hundred years."}
+  sentences:
+    - {words: [悟空, 在山下, 等了, 五百年], english: "Wukong waited under the mountain for five hundred years."}
+    - {words: [唐僧, 救出了, 山下的, 猴子], english: "Tang Seng freed the monkey under the mountain."}
+    - {words: [你, 见过, 这么大的, 老虎, 吗], english: "Have you ever seen such a big tiger?"}
+    - {words: [悟空, 打死了, 一只, 老虎], english: "Wukong killed a tiger."}
+    - {words: [我, 从来没, 听过, 这个名字], english: "I've never heard this name."}
+    - {words: [观音, 给了, 师父, 一顶帽子], english: "Guanyin gave Master a cap."}
+
+- region: heifeng
+  pattern: 比
+  pinyin: bǐ
+  explain: "A 比 B + adjective: A is more so than B. Don't put 很 after 比; say how much after the adjective."
+  markers: [比]
+  examples:
+    - {chinese: "今天比昨天冷。", english: "Today is colder than yesterday."}
+    - {chinese: "中文比法语难。", english: "Chinese is harder than French."}
+    - {chinese: "黑熊精比老和尚厉害多了。", english: "The Black Bear Spirit is far fiercer than the old abbot."}
+  sentences:
+    - {words: [这件袈裟, 比, 那件, 漂亮], english: "This kasaya is prettier than that one."}
+    - {words: [黑熊精, 比, 悟空, 高], english: "The Black Bear Spirit is taller than Wukong."}
+    - {words: [山里的风, 比, 城里, 大多了], english: "The wind in the mountains is much stronger than in the city."}
+    - {words: [今天的路, 比, 昨天的, 难走], english: "Today's road is harder going than yesterday's."}
+    - {words: [老和尚, 比, 我们, 大, 两百岁], english: "The old monk is two hundred years older than us."}
+    - {words: [悟空, 比, 白龙马, 跑得快], english: "Wukong runs faster than the white dragon horse."}
+
+- region: huangfeng
+  pattern: 连…都
+  pinyin: lián…dōu
+  explain: "连 X 都 (or 也): even X. It stresses that X, the least likely case, is true as well."
+  markers: [连, "都|也"]
+  examples:
+    - {chinese: "他连自己的名字都不会写。", english: "He can't even write his own name."}
+    - {chinese: "这道题连老师都不会做。", english: "Even the teacher can't solve this problem."}
+    - {chinese: "黄风一吹，连悟空都睁不开眼睛。", english: "When the yellow wind blows, even Wukong can't open his eyes."}
+  sentences:
+    - {words: [风, 太大了, 连, 路, 都, 看不见], english: "The wind is so strong you can't even see the road."}
+    - {words: [八戒, 连, 一碗饭, 也, 不给, 别人], english: "Bajie won't give anyone even one bowl of rice."}
+    - {words: [流沙河里, 连, 鹅毛, 都, 浮不起来], english: "In the Flowing Sands River not even a goose feather floats."}
+    - {words: [师父, 累得, 连, 话, 都, 说不出来], english: "Master is so tired he can't even speak."}
+    - {words: [这个妖怪, 连, 神仙, 也, 不怕], english: "This demon isn't even afraid of the immortals."}
+    - {words: [沙漠里, 连, 一滴水, 都, 没有], english: "In the desert there isn't even a drop of water."}
+
+- region: baihu
+  pattern: 是…的
+  pinyin: shì…de
+  explain: "是…的 picks out when, where, how or by whom something that already happened was done."
+  markers: [是, 的]
+  ends: true
+  examples:
+    - {chinese: "你是什么时候来的？", english: "When did you come?"}
+    - {chinese: "我是昨天到的。", english: "I arrived yesterday."}
+    - {chinese: "这些饭是一个姑娘送来的。", english: "This food was brought by a young woman."}
+  sentences:
+    - {words: [这个姑娘, 是, 从山里, 来的], english: "This young woman came from the mountains."}
+    - {words: [老太太, 是, 来找, 女儿的], english: "The old woman came looking for her daughter."}
+    - {words: [悟空, 是, 用金箍棒, 打死她的], english: "Wukong struck her down with the gold-banded staff."}
+    - {words: [这封信, 是, 师父, 亲手写的], english: "This letter was written in Master's own hand."}
+    - {words: [八戒, 是, 坐着云, 回来的], english: "Bajie came back riding a cloud."}
+    - {words: [那些斋饭, 是, 妖怪, 变出来的], english: "That food was conjured up by the demon."}
+
+- region: pingding
+  pattern: 越…越
+  pinyin: yuè…yuè
+  explain: "越 A 越 B: the more A, the more B. Each 越 goes straight before a verb or adjective."
+  markers: [越, 越]
+  examples:
+    - {chinese: "雨越下越大。", english: "The rain fell harder and harder."}
+    - {chinese: "他越说越生气。", english: "The more he talked, the angrier he got."}
+    - {chinese: "这个葫芦越看越奇怪。", english: "The more you look at this gourd, the stranger it seems."}
+  sentences:
+    - {words: [这条, 山路, 越走, 越窄], english: "The further we walk, the narrower this mountain road gets."}
+    - {words: [银角大王, 心里, 越想, 越害怕], english: "The more Silver Horn thought about it, the more afraid he grew."}
+    - {words: [八戒, 吃得, 越多, 走得, 越慢], english: "The more Bajie eats, the slower he walks."}
+    - {words: [悟空, 越打, 越有, 力气], english: "The more Wukong fights, the stronger he gets."}
+    - {words: [山上的, 风, 越刮, 越大], english: "The wind on the mountain blows harder and harder."}
+    - {words: [你, 越着急, 越, 走不快], english: "The more anxious you are, the slower you go."}
+
+- region: haoshan
+  pattern: 一…就
+  pinyin: yī…jiù
+  explain: "一 A 就 B: as soon as A happens, B follows."
+  markers: [一, 就]
+  examples:
+    - {chinese: "我一到家就给你打电话。", english: "I'll call you as soon as I get home."}
+    - {chinese: "他一喝酒就脸红。", english: "He goes red as soon as he drinks."}
+    - {chinese: "红孩儿一张嘴就喷出了大火。", english: "As soon as Red Boy opened his mouth, he breathed out a great fire."}
+  sentences:
+    - {words: [悟空, 一看, 就, 知道, 是妖怪], english: "Wukong knew at a glance it was a demon."}
+    - {words: [红孩儿, 一, 生气, 就, 放火], english: "As soon as Red Boy gets angry he sets things on fire."}
+    - {words: [师父, 一听, 有人哭, 就, 停下了], english: "As soon as Master heard someone crying, he stopped."}
+    - {words: [火, 一碰到, 水, 就, 更大了], english: "As soon as the fire met water, it grew bigger."}
+    - {words: [八戒, 一, 躺下, 就, 睡着了], english: "Bajie falls asleep the moment he lies down."}
+    - {words: [观音, 一来, 红孩儿, 就, 跑不了了], english: "Once Guanyin came, Red Boy couldn't get away."}
+
+- region: heishui
+  pattern: 虽然…但是
+  pinyin: suīrán…dànshì
+  explain: "虽然 A，但是 B: although A, B. Chinese keeps both words, unlike English."
+  markers: [虽然, "但是|可是|但|却"]
+  examples:
+    - {chinese: "虽然他很忙，但是他每天都运动。", english: "Although he is busy, he exercises every day."}
+    - {chinese: "这个菜虽然贵，但是很好吃。", english: "Although this dish is expensive, it's delicious."}
+    - {chinese: "黑水河虽然不宽，但是水很急。", english: "Although the Black River isn't wide, its current is fast."}
+  sentences:
+    - {words: [虽然, 船很小, 但是, 很稳], english: "Although the boat is small, it's steady."}
+    - {words: [虽然, 河水很黑, 但是, 师父, 一点儿也不怕], english: "Although the river is black, Master isn't the least afraid."}
+    - {words: [虽然, 天黑了, 但是, 我们, 还要, 过河], english: "Although it's dark, we still have to cross the river."}
+    - {words: [船夫, 虽然很客气, 可是, 心里, 很坏], english: "The boatman is polite, but his heart is wicked."}
+    - {words: [虽然, 悟空, 不会游泳, 但是, 很有办法], english: "Although Wukong can't swim, he is full of ideas."}
+    - {words: [虽然, 走了一天, 很累, 但是, 大家都很高兴], english: "Although we're tired after a day's walk, everyone is happy."}
+
+- region: chechi
+  pattern: 除了…以外
+  pinyin: chúle…yǐwài
+  explain: "除了 X 以外: with 都 it means except X; with 还 or 也 it means besides X."
+  markers: [除了, "以外|之外"]
+  examples:
+    - {chinese: "除了他以外，大家都去了。", english: "Except for him, everyone went."}
+    - {chinese: "除了中文以外，他还会说法语。", english: "Besides Chinese, he also speaks French."}
+    - {chinese: "除了求雨以外，三个道士还要和悟空比坐禅。", english: "Besides praying for rain, the three Daoists also challenge Wukong at meditation."}
+  sentences:
+    - {words: [除了, 和尚, 以外, 大家, 都, 很高兴], english: "Everyone is happy except the monks."}
+    - {words: [除了, 求雨, 以外, 他们, 还要, 比, 坐禅], english: "Besides praying for rain, they also want to compete at meditation."}
+    - {words: [除了, 悟空, 以外, 谁, 也, 不敢, 去], english: "Apart from Wukong, nobody dares to go."}
+    - {words: [除了, 国王, 以外, 大家, 都, 怕, 道士], english: "Apart from the king, everyone is afraid of the Daoists."}
+    - {words: [除了, 下雨, 以外, 悟空, 还, 会, 打雷], english: "Besides rain, Wukong can make thunder too.", also: [悟空除了下雨以外还会打雷]}
+    - {words: [除了, 油锅, 以外, 他, 什么, 都, 不怕], english: "He fears nothing except the cauldron of oil.", also: [他除了油锅以外什么都不怕]}
+
+- region: tongtian
+  pattern: 因为…所以
+  pinyin: yīnwèi…suǒyǐ
+  explain: "因为 A，所以 B: because A, so B. The cause comes first, and Chinese often keeps both words."
+  markers: [因为, 所以]
+  examples:
+    - {chinese: "因为今天下雨，所以我没出去。", english: "Because it rained today, I didn't go out."}
+    - {chinese: "因为他很努力，所以考试考得很好。", english: "Because he worked hard, he did well on the exam."}
+    - {chinese: "因为河水结了冰，所以师父想走过去。", english: "Because the river had frozen, Master wanted to walk across."}
+  sentences:
+    - {words: [因为, 河, 太宽了, 所以, 我们, 过不去], english: "Because the river is too wide, we can't get across."}
+    - {words: [因为, 天气, 很冷, 所以, 河水, 结冰了], english: "Because the weather is cold, the river froze."}
+    - {words: [因为, 妖怪, 要吃, 孩子, 所以, 村里人, 很害怕], english: "Because the demon wants to eat children, the villagers are afraid."}
+    - {words: [因为, 冰, 破了, 所以, 师父, 掉进了, 河里], english: "Because the ice broke, Master fell into the river."}
+    - {words: [因为, 老乌龟, 帮忙, 所以, 他们, 过了河], english: "Because the old turtle helped, they crossed the river."}
+    - {words: [因为, 八戒, 太重, 所以, 船, 走得很慢], english: "Because Bajie is too heavy, the boat goes slowly."}
+
+- region: jindou
+  pattern: 如果…就
+  pinyin: rúguǒ…jiù
+  explain: "如果 (or 要是) A，就 B: if A, then B. 就 goes after the subject of the second part."
+  markers: ["如果|要是", 就]
+  examples:
+    - {chinese: "如果明天下雨，我们就不去了。", english: "If it rains tomorrow, we won't go."}
+    - {chinese: "如果你不懂，就问老师。", english: "If you don't understand, ask the teacher."}
+    - {chinese: "如果你们不走出这个圈，妖怪就进不来。", english: "If you don't step out of this circle, the demon can't get in."}
+  sentences:
+    - {words: [如果, 你们, 走出, 圈子, 就, 会, 有危险], english: "If you step out of the circle, you'll be in danger."}
+    - {words: [如果, 天, 黑了, 我们, 就, 在这里, 休息], english: "If it gets dark, we'll rest here."}
+    - {words: [如果, 没有, 金箍棒, 悟空, 就, 打不过, 他], english: "Without the gold-banded staff, Wukong can't beat him.", also: [如果悟空没有金箍棒就打不过他]}
+    - {words: [如果, 你, 饿了, 就, 吃, 一个, 馒头], english: "If you're hungry, eat a steamed bun."}
+    - {words: [如果, 找到, 它的主人, 妖怪, 就, 跑不了], english: "If we find its master, the demon can't escape."}
+    - {words: [要是, 八戒, 不, 贪心, 就, 不会, 被抓], english: "If Bajie weren't greedy, he wouldn't get caught."}
+
+- region: xiliang
+  pattern: 不但…而且
+  pinyin: búdàn…érqiě
+  explain: "不但 A，而且 B: not only A but also B. 还 or 也 can stand in for 而且."
+  markers: [不但, "而且|还|也"]
+  examples:
+    - {chinese: "他不但会说中文，而且会说日文。", english: "He can speak not only Chinese but also Japanese."}
+    - {chinese: "这个地方不但漂亮，而且很安静。", english: "This place is not only beautiful but also very quiet."}
+    - {chinese: "女王不但很漂亮，而且非常聪明。", english: "The queen is not only beautiful but also very clever."}
+  sentences:
+    - {words: [女王, 不但, 年轻, 而且, 很善良], english: "The queen is not only young but also kind."}
+    - {words: [这条河, 不但, 很清, 而且, 很甜], english: "This river is not only clear but sweet as well."}
+    - {words: [八戒, 不但, 喝了, 河水, 而且, 喝了, 两碗], english: "Bajie not only drank the river water, he drank two bowls."}
+    - {words: [城里, 不但, 有很多, 商店, 而且, 很热闹], english: "The city not only has many shops, it's lively too."}
+    - {words: [女王, 不但, 送了, 礼物, 还, 要, 嫁给, 唐僧], english: "The queen not only gave gifts, she wanted to marry Tang Seng."}
+    - {words: [师父, 不但, 不想, 结婚, 而且, 想, 快点儿, 走], english: "Master not only doesn't want to marry, he wants to leave soon."}
+
+- region: dudi
+  pattern: 一边…一边
+  pinyin: yìbiān…yìbiān
+  explain: "一边 A，一边 B: doing A and B at the same time, both by the same person."
+  markers: [一边, 一边]
+  examples:
+    - {chinese: "他一边吃饭，一边看电视。", english: "He eats while watching TV."}
+    - {chinese: "我们一边喝咖啡，一边聊天。", english: "We chat while drinking coffee."}
+    - {chinese: "悟空一边打，一边叫八戒快来帮忙。", english: "Wukong fought while shouting for Bajie to come and help."}
+  sentences:
+    - {words: [师父, 一边, 走路, 一边, 念经], english: "Master chants sutras as he walks.", also: [师父一边念经一边走路]}
+    - {words: [八戒, 一边, 吃饭, 一边, 说话], english: "Bajie talks while he eats.", also: [八戒一边说话一边吃饭]}
+    - {words: [悟空, 一边, 跑, 一边, 回头看], english: "Wukong runs, looking back over his shoulder.", also: [悟空一边回头看一边跑]}
+    - {words: [蝎子精, 一边, 笑, 一边, 走了过来], english: "The scorpion spirit came over, laughing."}
+    - {words: [沙僧, 一边, 挑着担子, 一边, 唱歌], english: "Sha Seng sings as he carries the load.", also: [沙僧一边唱歌一边挑着担子]}
+    - {words: [大家, 一边, 休息, 一边, 想办法], english: "Everyone rests and thinks of a plan.", also: [大家一边想办法一边休息]}
+
+- region: huoyan
+  pattern: 越来越
+  pinyin: yuèláiyuè
+  explain: "越来越 + adjective or feeling: more and more so as time goes on."
+  markers: [越来越]
+  examples:
+    - {chinese: "天气越来越冷了。", english: "The weather is getting colder and colder."}
+    - {chinese: "他的中文越来越好了。", english: "His Chinese is getting better and better."}
+    - {chinese: "火焰山的火越来越大了。", english: "The fire on the Flaming Mountain is growing bigger and bigger."}
+  sentences:
+    - {words: [这里的, 天气, 越来越, 热了], english: "The weather here is getting hotter and hotter."}
+    - {words: [悟空, 心里, 越来越, 着急], english: "Wukong grows more and more anxious."}
+    - {words: [路上的, 水, 越来越, 少了], english: "There's less and less water on the road."}
+    - {words: [铁扇公主, 变得, 越来越, 生气], english: "Princess Iron Fan grows angrier and angrier."}
+    - {words: [假扇子, 一扇, 火, 就, 越来越, 大], english: "One wave of the false fan, and the fire grew bigger and bigger."}
+    - {words: [师父的, 身体, 越来越, 好了], english: "Master's health is getting better and better."}
+
+- region: jisai
+  pattern: 从…到
+  pinyin: cóng…dào
+  explain: "从 A 到 B: from A to B, in place or in time."
+  markers: [从, 到]
+  examples:
+    - {chinese: "从我家到学校要二十分钟。", english: "From my home to the school takes twenty minutes."}
+    - {chinese: "从早上到晚上他都在学习。", english: "He studies from morning to night."}
+    - {chinese: "和尚们从早到晚都在扫塔。", english: "The monks sweep the pagoda from morning till night."}
+  sentences:
+    - {words: [我们, 从, 东土, 走到, 这里], english: "We walked here from the Eastern Land."}
+    - {words: [从, 塔下, 到, 塔顶, 有, 十三层], english: "From the foot of the pagoda to its top there are thirteen storeys."}
+    - {words: [和尚们, 从, 早, 到, 晚, 都, 在干活], english: "The monks work from morning to night.", also: [从早到晚和尚们都在干活]}
+    - {words: [悟空, 从, 第一层, 扫到了, 最高的一层], english: "Wukong swept from the first storey up to the highest."}
+    - {words: [从, 那天, 到, 现在, 已经, 三年了], english: "It's been three years from that day to now."}
+    - {words: [从, 国王, 到, 百姓, 都, 很高兴], english: "Everyone from the king to the common folk is happy."}
+
+- region: biqiu
+  pattern: 得 (verb 得 how)
+  pinyin: de
+  explain: "Verb 得 + description says how an action is done or how far it goes: 他跑得很快."
+  markers: [得]
+  examples:
+    - {chinese: "她说得很好。", english: "She speaks very well."}
+    - {chinese: "他跑得很快。", english: "He runs very fast."}
+    - {chinese: "树精们的诗写得很好。", english: "The tree spirits write fine poems."}
+  sentences:
+    - {words: [荆棘, 长得, 又高, 又密], english: "The thorns grow tall and thick."}
+    - {words: [八戒, 开路, 开得, 很快], english: "Bajie clears the way fast."}
+    - {words: [这位老树精, 的诗, 写得, 很好], english: "This old tree spirit's poems are well written."}
+    - {words: [师父, 那天晚上, 睡得, 不好], english: "Master slept badly that night.", also: [那天晚上师父睡得不好]}
+    - {words: [小孩子们, 哭得, 很伤心], english: "The little children cry their hearts out."}
+    - {words: [悟空, 变得, 和师父, 一模一样], english: "Wukong changed until he looked just like Master."}
+    - {words: [国王, 病得, 很重], english: "The king is gravely ill."}
+
+- region: pansi
+  pattern: 正在
+  pinyin: zhèngzài
+  explain: "正在 before a verb says the action is going on right now; 呢 can close the sentence."
+  markers: [正在]
+  examples:
+    - {chinese: "她正在写作业。", english: "She is doing her homework right now."}
+    - {chinese: "我们正在吃饭呢。", english: "We're eating just now."}
+    - {chinese: "七个女妖正在河里洗澡。", english: "Seven demonesses are bathing in the stream."}
+  sentences:
+    - {words: [师父, 正在, 向她们, 化斋], english: "Master is begging them for food."}
+    - {words: [蜘蛛精, 正在, 织网, 呢], english: "The spider spirits are spinning webs."}
+    - {words: [八戒, 正在, 河里, 洗澡], english: "Bajie is bathing in the stream."}
+    - {words: [悟空, 正在, 想办法, 救师父], english: "Wukong is working out how to save Master."}
+    - {words: [道士, 正在, 给他们, 倒茶], english: "The Daoist is pouring them tea."}
+    - {words: [我们, 正在, 赶路, 呢], english: "We are hurrying on our way."}
+
+- region: shituo
+  pattern: 只要…就
+  pinyin: zhǐyào…jiù
+  explain: "只要 A，就 B: as long as A, B. A is enough to bring B about."
+  markers: [只要, 就]
+  examples:
+    - {chinese: "只要你努力，就一定能学好中文。", english: "As long as you work hard, you'll surely learn Chinese well."}
+    - {chinese: "只要不下雨，我们就去爬山。", english: "As long as it doesn't rain, we'll go climbing."}
+    - {chinese: "只要吃一块唐僧肉，就能长生不老。", english: "One bite of Tang Seng's flesh is enough to live forever."}
+  sentences:
+    - {words: [只要, 师父, 在, 我们, 就, 不怕], english: "As long as Master is here, we're not afraid."}
+    - {words: [只要, 走过, 这座山, 就, 安全了], english: "Once we're past this mountain, we're safe."}
+    - {words: [只要, 大家, 一起, 想办法, 就, 能, 赢], english: "As long as we all think it through together, we can win."}
+    - {words: [只要, 你, 叫一声, 我, 就, 马上, 来], english: "Just call once and I'll come at once."}
+    - {words: [只要, 不, 进城, 妖怪, 就, 找不到, 我们], english: "As long as we stay out of the city, the demons can't find us."}
+    - {words: [只要, 有, 金箍棒, 悟空, 就, 什么都, 不怕], english: "As long as he has the staff, Wukong fears nothing.", also: [只要悟空有金箍棒就什么都不怕]}
+
+- region: xiaoleiyin
+  pattern: 不是…而是
+  pinyin: búshì…érshì
+  explain: "不是 A，而是 B: not A but B. It corrects a mistaken idea."
+  markers: [不是, 而是]
+  examples:
+    - {chinese: "他不是老师，而是学生。", english: "He isn't a teacher but a student."}
+    - {chinese: "我不是不想去，而是没有时间。", english: "It's not that I don't want to go; I don't have time."}
+    - {chinese: "这不是雷音寺，而是妖怪住的地方。", english: "This isn't the Thunderclap Temple but a demon's den."}
+  sentences:
+    - {words: [坐在上面的, 不是, 如来, 而是, 黄眉怪], english: "The one sitting up there isn't the Buddha but Yellow Brows."}
+    - {words: [这些, 不是, 真和尚, 而是, 小妖], english: "These aren't real monks but little demons."}
+    - {words: [悟空, 不是, 不信, 师父, 而是, 怕, 他, 上当], english: "It's not that Wukong doubts Master; he fears Master will be fooled.", also: [悟空不是不信他而是怕师父上当]}
+    - {words: [我们, 要找的, 不是, 小雷音寺, 而是, 大雷音寺], english: "We're looking not for the Lesser Thunderclap Temple but the Great one."}
+    - {words: [那个, 不是, 钟声, 而是, 妖怪的, 笑声], english: "That isn't the sound of a bell but a demon's laughter."}
+    - {words: [挡路的, 不是, 山, 而是, 一条大蛇], english: "What blocks the road isn't a mountain but a great snake."}
+
+- region: wudi
+  pattern: 不管…都
+  pinyin: bùguǎn…dōu
+  explain: "不管 + a question word or choice，都 (or 也) B: no matter what, B. 不管 needs an open question after it."
+  markers: [不管, "都|也"]
+  examples:
+    - {chinese: "不管天气怎么样，我都去。", english: "Whatever the weather, I'm going."}
+    - {chinese: "不管多难，我们也要坚持。", english: "However hard it is, we'll keep going."}
+    - {chinese: "不管妖怪藏在哪儿，悟空都能找到。", english: "Wherever the demon hides, Wukong can find it."}
+  sentences:
+    - {words: [不管, 洞, 有多深, 悟空, 都, 要, 进去], english: "However deep the cave is, Wukong will go in."}
+    - {words: [不管, 谁, 问, 你们, 都, 说, 不是和尚], english: "Whoever asks, say you aren't monks."}
+    - {words: [不管, 她, 怎么说, 师父, 都, 不, 答应], english: "Whatever she says, Master won't agree."}
+    - {words: [不管, 白天, 还是, 晚上, 洞里, 都, 很黑], english: "Day or night, it's dark in the cave.", also: [洞里不管白天还是晚上都很黑]}
+    - {words: [不管, 走, 多远, 我们, 也, 要, 到西天], english: "However far we must walk, we'll reach the West."}
+    - {words: [不管, 多累, 沙僧, 都, 不, 抱怨], english: "However tired he is, Sha Seng never complains.", also: [沙僧不管多累都不抱怨]}
+
+- region: yuhua
+  pattern: 只有…才
+  pinyin: zhǐyǒu…cái
+  explain: "只有 A，才 B: only if A, B. A is the one condition B needs."
+  markers: [只有, 才]
+  examples:
+    - {chinese: "只有多练习，才能说好中文。", english: "Only with lots of practice can you speak Chinese well."}
+    - {chinese: "只有他才知道答案。", english: "Only he knows the answer."}
+    - {chinese: "只有找到狮子的主人，才能救出师父。", english: "Only by finding the lion's master can we rescue Master."}
+  sentences:
+    - {words: [只有, 每天, 练习, 才能, 学会, 功夫], english: "Only by practising every day can you learn kung fu."}
+    - {words: [只有, 悟空, 才, 拿得动, 金箍棒], english: "Only Wukong can lift the gold-banded staff."}
+    - {words: [只有, 找回, 兵器, 王子们, 才, 能, 学武], english: "Only when the weapons are found can the princes learn to fight."}
+    - {words: [只有, 它的主人, 才, 管得了, 它], english: "Only its master can control it."}
+    - {words: [只有, 晚上, 才, 能, 看到, 花灯], english: "Only at night can you see the lanterns."}
+    - {words: [只有, 吃饱了, 八戒, 才, 肯, 走], english: "Only when he's full will Bajie walk on.", also: [八戒只有吃饱了才肯走]}
+
+- region: tianzhu
+  pattern: 即使…也
+  pinyin: jíshǐ…yě
+  explain: "即使 A，也 B: even if A, still B. 也 goes after the subject of the second part."
+  markers: [即使, 也]
+  examples:
+    - {chinese: "即使明天下雨，我也要去。", english: "Even if it rains tomorrow, I'll go."}
+    - {chinese: "即使很累，他也每天学习。", english: "Even when he's tired, he studies every day."}
+    - {chinese: "即使公主很美，唐僧也不想结婚。", english: "Even though the princess is lovely, Tang Seng doesn't want to marry."}
+  sentences:
+    - {words: [即使, 路, 很远, 我们, 也, 要, 走下去], english: "Even if the road is long, we'll keep walking."}
+    - {words: [即使, 她, 变成了, 公主, 悟空, 也, 认得出来], english: "Even turned into a princess, Wukong can tell who she is."}
+    - {words: [即使, 没有, 水, 白龙马, 也, 不停下], english: "Even without water, the white dragon horse doesn't stop."}
+    - {words: [即使, 国王, 不信, 我们, 也, 要, 说真话], english: "Even if the king doesn't believe it, we must tell the truth."}
+    - {words: [即使, 妖怪, 跑到, 月亮上, 悟空, 也, 能, 找到她], english: "Even if the demon runs to the moon, Wukong can find her."}
+    - {words: [即使, 很饿, 师父, 也, 不吃, 肉], english: "Even when hungry, Master doesn't eat meat.", also: [师父即使很饿也不吃肉]}
+
+- region: lingshan
+  pattern: 难道…吗
+  pinyin: nándào…ma
+  explain: "难道…吗 asks a question that expects the answer 'surely not': it shows surprise or disbelief."
+  markers: [难道, 吗]
+  ends: true
+  examples:
+    - {chinese: "难道你不知道吗？", english: "Don't tell me you don't know?"}
+    - {chinese: "难道这就是灵山吗？", english: "Can this really be Vulture Peak?"}
+    - {chinese: "难道没有字的经书也能用吗？", english: "Can scriptures with no words really be any use?"}
+  sentences:
+    - {words: [难道, 这条船, 没有底, 吗], english: "Can this boat really have no bottom?"}
+    - {words: [难道, 你, 忘了, 我们的, 约定, 吗], english: "Have you really forgotten our promise?"}
+    - {words: [难道, 我们, 走了, 十四年, 是, 白走的, 吗], english: "Did we really walk fourteen years for nothing?"}
+    - {words: [难道, 经书上, 一个字, 都没有, 吗], english: "Is there really not one word in the scriptures?"}
+    - {words: [难道, 你们, 不想, 回, 东土, 吗], english: "Don't you want to go back to the Eastern Land?"}
+    - {words: [难道, 这, 就是, 第八十一难, 吗], english: "Can this be the eighty-first tribulation?"}
