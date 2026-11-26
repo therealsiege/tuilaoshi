@@ -20,6 +20,14 @@ type StoryChapter struct {
 	Text    string `yaml:"text"`
 	English string `yaml:"english,omitempty"` // a short summary
 	Date    string `yaml:"date"`              // the day it was told, YYYY-MM-DD
+
+	Questions []StoryQuestion `yaml:"questions,omitempty"` // for hearing it first (right choice first)
+}
+
+// StoryQuestion is a question about a chapter, its right choice first.
+type StoryQuestion struct {
+	Ask     string   `yaml:"ask"`
+	Choices []string `yaml:"choices"`
 }
 
 type storyteller struct {

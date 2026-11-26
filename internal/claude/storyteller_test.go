@@ -34,3 +34,13 @@ func TestParseChapterAddsTheStorytellersEnding(t *testing.T) {
 		t.Error("a reply without text should be an error")
 	}
 }
+
+func TestParseChapterQuestions(t *testing.T) {
+	ch, err := ParseChapter("TITLE: 题\nTEXT: 猴子出来了。欲知后事如何，且听下回分解。\nENGLISH: A monkey.\nQ: 谁出来了？ | 猴子 | 老虎 | 和尚\nQ: 坏的问题\n")
+	if err != nil || len(ch.Questions) != 1 || ch.Questions[0].Ask != "谁出来了？" || ch.Questions[0].Choices[0] != "猴子" || len(ch.Questions[0].Choices) != 3 {
+		t.Errorf("questions %+v %v", ch.Questions, err)
+	}
+	if strings.Contains(ch.English, "Q:") {
+		t.Errorf("a question leaked into the English: %q", ch.English)
+	}
+}

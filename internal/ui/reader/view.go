@@ -22,6 +22,8 @@ func (m Model) View() string {
 		b.WriteString(m.TextView("  ←→ word · ↑↓ line · enter review it tomorrow · ctrl+r hear · esc chapters"))
 	case m.open:
 		b.WriteString(m.TextView("  ←→ word · ↑↓ line · enter didn't know it (review tomorrow) · esc readings"))
+	case m.listening != nil:
+		b.WriteString(m.listeningView())
 	case m.story:
 		b.WriteString(m.viewShelf())
 	default:

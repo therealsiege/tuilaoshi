@@ -19,11 +19,22 @@ Retell the events of the chapter you are given in your own words: never quote th
 Answer in exactly this format and nothing else:
 TITLE: a one-line chapter title in Chinese
 TEXT: the retelling, which may run over several lines
-ENGLISH: a one or two sentence summary in English`
+ENGLISH: a one or two sentence summary in English
+Q: a question in simple Chinese about what happened | the right answer | a wrong answer | another wrong answer
+Q: a second such question | right | wrong | wrong
+Q: a third such question | right | wrong | wrong`
 
-// Chapter is one chapter as the storyteller tells it.
+// Chapter is one chapter as the storyteller tells it, with questions for
+// hearing it before reading it.
 type Chapter struct {
 	Title, Text, English string
+	Questions            []Question
+}
+
+// Question is a question about a chapter: the right choice first.
+type Question struct {
+	Ask     string
+	Choices []string
 }
 
 // TellChapter asks the storyteller for chapter n of the novel, retold
@@ -58,6 +69,16 @@ func ParseChapter(reply string) (Chapter, error) {
 			field = "text"
 			if v := strings.TrimSpace(strings.TrimPrefix(line, "TEXT:")); v != "" {
 				text = append(text, v)
+			}
+		case strings.HasPrefix(line, "Q:"):
+			field = "question"
+			parts := strings.Split(strings.TrimPrefix(line, "Q:"), "|")
+			if len(parts) >= 3 {
+				q := Question{Ask: strings.TrimSpace(parts[0])}
+				for _, c := range parts[1:] {
+					q.Choices = append(q.Choices, strings.TrimSpace(c))
+				}
+				ch.Questions = append(ch.Questions, q)
 			}
 		case strings.HasPrefix(line, "ENGLISH:"):
 			field, ch.English = "english", strings.TrimSpace(strings.TrimPrefix(line, "ENGLISH:"))

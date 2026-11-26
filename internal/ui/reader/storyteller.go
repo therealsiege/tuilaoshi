@@ -129,6 +129,8 @@ func (m Model) updateShelf(k tea.KeyMsg) (Model, tea.Cmd) {
 		m.shelfCursor++
 	case key.Matches(k, m.gkeys.Enter) && m.shelfCursor > 0:
 		m = m.openChapter(m.shelfChapter(m.shelfCursor))
+	case k.String() == "l" && m.shelfCursor > 0:
+		m = m.startListening(m.shelfChapter(m.shelfCursor))
 	case key.Matches(k, m.gkeys.Enter):
 		return m.tell()
 	}
@@ -160,6 +162,9 @@ func (m Model) tell() (Model, tea.Cmd) {
 			return toldMsg{err: err}
 		}
 		told := wiki.StoryChapter{Number: n, Title: ch.Title, Text: ch.Text, English: ch.English, Date: today}
+		for _, q := range ch.Questions {
+			told.Questions = append(told.Questions, wiki.StoryQuestion{Ask: q.Ask, Choices: q.Choices})
+		}
 		return toldMsg{chapter: told, err: store.SaveStoryChapter(told)}
 	}
 }
@@ -198,6 +203,9 @@ func (m Model) openChapter(c wiki.StoryChapter) Model {
 
 // Hear is the open chapter's text, for ctrl+r to read aloud.
 func (m Model) Hear() string {
+	if m.listening != nil {
+		return m.listening.chapter.Text
+	}
 	if !m.open || !m.chapterOpen {
 		return ""
 	}
@@ -257,6 +265,6 @@ func (m Model) viewShelf() string {
 		b.WriteString(ui.MutedStyle.Render("  " + m.status))
 		b.WriteString("\n\n")
 	}
-	b.WriteString(ui.HelpStyle.Render("  ↑↓ choose · enter tell / read · esc readings"))
+	b.WriteString(ui.HelpStyle.Render("  ↑↓ choose · enter tell / read · l hear it first · esc readings"))
 	return b.String()
 }

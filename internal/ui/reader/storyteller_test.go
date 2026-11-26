@@ -32,7 +32,8 @@ func storyteller(t *testing.T, asked *[]int) Model {
 		if !reflect.DeepEqual(known, []string{"菜单"}) {
 			return claude.Chapter{}, errors.New("known words not passed")
 		}
-		return claude.Chapter{Title: "石猴出世", Text: chapterOne, English: "A stone monkey is born."}, nil
+		return claude.Chapter{Title: "石猴出世", Text: chapterOne, English: "A stone monkey is born.",
+			Questions: []claude.Question{{Ask: "猴子是从哪里出来的？", Choices: []string{"石头里", "水里", "树上"}}}}, nil
 	}
 	return m.Refresh()
 }
@@ -143,5 +144,37 @@ func TestKnownWordsPreferLearnedAndEasyWords(t *testing.T) {
 	got := knownWords(cards, pages)
 	if !reflect.DeepEqual(got, []string{"斟酌", "吃饭"}) {
 		t.Errorf("known words %q; want the learned word, then the HSK2 one", got)
+	}
+}
+
+func TestHearingAChapterFirst(t *testing.T) {
+	var asked []int
+	m := storyteller(t, &asked)
+	m, _ = typeKey(m, "s")
+	m, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	m, _ = m.Update(cmd())
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEsc}) // back to the shelf
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyDown})
+	m, _ = typeKey(m, "l")
+	if m.listening == nil || strings.Contains(m.View(), "花果山") || !strings.Contains(m.View(), "猴子是从哪里出来的") {
+		t.Fatalf("hearing mode should ask, with the text hidden:\n%s", m.View())
+	}
+	if m.Hear() != chapterOne {
+		t.Errorf("ctrl+r should read the chapter: %q", m.Hear())
+	}
+	right := 0
+	for i, c := range m.listening.order[0] {
+		if c == 0 {
+			right = i
+		}
+	}
+	m, _ = typeKey(m, string(rune('1'+right)))
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if !strings.Contains(m.View(), "1 of 1 right") {
+		t.Fatalf("after the questions:\n%s", m.View())
+	}
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if m.listening != nil || !m.chapterOpen || !strings.Contains(m.View(), "花果山") {
+		t.Errorf("the text should open after the questions:\n%s", m.View())
 	}
 }

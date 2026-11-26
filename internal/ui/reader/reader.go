@@ -84,6 +84,7 @@ type Model struct {
 	shelfCursor int                 // 0 tells the next chapter; then told ones, newest first
 	telling     bool                // waiting for the storyteller
 	chapterOpen bool                // the open text is a told chapter
+	listening   *listening          // a chapter being heard before it is read (listen.go)
 
 	loadErr, saveErr error
 	width, height    int
@@ -268,6 +269,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	k, ok := msg.(tea.KeyMsg)
 	if !ok {
 		return m, nil
+	}
+	if m.listening != nil {
+		return m.updateListening(k)
 	}
 	if m.story && !m.open {
 		return m.updateShelf(k)
