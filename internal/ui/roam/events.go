@@ -194,7 +194,7 @@ func (m Model) wrapped(style lipgloss.Style, text, pad string) string {
 	room := 78
 	switch {
 	case m.width > 0 && !m.compact() && m.width >= m.region.W+40:
-		room = max(m.region.W, m.width-53) // the sidebar and its gap take about 50
+		room = max(m.region.W, m.width-lipgloss.Width(m.sideView())-4) // left of the sidebar and its gap
 	case m.width > 0:
 		room = min(room, m.width-1)
 	}
