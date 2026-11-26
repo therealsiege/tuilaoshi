@@ -19,6 +19,7 @@ func main() {
 	export := flag.String("export", "", "write your progress as readable files into this folder, then exit")
 	importDir := flag.String("import", "", "read progress exported with -export (e.g. from another Mac), then exit")
 	deck := flag.String("deck", "", "write your studied and hard words to this CSV file for Anki or Pleco, then exit")
+	remindNow := flag.Bool("remind", false, "show today's study reminder as a notification, then exit (make reminder schedules it)")
 	flag.Parse()
 
 	dir, err := filepath.Abs(*wikiDir)
@@ -29,6 +30,14 @@ func main() {
 	if info, err := os.Stat(dir); err != nil || !info.IsDir() {
 		fmt.Fprintf(os.Stderr, "mandarin: wiki directory %s not found; run from the repo root or pass -wiki <dir>\n", dir)
 		os.Exit(1)
+	}
+
+	if *remindNow {
+		if err := remind(dir); err != nil {
+			fmt.Fprintf(os.Stderr, "mandarin: %v\n", err)
+			os.Exit(1)
+		}
+		return
 	}
 
 	if *deck != "" {

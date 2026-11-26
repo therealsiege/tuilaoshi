@@ -1,4 +1,4 @@
-.PHONY: build run test fmt check lint golden recordings launcher demonart freqlist proofsheet sweep clean
+.PHONY: build run test fmt check lint golden recordings launcher demonart freqlist proofsheet sweep reminder reminder-off clean
 
 GOLANGCI_LINT = go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 
@@ -47,6 +47,13 @@ launcher:
 # make freqlist IN="$$HOME/Desktop/list.xlsx".
 freqlist:
 	go run ./cmd/freqlist -in "$(IN)" -wiki wiki
+
+# A daily study reminder at AT (a macOS notification), e.g. make reminder AT=19:00.
+reminder:
+	./scripts/install-reminder.sh "$(or $(AT),19:00)"
+
+reminder-off:
+	./scripts/install-reminder.sh off
 
 # Open every screen of the real game at 80x24 and 120x45 (tmux) and fail on
 # a missing title or a cut line. Takes a few minutes.
