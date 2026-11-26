@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/claude"
 	"github.com/therealsiege/tuilaoshi/internal/episode"
@@ -261,13 +262,28 @@ func (m Model) View() string {
 		b.WriteString(ui.SubtitleStyle.Render(fmt.Sprintf("  %d items due for review", len(m.items))))
 		b.WriteString("\n\n")
 
-		for i, card := range m.items {
+		first, last := 0, len(m.items)
+		if room := m.height - 10; m.height > 0 && room < len(m.items) {
+			room = max(room, 3)
+			first = min(max(m.cursor-room/2, 0), len(m.items)-room)
+			last = first + room
+		}
+		if first > 0 {
+			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("    … %d above", first)) + "\n")
+		}
+		for i := first; i < last; i++ {
+			card := m.items[i]
 			line := fmt.Sprintf("  %s  %s",
 				card.Chinese,
 				ui.MutedStyle.Render(fmt.Sprintf("[%s]", card.Type)),
 			)
-			if card.English != "" {
-				line += "  " + ui.MutedStyle.Render(card.English)
+			if en := card.English; en != "" {
+				if m.width > 0 {
+					if room := m.width - lipgloss.Width(line) - 6; room > 3 && lipgloss.Width(en) > room {
+						en = ui.WrapDisplay(en, room-1)[0] + "…"
+					}
+				}
+				line += "  " + ui.MutedStyle.Render(en)
 			}
 			if i == m.cursor {
 				b.WriteString(ui.SelectedStyle.Render("▸ " + line))
@@ -276,7 +292,9 @@ func (m Model) View() string {
 			}
 			b.WriteString("\n")
 		}
-		b.WriteString("\n")
+		if last < len(m.items) {
+			b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("    … %d below", len(m.items)-last)) + "\n")
+		}
 		b.WriteString(ui.HelpStyle.Render("  ↑↓ navigate · enter start drill · esc back"))
 
 	case stateDrill:
@@ -295,7 +313,7 @@ func (m Model) View() string {
 		}
 
 	case stateEval:
-		b.WriteString(ui.MutedStyle.Render("  Evaluating with Claude..."))
+		b.WriteString(ui.MutedStyle.Render("  Checking your answer…"))
 
 	case stateDifficulty:
 		if m.result.Correct {
@@ -304,7 +322,11 @@ func (m Model) View() string {
 			b.WriteString(ui.ErrorStyle.Render("  ✗ Incorrect"))
 		}
 		b.WriteString("\n\n")
-		b.WriteString("  " + m.feedback)
+		width := 76
+		if m.width > 0 {
+			width = min(width, m.width-4)
+		}
+		b.WriteString("  " + strings.Join(ui.WrapDisplay(m.feedback, width), "\n  "))
 		if m.cursor < len(m.items) {
 			if line := formatDecomposition(m.items[m.cursor].Chinese); line != "" {
 				b.WriteString("\n\n")

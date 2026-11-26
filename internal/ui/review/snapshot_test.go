@@ -1,10 +1,12 @@
 package review
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/therealsiege/tuilaoshi/internal/claude"
 	"github.com/therealsiege/tuilaoshi/internal/ui/input"
@@ -61,5 +63,29 @@ func TestLeavingEarlyKeepsTheAnswersGiven(t *testing.T) {
 	}
 	if m = m.Leave(); store.TodayStats().CardsReviewed != 1 {
 		t.Error("leaving twice saved the answer twice")
+	}
+}
+
+func TestALongQueueFitsTheWindow(t *testing.T) {
+	pages := map[string]string{}
+	for i := range 40 {
+		pages[fmt.Sprintf("characters/c%02d.md", i)] = strings.Replace(uitest.OverdueCharacter, "book", fmt.Sprintf("book number %d, with a meaning long enough to run past the edge of the window", i), 1)
+	}
+	m := New(uitest.Wiki(t, pages), claude.New(), nil, input.NewDict())
+	for _, size := range [][2]int{{80, 24}, {120, 45}} {
+		m = m.SetSize(size[0], size[1])
+		m, _ = m.Update(loadDueMsg{})
+		for range 20 {
+			m, _ = m.Update(tea.KeyMsg{Type: tea.KeyDown})
+		}
+		out := m.View()
+		if n := strings.Count(out, "\n") + 1; n > size[1] || !strings.Contains(out, "复习") || !strings.Contains(out, "above") {
+			t.Errorf("%dx%d: %d lines\n%s", size[0], size[1], n, out)
+		}
+		for _, l := range strings.Split(out, "\n") {
+			if lipgloss.Width(l) > size[0] {
+				t.Errorf("%dx%d: a line %d wide: %s", size[0], size[1], lipgloss.Width(l), l)
+			}
+		}
 	}
 }
