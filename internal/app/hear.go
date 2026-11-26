@@ -1,6 +1,9 @@
 package app
 
 import (
+	"fmt"
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/therealsiege/tuilaoshi/internal/ui"
@@ -51,4 +54,31 @@ func (m Model) ownsEsc() bool {
 		return m.stats.Walking()
 	}
 	return false
+}
+
+// fitToWindow keeps a screen taller than the window readable: the title
+// (its first lines) and the keys (its last) stay, and the middle shows the
+// part around the selected line (▸), with a note that more is above or
+// below. Screens that fit, or a window of unknown height, are untouched.
+func fitToWindow(screen string, height int) string {
+	lines := strings.Split(screen, "\n")
+	const head, tail = 2, 2
+	if height <= 0 || len(lines) <= height || height < head+tail+3 {
+		return screen
+	}
+	middle := lines[head : len(lines)-tail]
+	room := height - head - tail - 1 // one line says what is hidden
+	sel := 0
+	for i, l := range middle {
+		if strings.Contains(l, "▸") {
+			sel = i
+			break
+		}
+	}
+	first := min(max(sel-room/2, 0), len(middle)-room)
+	out := append([]string{}, lines[:head]...)
+	out = append(out, middle[first:first+room]...)
+	note := fmt.Sprintf("  ⋯ %d more lines above, %d below: a taller window shows them", first, len(middle)-first-room)
+	out = append(out, ui.MutedStyle.Render(note))
+	return strings.Join(append(out, lines[len(lines)-tail:]...), "\n")
 }

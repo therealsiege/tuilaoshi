@@ -19,7 +19,7 @@ func (m Model) View() string {
 	var b strings.Builder
 	b.WriteString(ui.TitleStyle.MarginBottom(0).Render("土地庙 Earth God's Shrine"))
 	b.WriteString("  " + ui.WarningStyle.Render(fmt.Sprintf("%d 铜钱 · %d 元宝", m.wallet.Tongqian, m.wallet.Yuanbao)) + "\n")
-	b.WriteString(ui.MutedStyle.Render("  The Earth God trades gear for the coins your study earns. Gear helps in battle; it never changes your reviews.") + "\n\n")
+	b.WriteString(ui.MutedStyle.Render(ui.WrapIndent("The Earth God trades gear for the coins your study earns. Gear helps in battle; it never changes your reviews.", m.width)) + "\n\n")
 	b.WriteString(ui.LoadError(m.loadErr))
 
 	shelf, sheet := m.shelfView(), m.sheetView()

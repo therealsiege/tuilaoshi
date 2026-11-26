@@ -406,6 +406,7 @@ func (m Model) View() string {
 	default:
 		content = m.dashboard.View()
 	}
+	content = fitToWindow(content, m.height)
 
 	if m.celebration != nil {
 		content = m.renderCelebrationOverlay(content)

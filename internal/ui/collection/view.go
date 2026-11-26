@@ -28,7 +28,7 @@ func (m Model) listRows() int {
 func (m Model) View() string {
 	var b strings.Builder
 	b.WriteString(ui.TitleStyle.MarginBottom(0).Render("图鉴 Collection") + "\n")
-	b.WriteString(ui.MutedStyle.Render("  Every enemy beaten and every character mastered is a card. Complete a set to claim its reward.") + "\n")
+	b.WriteString(ui.MutedStyle.Render(ui.WrapIndent("Every enemy beaten and every character mastered is a card. Complete a set to claim its reward.", m.width)) + "\n")
 	b.WriteString(m.tabsLine() + "\n\n")
 	b.WriteString(ui.LoadError(m.loadErr))
 
