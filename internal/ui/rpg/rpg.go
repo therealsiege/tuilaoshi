@@ -119,6 +119,11 @@ type Model struct {
 	inner bool
 	// loot is the materials the last fight earned (see road.go).
 	loot []string
+
+	// The White Bone Demon's disguises, the old man's answer box, its grader.
+	bg     baiguState
+	bgIn   input.Model
+	grader Grader
 }
 
 type logEntry struct {
@@ -136,6 +141,7 @@ func New(store *wiki.Store, tts *audio.Client, dict *input.Dict) Model {
 		tts:     tts,
 		input:   ti,
 		writing: dict != nil,
+		bgIn:    newBaiguInput(dict),
 		gkeys:   ui.DefaultGlobalKeys(),
 		state:   stateIntro,
 	}
@@ -195,6 +201,9 @@ func (m Model) Refresh() Model {
 			m.cards = rpgengine.WeakCards(m.cards)
 		}
 		m.startGauntlet()
+		if m.baiguFight() {
+			m.startBaigu()
+		}
 	case m.meetSpirit(pages, cards):
 	default:
 		reached := len(stages)
@@ -230,6 +239,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.ttsErr = msg.Err
 		return m, nil
 
+	case baiguGradeMsg:
+		return m.onBaiguGrade(msg)
+
 	case timerMsg:
 		return m.onTimer(msg)
 
@@ -249,6 +261,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		if m.state == stateScene && !key.Matches(msg, m.gkeys.Back) {
 			return m.updateScene(msg)
 		}
+		if m.state == stateBaigu && (!key.Matches(msg, m.gkeys.Back) || m.bgIn.Composing()) {
+			return m.updateBaigu(msg)
+		}
 		// Global escape: flee battle.
 		if key.Matches(msg, m.gkeys.Back) {
 			return m, ui.SwitchTo(ui.ViewMap)
@@ -260,6 +275,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				return m.startNightmare(), nil
 			}
 			if key.Matches(msg, m.gkeys.Enter) || msg.Type == tea.KeySpace {
+				if m.baiguFight() {
+					return m.askBaigu()
+				}
 				m.state = stateFighting
 				m.battle.State = rpgengine.BattlePlayerTurn
 				q := m.battle.GenerateQuestion(m.cards)
@@ -478,7 +496,3 @@ func tickAfter(d time.Duration) tea.Cmd {
 		return animTickMsg{}
 	})
 }
-
-// InputComposing reports whether a typed answer is mid-composition, so esc
-// cancels it rather than fleeing.
-func (m Model) InputComposing() bool { return m.input.Composing() }
