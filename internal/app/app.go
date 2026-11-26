@@ -110,7 +110,7 @@ func New(wikiDir string) (Model, error) {
 		keys:        ui.DefaultGlobalKeys(),
 		currentView: ui.ViewTitle,
 		title:       title.New(store, dict).Refresh(),
-		roam:        roam.New(store, ttsClient),
+		roam:        roam.New(store, ttsClient).WithWriting(ai, dict),
 		theatre:     theatre.New(store, dict),
 		forge:       forgeview.New(store, ai),
 		festival:    festival.New(store),
@@ -264,7 +264,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		typing := m.currentView == ui.ViewChat || (m.currentView == ui.ViewParty && m.party.Busy()) ||
 			(m.currentView == ui.ViewWorld && m.world.Typing()) ||
 			(m.currentView == ui.ViewTitle && m.title.Typing()) ||
-			(m.currentView == ui.ViewTheatre && m.theatre.Typing()) || (m.currentView == ui.ViewDiary && m.diary.Typing())
+			(m.currentView == ui.ViewTheatre && m.theatre.Typing()) || (m.currentView == ui.ViewDiary && m.diary.Typing()) ||
+			(m.currentView == ui.ViewMap && m.roam.Typing())
 		if key.Matches(msg, m.keys.Help) && !typing {
 			m.showHelp = !m.showHelp
 			return m, nil

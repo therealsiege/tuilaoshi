@@ -45,6 +45,7 @@ type Content struct {
 	Mysteries    []Mystery
 	Errands      []Errand
 	Baigu        Baigu
+	GrammarGates []GrammarGate
 }
 
 // Progression sets which characters count toward opening a stage.
@@ -110,6 +111,7 @@ func LoadContent() (Content, error) {
 		{"mysteries", &c.Mysteries},
 		{"errands", &c.Errands},
 		{"baigu", &c.Baigu},
+		{"grammar_gates", &c.GrammarGates},
 	}
 	for _, f := range files {
 		data, err := contentFS.ReadFile("content/" + f.name + ".yaml")

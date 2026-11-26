@@ -44,11 +44,13 @@ func (m Model) View() string {
 		grid = m.eventView()
 	} else if m.plot != nil {
 		grid = m.plotView()
+	} else if m.gate != nil {
+		grid = m.gateView()
 	}
 	switch {
-	case m.compact() && (m.event != nil || m.plot != nil):
-		// An event or plot has the short window to itself; it carries its
-		// own keys.
+	case m.compact() && (m.event != nil || m.plot != nil || m.gate != nil):
+		// An event, plot or gate has the short window to itself; it
+		// carries its own keys.
 		b.WriteString(grid)
 		return b.String()
 	case m.compact():
@@ -219,6 +221,9 @@ func (m Model) compactSide() string {
 	} else if s != nil && s.Number > m.region.Region.To {
 		lines = append(lines, ui.SuccessStyle.Render("This region is cleared: the road west (<) is open."))
 	}
+	if l := m.gateLine(); l != "" {
+		lines = append(lines, l)
+	}
 	t := m.trail
 	day := fmt.Sprintf("%s · 斋饭 %d · 水 %d · %s, %s", ui.SubtitleStyle.Render(fmt.Sprintf("Day %d", t.Day)), t.Food, t.Water, t.Pace, t.Rations)
 	if t.Forewarned {
@@ -273,6 +278,7 @@ func (m Model) sideView() string {
 	} else if s == nil {
 		b.WriteString(ui.SuccessStyle.Render("The scriptures are won.") + "\n")
 	}
+	b.WriteString(m.gateSide())
 	b.WriteString("\n" + m.trailView())
 	b.WriteString(m.hpBar() + "\n")
 	b.WriteString(ui.WarningStyle.Render(fmt.Sprintf("%d 铜钱 · %d 元宝", m.wallet.Tongqian, m.wallet.Yuanbao)) + "\n\n")

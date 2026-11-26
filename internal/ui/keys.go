@@ -301,13 +301,17 @@ func HelpText(v View) string {
 			"  ctrl+r       Hear an event in Chinese\n" +
 			"  1-3          Answer where or when the\n" +
 			"               overheard demons strike\n" +
+			"  1-9          Lay a grammar gate's tiles\n" +
+			"  backspace    Take the last tile back\n" +
 			"  c / esc      Camp: study, party, shrine\n\n" +
 			"  @ you   · road (safe)   , wild (clans)\n" +
 			"  H town  ! tribulation   & demon's lair\n" +
 			"  + won   < > the next regions\n\n" +
 			"  Studying at camp opens sealed\n" +
 			"  tribulations; winning one opens\n" +
-			"  the road past it."
+			"  the road past it. Each lair has a\n" +
+			"  grammar gate (语法关) first: build\n" +
+			"  five sentences with its pattern."
 	case ViewWorld:
 		return "Town Keys\n\n" +
 			"  ↑↓     Choose a request\n" +
