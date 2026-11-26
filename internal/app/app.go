@@ -261,12 +261,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		// Help toggle from anywhere
-		typing := m.currentView == ui.ViewChat || (m.currentView == ui.ViewParty && m.party.Busy()) ||
-			(m.currentView == ui.ViewWorld && m.world.Typing()) ||
-			(m.currentView == ui.ViewTitle && m.title.Typing()) ||
-			(m.currentView == ui.ViewTheatre && m.theatre.Typing()) || (m.currentView == ui.ViewDiary && m.diary.Typing()) ||
-			(m.currentView == ui.ViewMap && m.roam.Typing())
-		if key.Matches(msg, m.keys.Help) && !typing {
+		if key.Matches(msg, m.keys.Help) && !m.typing() {
 			m.showHelp = !m.showHelp
 			return m, nil
 		}

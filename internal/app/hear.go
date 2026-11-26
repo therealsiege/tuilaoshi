@@ -82,3 +82,29 @@ func fitToWindow(screen string, height int) string {
 	out = append(out, ui.MutedStyle.Render(note))
 	return strings.Join(append(out, lines[len(lines)-tail:]...), "\n")
 }
+
+// typing reports whether the screen's text box has the keyboard, so ?
+// types a question mark rather than opening help.
+func (m Model) typing() bool {
+	switch m.currentView {
+	case ui.ViewChat:
+		return true
+	case ui.ViewParty:
+		return m.party.Busy()
+	case ui.ViewWorld:
+		return m.world.Typing()
+	case ui.ViewTitle:
+		return m.title.Typing()
+	case ui.ViewTheatre:
+		return m.theatre.Typing()
+	case ui.ViewDiary:
+		return m.diary.Typing()
+	case ui.ViewMap:
+		return m.roam.Typing()
+	case ui.ViewBattle:
+		return m.battle.InputComposing() || m.battle.Typing()
+	case ui.ViewAssess:
+		return m.assess.Typing()
+	}
+	return false
+}

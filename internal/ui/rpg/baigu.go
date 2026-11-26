@@ -299,3 +299,9 @@ func (m Model) winBaigu() Model {
 	m.saved = true
 	return m
 }
+
+// Typing reports whether a text box has the keyboard (a typed answer, or
+// the old man's round), so the app lets ? be typed.
+func (m Model) Typing() bool {
+	return m.input.Focused() || (m.state == stateBaigu && m.bgIn.Focused())
+}

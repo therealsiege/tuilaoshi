@@ -373,3 +373,7 @@ func (m Model) mockKey(k tea.KeyMsg) (Model, tea.Cmd) {
 	}
 	return m, nil
 }
+
+// Typing reports whether the mock test's sentence box has the keyboard, so
+// the app lets ? be typed.
+func (m Model) Typing() bool { return m.phase == phaseMock && m.mock.input.Focused() }
