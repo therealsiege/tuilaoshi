@@ -79,7 +79,7 @@ Chinese and English voices via Fish Audio. Cards are spoken aloud during drills.
 
 ### Everything is a file
 
-Your entire curriculum is plain markdown with YAML frontmatter. Browse it in the TUI, edit it in vim, version it with git. Your progress (reviews, journeys, settings) is kept apart, in one SQLite file, `wiki/progress.db`, that git ignores and the app backs up daily; `tuilaoshi -export DIR` writes it out as readable YAML and CSV whenever you want it as files.
+Your entire curriculum is plain markdown with YAML frontmatter. Browse it in the TUI, edit it in vim, version it with git. Your progress (reviews, journeys, settings) is kept apart, in one SQLite file, `wiki/progress.db`, that git ignores and the app backs up daily; `tuilaoshi -export DIR` writes it out as readable YAML and CSV whenever you want it as files, and `tuilaoshi -deck words.csv` writes the words you have studied as a deck to import into Anki or Pleco.
 
 ```
 wiki/

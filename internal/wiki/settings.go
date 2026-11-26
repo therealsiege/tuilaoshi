@@ -15,11 +15,12 @@ type Settings struct {
 	NewWords    int    `yaml:"new_words"`    // frequency-list words introduced a day
 	ClaudeCap   int    `yaml:"claude_cap"`   // Claude calls allowed a day; 0 for no limit
 	ToneColours bool   `yaml:"tone_colours"` // pinyin drawn in its tones' colours
+	Scheduler   string `yaml:"scheduler"`    // review spacing: classic, fsrs
 }
 
 // DefaultSettings are the settings before the learner changes any.
 func DefaultSettings() Settings {
-	return Settings{Speech: true, Effects: true, Input: "chinese", Difficulty: "adaptive", Encounters: "normal", Portraits: "large", ReviewChunk: 20, NewWords: 10, ToneColours: true}
+	return Settings{Speech: true, Effects: true, Input: "chinese", Difficulty: "adaptive", Encounters: "normal", Portraits: "large", ReviewChunk: 20, NewWords: 10, ToneColours: true, Scheduler: SchedulerClassic}
 }
 
 // Settings reads the learner's settings, filling any missing with defaults.
@@ -30,6 +31,9 @@ func (s *Store) Settings() (Settings, error) {
 	}
 	if set.NewWords < 0 {
 		set.NewWords = 0
+	}
+	if set.Scheduler != SchedulerFSRS {
+		set.Scheduler = SchedulerClassic
 	}
 	if set.ReviewChunk <= 0 {
 		set.ReviewChunk = DefaultSettings().ReviewChunk

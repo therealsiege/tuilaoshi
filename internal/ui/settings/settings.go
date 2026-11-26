@@ -56,11 +56,15 @@ var options = []option{
 		[]string{"10", "20", "30", "50"},
 		func(s wiki.Settings) string { return fmt.Sprint(s.ReviewChunk) },
 		func(s *wiki.Settings, v string) { _, _ = fmt.Sscan(v, &s.ReviewChunk) }}, //nolint:errcheck // choices are numbers
+	{"Scheduler", "Classic grows each interval by a fixed amount; FSRS models how well you hold each word and aims for 90% recall (My progress compares them)",
+		[]string{wiki.SchedulerClassic, wiki.SchedulerFSRS},
+		func(s wiki.Settings) string { return s.Scheduler },
+		func(s *wiki.Settings, v string) { s.Scheduler = v }},
 	{"Tone colours", "Pinyin drawn in its tones' colours: first red, second orange, third green, fourth blue",
 		[]string{"on", "off"},
 		func(s wiki.Settings) string { return map[bool]string{true: "on", false: "off"}[s.ToneColours] },
 		func(s *wiki.Settings, v string) { s.ToneColours = v == "on" }},
-	{"Claude calls a day", "A cap on calls to Claude (chat, talks, grading, the storyteller, haggling, Fiery Eyes); My progress shows today's use",
+	{"Claude calls", "Calls to Claude allowed a day (chat, talks, grading, the storyteller, haggling, Fiery Eyes); My progress shows today's use",
 		[]string{"no limit", "50", "100", "200"},
 		func(s wiki.Settings) string {
 			if s.ClaudeCap == 0 {
@@ -131,6 +135,7 @@ func (m Model) step(by int) Model {
 		return m
 	}
 	ui.Prefs, m.saved = m.set, true
+	m.store.Scheduler = m.set.Scheduler
 	return m
 }
 

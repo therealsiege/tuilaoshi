@@ -165,7 +165,7 @@ func TestUpdateSRSPassingReviewAlwaysGrows(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			card := model.Card{ID: "characters/shu1.md", ReviewInterval: tt.interval}
-			updateSRS(&card, tt.diff, time.Now())
+			updateSRS(&card, tt.diff, time.Now(), nil, false)
 			if card.ReviewInterval != tt.want {
 				t.Errorf("interval = %d, want %d", card.ReviewInterval, tt.want)
 			}
@@ -206,7 +206,7 @@ func TestLongIntervalsSpreadAndCap(t *testing.T) {
 	seen := map[int]bool{}
 	for i := range 40 {
 		card := model.Card{ID: fmt.Sprintf("characters/c%d.md", i), ReviewInterval: 40}
-		updateSRS(&card, model.DiffGood, now) // 100 days, ±5
+		updateSRS(&card, model.DiffGood, now, nil, false) // 100 days, ±5
 		if card.ReviewInterval < 95 || card.ReviewInterval > 105 {
 			t.Fatalf("interval %d outside 95-105", card.ReviewInterval)
 		}
@@ -216,7 +216,7 @@ func TestLongIntervalsSpreadAndCap(t *testing.T) {
 		t.Errorf("40 cards reviewed together landed on only %d days", len(seen))
 	}
 	card := model.Card{ID: "characters/a.md", ReviewInterval: 300}
-	if updateSRS(&card, model.DiffEasy, now); card.ReviewInterval > maxInterval {
+	if updateSRS(&card, model.DiffEasy, now, nil, false); card.ReviewInterval > maxInterval {
 		t.Errorf("interval %d passes the cap %d", card.ReviewInterval, maxInterval)
 	}
 }

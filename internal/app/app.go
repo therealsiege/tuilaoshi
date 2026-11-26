@@ -99,6 +99,7 @@ func New(wikiDir string) (Model, error) {
 	if ui.Prefs, err = store.Settings(); err != nil {
 		return Model{}, err
 	}
+	store.Scheduler = ui.Prefs.Scheduler
 	// Build pinyin/character dictionary from wiki pages
 	dict := buildDict(pages)
 
