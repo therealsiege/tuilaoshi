@@ -39,3 +39,8 @@ wiki/vocabulary/festivals.md
 # Claude Code local files: worktrees, settings, the session goal
 .claude/
 wiki/crash.log
+
+# iOS build output (the Go core framework, Xcode builds)
+ios/build/
+ios/*.xcodeproj/
+ios/DerivedData/

@@ -1,4 +1,4 @@
-.PHONY: build run test fmt check lint golden recordings launcher demonart freqlist proofsheet sweep reminder reminder-off clean
+.PHONY: build run test fmt check lint golden recordings launcher demonart freqlist proofsheet sweep reminder reminder-off ios-core ios-test clean
 
 GOLANGCI_LINT = go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 
@@ -47,6 +47,15 @@ launcher:
 # make freqlist IN="$$HOME/Desktop/list.xlsx".
 freqlist:
 	go run ./cmd/freqlist -in "$(IN)" -wiki wiki
+
+# The iOS app: the Go engine as an xcframework (needs gomobile), then its
+# tests in the iPhone simulator (needs XcodeGen).
+ios-core:
+	PATH="$$HOME/go/bin:$$PATH" gomobile bind -target=ios,iossimulator -o ios/build/TuiLaoShiCore.xcframework ./mobile
+
+ios-test: ios-core
+	cd ios && xcodegen generate && xcodebuild test -project TuiLaoShi.xcodeproj -scheme TuiLaoShi \
+		-destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath DerivedData -quiet
 
 # A daily study reminder at AT (a macOS notification), e.g. make reminder AT=19:00.
 reminder:

@@ -1,0 +1,56 @@
+name: TuiLaoShi
+options:
+  bundleIdPrefix: com.therealsiege
+  deploymentTarget:
+    iOS: "18.0"
+settings:
+  base:
+    DEVELOPMENT_TEAM: VZ9ME548RL
+    SWIFT_VERSION: "6.0"
+targets:
+  TuiLaoShi:
+    type: application
+    platform: iOS
+    sources: [App]
+    dependencies:
+      - framework: build/TuiLaoShiCore.xcframework
+        embed: true
+    postBuildScripts:
+      - name: Copy the wiki (content only)
+        script: ./copy-wiki.sh
+        basedOnDependencyAnalysis: false
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: 推老师
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.therealsiege.tuilaoshi
+        CODE_SIGN_STYLE: Automatic
+  TuiLaoShiTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests
+        excludes: ["Fixture/**"]
+      - path: Tests/Fixture
+        type: folder
+        buildPhase: resources
+    dependencies:
+      - target: TuiLaoShi
+      - framework: build/TuiLaoShiCore.xcframework
+        embed: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.therealsiege.tuilaoshi.tests
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  TuiLaoShi:
+    build:
+      targets:
+        TuiLaoShi: all
+        TuiLaoShiTests: [test]
+    test:
+      targets: [TuiLaoShiTests]
