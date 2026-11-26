@@ -67,10 +67,11 @@ type Model struct {
 	riddle journey.Riddle // the lantern riddle open
 	tries  int            // wrong guesses at it
 
-	stamps []string     // kingdoms that stamped the rescript, by town
-	gate   journey.Gate // the gate being passed
-	gateQ  int          // its question being asked
-	misses int          // wrong answers to it
+	stamps  []string     // kingdoms that stamped the rescript, by town
+	cleared int          // tribulations cleared, to tell kingdoms passed from those ahead
+	gate    journey.Gate // the gate being passed
+	gateQ   int          // its question being asked
+	misses  int          // wrong answers to it
 
 	talker Talker    // the merchant's voice; nil without Claude
 	haggle *haggling // the haggle open
@@ -125,8 +126,9 @@ func (m Model) Refresh() Model {
 	stones, stoneErr := m.store.StonesOpened()
 	hunts, huntErr := m.store.Hunts()
 	stamps, stampErr := m.store.Stamps()
-	m.loadErr = errors.Join(questErr, stoneErr, huntErr, stampErr)
-	m.stamps = stamps
+	cleared, clearErr := m.store.ClearedStages()
+	m.loadErr = errors.Join(questErr, stoneErr, huntErr, stampErr, clearErr)
+	m.stamps, m.cleared = stamps, len(cleared)
 	m.hunts, m.stones, m.states = hunts, stones, states
 	return m
 }

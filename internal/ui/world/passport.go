@@ -115,6 +115,8 @@ func (m Model) passportView() string {
 		t := names[g.Town]
 		if slices.Contains(m.stamps, g.Town) {
 			fmt.Fprintf(&b, "  %s  %s\n", ui.ErrorStyle.Render("【"+t.Name+"印】"), ui.MutedStyle.Render(t.English))
+		} else if t.Stage <= m.cleared+1 {
+			fmt.Fprintf(&b, "  %s  %s\n", ui.WarningStyle.Render("【 "+t.Name+" 】"), ui.MutedStyle.Render(t.English+": passed without its seal; go back to its gate (p)"))
 		} else {
 			fmt.Fprintf(&b, "  %s  %s\n", ui.MutedStyle.Render("【 ？？ 】"), ui.MutedStyle.Render(fmt.Sprintf("a kingdom ahead (tribulation %d)", t.Stage)))
 		}

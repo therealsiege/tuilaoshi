@@ -10,7 +10,6 @@ import (
 
 	"github.com/therealsiege/tuilaoshi/internal/claude"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
-	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/ui/roam"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -265,5 +264,5 @@ func (m Model) eyesHear() string {
 
 // eyesLine is the rumour's line in the town view.
 func eyesLine() string {
-	return ui.MutedStyle.Render(fmt.Sprintf("火眼金睛 A strange rumour: one of three villagers is a demon. Question them and unmask it for %d 铜钱 (f)", journey.MysteryBounty))
+	return fmt.Sprintf("火眼金睛 A strange rumour: one of three villagers is a demon. Question them and unmask it for %d 铜钱 (f)", journey.MysteryBounty)
 }

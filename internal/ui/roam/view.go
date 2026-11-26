@@ -227,7 +227,22 @@ func (m Model) compactSide() string {
 		}
 		party = append(party, status)
 	}
-	lines = append(lines, strings.Join(party, " · "))
+	width := m.width - 4
+	if m.width <= 0 {
+		width = 1 << 30
+	}
+	row := ""
+	for _, p := range party {
+		if row != "" && lipgloss.Width(row)+3+lipgloss.Width(p) > width {
+			lines = append(lines, row)
+			row = ""
+		}
+		if row != "" {
+			row += " · "
+		}
+		row += p
+	}
+	lines = append(lines, row)
 	lines = append(lines, strings.TrimRight(m.hpBar(), "\n")+"  "+ui.WarningStyle.Render(fmt.Sprintf("%d 铜钱 · %d 元宝", m.wallet.Tongqian, m.wallet.Yuanbao)))
 	if len(m.cleared) == 0 {
 		lines = append(lines, ui.MutedStyle.Render("Walk west (←) to the red ! to fight; study at camp (c) to open the rest."))
