@@ -45,7 +45,7 @@ func (m Model) gazetteBody() (zh, en []string) {
 // bodyWidth is how wide the issue's lines run.
 func (m Model) bodyWidth() int {
 	if m.width > 0 {
-		return min(m.width-4, 100)
+		return min(m.width-6, 100) // room for the indent and a closing 。 past the wrap
 	}
 	return 76
 }

@@ -46,7 +46,7 @@ screens=(
   "levelcheck|c a|Assess|0"
   "browse|c b|Wiki Browser|1"
   "festivals|c y|节日|0"
-  "radicals|c x|Radicals|0"
+  "radicals|c x|部首|0"
   "voices|c v|Voice|0"
   "settings|c ,|设置|0"
   "town|Left|宝象国|0"
@@ -55,6 +55,9 @@ screens=(
   "haggle|Left h|宝象国|0"
   "rumour|Left f|宝象国|0"
   "buy|Left b|杂货铺|0"
+  "errand|Left e|宝象国|0"
+  "gazette|c u|邸报|0"
+  "mocktest|c a m|Assess|0"
 )
 failed=0
 for size in 80x24 120x45; do
