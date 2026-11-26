@@ -12,6 +12,8 @@ import (
 func (m Model) View() string {
 	var b strings.Builder
 	switch m.screen {
+	case screenShadow:
+		return m.shadowView()
 	case screenListen:
 		b.WriteString(m.listenView())
 	case screenScene:
@@ -85,7 +87,7 @@ func (m Model) episodeView() string {
 			fmt.Fprintf(&b, "    %s  %s\n", line, status)
 		}
 	}
-	b.WriteString("\n" + ui.HelpStyle.Render("  ↑↓ scene · enter answer its question · r read & listen · l listening drill · t talk it over · esc back"))
+	b.WriteString("\n" + ui.HelpStyle.Render("  ↑↓ scene · enter answer its question · r read & listen · l listening drill · s shadow · t talk it over · esc back"))
 	return b.String()
 }
 

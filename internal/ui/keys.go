@@ -284,6 +284,7 @@ func HelpText(v View) string {
 			"  enter  Open / answer a scene\n" +
 			"  r      Read & listen line by line\n" +
 			"  l      Listening drill (tab replays)\n" +
+			"  s      Shadow: hear a line, say it back (space records)\n" +
 			"  t      Talk it over with 孙悟空\n" +
 			"  esc    Back"
 	case ViewMap:

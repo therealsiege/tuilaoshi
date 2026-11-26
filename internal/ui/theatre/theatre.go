@@ -38,6 +38,7 @@ const (
 	screenEpisode        // one episode's menu
 	screenScene          // a scene's question
 	screenListen         // a listening drill (see listen.go)
+	screenShadow         // shadowing a line (see shadow.go)
 )
 
 // Model is the episodes screen.
@@ -59,6 +60,7 @@ type Model struct {
 	now      func() time.Time
 
 	listen listenState // the listening drill (see listen.go)
+	shadow shadowState // shadowing (see shadow.go)
 
 	note          string
 	width, height int
@@ -111,6 +113,9 @@ func (m Model) Refresh() Model {
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	if s, ok := msg.(shadowMsg); ok {
+		return m.onShadow(s), nil
+	}
 	if done, ok := msg.(clipDoneMsg); ok {
 		if done.err != nil {
 			m.note = done.err.Error()
@@ -123,6 +128,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	}
 	back := key.Matches(k, m.gkeys.Back)
 	switch m.screen {
+	case screenShadow:
+		return m.updateShadow(k)
 	case screenListen:
 		return m.updateListen(k)
 	case screenScene:
@@ -172,6 +179,8 @@ func (m Model) updateEpisode(k tea.KeyMsg) (Model, tea.Cmd) {
 		return m, func() tea.Msg { return ReadMsg{Episode: ep} }
 	case k.String() == "l":
 		return m.startListen()
+	case k.String() == "s":
+		return m.startShadow()
 	case k.String() == "t":
 		title, lines, words := e.Title, e.Lines, e.Words(m.cards)
 		return m, func() tea.Msg { return TalkMsg{Title: title, Lines: lines, Words: words} }
