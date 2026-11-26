@@ -60,6 +60,9 @@ func (s *Store) progress() (*sql.DB, error) {
 			db.SetMaxOpenConns(1) // one writer; keeps reads and writes in order
 			_, err = db.Exec(schema)
 		}
+		if err == nil {
+			err = addMemoryColumns(db) // FSRS stability and difficulty (fsrs.go)
+		}
 		if err == nil && fresh && s.progressDir() == s.Dir {
 			err = s.importFiles(db)
 		}

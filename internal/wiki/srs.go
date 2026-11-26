@@ -29,23 +29,21 @@ var difficultyMultipliers = map[model.DrillDifficulty]float64{
 
 // updateSRS updates a card's SRS fields after a review. Callers outside this
 // package use Store.RecordReview, which also saves the result.
-// Again keeps a quarter of the interval (at least a day), Hard/Good/Easy
+// mem, when given, is the card's FSRS memory: it is brought up to date on
+// every review, and with useFSRS its interval schedules the card. Without
+// it, Again keeps a quarter of the interval (at least a day), Hard/Good/Easy
 // multiply it, and any passing review grows it by at least a day.
-func updateSRS(card *model.Card, difficulty model.DrillDifficulty, now time.Time) {
+// Either way no interval passes a year and long ones spread.
+func updateSRS(card *model.Card, difficulty model.DrillDifficulty, now time.Time, mem *fsrsMemory, useFSRS bool) {
+	if mem != nil {
+		*mem = mem.next(difficulty, card.ReviewInterval, daysBetween(card.LastReviewed, now))
+	}
 	card.LastReviewed = now
 
-	mult := difficultyMultipliers[difficulty]
-	switch {
-	case difficulty == model.DiffAgain || mult == 0:
-		card.ReviewInterval = max(card.ReviewInterval/lapseDivisor, initialInterval)
-	case card.ReviewInterval == 0:
-		card.ReviewInterval = initialInterval
-	default:
-		next := int(float64(card.ReviewInterval) * mult)
-		if next <= card.ReviewInterval {
-			next = card.ReviewInterval + 1
-		}
-		card.ReviewInterval = spread(min(next, maxInterval), card.ID, now)
+	if useFSRS && mem != nil {
+		card.ReviewInterval = spread(min(mem.interval(), maxInterval), card.ID, now)
+	} else {
+		card.ReviewInterval = classicInterval(card.ReviewInterval, difficulty, card.ID, now)
 	}
 
 	card.NextReview = now.AddDate(0, 0, card.ReviewInterval)
@@ -53,6 +51,22 @@ func updateSRS(card *model.Card, difficulty model.DrillDifficulty, now time.Time
 	if card.Introduced.IsZero() {
 		card.Introduced = now
 	}
+}
+
+// classicInterval is the next interval under the fixed multipliers.
+func classicInterval(interval int, difficulty model.DrillDifficulty, id string, now time.Time) int {
+	mult := difficultyMultipliers[difficulty]
+	switch {
+	case difficulty == model.DiffAgain || mult == 0:
+		return max(interval/lapseDivisor, initialInterval)
+	case interval == 0:
+		return initialInterval
+	}
+	next := int(float64(interval) * mult)
+	if next <= interval {
+		next = interval + 1
+	}
+	return spread(min(next, maxInterval), id, now)
 }
 
 // spread moves a long interval by up to 5% either way, the same for a

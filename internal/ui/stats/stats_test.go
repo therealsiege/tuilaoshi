@@ -61,7 +61,7 @@ func TestHardWordsAndTheWeekAhead(t *testing.T) {
 	m := New(store)
 	m.now = func() time.Time { return now }
 	out := m.Refresh().View()
-	for _, want := range []string{"Hard Words", "书", "×6", "Retention: 0% of 6 reviews", "Tomorrow"} {
+	for _, want := range []string{"Hard Words", "书", "×6", "Retention: 0% of 6 reviews", "Tomorrow", "If FSRS scheduled: 1"} {
 		if want == "Tomorrow" {
 			want = now.AddDate(0, 0, 1).Format("Mon") // the missed word is due tomorrow
 		}

@@ -56,6 +56,10 @@ var options = []option{
 		[]string{"10", "20", "30", "50"},
 		func(s wiki.Settings) string { return fmt.Sprint(s.ReviewChunk) },
 		func(s *wiki.Settings, v string) { _, _ = fmt.Sscan(v, &s.ReviewChunk) }}, //nolint:errcheck // choices are numbers
+	{"Scheduler", "Classic grows each interval by a fixed amount; FSRS models how well you hold each word and aims for 90% recall (My progress compares them)",
+		[]string{wiki.SchedulerClassic, wiki.SchedulerFSRS},
+		func(s wiki.Settings) string { return s.Scheduler },
+		func(s *wiki.Settings, v string) { s.Scheduler = v }},
 }
 
 // Model is the settings screen.
@@ -118,6 +122,7 @@ func (m Model) step(by int) Model {
 		return m
 	}
 	ui.Prefs, m.saved = m.set, true
+	m.store.Scheduler = m.set.Scheduler
 	return m
 }
 

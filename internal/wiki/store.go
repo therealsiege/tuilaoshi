@@ -29,6 +29,10 @@ type Store struct {
 	// means Dir. Tests reading the real wiki point it elsewhere.
 	Progress string
 
+	// Scheduler is how reviews are spaced: SchedulerClassic (or empty)
+	// or SchedulerFSRS. The app sets it from the learner's settings.
+	Scheduler string
+
 	// The progress file (see progress.go), opened on first use.
 	dbOnce sync.Once
 	db     *sql.DB

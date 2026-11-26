@@ -3,6 +3,7 @@ package stats
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
@@ -30,13 +31,17 @@ type history struct {
 	right, total int   // reviews remembered, of those given in the last 30 days
 	hard         []hardWord
 	hardCount    int
+	// The review log replayed through each scheduler: words due in the
+	// next 7 days under each.
+	classicDue, fsrsDue int
 }
 
 func loadHistory(store *wiki.Store, now time.Time) (history, error) {
 	var h history
-	var forecastErr, retentionErr, hardErr, cardsErr error
+	var forecastErr, retentionErr, hardErr, cardsErr, replayErr error
 	h.forecast, forecastErr = store.DueForecast(now, 7)
 	h.right, h.total, retentionErr = store.Retention(now, 30)
+	h.classicDue, h.fsrsDue, replayErr = store.CompareSchedulers(now, 7)
 	hard, hardErr := store.HardWords()
 	h.hardCount = len(hard)
 	if len(hard) > 0 {
@@ -53,7 +58,7 @@ func loadHistory(store *wiki.Store, now time.Time) (history, error) {
 			}
 		}
 	}
-	return h, errors.Join(forecastErr, retentionErr, hardErr, cardsErr)
+	return h, errors.Join(forecastErr, retentionErr, hardErr, cardsErr, replayErr)
 }
 
 // renderAhead is the next seven days of studied words due, and retention.
@@ -86,7 +91,24 @@ func (m Model) renderAhead() string {
 			lines = append(lines, ui.ErrorStyle.Render(text))
 		}
 	}
+	if line := m.schedulerLine(); line != "" {
+		lines = append(lines, "", ui.MutedStyle.Render(line))
+	}
 	return lipgloss.JoinVertical(lipgloss.Left, lines...)
+}
+
+// schedulerLine compares the week's due words under the other scheduler
+// with the one in use, both replayed from the review log; empty before
+// any review.
+func (m Model) schedulerLine() string {
+	if m.hist.classicDue == 0 && m.hist.fsrsDue == 0 {
+		return ""
+	}
+	text := fmt.Sprintf("If FSRS scheduled: %d reviews due in the next 7 days vs %d now", m.hist.fsrsDue, m.hist.classicDue)
+	if ui.Prefs.Scheduler == wiki.SchedulerFSRS {
+		text = fmt.Sprintf("If classic scheduled: %d reviews due in the next 7 days vs %d now", m.hist.classicDue, m.hist.fsrsDue)
+	}
+	return "  " + strings.Join(ui.WrapDisplay(text, 28), "\n  ")
 }
 
 // renderHardWords lists the words missed most, the leeches worth extra work.

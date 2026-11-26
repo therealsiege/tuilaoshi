@@ -81,23 +81,28 @@ func (s *Store) DrillableCards() ([]model.Card, error) {
 // RecordReview reschedules a card after a review and saves its schedule
 // and the answer to the progress file.
 func (s *Store) RecordReview(card *model.Card, difficulty model.DrillDifficulty, now time.Time) error {
+	mem, err := s.memory(card.ID)
+	if err != nil {
+		return err
+	}
 	was := card.ReviewInterval
-	updateSRS(card, difficulty, now)
-	return s.saveReview(card, difficulty, was, now)
+	updateSRS(card, difficulty, now, &mem, s.useFSRS())
+	return s.saveReview(card, difficulty, was, mem, now)
 }
 
 // RecordForgotten starts a card over, due tomorrow: the learner marked it
 // unknown (while reading, say) rather than missing it in a review. It is
-// logged and counted as a miss.
+// logged and counted as a miss, and its FSRS memory starts over too.
 func (s *Store) RecordForgotten(card *model.Card, now time.Time) error {
 	was := card.ReviewInterval
 	card.ReviewInterval = 0
-	updateSRS(card, model.DiffAgain, now)
-	return s.saveReview(card, model.DiffAgain, was, now)
+	var mem fsrsMemory
+	updateSRS(card, model.DiffAgain, now, &mem, s.useFSRS())
+	return s.saveReview(card, model.DiffAgain, was, mem, now)
 }
 
-// saveReview saves a card's new schedule and logs the answer.
-func (s *Store) saveReview(card *model.Card, difficulty model.DrillDifficulty, was int, now time.Time) error {
+// saveReview saves a card's new schedule and FSRS memory and logs the answer.
+func (s *Store) saveReview(card *model.Card, difficulty model.DrillDifficulty, was int, mem fsrsMemory, now time.Time) error {
 	db, err := s.progress()
 	if err != nil {
 		return err
@@ -111,12 +116,14 @@ func (s *Store) saveReview(card *model.Card, difficulty model.DrillDifficulty, w
 		return err
 	}
 	defer tx.Rollback() //nolint:errcheck // a no-op after Commit
-	if _, err := tx.Exec(`INSERT INTO schedules (card_id, introduced, last_reviewed, review_interval, next_review, reps, lapses)
-		VALUES (?, ?, ?, ?, ?, 1, ?)
+	if _, err := tx.Exec(`INSERT INTO schedules (card_id, introduced, last_reviewed, review_interval, next_review, reps, lapses, stability, difficulty)
+		VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?)
 		ON CONFLICT(card_id) DO UPDATE SET introduced = excluded.introduced, last_reviewed = excluded.last_reviewed,
 			review_interval = excluded.review_interval, next_review = excluded.next_review,
-			reps = reps + 1, lapses = lapses + excluded.lapses`,
-		card.ID, FormatDate(card.Introduced), FormatDate(card.LastReviewed), card.ReviewInterval, FormatDate(card.NextReview), lapse); err != nil {
+			reps = reps + 1, lapses = lapses + excluded.lapses,
+			stability = excluded.stability, difficulty = excluded.difficulty`,
+		card.ID, FormatDate(card.Introduced), FormatDate(card.LastReviewed), card.ReviewInterval, FormatDate(card.NextReview), lapse,
+		mem.Stability, mem.Difficulty); err != nil {
 		return fmt.Errorf("save schedule %s: %w", card.ID, err)
 	}
 	if _, err := tx.Exec(`INSERT INTO reviews (card_id, at, rating, interval_was, interval_now) VALUES (?, ?, ?, ?, ?)`,
