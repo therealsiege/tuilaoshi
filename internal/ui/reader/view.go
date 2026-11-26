@@ -19,7 +19,7 @@ func (m Model) View() string {
 	}
 	switch {
 	case m.open && m.chapterOpen:
-		b.WriteString(m.TextView("  ←→ word · ↑↓ line · enter didn't know it (review tomorrow) · ctrl+r hear it · esc chapters"))
+		b.WriteString(m.TextView("  ←→ word · ↑↓ line · enter review it tomorrow · ctrl+r hear · esc chapters"))
 	case m.open:
 		b.WriteString(m.TextView("  ←→ word · ↑↓ line · enter didn't know it (review tomorrow) · esc readings"))
 	case m.story:
@@ -138,7 +138,11 @@ func (m Model) viewGloss() string {
 		if m.showEnglish {
 			b.WriteString(ui.MutedStyle.Render("  "+en) + "\n")
 		} else {
-			b.WriteString(ui.MutedStyle.Render("  e: show this line in English") + "\n")
+			hint := "  e: show this line in English"
+			if m.chapterOpen {
+				hint = "  e: the chapter in English"
+			}
+			b.WriteString(ui.MutedStyle.Render(hint) + "\n")
 		}
 	}
 	if m.audio != "" {
