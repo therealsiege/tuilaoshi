@@ -17,6 +17,7 @@ func main() {
 	wikiDir := flag.String("wiki", "wiki", "path to the wiki directory")
 	export := flag.String("export", "", "write your progress as readable files into this folder, then exit")
 	importDir := flag.String("import", "", "read progress exported with -export (e.g. from another Mac), then exit")
+	deck := flag.String("deck", "", "write your studied and hard words to this CSV file for Anki or Pleco, then exit")
 	flag.Parse()
 
 	dir, err := filepath.Abs(*wikiDir)
@@ -27,6 +28,14 @@ func main() {
 	if info, err := os.Stat(dir); err != nil || !info.IsDir() {
 		fmt.Fprintf(os.Stderr, "mandarin: wiki directory %s not found; run from the repo root or pass -wiki <dir>\n", dir)
 		os.Exit(1)
+	}
+
+	if *deck != "" {
+		if err := writeDeck(dir, *deck); err != nil {
+			fmt.Fprintf(os.Stderr, "mandarin: %v\n", err)
+			os.Exit(1)
+		}
+		return
 	}
 
 	if *export != "" || *importDir != "" {
@@ -46,6 +55,27 @@ func main() {
 		fmt.Fprintf(os.Stderr, "mandarin: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+// writeDeck writes the learner's words as a CSV deck for Anki or Pleco.
+func writeDeck(dir, path string) (err error) {
+	store := wiki.NewStore(dir)
+	defer store.Close() //nolint:errcheck // exiting
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if cerr := f.Close(); err == nil {
+			err = cerr
+		}
+	}()
+	n, err := store.WriteDeck(f)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%d words written to %s\n", n, path)
+	return nil
 }
 
 // moveProgress exports or imports the learner's progress.
