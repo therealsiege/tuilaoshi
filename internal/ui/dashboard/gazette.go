@@ -49,6 +49,7 @@ type weekFacts struct {
 	Kingdoms  []string // every kingdom that has stamped the papers, in order
 	Cleared   []string // tribulations cleared in the week
 	Mysteries []string // towns where a rumour was settled in the week
+	Unmasked  []string // demons unmasked in the week, as 名字（城）
 	Errands   []string // errands done in the week, by their goal
 	Haggles   []string // sacks haggled for in the week
 	HaggledEN []string // the same in English
@@ -98,6 +99,8 @@ func gatherFacts(store *wiki.Store, monday time.Time) (weekFacts, error) {
 	for _, d := range deeds {
 		switch {
 		case !in(d.Date):
+		case d.Kind == wiki.DeedUnmask:
+			f.Unmasked = append(f.Unmasked, fmt.Sprintf("%s（%s）", d.What, names[d.Town]))
 		case d.Kind == wiki.DeedErrand:
 			f.Errands = append(f.Errands, strings.TrimRight(d.What, "。"))
 		case d.Kind == wiki.DeedHaggle:
@@ -124,10 +127,11 @@ func (f weekFacts) prompt(week string) string {
 		"Kingdoms that have stamped the travel papers so far: %s\n"+
 		"Tribulations cleared last week: %s\n"+
 		"Towns where a strange rumour (a demon in disguise among villagers) was looked into last week: %s\n"+
+		"Demons in disguise the pilgrims unmasked last week (the disguise's name, and the town): %s\n"+
 		"Errands done for townsfolk last week: %s\n"+
 		"Haggling at the market last week: %s\n"+
 		"The monk's latest diary entry: %s",
-		week, none(f.Kingdoms), none(f.Cleared), none(f.Mysteries), none(f.Errands), none(f.Haggles), cmp.Or(f.Diary, "none"))
+		week, none(f.Kingdoms), none(f.Cleared), none(f.Mysteries), none(f.Unmasked), none(f.Errands), none(f.Haggles), cmp.Or(f.Diary, "none"))
 }
 
 // composeGazette is the clerk's issue, set from the facts by template.
@@ -144,7 +148,10 @@ func composeGazette(f weekFacts) (string, string) {
 		zh = append(zh, fmt.Sprintf("上周他们渡过了%d难：%s，可喜可贺。", len(f.Cleared), strings.Join(f.Cleared, "、")))
 		en = append(en, fmt.Sprintf("Last week they came through %d %s: %s. Congratulations are in order.", len(f.Cleared), plural(len(f.Cleared), "tribulation", "tribulations"), strings.Join(f.Cleared, ", ")))
 	}
-	if len(f.Mysteries) > 0 {
+	if len(f.Unmasked) > 0 {
+		zh = append(zh, fmt.Sprintf("圣僧的大徒弟用火眼金睛识破了扮成百姓的妖怪：%s。", strings.Join(f.Unmasked, "、")))
+		en = append(en, fmt.Sprintf("The master's eldest disciple saw through demons disguised as villagers with his Fiery Eyes: %s.", strings.Join(f.Unmasked, ", ")))
+	} else if len(f.Mysteries) > 0 {
 		zh = append(zh, fmt.Sprintf("据悉，有妖怪扮成百姓，圣僧的大徒弟在%s用火眼金睛查了这件怪事。", strings.Join(f.Mysteries, "、")))
 		en = append(en, fmt.Sprintf("We hear demons disguised themselves as villagers, and in %s the master's eldest disciple looked into it with his Fiery Eyes.", strings.Join(f.Mysteries, ", ")))
 	}

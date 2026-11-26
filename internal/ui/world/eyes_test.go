@@ -12,6 +12,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui/roam"
 	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
+	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 var esc = tea.KeyMsg{Type: tea.KeyEsc}
@@ -128,6 +129,9 @@ func TestAccusingTheDemonUnmasksIt(t *testing.T) {
 	w, err := m.store.Wallet()
 	if err != nil || w.Tongqian != journey.MysteryBounty || !strings.Contains(m.View(), "Fight!") {
 		t.Fatalf("unmasked: purse %+v %v\n%s", w, err, m.View())
+	}
+	if deeds, err := m.store.Deeds(); err != nil || len(deeds) != 1 || deeds[0].Kind != wiki.DeedUnmask || deeds[0].What != m.eyes.mystery.Villagers[m.eyes.demon].Name {
+		t.Errorf("the unmasking should be kept for the gazette: %+v %v", deeds, err)
 	}
 	m, cmd := m.Update(enter)
 	if cmd == nil {

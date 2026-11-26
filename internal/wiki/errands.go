@@ -6,7 +6,7 @@ import "time"
 // errand finished or a sack of food haggled for.
 type Deed struct {
 	Date  string `yaml:"date"` // YYYY-MM-DD
-	Kind  string `yaml:"kind"` // DeedErrand or DeedHaggle
+	Kind  string `yaml:"kind"` // DeedErrand, DeedHaggle or DeedUnmask
 	Town  string `yaml:"town"` // town id
 	What  string `yaml:"what"` // the errand's goal in Chinese, or what was bought
 	Coins int    `yaml:"coins,omitempty"`
@@ -16,6 +16,7 @@ type Deed struct {
 const (
 	DeedErrand = "errand"
 	DeedHaggle = "haggle"
+	DeedUnmask = "unmask" // a demon in disguise unmasked with Fiery Eyes
 )
 
 // ErrandTaken reports whether a town's errand was taken today.

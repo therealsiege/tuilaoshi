@@ -217,6 +217,10 @@ func (m Model) accuse(n int) Model {
 	pay := wiki.Wallet{}
 	if n == e.demon {
 		pay.Tongqian = journey.MysteryBounty
+		if err := m.store.AddDeed(wiki.Deed{Date: m.now().Format("2006-01-02"), Kind: wiki.DeedUnmask,
+			Town: m.towns[m.town].ID, What: e.mystery.Villagers[n].Name}); err != nil {
+			m.loadErr = err
+		}
 		t := m.towns[m.town]
 		if at := journey.SoldiersAt(t.Stage); len(at) > 0 {
 			foe := at[len(at)-1] // the strongest serving here
