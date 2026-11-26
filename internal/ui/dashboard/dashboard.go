@@ -33,6 +33,12 @@ type Model struct {
 	assessed     bool             // the level check has been taken
 	letter       *wiki.Letter     // Guanyin's latest letter, or nil (letter.go)
 	reading      bool             // the letter is open
+	writer       GazetteWriter    // Claude writing the court gazette, or nil (gazette.go)
+	gazette      *wiki.Gazette    // the issue open, or nil
+	gazetteOpen  bool             // the gazette is being read
+	gazetteEN    bool             // its English is shown, when the window holds one at a time
+	gazetteTop   int              // its first line shown, when scrolled
+	printing     bool             // Claude is writing this week's issue
 	now          func() time.Time // the clock, fixed in tests
 	due          int
 	xp           int   // lifetime battle XP
@@ -65,7 +71,13 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case refreshMsg:
 		return m.Refresh(), nil
 
+	case gazetteMsg:
+		return m.onGazette(msg), nil
+
 	case tea.KeyMsg:
+		if m.gazetteOpen {
+			return m.updateGazette(msg), nil
+		}
 		if m.reading {
 			if key.Matches(msg, m.gkeys.Back) || key.Matches(msg, m.gkeys.Enter) {
 				m.reading = false
@@ -82,6 +94,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				}
 			}
 			return m, nil
+		case key.Matches(msg, m.keys.Gazette):
+			return m.openGazette()
 		case key.Matches(msg, m.gkeys.Back):
 			return m, ui.SwitchTo(ui.ViewMap) // back on the road
 		case msg.String() == "T":
@@ -168,6 +182,7 @@ func (m Model) Refresh() Model {
 	missed, missErr := rpgview.MissedThisWeek(m.store, m.now())
 	m.missed, m.note = len(missed), ""
 	bountyErr = errors.Join(bountyErr, missErr)
+	m.printing = false // an issue being written when camp was left is lost; u asks again
 	letter, letterErr := m.loadLetter()
 	m.letter, bountyErr = letter, errors.Join(bountyErr, letterErr)
 	m.journeyState, journeyErr = journey.Calculate(m.store)

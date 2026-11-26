@@ -132,6 +132,7 @@ type DashboardKeys struct {
 	Inner    key.Binding
 	Diary    key.Binding
 	Letter   key.Binding
+	Gazette  key.Binding
 }
 
 // DefaultDashboardKeys returns dashboard-specific keybindings.
@@ -216,6 +217,10 @@ func DefaultDashboardKeys() DashboardKeys {
 		Letter: key.NewBinding(
 			key.WithKeys("n"),
 			key.WithHelp("n", "letter"),
+		),
+		Gazette: key.NewBinding(
+			key.WithKeys("u"),
+			key.WithHelp("u", "gazette"),
 		),
 		Reading: key.NewBinding(
 			key.WithKeys("t"),

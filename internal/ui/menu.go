@@ -29,6 +29,7 @@ var DashboardMenu = []MenuGroup{
 		{"m", "Inner Demon 心魔"},
 		{"w", "Travel diary 日记"},
 		{"n", "Guanyin's letter 来信"},
+		{"u", "Court gazette 邸报"},
 		{"j", "Journey log"},
 		{"g", "Shrine: gear & coins"},
 		{"o", "Collection cards"},

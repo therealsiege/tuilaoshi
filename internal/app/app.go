@@ -114,7 +114,7 @@ func New(wikiDir string) (Model, error) {
 		festival:    festival.New(store),
 		diary:       diary.New(store, ai, dict),
 		settings:    settings.New(store),
-		dashboard:   dashboard.New(store, ttsClient),
+		dashboard:   dashboard.New(store, ttsClient).WithGazette(ai),
 		drill:       drill.New(store, claudeClient, ttsClient, dict),
 		browser:     browser.New(store),
 		chat:        chat.New(claudeClient, ttsClient, dict),
