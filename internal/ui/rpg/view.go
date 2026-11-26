@@ -39,6 +39,8 @@ func (m Model) View() string {
 		b.WriteString(m.viewVictory())
 	case stateDefeat:
 		b.WriteString(m.viewDefeat())
+	case stateBaigu:
+		b.WriteString(m.viewBaigu())
 	}
 
 	return b.String()
@@ -374,10 +376,11 @@ func (m Model) renderStakes() string {
 	case m.stage != nil:
 		fmt.Fprintf(&b, "  %s %s %s\n", ui.MutedStyle.Render(fmt.Sprintf("Tribulation %d ·", m.stage.Number)),
 			ui.ChineseStyle.Render(m.stage.Name), m.stage.English)
-		if m.stage.Boss != nil {
+		if m.stage.Boss != nil && !m.baiguFight() {
 			b.WriteString(ui.WarningStyle.Render(ui.WrapIndent(fmt.Sprintf("BOSS! It will test your weakest words. Theme: %s", m.stage.Boss.Theme), m.width)))
 			b.WriteString("\n")
 		}
+		b.WriteString(m.renderBaiguIntro())
 		if journey.SceneFor(m.stage.Number) == nil {
 			for _, line := range strings.Split(ui.WrapText(m.stage.Desc, 70), "\n") {
 				b.WriteString(ui.MutedStyle.Render("  "+line) + "\n")

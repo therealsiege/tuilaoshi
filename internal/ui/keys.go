@@ -355,7 +355,12 @@ func HelpText(v View) string {
 			"  enter  Select answer\n" +
 			"  1-5    Quick select\n" +
 			"  space  Continue\n" +
-			"  esc    Flee battle"
+			"  esc    Flee battle\n\n" +
+			"三打白骨精 (the White Bone Demon's disguises)\n\n" +
+			"  1-3    Unmask: pick the answer\n" +
+			"  r      Hear the old woman again\n" +
+			"  enter  Say what gives the old man away\n" +
+			"  e      English of the passage (short windows)"
 	case ViewDrill:
 		return "Drill Keys\n\n" +
 			"  ↑↓     Select mode/navigate\n" +

@@ -1,0 +1,87 @@
+# 三打白骨精: the White Bone Demon comes to the pilgrims three times, as in
+# chapter 27 of the novel, and each disguise tests a different skill. Each
+# disguise has several rounds so a rematch differs; in every round the first
+# choice is the right one (the game shuffles them).
+angry: "唐僧生气地说：「悟空，你又看错了！你再这样乱说，我就不要你这个徒弟了。」"
+angry_english: "Tang Sanzang says angrily: 'Wukong, you got it wrong again! Talk such nonsense once more and I will have you as my disciple no longer.'"
+won: "悟空第三次举起金箍棒，白骨精再也变不了了。地上只剩下一堆白骨，骨头上写着「白骨夫人」四个字。师父这才相信了悟空。"
+won_english: "Wukong raises his golden-banded staff a third time, and the White Bone Demon can change no more. All that is left on the ground is a heap of white bones, and on the bones are written four characters: 'Lady White Bone'. Only now does the master believe Wukong."
+disguises:
+  - name: "村姑"
+    english: "the village girl"
+    skill: reading
+    rounds:
+      - id: girl-rice
+        text: "一个穿白衣服的姑娘走过来，手里提着一个竹篮子。她笑着说：「师父，我家就在山下。篮子里是我刚做的香米饭，送给你们吃。」悟空用火眼金睛一看，篮子里根本没有米饭，只有一堆白色的长虫在动。"
+        english: "A girl in white walks up carrying a bamboo basket. She smiles and says: 'Master, my home is just below the mountain. In the basket is fragrant rice I have just cooked, for you to eat.' Wukong looks with his fiery eyes: there is no rice in the basket at all, only a heap of long white worms wriggling."
+        question: "篮子里真的有什么？"
+        question_english: "What is really in the basket?"
+        choices: ["白色的长虫", "刚做的香米饭", "山下的水果"]
+        english_choices: ["long white worms", "rice just cooked", "fruit from below the mountain"]
+      - id: girl-buns
+        text: "姑娘说：「我是给在田里干活的丈夫送饭的，篮子里有十个热包子。师父走了这么远的路，一定饿了，先吃吧。」八戒马上伸手去拿。悟空却看见，那些包子其实都是一只只绿色的青蛙。"
+        english: "The girl says: 'I am taking a meal to my husband working in the fields; in the basket are ten hot steamed buns. Master, you have walked such a long way, you must be hungry, eat first.' Bajie reaches out for one at once. But Wukong sees that the buns are really green frogs, one after another."
+        question: "那些包子其实是什么？"
+        question_english: "What are those buns really?"
+        choices: ["绿色的青蛙", "十个热包子", "田里的石头"]
+        english_choices: ["green frogs", "ten hot buns", "stones from the fields"]
+      - id: girl-peaches
+        text: "姑娘的篮子上盖着一块白布。她说：「这是我从树上摘的桃子，又大又甜，一个也没有坏。」可是篮子里传出一股很难闻的味道。悟空把白布拿开，里面是几块白骨和一些烂泥。"
+        english: "A white cloth covers the girl's basket. She says: 'These are peaches I picked from the tree, big and sweet, and not one of them is bad.' But a nasty smell comes from the basket. Wukong lifts the cloth away: inside are a few white bones and some rotten mud."
+        question: "篮子里真的有什么？"
+        question_english: "What is really in the basket?"
+        choices: ["白骨和烂泥", "又大又甜的桃子", "一块干净的白布"]
+        english_choices: ["white bones and rotten mud", "big sweet peaches", "a clean white cloth"]
+  - name: "老妇人"
+    english: "the old woman"
+    skill: listening
+    rounds:
+      - id: woman-meal
+        text: "我今年八十岁了，眼睛不好，走路也很慢。我女儿早上出门给她丈夫送饭，到现在还没回来。我在山上找了她一整天了。"
+        english: "I am eighty this year; my eyes are poor and I walk slowly. This morning my daughter went out to take a meal to her husband, and she still hasn't come back. I have been looking for her on the mountain all day."
+        question: "老婆婆的女儿早上去做什么了？"
+        question_english: "What did the old woman's daughter go to do this morning?"
+        choices: ["给丈夫送饭", "去山上摘花", "去城里买药"]
+        english_choices: ["take a meal to her husband", "pick flowers on the mountain", "buy medicine in town"]
+      - id: woman-alone
+        text: "我是山那边的人，每天都去庙里念经。我的老伴儿去年就去世了，现在家里只有我和女儿两个人。今天女儿不见了，我心里很着急。"
+        english: "I live on the other side of the mountain and go to the temple every day to chant the sutras. My husband passed away last year, so now there are just two of us at home, my daughter and me. Today my daughter has gone missing and I am very worried."
+        question: "老婆婆家里现在还有谁？"
+        question_english: "Who else is in the old woman's home now?"
+        choices: ["只有她的女儿", "她的老伴儿和女儿", "一个人也没有"]
+        english_choices: ["only her daughter", "her husband and her daughter", "nobody at all"]
+      - id: woman-river
+        text: "昨天晚上下了一场大雨。今天早上我女儿说要去河边洗衣服，可是一直没有回来。我从早上找到现在，连一口饭都没吃。"
+        english: "Last night there was a heavy rain. This morning my daughter said she was going to the river to wash clothes, but she never came back. I have been looking since morning and haven't eaten a single bite."
+        question: "老婆婆的女儿说要去哪儿？"
+        question_english: "Where did the old woman's daughter say she was going?"
+        choices: ["去河边洗衣服", "去山上砍柴", "去邻居家吃饭"]
+        english_choices: ["to the river to wash clothes", "up the mountain to cut firewood", "to a neighbour's for a meal"]
+  - name: "老公公"
+    english: "the old man"
+    skill: writing
+    rounds:
+      - id: man-shadow
+        text: "一个白头发的老人慢慢走过来，嘴里念着经。他说：「我在找我的老伴儿和女儿。」那天太阳很大，师父、八戒和沙僧在地上都有影子，可是这个老人的脚下什么也没有。"
+        english: "A white-haired old man walks slowly up, chanting sutras. He says: 'I am looking for my wife and my daughter.' The sun is strong that day; the master, Bajie and Sha Wujing all cast shadows on the ground, but there is nothing at all at the old man's feet."
+        question: "这个老人哪里不对？用中文写一句话。"
+        question_english: "What is wrong with this old man? Write one sentence in Chinese."
+        criteria: "The answer says that the old man has no shadow (没有影子) even though the sun is out and everyone else has one."
+        choices: ["太阳很大，可是他没有影子。", "他的头发都白了。", "他在找他的家人。"]
+        english_choices: ["The sun is strong, but he has no shadow.", "His hair has all turned white.", "He is looking for his family."]
+      - id: man-mud
+        text: "老人说他从很远的村子走来，走了三天三夜。可是昨天刚下过雨，路上都是泥，他的鞋子和衣服却一点儿也不脏，地上也没有他的脚印。"
+        english: "The old man says he has walked from a faraway village for three days and three nights. But it rained only yesterday and the road is all mud, yet his shoes and clothes are not the least bit dirty, and he leaves no footprints on the ground."
+        question: "这个老人哪里不对？用中文写一句话。"
+        question_english: "What is wrong with this old man? Write one sentence in Chinese."
+        criteria: "The answer says that the road is muddy but his shoes or clothes are clean, or that he leaves no footprints (没有脚印)."
+        choices: ["路上都是泥，他的鞋子却很干净。", "他走了三天三夜，很累。", "他是从很远的村子来的。"]
+        english_choices: ["The road is all mud, yet his shoes are clean.", "He walked three days and nights and is tired.", "He came from a faraway village."]
+      - id: man-leap
+        text: "老人拄着拐杖说：「我已经九十岁了，走不动路了。」可是他一看见悟空，就一下子跳过了一条小河，跑得比年轻人还快。"
+        english: "Leaning on his staff the old man says: 'I am ninety already, I can hardly walk.' But as soon as he sees Wukong, he leaps across a stream in one bound and runs faster than a young man."
+        question: "这个老人哪里不对？用中文写一句话。"
+        question_english: "What is wrong with this old man? Write one sentence in Chinese."
+        criteria: "The answer says that he claims he is too old to walk, yet he jumped the stream or ran faster than a young person."
+        choices: ["他说走不动，却跑得比年轻人还快。", "他已经九十岁了。", "他手里拄着拐杖。"]
+        english_choices: ["He says he can't walk, yet he runs faster than a young man.", "He is already ninety.", "He leans on a staff."]
