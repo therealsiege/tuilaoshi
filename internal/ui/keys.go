@@ -255,6 +255,16 @@ func HelpText(v View) string {
 			"  ↑↓     Select radical\n" +
 			"  esc    Back to dashboard\n" +
 			"  ?      Toggle help"
+	case ViewAssess:
+		return "Assess Keys\n\n" +
+			"  enter      Start the level check / answer\n" +
+			"  1-4        Answer a question\n" +
+			"  k          After the check: mark known words\n" +
+			"  m          Mock test 模拟考 (then 4 or 5)\n" +
+			"  tab        Mock listening: hear it again\n" +
+			"  1-6        Mock tiles: place a tile\n" +
+			"  backspace  Mock tiles: undo a tile\n" +
+			"  esc        Back (a test stopped isn't saved)"
 	case ViewSettings:
 		return "Settings Keys\n\n" +
 			"  ↑↓     Choose a setting\n" +

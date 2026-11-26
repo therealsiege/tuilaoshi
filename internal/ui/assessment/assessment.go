@@ -32,6 +32,9 @@ const (
 	phaseIntro phase = iota
 	phaseAsking
 	phaseResults
+	phaseMockPick // choosing HSK4 or HSK5 for a mock test
+	phaseMock     // sitting a mock test section
+	phaseMockDone // a mock test's scores
 )
 
 // Model is the Assess screen.
@@ -52,6 +55,12 @@ type Model struct {
 	marked           int          // how many were marked known, once done (-1 before)
 	loadErr, saveErr error
 	width, height    int
+
+	tts    speaker
+	grader grader
+	now    func() time.Time // the clock, for tests; nil is the real one
+	rng    *rand.Rand       // for tests; nil is seeded from the time
+	mock   mockState
 }
 
 // New creates the Assess screen.
@@ -161,15 +170,22 @@ func knownCards(skills []assess.Skill, results []assess.Result) []model.Card {
 	return known
 }
 
+// Update handles keys, and the clock and replies during a mock test.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	if m.phase >= phaseMockPick {
+		return m.updateMock(msg)
+	}
 	k, ok := msg.(tea.KeyMsg)
 	if !ok {
 		return m, nil
 	}
 	switch m.phase {
 	case phaseIntro:
-		if key.Matches(k, m.gkeys.Enter) {
+		switch {
+		case key.Matches(k, m.gkeys.Enter):
 			return m.start(), nil
+		case k.String() == "m":
+			return m.openMock(), nil
 		}
 	case phaseAsking:
 		n := len(m.question.Choices)
@@ -190,6 +206,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		switch {
 		case key.Matches(k, m.gkeys.Enter):
 			return m, ui.SwitchTo(ui.ViewDashboard)
+		case k.String() == "m":
+			return m.openMock(), nil
 		case k.String() == "k" && m.marked < 0 && len(m.known) > 0:
 			n, err := m.store.MarkKnown(m.known, time.Now())
 			m.marked, m.saveErr = n, errors.Join(m.saveErr, err)
@@ -198,6 +216,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	return m, nil
 }
 
+// View renders the intro, a question, the results or the mock test.
 func (m Model) View() string {
 	var b strings.Builder
 	b.WriteString(ui.TitleStyle.Render("Assess 测"))
@@ -216,12 +235,14 @@ func (m Model) View() string {
 			}
 			fmt.Fprintf(&b, "  %-24s %s\n", s.Name, ui.MutedStyle.Render(fmt.Sprintf("HSK%d–%d", levels[0], levels[len(levels)-1])))
 		}
-		b.WriteString("\n")
-		b.WriteString(ui.HelpStyle.Render("  enter start · esc back"))
+		fmt.Fprintf(&b, "\n  %s  Mock test 模拟考: a timed HSK4 or HSK5 paper, about 15 minutes.\n\n", ui.ChineseStyle.Render("m"))
+		b.WriteString(ui.HelpStyle.Render("  enter start · m mock test · esc back"))
 	case phaseAsking:
 		b.WriteString(m.viewQuestion())
 	case phaseResults:
 		b.WriteString(m.viewResults())
+	default:
+		b.WriteString(m.viewMock())
 	}
 	return b.String()
 }
@@ -266,15 +287,15 @@ func (m Model) viewResults() string {
 		b.WriteString(ui.SuccessStyle.Render("  Saved to wiki/overview.md (Current Level Assessment)."))
 	}
 	b.WriteString("\n\n")
-	help := "  enter dashboard"
+	help := "  m mock test · enter dashboard"
 	switch {
 	case m.marked >= 0:
-		b.WriteString(ui.SuccessStyle.Render(fmt.Sprintf("  %d words marked known: they leave today's reviews and come back over the next two months.", m.marked)) + "\n\n")
+		b.WriteString(ui.SuccessStyle.Render(ui.WrapIndent(fmt.Sprintf("%d words marked known: they leave today's reviews and come back over the next two months.", m.marked), m.width)) + "\n\n")
 	case len(m.known) > 0:
 		fmt.Fprintf(&b, "  %s  Mark the %d characters and words at or below your level as known.\n", ui.ChineseStyle.Render("k"), len(m.known))
-		b.WriteString(ui.MutedStyle.Render("     They leave today's reviews and come back spread over the next two months,") + "\n")
-		b.WriteString(ui.MutedStyle.Render("     so they stay fresh while you work on the rest. Words you've reviewed keep their schedule.") + "\n\n")
-		help = "  k mark them known · enter dashboard"
+		b.WriteString(ui.MutedStyle.Render(ui.WrapIndent("They leave today's reviews and come back spread over the next two months, "+
+			"so they stay fresh while you work on the rest. Words you've reviewed keep their schedule.", m.width)) + "\n\n")
+		help = "  k mark them known · m mock test · enter dashboard"
 	}
 	b.WriteString(ui.HelpStyle.Render(help))
 	return b.String()
