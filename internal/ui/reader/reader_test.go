@@ -10,6 +10,7 @@ import (
 
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
+	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 const restaurant = `---
@@ -222,5 +223,35 @@ func TestALongListScrollsInASmallWindow(t *testing.T) {
 	out := m.View()
 	if n := strings.Count(out, "\n") + 1; n > 24 || !strings.Contains(out, "above") || !strings.Contains(out, "below") || !strings.Contains(out, "▸") {
 		t.Errorf("%d lines:\n%s", n, out)
+	}
+}
+
+func TestASentenceCardKeepsTheLine(t *testing.T) {
+	m := openRestaurant(t)
+	for m.current() != "菜单" {
+		m = press(m, tea.KeyRight)
+	}
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("c")})
+	if !strings.Contains(m.status, "joins your reviews") {
+		t.Fatalf("status %q", m.status)
+	}
+	cards, err := m.store.DrillableCards()
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, c := range cards {
+		if strings.HasSuffix(c.ID, "sentence-cards.md#菜单") && len(c.Examples) == 1 && strings.Contains(c.Examples[0], "菜单") {
+			found = true
+			if wiki.Cloze(c.Examples[0], "菜单") == "" || strings.Contains(wiki.Cloze(c.Examples[0], "菜单"), "菜单") {
+				t.Errorf("cloze %q", wiki.Cloze(c.Examples[0], "菜单"))
+			}
+		}
+	}
+	if !found {
+		t.Error("no sentence card with its line")
+	}
+	if m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("c")}); !strings.Contains(m.status, "already") {
+		t.Errorf("a second card for the same word: %q", m.status)
 	}
 }

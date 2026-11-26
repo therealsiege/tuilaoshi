@@ -6,6 +6,7 @@ package reader
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -256,6 +257,31 @@ func (m Model) mark() Model {
 	return m
 }
 
+// sentenceCard keeps the selected word with the line it is in, as a card
+// whose review shows the line with the word blanked.
+func (m Model) sentenceCard() Model {
+	w := m.current()
+	gl := m.glosses(w)
+	if w == "" || len(gl) == 0 {
+		m.status = "Pick a word with a meaning to make a sentence card."
+		return m
+	}
+	var line strings.Builder
+	for _, t := range m.lines[m.words[m.cursor].line] {
+		line.WriteString(t.Text)
+	}
+	added, err := m.store.AddSentenceCard(wiki.Word{Chinese: w, Pinyin: gl[0].Pinyin, Meaning: gl[0].English}, line.String(), time.Now())
+	switch {
+	case err != nil:
+		m.saveErr = err
+	case added:
+		m.status = w + " joins your reviews with this sentence"
+	default:
+		m.status = w + " already has a sentence card"
+	}
+	return m
+}
+
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	if done, ok := msg.(clipDoneMsg); ok {
 		if done.err != nil {
@@ -308,6 +334,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.cursor = m.lineStart(-1)
 	case key.Matches(k, m.gkeys.Enter):
 		m = m.mark()
+	case k.String() == "c":
+		m = m.sentenceCard()
 	case k.String() == "e":
 		m.showEnglish = !m.showEnglish
 	case k.String() == "p":

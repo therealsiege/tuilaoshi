@@ -19,9 +19,9 @@ func (m Model) View() string {
 	}
 	switch {
 	case m.open && m.chapterOpen:
-		b.WriteString(m.TextView("  ←→ word · ↑↓ line · enter review it tomorrow · ctrl+r hear · esc chapters"))
+		b.WriteString(m.TextView("  ←→ word · ↑↓ line · enter review it · c sentence card · ctrl+r · esc"))
 	case m.open:
-		b.WriteString(m.TextView("  ←→ word · ↑↓ line · enter didn't know it (review tomorrow) · esc readings"))
+		b.WriteString(m.TextView("  ←→ word · ↑↓ line · enter review it tomorrow · c sentence card · esc readings"))
 	case m.listening != nil:
 		b.WriteString(m.listeningView())
 	case m.story:

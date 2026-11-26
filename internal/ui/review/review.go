@@ -305,6 +305,12 @@ func (m Model) View() string {
 			if card.Pinyin != "" {
 				cardView += "\n  " + ui.Pinyin(card.Pinyin)
 			}
+			for _, ex := range card.Examples {
+				if cloze := wiki.Cloze(ex, card.Chinese); cloze != "" {
+					cardView += "\n\n  " + ui.MutedStyle.Render("in: ") + strings.Join(ui.WrapDisplay(cloze, 26), "\n      ")
+					break
+				}
+			}
 			b.WriteString(ui.CardStyle.Render(cardView))
 			b.WriteString("\n\n")
 			b.WriteString("  " + m.input.View())
