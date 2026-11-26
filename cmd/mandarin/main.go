@@ -2,6 +2,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -42,7 +43,14 @@ func main() {
 		fmt.Fprintf(os.Stderr, "mandarin: %v\n", err)
 		os.Exit(1)
 	}
-	if _, err := tea.NewProgram(m).Run(); err != nil {
+	stop := logStderr(dir)
+	_, err = tea.NewProgram(m).Run()
+	stop()
+	if errors.Is(err, tea.ErrProgramPanic) {
+		fmt.Fprintf(os.Stderr, "\nTuiLaoShi crashed. The details are in %s; your progress up to the last answer is saved.\n", filepath.Join(dir, crashLog))
+		os.Exit(1)
+	}
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "mandarin: %v\n", err)
 		os.Exit(1)
 	}

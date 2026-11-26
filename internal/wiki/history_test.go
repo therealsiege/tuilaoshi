@@ -101,3 +101,23 @@ func TestKnownWordsLeaveTodayAndComeBackSpread(t *testing.T) {
 		t.Errorf("assessed %v %v", ok, err)
 	}
 }
+
+func TestUsageIsCountedByDay(t *testing.T) {
+	store := newTestStore(t)
+	now := time.Date(2026, 11, 26, 9, 0, 0, 0, time.Local)
+	for range 3 {
+		if err := store.RecordUsage("claude-sonnet-5-5", 100, 50, now); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := store.RecordUsage("claude-haiku-4-5", 10, 5, now); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.RecordUsage("claude-haiku-4-5", 10, 5, now.AddDate(0, 0, -1)); err != nil {
+		t.Fatal(err)
+	}
+	u, err := store.UsageOn(now)
+	if err != nil || u.Calls != 4 || u.Input != 310 || u.Output != 155 {
+		t.Errorf("today's usage %+v %v", u, err)
+	}
+}

@@ -30,6 +30,7 @@ type history struct {
 	right, total int   // reviews remembered, of those given in the last 30 days
 	hard         []hardWord
 	hardCount    int
+	claude       wiki.Usage // today's calls to Claude
 }
 
 func loadHistory(store *wiki.Store, now time.Time) (history, error) {
@@ -37,6 +38,9 @@ func loadHistory(store *wiki.Store, now time.Time) (history, error) {
 	var forecastErr, retentionErr, hardErr, cardsErr error
 	h.forecast, forecastErr = store.DueForecast(now, 7)
 	h.right, h.total, retentionErr = store.Retention(now, 30)
+	var usageErr error
+	h.claude, usageErr = store.UsageOn(now)
+	retentionErr = errors.Join(retentionErr, usageErr)
 	hard, hardErr := store.HardWords()
 	h.hardCount = len(hard)
 	if len(hard) > 0 {
@@ -86,7 +90,30 @@ func (m Model) renderAhead() string {
 			lines = append(lines, ui.ErrorStyle.Render(text))
 		}
 	}
+	used := fmt.Sprintf("  Claude today: %d %s", m.hist.claude.Calls, plural(m.hist.claude.Calls, "call", "calls"))
+	if m.hist.claude.Calls > 0 {
+		used += fmt.Sprintf(", %s tokens", tokens(m.hist.claude.Input+m.hist.claude.Output))
+	}
+	if ui.Prefs.ClaudeCap > 0 {
+		used += fmt.Sprintf(" (cap %d)", ui.Prefs.ClaudeCap)
+	}
+	lines = append(lines, ui.MutedStyle.Render(used))
 	return lipgloss.JoinVertical(lipgloss.Left, lines...)
+}
+
+// tokens writes 12345 as "12.3k".
+func tokens(n int64) string {
+	if n < 1000 {
+		return fmt.Sprint(n)
+	}
+	return fmt.Sprintf("%.1fk", float64(n)/1000)
+}
+
+func plural(n int, one, many string) string {
+	if n == 1 {
+		return one
+	}
+	return many
 }
 
 // renderHardWords lists the words missed most, the leeches worth extra work.

@@ -88,6 +88,7 @@ type Model struct {
 func New(wikiDir string) (Model, error) {
 	store := wiki.NewStore(wikiDir)
 	claudeClient := claude.New()
+	claudeClient.Meter = meter{store}
 	ai := claudeClient.IfReady() // nil without a key: those screens say what they need
 	ttsClient := audio.New()
 

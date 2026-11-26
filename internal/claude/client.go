@@ -44,6 +44,10 @@ FEEDBACK: Brief feedback in Chinese with English translation. If wrong, give the
 // Client wraps the Anthropic API for drill evaluation and chat.
 type Client struct {
 	client anthropic.Client
+
+	// Meter, when set, is asked before each call and told what each call
+	// used (see usage.go).
+	Meter Meter
 }
 
 // New creates a Claude API client. Reads ANTHROPIC_API_KEY from environment.
@@ -84,7 +88,7 @@ func (c *Client) EvaluateDrill(ctx context.Context, card model.Card, userAnswer 
 		modeDesc, card.Type, card.Chinese, card.Pinyin, card.English, userAnswer,
 	)
 
-	msg, err := c.client.Messages.New(ctx, anthropic.MessageNewParams{
+	msg, err := c.send(ctx, anthropic.MessageNewParams{
 		Model:     drillModel,
 		MaxTokens: 300,
 		System: []anthropic.TextBlockParam{
@@ -119,7 +123,7 @@ func (c *Client) ChatAs(ctx context.Context, system string, history []ChatMessag
 	}
 	messages = append(messages, anthropic.NewUserMessage(anthropic.NewTextBlock(userMessage)))
 
-	msg, err := c.client.Messages.New(ctx, anthropic.MessageNewParams{
+	msg, err := c.send(ctx, anthropic.MessageNewParams{
 		Model:     chatModel,
 		MaxTokens: 1024,
 		System: []anthropic.TextBlockParam{
@@ -144,7 +148,7 @@ FEEDBACK: one or two short sentences in English, with a corrected or more natura
 // returning a 0-2 score and feedback.
 func (c *Client) GradeWriting(ctx context.Context, task, criteria, answer string) (int, string, error) {
 	prompt := fmt.Sprintf("Task given to the learner: %s\nWhat the answer must do: %s\nLearner's answer: %s", task, criteria, answer)
-	msg, err := c.client.Messages.New(ctx, anthropic.MessageNewParams{
+	msg, err := c.send(ctx, anthropic.MessageNewParams{
 		Model:     drillModel,
 		MaxTokens: 300,
 		System:    []anthropic.TextBlockParam{{Text: writingSystemPrompt}},
@@ -179,7 +183,7 @@ For each character given, answer one line: the character, a space, then its comp
 
 // DecomposeCharacters asks for each character's main written components.
 func (c *Client) DecomposeCharacters(ctx context.Context, chars []string) (map[string][]string, error) {
-	msg, err := c.client.Messages.New(ctx, anthropic.MessageNewParams{
+	msg, err := c.send(ctx, anthropic.MessageNewParams{
 		Model:     chatModel, // the small model splits characters wrongly too often
 		MaxTokens: 2048,      // room to think before answering
 		System:    []anthropic.TextBlockParam{{Text: decomposeSystemPrompt}},
@@ -214,7 +218,7 @@ func (c *Client) Explain(ctx context.Context, topic string) (string, error) {
 		topic,
 	)
 
-	msg, err := c.client.Messages.New(ctx, anthropic.MessageNewParams{
+	msg, err := c.send(ctx, anthropic.MessageNewParams{
 		Model:     chatModel,
 		MaxTokens: 1024,
 		System: []anthropic.TextBlockParam{

@@ -46,6 +46,14 @@ CREATE TABLE IF NOT EXISTS reviews (
 );
 CREATE INDEX IF NOT EXISTS reviews_at ON reviews(at);
 CREATE INDEX IF NOT EXISTS reviews_card ON reviews(card_id);
+CREATE TABLE IF NOT EXISTS usage (
+	day    TEXT NOT NULL, -- YYYY-MM-DD
+	model  TEXT NOT NULL,
+	calls  INTEGER NOT NULL DEFAULT 0,
+	input  INTEGER NOT NULL DEFAULT 0, -- tokens
+	output INTEGER NOT NULL DEFAULT 0,
+	PRIMARY KEY (day, model)
+);
 `
 
 // progress opens the progress file, creating it on first use and bringing

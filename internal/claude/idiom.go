@@ -43,7 +43,7 @@ func (c *Client) IdiomMove(ctx context.Context, companion string, chain []string
 	default:
 		prompt = fmt.Sprintf("The chain so far: %s. The learner plays: %s", strings.Join(chain, " → "), attempt)
 	}
-	msg, err := c.client.Messages.New(ctx, anthropic.MessageNewParams{
+	msg, err := c.send(ctx, anthropic.MessageNewParams{
 		Model:     chatModel,
 		MaxTokens: 2048, // the model thinks before answering; a small budget ends mid-thought
 		System:    []anthropic.TextBlockParam{{Text: fmt.Sprintf(idiomSystemPrompt, companion)}},

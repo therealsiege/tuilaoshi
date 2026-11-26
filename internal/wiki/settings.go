@@ -13,6 +13,7 @@ type Settings struct {
 	Portraits   string `yaml:"portraits"`    // enemy portraits: large, small, off
 	ReviewChunk int    `yaml:"review_chunk"` // due words "Start here" suggests at once
 	NewWords    int    `yaml:"new_words"`    // frequency-list words introduced a day
+	ClaudeCap   int    `yaml:"claude_cap"`   // Claude calls allowed a day; 0 for no limit
 }
 
 // DefaultSettings are the settings before the learner changes any.

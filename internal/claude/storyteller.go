@@ -30,7 +30,7 @@ type Chapter struct {
 // mostly in the words the learner knows.
 func (c *Client) TellChapter(ctx context.Context, n int, known []string) (Chapter, error) {
 	prompt := fmt.Sprintf("Chapter: 第%d回 of 100.\nWords the learner knows: %s", n, strings.Join(known, " "))
-	msg, err := c.client.Messages.New(ctx, anthropic.MessageNewParams{
+	msg, err := c.send(ctx, anthropic.MessageNewParams{
 		Model:     chatModel,
 		MaxTokens: 4096, // room to think before a long answer; small limits return empty text
 		System:    []anthropic.TextBlockParam{{Text: storytellerSystemPrompt}},
