@@ -38,7 +38,17 @@ func (m Model) viewList() string {
 		b.WriteString(ui.MutedStyle.Render("  No readings or episodes yet."))
 		b.WriteString("\n")
 	}
-	for i, it := range m.items {
+	first, last := 0, len(m.items)
+	if room := m.height - 13; m.height > 0 && room < len(m.items) {
+		room = max(room, 3)
+		first = min(max(m.listCursor-room/2, 0), len(m.items)-room)
+		last = first + room
+	}
+	if first > 0 {
+		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("  … %d above", first)) + "\n")
+	}
+	for i := first; i < last; i++ {
+		it := m.items[i]
 		line := fmt.Sprintf("%s  %s", it.title, ui.MutedStyle.Render(it.tag))
 		if i == m.listCursor {
 			b.WriteString(ui.SelectedStyle.Render("▸ " + line))
@@ -47,8 +57,16 @@ func (m Model) viewList() string {
 		}
 		b.WriteString("\n")
 	}
+	if last < len(m.items) {
+		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("  … %d below", len(m.items)-last)) + "\n")
+	}
 	b.WriteString("\n")
-	b.WriteString(ui.MutedStyle.Render("  Add your own episodes: .srt or .txt subtitle files in wiki/" + wiki.PrivateEpisodesDir + " (kept private)."))
+	add := "Add your own episodes: .srt or .txt subtitle files in wiki/" + wiki.PrivateEpisodesDir + " (kept private)."
+	width := 76
+	if m.width > 0 {
+		width = min(width, m.width-4)
+	}
+	b.WriteString(ui.MutedStyle.Render("  " + strings.Join(ui.WrapDisplay(add, width), "\n  ")))
 	b.WriteString("\n\n")
 	b.WriteString(ui.HelpStyle.Render("  ↑↓ choose · enter read · s storyteller · esc back"))
 	return b.String()

@@ -206,3 +206,21 @@ func TestPlaysTheLineFromTheOriginalAudio(t *testing.T) {
 		t.Errorf("status %q; want the playback error", m.status)
 	}
 }
+
+func TestALongListScrollsInASmallWindow(t *testing.T) {
+	pages := map[string]string{"vocabulary/food.md": food}
+	for i := range 30 {
+		pages[fmt.Sprintf("readings/r%02d.md", i)] = strings.Replace(restaurant, "title:", fmt.Sprintf("title: R%02d", i), 1)
+	}
+	m := New(uitest.Wiki(t, pages)).SetSize(80, 24).Refresh()
+	if len(m.items) < 30 {
+		t.Fatalf("%d items", len(m.items))
+	}
+	for range 20 {
+		m = press(m, tea.KeyDown)
+	}
+	out := m.View()
+	if n := strings.Count(out, "\n") + 1; n > 24 || !strings.Contains(out, "above") || !strings.Contains(out, "below") || !strings.Contains(out, "▸") {
+		t.Errorf("%d lines:\n%s", n, out)
+	}
+}

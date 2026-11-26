@@ -6,6 +6,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
@@ -94,5 +95,17 @@ func TestTheNumbersScrollInASmallWindow(t *testing.T) {
 	}
 	if out = m.View(); !strings.Contains(out, "学习统计") || !strings.Contains(out, "Streak") {
 		t.Errorf("scrolled to the end, the title stays and the last section shows:\n%s", out)
+	}
+}
+
+func TestTheNumbersFitEightyColumns(t *testing.T) {
+	m := New(uitest.Wiki(t, nil)).SetSize(80, 24).Refresh()
+	for range 3 {
+		for _, l := range strings.Split(m.View(), "\n") {
+			if w := lipgloss.Width(l); w > 80 {
+				t.Errorf("a line %d wide: %s", w, l)
+			}
+		}
+		m, _ = m.Update(tea.KeyMsg{Type: tea.KeyPgDown})
 	}
 }

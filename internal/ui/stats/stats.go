@@ -99,6 +99,15 @@ func (m Model) scrolled(page string) string {
 	return strings.Join(append(append(head, body[top:top+room]...), ui.HelpStyle.UnsetMarginTop().Render(more)), "\n")
 }
 
+// pair puts two boxes side by side, or one above the other when the
+// window is too narrow for both.
+func (m Model) pair(left, right string) string {
+	if m.width > 0 && lipgloss.Width(left)+2+lipgloss.Width(right) > m.width {
+		return left + "\n" + right
+	}
+	return lipgloss.JoinHorizontal(lipgloss.Top, left, "  ", right)
+}
+
 // lastScroll is the furthest the page can scroll in the window.
 func (m Model) lastScroll() int {
 	if m.height <= 0 {
@@ -124,7 +133,7 @@ func (m Model) numbersView() string {
 
 	leftCol := ui.BorderStyle.Width(34).Render(overviewBox)
 	rightCol := ui.BorderStyle.Width(42).Render(activityBox)
-	b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, leftCol, "  ", rightCol))
+	b.WriteString(m.pair(leftCol, rightCol))
 	b.WriteString("\n\n")
 
 	// Section 3: SRS Distribution
@@ -135,13 +144,13 @@ func (m Model) numbersView() string {
 
 	leftCol2 := ui.BorderStyle.Width(34).Render(srsBox)
 	rightCol2 := ui.BorderStyle.Width(42).Render(masteryBox)
-	b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, leftCol2, "  ", rightCol2))
+	b.WriteString(m.pair(leftCol2, rightCol2))
 	b.WriteString("\n\n")
 
 	// Section 5: the week ahead and the hard words, from the review log
 	leftCol3 := ui.BorderStyle.Width(34).Render(m.renderAhead())
 	rightCol3 := ui.BorderStyle.Width(42).Render(m.renderHardWords())
-	b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, leftCol3, "  ", rightCol3))
+	b.WriteString(m.pair(leftCol3, rightCol3))
 	b.WriteString("\n\n")
 
 	// Section 6: Streak
