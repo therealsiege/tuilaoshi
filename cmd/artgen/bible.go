@@ -48,6 +48,7 @@ type Job struct {
 	Kind, Name, Ratio, Prompt string
 	Subject                   string              // the character a ref picture is kept for, if any
 	Cast                      []journey.Companion // companions shown small, whose approved pictures are attached
+	Peers                     []string            // characters whose approved pictures set the style for this one
 	Layout                    *journey.RegionMap
 }
 
@@ -148,7 +149,13 @@ func (p composer) portrait(name string) (Job, error) {
 	if where != nil {
 		place = p.place(*where)
 	}
-	return Job{Kind: "portrait", Name: name, Ratio: k.Ratio, Subject: name,
+	var peers []string
+	for _, c := range p.c.Companions {
+		if c.Name != name {
+			peers = append(peers, c.Name)
+		}
+	}
+	return Job{Kind: "portrait", Name: name, Ratio: k.Ratio, Subject: name, Peers: peers,
 		Prompt: p.join(k.Frame, desc, place, p.b.World, p.style(), p.b.Never)}, nil
 }
 

@@ -28,6 +28,8 @@ import (
 
 const castNote = "The attached pictures, in order, are the approved designs of %s. Paint them small but recognisable: the same costume, colours and weapon."
 
+const peerNote = "The other attached pictures are approved portraits of other characters, for style only: match their painting style, level of realism, adult proportions, lighting and framing, but do not copy their faces or costumes."
+
 const refNote = "The attached picture is the approved design of this character. Keep their face, build, costume, colours and weapon exactly the same; change only the pose, place and light this prompt asks for."
 
 func main() {
@@ -122,6 +124,19 @@ func main() {
 				prompt += "\n\n" + refNote
 				refs = append(refs, ref)
 			}
+		}
+		var peers []string
+		for _, n := range j.Peers {
+			if len(peers) == 2 {
+				break
+			}
+			if ref, err := os.ReadFile(filepath.Join(*out, "refs", n+".png")); err == nil {
+				peers = append(peers, n)
+				refs = append(refs, ref)
+			}
+		}
+		if len(peers) > 0 {
+			prompt += "\n\n" + peerNote
 		}
 		var shown []string
 		for _, c := range j.Cast {
