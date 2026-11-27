@@ -3,7 +3,6 @@ package wiki
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -34,8 +33,7 @@ func (s *Store) AddFestivalWords(words []Word, now time.Time) (int, error) {
 // addWords adds words not yet on a vocabulary page, creating it with title
 // and tags if needed, and returns how many were new.
 func (s *Store) addWords(rel, title, tags string, words []Word, now time.Time) (int, error) {
-	path := filepath.Join(s.Dir, rel)
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(s.readPath(rel))
 	if err != nil && !os.IsNotExist(err) {
 		return 0, fmt.Errorf("read %s: %w", rel, err)
 	}
@@ -57,7 +55,8 @@ func (s *Store) addWords(rel, title, tags string, words []Word, now time.Time) (
 	if added == 0 {
 		return 0, nil
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+	path, err := s.writePath(rel)
+	if err != nil {
 		return 0, err
 	}
 	return added, os.WriteFile(path, []byte(page), 0644)

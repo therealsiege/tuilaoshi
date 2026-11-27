@@ -29,6 +29,13 @@ type Store struct {
 	// means Dir. Tests reading the real wiki point it elsewhere.
 	Progress string
 
+	// Pages is the folder for the pages the game writes itself: sessions
+	// and the vocabulary it collects (idioms, festival words, sentence
+	// cards, the frequency deck). Empty means Dir. On the phone the wiki
+	// is read-only, so these pages live beside the progress file and are
+	// read over the wiki's own.
+	Pages string
+
 	// Scheduler is how reviews are spaced: SchedulerClassic (or empty)
 	// or SchedulerFSRS. The app sets it from the learner's settings.
 	Scheduler string
@@ -50,9 +57,48 @@ func NewStore(dir string) *Store {
 	return &Store{Dir: dir}
 }
 
+// pagesDir is the folder the game writes its own pages to.
+func (s *Store) pagesDir() string {
+	if s.Pages != "" {
+		return s.Pages
+	}
+	return s.Dir
+}
+
+// readPath is where a page is read from: the game's own copy if it has
+// written one, else the wiki's.
+func (s *Store) readPath(relPath string) string {
+	if s.pagesDir() != s.Dir {
+		if p := filepath.Join(s.pagesDir(), relPath); fileExists(p) {
+			return p
+		}
+	}
+	return filepath.Join(s.Dir, relPath)
+}
+
+// writePath is where the game writes a page, making its folder.
+func (s *Store) writePath(relPath string) (string, error) {
+	path := filepath.Join(s.pagesDir(), relPath)
+	return path, os.MkdirAll(filepath.Dir(path), 0755)
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
+// roots are the folders pages are listed from, the game's own first so
+// its copy of a page wins.
+func (s *Store) roots() []string {
+	if s.pagesDir() != s.Dir {
+		return []string{s.pagesDir(), s.Dir}
+	}
+	return []string{s.Dir}
+}
+
 // ReadPage reads and parses a single wiki page by its relative path.
 func (s *Store) ReadPage(relPath string) (model.Page, error) {
-	data, err := os.ReadFile(filepath.Join(s.Dir, relPath))
+	data, err := os.ReadFile(s.readPath(relPath))
 	if err != nil {
 		return model.Page{}, fmt.Errorf("read page %s: %w", relPath, err)
 	}
@@ -74,34 +120,12 @@ func (s *Store) ListPages() ([]model.Page, error) {
 	defer s.mu.Unlock()
 	var pages []model.Page
 	fresh := map[string]cachedPage{}
-	err := filepath.Walk(s.Dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
+	var err error
+	for _, root := range s.roots() {
+		if err = s.walkPages(root, fresh, &pages); err != nil {
+			break
 		}
-		if info.IsDir() || !strings.HasSuffix(info.Name(), ".md") {
-			return nil
-		}
-		relPath, err := filepath.Rel(s.Dir, path)
-		if err != nil {
-			return err
-		}
-		if c, ok := s.pages[relPath]; ok && c.mod.Equal(info.ModTime()) && c.size == info.Size() {
-			fresh[relPath] = c
-			pages = append(pages, c.page)
-			return nil
-		}
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return nil // skip unreadable files
-		}
-		page, err := ParsePage(relPath, data)
-		if err != nil {
-			return nil // skip unparseable files
-		}
-		fresh[relPath] = cachedPage{mod: info.ModTime(), size: info.Size(), page: page}
-		pages = append(pages, page)
-		return nil
-	})
+	}
 	if err != nil {
 		return pages, err
 	}
@@ -116,6 +140,46 @@ func (s *Store) ListPages() ([]model.Page, error) {
 		}
 	}
 	return pages, nil
+}
+
+// walkPages adds the pages under root not already in fresh, reusing
+// cached ones whose file hasn't changed.
+func (s *Store) walkPages(root string, fresh map[string]cachedPage, pages *[]model.Page) error {
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			if root != s.Dir && os.IsNotExist(err) {
+				return nil // the game hasn't written any pages yet
+			}
+			return err
+		}
+		if info.IsDir() || !strings.HasSuffix(info.Name(), ".md") {
+			return nil
+		}
+		relPath, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		if _, done := fresh[relPath]; done {
+			return nil
+		}
+		if c, ok := s.pages[relPath]; ok && c.mod.Equal(info.ModTime()) && c.size == info.Size() {
+			fresh[relPath] = c
+			*pages = append(*pages, c.page)
+			return nil
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return nil // skip unreadable files
+		}
+		page, err := ParsePage(relPath, data)
+		if err != nil {
+			return nil // skip unparseable files
+		}
+		fresh[relPath] = cachedPage{mod: info.ModTime(), size: info.Size(), page: page}
+		*pages = append(*pages, page)
+		return nil
+	})
+	return err
 }
 
 // withSchedule puts a page's saved review schedule over its frontmatter:
@@ -191,8 +255,7 @@ func (s *Store) ListDirPages(subdir string) ([]model.Page, error) {
 // the next "## " heading, with update(old body). It fails if the page has
 // no such section.
 func (s *Store) UpdateSection(relPath, heading string, update func(old string) string) error {
-	path := filepath.Join(s.Dir, relPath)
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(s.readPath(relPath))
 	if err != nil {
 		return err
 	}
@@ -216,5 +279,9 @@ func (s *Store) UpdateSection(relPath, heading string, update func(old string) s
 	}
 	body := strings.Trim(update(strings.Join(lines[start+1:end], "\n")), "\n")
 	out := append(append(append([]string{}, lines[:start+1]...), body, ""), lines[end:]...)
+	path, err := s.writePath(relPath)
+	if err != nil {
+		return err
+	}
 	return os.WriteFile(path, []byte(strings.Join(out, "\n")), 0644)
 }

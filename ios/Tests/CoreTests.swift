@@ -64,3 +64,27 @@ final class CampTests: XCTestCase {
         XCTAssertFalse(camp.term.isEmpty)
     }
 }
+
+/// Sync and export, called from Swift the way the app calls them.
+final class SyncTests: XCTestCase {
+    func testThePhoneWritesItsProgressToTheSharedFolderAndExports() async throws {
+        let bundle = Bundle(for: SyncTests.self)
+        let wiki = try XCTUnwrap(bundle.url(forResource: "Fixture", withExtension: nil))
+        let temp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let progress = temp.appending(path: "progress"), shared = temp.appending(path: "iCloud"), export = temp.appending(path: "export")
+        try FileManager.default.createDirectory(at: progress, withIntermediateDirectories: true)
+        var error: NSError?
+        let core = try XCTUnwrap(MobileOpen(wiki.path, progress.path, &error), "\(String(describing: error))")
+        defer { try? core.close() }
+
+        _ = core.review("characters/shu1.md", rating: 2, error: &error)
+        XCTAssertNil(error)
+        try await Engine.sync(CoreHandle(core), root: shared)
+        let mine = shared.appending(path: Engine.syncName)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: mine.appending(path: "schedules.yaml").path),
+                      "\(String(describing: try? FileManager.default.contentsOfDirectory(atPath: mine.path)))")
+
+        try await Engine.export(CoreHandle(core), to: export)
+        XCTAssertFalse(try FileManager.default.contentsOfDirectory(atPath: export.path).isEmpty)
+    }
+}

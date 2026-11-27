@@ -73,6 +73,7 @@ type exportedSchedule struct {
 	Lapses       int     `yaml:"lapses,omitempty"`
 	Stability    float64 `yaml:"stability,omitempty"`  // FSRS memory (fsrs.go)
 	Difficulty   float64 `yaml:"difficulty,omitempty"` // FSRS memory
+	LastAt       string  `yaml:"last_at,omitempty"`    // when it was last answered (RFC 3339), to order same-day reviews
 }
 
 // Export writes the learner's progress into dir as readable files.
@@ -98,7 +99,8 @@ func (s *Store) Export(dir string) error {
 			return err
 		}
 	}
-	rows, err := db.Query(`SELECT card_id, introduced, last_reviewed, review_interval, next_review, reps, lapses, stability, difficulty FROM schedules ORDER BY card_id`)
+	rows, err := db.Query(`SELECT s.card_id, s.introduced, s.last_reviewed, s.review_interval, s.next_review, s.reps, s.lapses, s.stability, s.difficulty,
+		COALESCE((SELECT MAX(r.at) FROM reviews r WHERE r.card_id = s.card_id), '') FROM schedules s ORDER BY s.card_id`)
 	if err != nil {
 		return err
 	}
@@ -106,7 +108,7 @@ func (s *Store) Export(dir string) error {
 	for rows.Next() {
 		var id string
 		var e exportedSchedule
-		if err := rows.Scan(&id, &e.Introduced, &e.LastReviewed, &e.ReviewInterval, &e.NextReview, &e.Reps, &e.Lapses, &e.Stability, &e.Difficulty); err != nil {
+		if err := rows.Scan(&id, &e.Introduced, &e.LastReviewed, &e.ReviewInterval, &e.NextReview, &e.Reps, &e.Lapses, &e.Stability, &e.Difficulty, &e.LastAt); err != nil {
 			_ = rows.Close() //nolint:errcheck // the scan error is the one to report
 			return err
 		}
@@ -234,7 +236,7 @@ func (s *Store) importFolder(dir string, merge bool) error {
 			return fmt.Errorf("import %s: %w", exportSchedules, err)
 		}
 		for id, e := range schedules {
-			if merge && !newerSchedule(tx, id, e.LastReviewed) {
+			if merge && !newerSchedule(tx, id, e.LastReviewed, e.LastAt) {
 				continue
 			}
 			if _, err := tx.Exec(`INSERT OR REPLACE INTO schedules (card_id, introduced, last_reviewed, review_interval, next_review, reps, lapses, stability, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,

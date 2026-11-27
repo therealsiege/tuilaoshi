@@ -42,7 +42,7 @@ type sessionRecord struct {
 // WriteSession saves a drill, review, or battle session as a markdown file in
 // wiki/sessions/, and pays its coins (see payForSession).
 func (s *Store) WriteSession(sess model.Session) error {
-	sessDir := filepath.Join(s.Dir, sessionsDir)
+	sessDir := filepath.Join(s.pagesDir(), sessionsDir)
 	if err := os.MkdirAll(sessDir, 0755); err != nil {
 		return fmt.Errorf("create sessions dir: %w", err)
 	}
@@ -113,7 +113,7 @@ func difficultyLabel(d model.DrillDifficulty) string {
 
 // readSessions parses every session file. Unreadable files are skipped.
 func (s *Store) readSessions() []sessionRecord {
-	entries, err := os.ReadDir(filepath.Join(s.Dir, sessionsDir))
+	entries, err := os.ReadDir(filepath.Join(s.pagesDir(), sessionsDir))
 	if err != nil {
 		return nil
 	}
@@ -124,7 +124,7 @@ func (s *Store) readSessions() []sessionRecord {
 		if e.IsDir() || !strings.HasSuffix(name, ".md") || len(name) < len(dateFmt) {
 			continue
 		}
-		data, err := os.ReadFile(filepath.Join(s.Dir, sessionsDir, name))
+		data, err := os.ReadFile(filepath.Join(s.pagesDir(), sessionsDir, name))
 		if err != nil {
 			continue
 		}

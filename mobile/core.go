@@ -6,6 +6,7 @@ package mobile
 import (
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"time"
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
@@ -19,15 +20,25 @@ type Core struct {
 }
 
 // Open opens the wiki in wikiDir (the app bundle's copy, read-only) with
-// its progress kept in progressDir (the app's own container).
+// its progress, and the pages the game writes, kept in progressDir (the
+// app's own container).
 func Open(wikiDir, progressDir string) (*Core, error) {
 	s := wiki.NewStore(wikiDir)
 	s.Progress = progressDir
+	s.Pages = filepath.Join(progressDir, "pages") // the bundled wiki is read-only
 	if _, err := s.Settings(); err != nil {
 		return nil, fmt.Errorf("open progress: %w", err)
 	}
 	return &Core{store: s}, nil
 }
+
+// Sync merges in every other device's folder under root (the shared
+// iCloud Drive folder), then writes this device's progress to root/name,
+// the same format the Mac's TUILAOSHI_SYNC_DIR uses.
+func (c *Core) Sync(root, name string) error { return c.store.Sync(root, name) }
+
+// Export writes the progress as readable files into dir.
+func (c *Core) Export(dir string) error { return c.store.Export(dir) }
 
 // Close closes the progress file.
 func (c *Core) Close() error { return c.store.Close() }

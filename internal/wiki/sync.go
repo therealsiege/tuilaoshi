@@ -63,12 +63,23 @@ func newerDoc(tx *sql.Tx, name, stamp string) bool {
 	return err1 == nil && (err2 != nil || theirs.After(ours))
 }
 
-// newerSchedule reports whether a card reviewed on lastReviewed is newer
-// than this Mac's schedule for it.
-func newerSchedule(tx *sql.Tx, id, lastReviewed string) bool {
+// newerSchedule reports whether a card last reviewed on lastReviewed, at
+// lastAt, is newer than this device's schedule for it. Reviews on the same
+// day are ordered by the time of the last answer, which this device knows
+// from its own reviews (the other device's are merged in after this).
+func newerSchedule(tx *sql.Tx, id, lastReviewed, lastAt string) bool {
 	var mine string
 	if err := tx.QueryRow(`SELECT last_reviewed FROM schedules WHERE card_id = ?`, id).Scan(&mine); err != nil {
 		return true
 	}
-	return lastReviewed > mine
+	if lastReviewed != mine || lastAt == "" {
+		return lastReviewed > mine
+	}
+	var myAt string
+	if err := tx.QueryRow(`SELECT COALESCE(MAX(at), '') FROM reviews WHERE card_id = ?`, id).Scan(&myAt); err != nil {
+		return false
+	}
+	theirs, err1 := time.Parse(time.RFC3339, lastAt)
+	ours, err2 := time.Parse(time.RFC3339, myAt)
+	return err1 == nil && (err2 != nil || theirs.After(ours))
 }

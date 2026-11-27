@@ -3,7 +3,6 @@ package wiki
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -16,8 +15,7 @@ const sentencePage = "private/vocabulary/sentence-cards.md"
 // AddSentenceCard keeps a word with the sentence it was met in; it
 // reports false when the word already has a sentence card.
 func (s *Store) AddSentenceCard(w Word, sentence string, now time.Time) (bool, error) {
-	path := filepath.Join(s.Dir, sentencePage)
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(s.readPath(sentencePage))
 	if err != nil && !os.IsNotExist(err) {
 		return false, fmt.Errorf("read %s: %w", sentencePage, err)
 	}
@@ -34,7 +32,8 @@ func (s *Store) AddSentenceCard(w Word, sentence string, now time.Time) (bool, e
 		return strings.ReplaceAll(strings.ReplaceAll(strings.TrimSpace(s), "|", "/"), "\n", " ")
 	}
 	page = strings.TrimRight(page, "\n") + fmt.Sprintf("\n| %s | %s | %s | %s |\n", word, clean(w.Pinyin), clean(w.Meaning), clean(sentence))
-	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+	path, err := s.writePath(sentencePage)
+	if err != nil {
 		return false, err
 	}
 	return true, os.WriteFile(path, []byte(page), 0644)

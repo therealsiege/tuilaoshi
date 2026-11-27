@@ -20,6 +20,7 @@ struct CampView: View {
                         if let stage = camp.stage { StageCard(stage: stage) }
                         party(camp)
                         doors
+                        ProgressSection()
                     }
                     .padding()
                 }
@@ -79,6 +80,43 @@ struct CampView: View {
                 }
                 .buttonStyle(.plain)
             }
+        }
+    }
+}
+
+/// Where progress is kept: syncing with the Mac, and exporting it.
+private struct ProgressSection: View {
+    @Environment(Engine.self) private var engine
+    @State private var exported: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("进度 Progress").font(Theme.heading(20))
+            Text(syncLine).font(.footnote).foregroundStyle(.secondary)
+            HStack {
+                Button("Sync now") { Task { await engine.syncNow() } }
+                Button("Export") {
+                    Task {
+                        do {
+                            let dir = try await engine.export()
+                            exported = "Exported to Files › On My iPhone › 推老师 › \(dir.lastPathComponent)"
+                        } catch {
+                            exported = "Couldn't export: \(error.localizedDescription)"
+                        }
+                    }
+                }
+            }
+            .buttonStyle(.bordered)
+            if let exported { Text(exported).font(.footnote).foregroundStyle(.secondary) }
+        }
+    }
+
+    private var syncLine: String {
+        switch engine.sync {
+        case .never: "Not synced with the Mac yet."
+        case .off(let why): why
+        case .synced(let at): "Synced with the Mac through iCloud Drive \(at.formatted(.relative(presentation: .named)))."
+        case .failed(let why): why
         }
     }
 }

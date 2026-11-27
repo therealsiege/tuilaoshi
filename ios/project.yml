@@ -19,11 +19,26 @@ targets:
       - name: Copy the wiki (content only)
         script: ./copy-wiki.sh
         basedOnDependencyAnalysis: false
+    entitlements:
+      path: App/TuiLaoShi.entitlements
+      properties:
+        com.apple.developer.icloud-container-identifiers: [iCloud.com.therealsiege.tuilaoshi]
+        com.apple.developer.icloud-services: [CloudDocuments]
+        com.apple.developer.ubiquity-container-identifiers: [iCloud.com.therealsiege.tuilaoshi]
     info:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: 推老师
         UILaunchScreen: {}
+        # The progress folder shared with the Mac shows in iCloud Drive, and
+        # exports show in the Files app.
+        NSUbiquitousContainers:
+          iCloud.com.therealsiege.tuilaoshi:
+            NSUbiquitousContainerIsDocumentScopePublic: true
+            NSUbiquitousContainerName: TuiLaoShi
+            NSUbiquitousContainerSupportedFolderLevels: Any
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
     settings:
       base:
