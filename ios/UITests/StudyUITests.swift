@@ -121,7 +121,7 @@ final class StudyUITests: XCTestCase {
         app.launchArguments = ["-fresh-progress"]
         app.launch()
         XCTAssertTrue(app.staticTexts["camp.due"].waitForExistence(timeout: 30))
-        let checks: [(String, String)] = [("letter", "Nothing yet"), ("gazette", "Week of"), ("diary", "Writing an entry"), ("progress", "The last seven days")]
+        let checks: [(String, String)] = [("letter", "Nothing yet"), ("gazette", "Week of"), ("diary", "Writing an entry"), ("progress", "The last seven days"), ("web", "No web yet")]
         for (paper, expect) in checks {
             let link = app.buttons["paper.\(paper)"]
             for _ in 0..<6 where !link.isHittable { app.swipeUp() }

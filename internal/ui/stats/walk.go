@@ -32,7 +32,7 @@ func (w walk) active() bool { return len(w.cards) > 0 }
 
 // startWalk begins reviving the slipping words around the centre.
 func (m Model) startWalk() Model {
-	cards := m.spider.g.cluster(m.spider.centre)
+	cards := m.spider.g.Cluster(m.spider.centre)
 	if len(cards) == 0 {
 		m.spider.note = fmt.Sprintf("Nothing slipping around %s: every strand holds.", m.centreWord())
 		return m

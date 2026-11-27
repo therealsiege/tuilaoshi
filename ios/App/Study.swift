@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// A due card, as the Go engine's DueCards() reports it.
-struct Card: Decodable, Identifiable, Equatable {
+struct Card: Decodable, Identifiable, Hashable, Sendable {
     let id: String
     let chinese: String
     let pinyin: String
@@ -63,9 +63,14 @@ final class StudySession {
     /// learner's "words a sitting" setting).
     static var size = 20
 
-    init(mode: StudyMode, engine: Engine) {
+    private let preset: [Card]?
+
+    /// A session over the due cards, or over the given cards (a walk of
+    /// the spider's web).
+    init(mode: StudyMode, engine: Engine, cards: [Card]? = nil) {
         self.mode = mode
         self.engine = engine
+        self.preset = cards
     }
 
     var card: Card? { index < cards.count ? cards[index] : nil }
@@ -75,6 +80,11 @@ final class StudySession {
     var typedRight: Bool { typed.trimmingCharacters(in: .whitespaces) == card?.chinese }
 
     func load() async {
+        if let preset {
+            cards = preset
+            loading = false
+            return
+        }
         do {
             let all = try await engine.dueCards(limit: Self.size * 3)
             // Sentence mode needs an example sentence holding the word.

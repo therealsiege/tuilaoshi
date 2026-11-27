@@ -162,6 +162,12 @@ final class Engine {
     /// The travel diary, newest first.
     func diary() async throws -> [DiaryEntry] { try await decode([DiaryEntry].self) { h, e in h.core.diary(e) } }
 
+    /// The spider's web around a word ("" for the weakest).
+    func spiderWeb(_ word: String) async throws -> SpiderWeb { try await decode(SpiderWeb.self) { h, e in h.core.spiderWeb(word, error: e) } }
+
+    /// The cards a walk of the web from a word revives.
+    func walkWeb(_ word: String) async throws -> [Card] { try await decode([Card].self) { h, e in h.core.walkWeb(word, error: e) } }
+
     /// My progress.
     func progress() async throws -> ProgressReport { try await decode(ProgressReport.self) { h, e in h.core.progress(e) } }
 

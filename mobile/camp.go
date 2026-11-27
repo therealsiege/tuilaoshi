@@ -253,3 +253,64 @@ func (c *Core) Progress() (string, error) {
 	data, err := json.Marshal(out)
 	return string(data), err
 }
+
+// SpiderWeb is the spider's web (盘丝洞) around a word, as JSON: the word,
+// the studied words tied to it by a shared character (slipping ones
+// first), and the web's size. An empty or unknown centre opens on the
+// weakest word, as the Mac does. Empty before any word is studied.
+func (c *Core) SpiderWeb(centre string) (string, error) {
+	studied, err := c.store.StudiedWords()
+	if err != nil {
+		return "", err
+	}
+	w := campnews.BuildWeb(studied, time.Now())
+	type node struct {
+		Word    string `json:"word"`
+		Pinyin  string `json:"pinyin"`
+		English string `json:"english"`
+		Weak    bool   `json:"weak"`
+		Shared  string `json:"shared,omitempty"`
+		Links   int    `json:"links"`
+	}
+	out := struct {
+		Centre      *node  `json:"centre,omitempty"`
+		Links       []node `json:"links"`
+		Words       int    `json:"words"`
+		Strands     int    `json:"strands"`
+		WeakStrands int    `json:"weakStrands"`
+		Walk        int    `json:"walk"`
+	}{Links: []node{}, Words: len(w.Words), Strands: w.Strands, WeakStrands: w.WeakStrands}
+	i, ok := w.Index[centre]
+	if !ok {
+		i = w.Weakest()
+	}
+	if i >= 0 {
+		cw := w.Words[i]
+		out.Centre = &node{Word: cw.Card.Chinese, Pinyin: cw.Card.Pinyin, English: cw.Card.English, Weak: cw.Weak, Links: len(w.Links[i])}
+		for _, j := range w.Links[i] {
+			n := w.Words[j]
+			out.Links = append(out.Links, node{n.Card.Chinese, n.Card.Pinyin, n.Card.English, n.Weak, campnews.Shared(cw.Card.Chinese, n.Card.Chinese), len(w.Links[j])})
+		}
+		out.Walk = len(w.Cluster(i))
+	}
+	data, err := json.Marshal(out)
+	return string(data), err
+}
+
+// WalkWeb is the cards a walk of the web from a word revives, as the due
+// cards' JSON: the word if it is slipping, then its slipping neighbours.
+func (c *Core) WalkWeb(centre string) (string, error) {
+	studied, err := c.store.StudiedWords()
+	if err != nil {
+		return "", err
+	}
+	w := campnews.BuildWeb(studied, time.Now())
+	out := []card{}
+	if i, ok := w.Index[centre]; ok {
+		for _, cd := range w.Cluster(i) {
+			out = append(out, toCard(cd))
+		}
+	}
+	data, err := json.Marshal(out)
+	return string(data), err
+}

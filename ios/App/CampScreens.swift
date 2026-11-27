@@ -35,7 +35,7 @@ struct ProgressReport: Decodable, Equatable, Sendable {
 /// The things camp keeps to read: the letter, the gazette, the diary and
 /// My progress.
 enum Paper: String, CaseIterable, Identifiable, Hashable {
-    case letter, gazette, diary, progress
+    case letter, gazette, diary, progress, web
     var id: Self { self }
 
     var title: String {
@@ -44,6 +44,7 @@ enum Paper: String, CaseIterable, Identifiable, Hashable {
         case .gazette: "邸报 The court gazette"
         case .diary: "日记 Travel diary"
         case .progress: "进度 My progress"
+        case .web: "盘丝洞 The spider's web"
         }
     }
 
@@ -53,6 +54,7 @@ enum Paper: String, CaseIterable, Identifiable, Hashable {
         case .gazette: "newspaper"
         case .diary: "book.closed"
         case .progress: "chart.bar"
+        case .web: "circle.hexagongrid"
         }
     }
 }
@@ -67,6 +69,7 @@ struct PaperView: View {
         case .gazette: WritingView(title: paper.title, load: { try await $0.gazette() }, empty: "")
         case .diary: DiaryView()
         case .progress: ProgressScreen()
+        case .web: WebScreen()
         }
     }
 }
@@ -193,5 +196,88 @@ struct ProgressScreen: View {
         }
         .navigationTitle("进度 My progress")
         .task { report = try? await engine.progress() }
+    }
+}
+
+/// The spider's web around a word, as the engine's SpiderWeb() reports it.
+struct SpiderWeb: Decodable, Equatable, Sendable {
+    struct Node: Decodable, Equatable, Hashable, Sendable {
+        let word: String
+        let pinyin: String
+        let english: String
+        let weak: Bool
+        let shared: String?
+        let links: Int
+    }
+    let centre: Node?
+    let links: [Node]
+    let words: Int
+    let strands: Int
+    let weakStrands: Int
+    let walk: Int
+}
+
+/// The spider's web (盘丝洞): studied words tied by the characters they
+/// share. Slipping words show in cinnabar; walking the web reviews the
+/// slipping words around the centre.
+struct WebScreen: View {
+    @Environment(Engine.self) private var engine
+    @State private var web: SpiderWeb?
+    @State private var trail: [String] = []
+    @State private var walking: [Card]?
+
+    var body: some View {
+        List {
+            if let web, let c = web.centre {
+                Section {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(c.word).font(.system(size: 48)).foregroundStyle(c.weak ? Theme.cinnabar : .primary)
+                        Pinyin.coloured(c.pinyin).font(.title3.italic())
+                        Text(c.english).foregroundStyle(.secondary)
+                    }
+                    if web.walk > 0 {
+                        Button("Walk the web: review \(web.walk) slipping word\(web.walk == 1 ? "" : "s") here") {
+                            Task { walking = try? await engine.walkWeb(c.word) }
+                        }
+                    }
+                } footer: {
+                    Text("\(web.words) words, \(web.strands) strands, \(web.weakStrands) with a slipping word")
+                }
+                Section("Tied by a shared character") {
+                    if web.links.isEmpty { Text("No other studied word shares a character with this one yet.").foregroundStyle(.secondary) }
+                    ForEach(web.links, id: \.word) { n in
+                        Button { trail.append(c.word); Task { await open(n.word) } } label: {
+                            HStack {
+                                Text(n.word).font(.title3).foregroundStyle(n.weak ? Theme.cinnabar : .primary)
+                                Text(n.english).font(.footnote).foregroundStyle(.secondary).lineLimit(1)
+                                Spacer()
+                                Text("· \(n.shared ?? "") ·").font(.caption).foregroundStyle(Theme.ochre)
+                            }
+                        }
+                    }
+                }
+            } else if web != nil {
+                ContentUnavailableView("No web yet", systemImage: "circle.hexagongrid",
+                                       description: Text("Words join the web once they've been reviewed."))
+            } else {
+                ProgressView()
+            }
+        }
+        .navigationTitle("盘丝洞 The spider's web")
+        .toolbar {
+            if !trail.isEmpty {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Back to \(trail.last ?? "")") { Task { await open(trail.removeLast()) } }
+                }
+            }
+        }
+        .navigationDestination(item: $walking) { cards in
+            SessionView(session: StudySession(mode: .review, engine: engine, cards: cards))
+        }
+        .task { await open("") }
+    }
+
+    private func open(_ word: String) async {
+        web = try? await engine.spiderWeb(word)
     }
 }

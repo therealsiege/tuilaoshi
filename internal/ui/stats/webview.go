@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/therealsiege/tuilaoshi/internal/camp"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 )
 
@@ -17,7 +18,7 @@ import (
 // spider is the web's place on the progress screen.
 type spider struct {
 	on     bool // the web is shown instead of the numbers
-	g      web
+	g      camp.Web
 	centre int      // the word in the middle, -1 for an empty web
 	trail  []string // centres walked from, for going back
 	sel    int      // the chosen strand from the centre
@@ -35,12 +36,12 @@ func (m Model) Walking() bool { return m.spider.walk.active() }
 func (m Model) loadWeb() Model {
 	words, err := m.store.StudiedWords()
 	keep := m.centreWord()
-	m.spider.g = buildWeb(words, m.now())
+	m.spider.g = camp.BuildWeb(words, m.now())
 	m.spider.err = err
-	if i, ok := m.spider.g.index[keep]; ok && keep != "" {
+	if i, ok := m.spider.g.Index[keep]; ok && keep != "" {
 		m.spider.centre = i
 	} else {
-		m.spider.centre, m.spider.trail, m.spider.sel = m.spider.g.weakest(), nil, 0
+		m.spider.centre, m.spider.trail, m.spider.sel = m.spider.g.Weakest(), nil, 0
 	}
 	m.spider.sel = min(m.spider.sel, max(0, len(m.strands())-1))
 	return m
@@ -49,10 +50,10 @@ func (m Model) loadWeb() Model {
 // centreWord is the word in the middle of the web, or "".
 func (m Model) centreWord() string {
 	g := m.spider.g
-	if m.spider.centre < 0 || m.spider.centre >= len(g.words) {
+	if m.spider.centre < 0 || m.spider.centre >= len(g.Words) {
 		return ""
 	}
-	return g.words[m.spider.centre].card.Chinese
+	return g.Words[m.spider.centre].Card.Chinese
 }
 
 // strands lists the words tied to the centre.
@@ -60,7 +61,7 @@ func (m Model) strands() []int {
 	if m.centreWord() == "" {
 		return nil
 	}
-	return m.spider.g.links[m.spider.centre]
+	return m.spider.g.Links[m.spider.centre]
 }
 
 // updateWeb handles keys while the web is shown.
@@ -82,11 +83,11 @@ func (m Model) updateWeb(msg tea.KeyMsg) (Model, tea.Cmd) {
 		}
 	case "left", "h", "backspace":
 		if t := len(sp.trail); t > 0 {
-			sp.centre, sp.sel = sp.g.index[sp.trail[t-1]], 0
+			sp.centre, sp.sel = sp.g.Index[sp.trail[t-1]], 0
 			sp.trail = sp.trail[:t-1]
 		}
 	case "c":
-		sp.centre, sp.trail, sp.sel = sp.g.weakest(), nil, 0
+		sp.centre, sp.trail, sp.sel = sp.g.Weakest(), nil, 0
 	case "enter", " ":
 		return m.startWalk(), nil
 	}
@@ -111,7 +112,7 @@ func (m Model) webView() string {
 	width, height := m.size()
 	var b strings.Builder
 	title := ui.TitleStyle.MarginBottom(0).Render("盘丝洞 The Spider's Web")
-	counts := fmt.Sprintf("  %d words · %d strands · %d weak ╳", len(g.words), g.strands, g.weakStrands)
+	counts := fmt.Sprintf("  %d words · %d strands · %d weak ╳", len(g.Words), g.Strands, g.WeakStrands)
 	b.WriteString(fit(title+ui.MutedStyle.Render(counts), width) + "\n\n")
 	if m.spider.err != nil {
 		b.WriteString(fit(ui.ErrorStyle.Render("  "+m.spider.err.Error()), width) + "\n\n")
@@ -122,12 +123,12 @@ func (m Model) webView() string {
 		b.WriteString(ui.HelpStyle.Render(fit("  w numbers · esc camp", width)))
 		return b.String()
 	}
-	centre := g.words[m.spider.centre]
+	centre := g.Words[m.spider.centre]
 	b.WriteString(fit(ui.MutedStyle.Render("  centre ")+wordLine(centre), width) + "\n\n")
 
 	links := m.strands()
 	if len(links) == 0 {
-		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("  No other studied word shares a character with %s yet.", centre.card.Chinese)) + "\n")
+		b.WriteString(ui.MutedStyle.Render(fmt.Sprintf("  No other studied word shares a character with %s yet.", centre.Card.Chinese)) + "\n")
 	} else {
 		rows := max(3, height-9)
 		if m.spider.err != nil {
@@ -136,14 +137,14 @@ func (m Model) webView() string {
 		for _, r := range m.graphRows(links, rows, width) {
 			b.WriteString(r + "\n")
 		}
-		nb := g.words[links[m.spider.sel]]
+		nb := g.Words[links[m.spider.sel]]
 		b.WriteString("\n" + fit(ui.MutedStyle.Render("  ▸ ")+wordLine(nb)+
-			ui.MutedStyle.Render(" · shares "+shared(centre.card.Chinese, nb.card.Chinese)), width) + "\n")
+			ui.MutedStyle.Render(" · shares "+camp.Shared(centre.Card.Chinese, nb.Card.Chinese)), width) + "\n")
 	}
 	if m.spider.note != "" {
 		b.WriteString(fit(ui.WarningStyle.Render("  "+m.spider.note), width) + "\n")
 	}
-	if n := len(g.cluster(m.spider.centre)); n > 0 {
+	if n := len(g.Cluster(m.spider.centre)); n > 0 {
 		help = strings.Replace(help, "enter revive", fmt.Sprintf("enter revive %d", n), 1)
 	}
 	b.WriteString(ui.HelpStyle.Render(fit(help, width)))
@@ -154,7 +155,7 @@ func (m Model) webView() string {
 // followed by that word's own strands to words not already shown.
 func (m Model) graphRows(links []int, rows, width int) []string {
 	g := m.spider.g
-	centre := g.words[m.spider.centre]
+	centre := g.Words[m.spider.centre]
 	shown := min(len(links), rows)
 	if len(links) > rows {
 		shown = rows - 1 // the last row says how many more
@@ -168,10 +169,10 @@ func (m Model) graphRows(links []int, rows, width int) []string {
 	for _, j := range links {
 		onScreen[j] = true
 	}
-	cw := lipgloss.Width(centre.card.Chinese)
+	cw := lipgloss.Width(centre.Card.Chinese)
 	wordW := 4
 	for _, j := range links[off : off+shown] {
-		wordW = max(wordW, min(8, lipgloss.Width(g.words[j].card.Chinese)))
+		wordW = max(wordW, min(8, lipgloss.Width(g.Words[j].Card.Chinese)))
 	}
 	pinyin := width >= 100
 	var out []string
@@ -179,7 +180,7 @@ func (m Model) graphRows(links []int, rows, width int) []string {
 		lead := "  " + strings.Repeat(" ", cw) + "  "
 		branch := "├"
 		if k == 0 {
-			lead = "  " + wordStyle(centre).Render(centre.card.Chinese) + ui.MutedStyle.Render(" ─")
+			lead = "  " + wordStyle(centre).Render(centre.Card.Chinese) + ui.MutedStyle.Render(" ─")
 			branch = "┬"
 		}
 		if k == total-1 {
@@ -193,20 +194,20 @@ func (m Model) graphRows(links []int, rows, width int) []string {
 			continue
 		}
 		j := links[off+k]
-		nb := g.words[j]
+		nb := g.Words[j]
 		strand := ui.SuccessStyle.Render("──") // ╳ marks a strand into a slipping word
-		if nb.weak {
+		if nb.Weak {
 			strand = ui.ErrorStyle.Render("╳─")
 		}
 		cursor := " "
 		if off+k == m.spider.sel {
 			cursor = ui.SelectedStyle.Render("▸")
 		}
-		word := ansi.Truncate(nb.card.Chinese, 8, "…")
+		word := ansi.Truncate(nb.Card.Chinese, 8, "…")
 		row := lead + ui.MutedStyle.Render(branch) + strand + cursor + wordStyle(nb).Render(word) +
 			strings.Repeat(" ", wordW-lipgloss.Width(word))
 		if pinyin {
-			py := ansi.Truncate(nb.card.Pinyin, 14, "…")
+			py := ansi.Truncate(nb.Card.Pinyin, 14, "…")
 			row += " " + ui.Pinyin(py) + strings.Repeat(" ", 14-lipgloss.Width(py))
 		}
 		out = append(out, row+m.outerRing(j, onScreen, width-lipgloss.Width(row)-1))
@@ -219,7 +220,7 @@ func (m Model) graphRows(links []int, rows, width int) []string {
 func (m Model) outerRing(j int, onScreen map[int]bool, room int) string {
 	g := m.spider.g
 	var far []int
-	for _, k := range g.links[j] {
+	for _, k := range g.Links[j] {
 		if !onScreen[k] {
 			far = append(far, k)
 		}
@@ -231,8 +232,8 @@ func (m Model) outerRing(j int, onScreen map[int]bool, room int) string {
 	used := 1
 	b.WriteString(" ")
 	for i, k := range far {
-		ww := g.words[k]
-		item := ansi.Truncate(ww.card.Chinese, 8, "…")
+		ww := g.Words[k]
+		item := ansi.Truncate(ww.Card.Chinese, 8, "…")
 		need := 2 + lipgloss.Width(item)
 		reserve := 0
 		if i < len(far)-1 {
@@ -243,7 +244,7 @@ func (m Model) outerRing(j int, onScreen map[int]bool, room int) string {
 			break
 		}
 		mark := ui.SuccessStyle.Render("─")
-		if ww.weak {
+		if ww.Weak {
 			mark = ui.ErrorStyle.Render("╳")
 		}
 		b.WriteString(" " + mark + wordStyle(ww).Render(item))
@@ -253,30 +254,30 @@ func (m Model) outerRing(j int, onScreen map[int]bool, room int) string {
 }
 
 // wordStyle shows slipping words in red and firm ones in the usual ink.
-func wordStyle(w webWord) lipgloss.Style {
-	if w.weak {
+func wordStyle(w camp.WebWord) lipgloss.Style {
+	if w.Weak {
 		return ui.ErrorStyle.Bold(true)
 	}
 	return ui.ChineseStyle
 }
 
 // wordLine is a word with its pinyin, meaning and how firmly it is held.
-func wordLine(w webWord) string {
-	return wordStyle(w).Render(w.card.Chinese) + " " + ui.Pinyin(w.card.Pinyin) + "  " +
-		w.card.English + ui.MutedStyle.Render(" · "+holdText(w))
+func wordLine(w camp.WebWord) string {
+	return wordStyle(w).Render(w.Card.Chinese) + " " + ui.Pinyin(w.Card.Pinyin) + "  " +
+		w.Card.English + ui.MutedStyle.Render(" · "+holdText(w))
 }
 
 // holdText says in words how firmly a word is held, so the web reads
 // without colour.
-func holdText(w webWord) string {
-	parts := []string{fmt.Sprintf("every %dd", w.card.ReviewInterval)}
-	if w.overdue {
+func holdText(w camp.WebWord) string {
+	parts := []string{fmt.Sprintf("every %dd", w.Card.ReviewInterval)}
+	if w.Overdue {
 		parts = append(parts, "due")
 	}
-	if w.lapses > 0 {
-		parts = append(parts, fmt.Sprintf("missed %d×", w.lapses))
+	if w.Lapses > 0 {
+		parts = append(parts, fmt.Sprintf("missed %d×", w.Lapses))
 	}
-	if w.weak {
+	if w.Weak {
 		parts = append(parts, "╳ slipping")
 	} else {
 		parts = append(parts, "firm")

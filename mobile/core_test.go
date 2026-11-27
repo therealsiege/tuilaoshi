@@ -342,3 +342,54 @@ func TestSettingsKeepTheMacsOwnAndSync(t *testing.T) {
 		t.Errorf("exported settings = %q, %v; settings must travel with sync", data, err)
 	}
 }
+
+// The web ties studied words sharing a character, and a walk revives the
+// slipping ones.
+func TestSpiderWeb(t *testing.T) {
+	dir := fixtureWiki(t)
+	vocab := "---\ntype: vocabulary\nlevel: HSK1\n---\n\n# Books\n\n| Word | Pinyin | Meaning |\n|------|--------|---------|\n| 书包 | shūbāo | schoolbag |\n| 读书 | dú shū | to study |\n"
+	if err := os.MkdirAll(filepath.Join(dir, "vocabulary"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "vocabulary", "books.md"), []byte(vocab), 0644); err != nil {
+		t.Fatal(err)
+	}
+	c, err := Open(dir, t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close() //nolint:errcheck // test
+	if w, err := c.SpiderWeb(""); err != nil || !strings.Contains(w, `"words":0`) {
+		t.Fatalf("web before studying = %s, %v", w, err)
+	}
+	for _, id := range []string{"characters/shu1.md", "vocabulary/books.md#书包", "vocabulary/books.md#读书"} {
+		if _, err := c.Review(id, 0); err != nil {
+			t.Fatal(err)
+		}
+	}
+	w, err := c.SpiderWeb("书")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got struct {
+		Centre struct {
+			Word string `json:"word"`
+		} `json:"centre"`
+		Links []struct {
+			Word   string `json:"word"`
+			Shared string `json:"shared"`
+		} `json:"links"`
+		Strands int `json:"strands"`
+		Walk    int `json:"walk"`
+	}
+	if err := json.Unmarshal([]byte(w), &got); err != nil {
+		t.Fatal(err)
+	}
+	if got.Centre.Word != "书" || len(got.Links) != 2 || got.Links[0].Shared != "书" || got.Strands != 3 || got.Walk != 3 {
+		t.Errorf("web = %s; want 书 tied to 书包 and 读书", w)
+	}
+	cards, err := c.WalkWeb("书")
+	if err != nil || strings.Count(cards, `"id"`) != 3 {
+		t.Errorf("walk = %s, %v", cards, err)
+	}
+}
