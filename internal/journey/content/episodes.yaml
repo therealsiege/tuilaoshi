@@ -3,7 +3,7 @@
 # source: "original" for episodes written for this app; novel adaptations
 # cite their chapter, and mark lines quoted verbatim from the public-domain
 # novel (Wikisource text, converted to simplified) with original: true. Speakers must be companions, demons, or in cast.
-cast: [旁白, 老者, 太宗, 观音菩萨, 小白龙, 高老太公, 黑熊精, 镇元大仙, 清风, 车迟国王, 虎力大仙, 女王, 假悟空, 铁扇公主]
+cast: [旁白, 老者, 太宗, 观音菩萨, 小白龙, 高老太公, 黑熊精, 镇元大仙, 清风, 车迟国王, 虎力大仙, 女王, 假悟空, 铁扇公主, 小猴, 须菩提祖师, 东海龙王, 玉帝, 太白金星, 如来佛祖]
 
 episodes:
   - id: dragon-horse
@@ -128,6 +128,58 @@ episodes:
       - {speaker: 孙悟空, zh: 不借也可以，那我就变成小虫，飞进你的肚子里。, en: "Fine, don't. Then I'll turn into a little bug and fly into your stomach."}
       - {speaker: 铁扇公主, zh: 好疼！好疼！我借给你，快出来！, en: "It hurts! It hurts! I'll lend it to you, come out!"}
       - {speaker: 猪八戒, zh: 猴哥，这把扇子是真的吗？我看不太像。, en: "Monkey brother, is this fan real? It doesn't look quite right to me."}
+  # Wukong's own story (novel chapters 1-7), told once he is freed at Two
+  # Boundary Mountain. Written for TuiLaoShi from the novel.
+  - id: stone-monkey
+    stage: 8
+    title: 石猴出世 The Stone Monkey (novel, chapters 1-2)
+    source: novel, chapters 1-2
+    lines:
+      - {speaker: 唐僧, zh: 悟空，你在山下住了五百年。你是从哪里来的？, en: "Wukong, you lived under the mountain for five hundred years. Where did you come from?"}
+      - {speaker: 孙悟空, zh: 师父，我是从一块石头里出来的。花果山上有一块仙石，有一天它开了，我就跳出来了。, en: "Master, I came out of a stone. There was a magic stone on Flower-Fruit Mountain. One day it split open, and I jumped out."}
+      - {speaker: 孙悟空, zh: 山上有很多猴子。有一条瀑布，谁敢跳进去，谁就做大王。, en: "There were lots of monkeys on the mountain. There was a waterfall, and whoever dared to jump through it would be king."}
+      - {speaker: 小猴, zh: 他真勇敢！瀑布后面有一个大洞，我们有家了！, en: "He's so brave! There's a big cave behind the waterfall. We have a home!"}
+      - {speaker: 旁白, zh: 这个洞叫水帘洞。石猴做了美猴王。, en: "The cave was called the Water Curtain Cave. The stone monkey became the Handsome Monkey King."}
+      - {speaker: 孙悟空, zh: 后来我想学不老的本领，就去找须菩提祖师。, en: "Later I wanted to learn how never to grow old, so I went to find Master Subhuti."}
+      - {speaker: 须菩提祖师, zh: 我给你起个名字，叫孙悟空。你要守规矩，不要给别人看你的本领。, en: "I'll give you a name: Sun Wukong. You must keep the rules and not show off your powers to others."}
+      - {speaker: 孙悟空, zh: 我学会了七十二变，还有筋斗云，一个跟头就是十万八千里。, en: "I learned the seventy-two transformations, and the somersault cloud. One somersault carries me a hundred and eight thousand li."}
+  - id: dragon-palace
+    stage: 8
+    title: 龙宫得宝 The Treasure of the Dragon Palace (novel, chapters 2-3)
+    source: novel, chapters 2-3
+    lines:
+      - {speaker: 孙悟空, zh: 我回到花果山，小猴们哭着说，有个妖怪常常来欺负他们。, en: "When I got back to Flower-Fruit Mountain, the little monkeys told me, crying, that a demon kept coming to bully them."}
+      - {speaker: 孙悟空, zh: 那是混世魔王。我飞到他的洞里，拿了他自己的刀，把他打死了。, en: "That was the Havoc Monster. I flew to his cave, took his own blade and killed him."}
+      - {speaker: 唐僧, zh: 你的兵器不是刀，是一根铁棒。它是从哪里来的？, en: "Your weapon isn't a blade, it's an iron staff. Where did it come from?"}
+      - {speaker: 孙悟空, zh: 我去东海龙宫，找龙王要兵器。他给我的刀和枪都太轻了。, en: "I went to the Dragon Palace of the Eastern Sea and asked the Dragon King for a weapon. The swords and spears he gave me were all too light."}
+      - {speaker: 东海龙王, zh: 我们海底有一根定海神针，一万三千五百斤重，谁也拿不动。, en: "At the bottom of our sea there's a pillar that holds the sea steady. It weighs thirteen thousand five hundred jin. No one can lift it."}
+      - {speaker: 孙悟空, zh: 我一拿，它就变小了。它能大能小，叫如意金箍棒。, en: "The moment I picked it up, it shrank. It can grow big or small. It's called the As-You-Will Gold-Banded Staff."}
+      - {speaker: 旁白, zh: 平时，悟空把金箍棒变得像针一样小，放在耳朵里。, en: "Most of the time Wukong shrinks the staff as small as a needle and keeps it in his ear."}
+  - id: great-sage
+    stage: 8
+    title: 弼马温与齐天大圣 Keeper of the Horses, Great Sage (novel, chapters 4-5)
+    source: novel, chapters 4-5
+    lines:
+      - {speaker: 玉帝, zh: 这只猴子本领太大了。太白金星，你去请他上天，给他一个官做。, en: "This monkey is far too powerful. Venus, go and invite him up to Heaven and give him a post."}
+      - {speaker: 太白金星, zh: 美猴王，玉帝请你上天做官。, en: "Handsome Monkey King, the Jade Emperor invites you up to Heaven to take a post."}
+      - {speaker: 孙悟空, zh: 他们让我做弼马温，每天养马。后来我才知道，这是一个最小的官！, en: "They made me Keeper of the Horses, looking after horses every day. Only later did I find out it was the lowest post of all!"}
+      - {speaker: 孙悟空, zh: 我很生气，就回到花果山，自己叫齐天大圣。, en: "I was furious, so I went back to Flower-Fruit Mountain and called myself the Great Sage Equal to Heaven."}
+      - {speaker: 太白金星, zh: 玉帝同意了，你就做齐天大圣吧。请你去看管蟠桃园。, en: "The Jade Emperor agrees: be the Great Sage Equal to Heaven. Please look after the Garden of Immortal Peaches."}
+      - {speaker: 孙悟空, zh: 可是蟠桃会没有请我。我吃了桃子，喝了酒，又吃了太上老君的金丹。, en: "But they didn't invite me to the Peach Banquet. So I ate the peaches, drank the wine, and ate Laozi's golden elixir too."}
+      - {speaker: 唐僧, zh: 悟空，这不是好事情。, en: "Wukong, that was not a good thing to do."}
+  - id: buddhas-palm
+    stage: 8
+    title: 如来的手掌 The Buddha's Palm (novel, chapters 6-7)
+    source: novel, chapters 6-7
+    lines:
+      - {speaker: 孙悟空, zh: 天兵天将都打不过我。最后二郎神来了，我们打了很久，他的狗咬了我一口。, en: "None of Heaven's soldiers could beat me. In the end Erlang Shen came. We fought for a long time, and his dog bit me."}
+      - {speaker: 孙悟空, zh: 他们把我放进太上老君的八卦炉里，烧了四十九天。, en: "They put me in Laozi's Eight Trigrams Furnace and burned me for forty-nine days."}
+      - {speaker: 孙悟空, zh: 我没有死，眼睛却被烟熏红了，变成了火眼金睛，能看出妖怪。, en: "I didn't die, but the smoke turned my eyes red: fiery golden eyes that can see through demons."}
+      - {speaker: 如来佛祖, zh: 你如果能跳出我的右手，玉帝的位子就给你。, en: "If you can jump out of my right hand, the Jade Emperor's throne is yours."}
+      - {speaker: 孙悟空, zh: 我翻了一个筋斗，飞到五根大柱子前面，写了几个字。, en: "I did one somersault, flew to five great pillars, and wrote a few words."}
+      - {speaker: 孙悟空, zh: 齐天大圣，到此一游。, en: "The Great Sage Equal to Heaven was here.", original: true}
+      - {speaker: 旁白, zh: 原来那五根柱子是如来的手指。如来把手一翻，变成五行山，把悟空压在下面。, en: "The five pillars were really the Buddha's fingers. The Buddha turned his hand over, and it became Five Elements Mountain, pinning Wukong beneath it."}
+      - {speaker: 唐僧, zh: 所以你等了五百年。以后，我们一起去西天吧。, en: "So you waited five hundred years. From now on, let's go west together."}
   - id: novel-14
     stage: 8
     title: 第十四回 心猿归正 Wukong Freed (novel)
