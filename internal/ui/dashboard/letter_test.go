@@ -7,12 +7,13 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/camp"
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
 )
 
 func TestComposeLetter(t *testing.T) {
-	zh, en := composeLetter(40, 90, []string{"已", "未"}, 12, 3)
+	zh, en := camp.ComposeLetter(40, 90, []string{"已", "未"}, 12, 3)
 	for _, want := range []string{"上个星期你复习了40次", "百分之90", "已、未", "答错了3个词", "有12个词", "南海 观音"} {
 		if !strings.Contains(zh, want) {
 			t.Errorf("letter lacks %q:\n%s", want, zh)
@@ -21,7 +22,7 @@ func TestComposeLetter(t *testing.T) {
 	if strings.Count(zh, "\n") != strings.Count(en, "\n") {
 		t.Errorf("Chinese and English have different lines:\n%s\n%s", zh, en)
 	}
-	if zh, _ := composeLetter(10, 50, nil, 0, 0); strings.Contains(zh, "常常忘记") || strings.Contains(zh, "心魔") || !strings.Contains(zh, "慢慢来") {
+	if zh, _ := camp.ComposeLetter(10, 50, nil, 0, 0); strings.Contains(zh, "常常忘记") || strings.Contains(zh, "心魔") || !strings.Contains(zh, "慢慢来") {
 		t.Errorf("a weak week with nothing hard or missed:\n%s", zh)
 	}
 }

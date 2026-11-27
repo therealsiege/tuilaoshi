@@ -10,6 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/therealsiege/tuilaoshi/internal/camp"
 	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -45,7 +46,7 @@ func busyWeek(t *testing.T) Model {
 
 func TestGatherFactsReadsTheWeek(t *testing.T) {
 	m := busyWeek(t)
-	f, err := gatherFacts(m.store, gazetteMonday)
+	f, err := camp.GatherFacts(m.store, gazetteMonday)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,13 +55,13 @@ func TestGatherFactsReadsTheWeek(t *testing.T) {
 		len(f.Haggles) != 1 || !strings.Contains(f.Haggles[0], "25个铜钱") || !strings.Contains(f.Diary, "八戒") {
 		t.Errorf("facts %+v", f)
 	}
-	if p := f.prompt("2026-11-30"); !strings.Contains(p, "宝象国") || !strings.Contains(p, "第2难") || strings.Contains(p, "退烧") {
+	if p := f.Prompt("2026-11-30"); !strings.Contains(p, "宝象国") || !strings.Contains(p, "第2难") || strings.Contains(p, "退烧") {
 		t.Errorf("prompt:\n%s", p)
 	}
 }
 
 func TestComposeGazette(t *testing.T) {
-	zh, en := composeGazette(weekFacts{Kingdoms: []string{"宝象国"}, Cleared: []string{"第2难出城逢虎"}, Errands: []string{"订房"}, Diary: "累了。"})
+	zh, en := camp.ComposeGazette(camp.Facts{Kingdoms: []string{"宝象国"}, Cleared: []string{"第2难出城逢虎"}, Errands: []string{"订房"}, Diary: "累了。"})
 	for _, want := range []string{"本报讯", "1国在通关文牒上盖了印：宝象国", "渡过了1难：第2难出城逢虎", "办了1件事：订房", "「累了。」", "本报将继续报道"} {
 		if !strings.Contains(zh, want) {
 			t.Errorf("issue lacks %q:\n%s", want, zh)
@@ -69,7 +70,7 @@ func TestComposeGazette(t *testing.T) {
 	if strings.Count(zh, "\n") != strings.Count(en, "\n") {
 		t.Errorf("Chinese and English have different lines:\n%s\n%s", zh, en)
 	}
-	if zh, _ := composeGazette(weekFacts{}); !strings.Contains(zh, "还没有盖过印") || !strings.Contains(zh, "平静") || strings.Contains(zh, "日记") {
+	if zh, _ := camp.ComposeGazette(camp.Facts{}); !strings.Contains(zh, "还没有盖过印") || !strings.Contains(zh, "平静") || strings.Contains(zh, "日记") {
 		t.Errorf("a quiet week:\n%s", zh)
 	}
 }

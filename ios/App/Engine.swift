@@ -153,6 +153,28 @@ final class Engine {
         s.apply()
     }
 
+    /// Guanyin's latest letter, or nil before a week with reviews.
+    func letter() async throws -> Writing? { try await decode(Writing?.self) { h, e in h.core.letter(e) } }
+
+    /// This week's court gazette.
+    func gazette() async throws -> Writing? { try await decode(Writing?.self) { h, e in h.core.gazette(e) } }
+
+    /// The travel diary, newest first.
+    func diary() async throws -> [DiaryEntry] { try await decode([DiaryEntry].self) { h, e in h.core.diary(e) } }
+
+    /// My progress.
+    func progress() async throws -> ProgressReport { try await decode(ProgressReport.self) { h, e in h.core.progress(e) } }
+
+    /// Calls a JSON-returning engine method off the main thread and decodes it.
+    private func decode<T: Decodable & Sendable>(_: T.Type, _ get: @Sendable @escaping (CoreHandle, NSErrorPointer) -> String) async throws -> T {
+        try await call { h in
+            var error: NSError?
+            let json = get(h, &error)
+            if let error { throw error }
+            return try JSONDecoder().decode(T.self, from: Data(json.utf8))
+        }
+    }
+
     /// Camp's Today panel.
     func today() async throws -> Today {
         try await call { h in

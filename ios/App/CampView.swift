@@ -22,6 +22,7 @@ struct CampView: View {
                         if let stage = camp.stage { StageCard(stage: stage) }
                         party(camp)
                         doors
+                        papers
                         ProgressSection()
                     }
                     .padding()
@@ -44,6 +45,7 @@ struct CampView: View {
                     .accessibilityLabel("Settings")
             }
         }
+        .navigationDestination(for: Paper.self) { PaperView(paper: $0) }
         .navigationDestination(for: Door.self) { door in
             switch door {
             case .study: StudyView()
@@ -87,6 +89,22 @@ struct CampView: View {
             Text(camp.party.joined(separator: " · ")).font(.body)
             Text("\(count(camp.learned, "character")) learned, \(camp.mastered) mastered")
                 .font(.footnote).foregroundStyle(.secondary)
+        }
+    }
+
+    private var papers: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("营火边 By the fire").font(Theme.heading(20))
+            ForEach(Paper.allCases) { p in
+                NavigationLink(value: p) {
+                    Label(p.title, systemImage: p.symbol)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                        .background(.background.secondary, in: .rect(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("paper.\(p.rawValue)")
+            }
         }
     }
 

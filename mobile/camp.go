@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"time"
 
+	campnews "github.com/therealsiege/tuilaoshi/internal/camp"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -130,4 +131,125 @@ func (c *Core) SaveSettings(settingsJSON string) error {
 	saved, err := c.store.Settings() // normalised
 	c.store.Scheduler = saved.Scheduler
 	return err
+}
+
+// Letter is Guanyin's latest letter as JSON (week, text, english), writing
+// this week's first if it is due; "null" before any week with reviews.
+func (c *Core) Letter() (string, error) {
+	l, err := campnews.LatestLetter(c.store, time.Now())
+	if err != nil {
+		return "", err
+	}
+	if l == nil {
+		return "null", nil
+	}
+	data, err := json.Marshal(map[string]string{"week": l.Week, "text": l.Text, "english": l.English})
+	return string(data), err
+}
+
+// Gazette is this week's court gazette as JSON (week, text, english,
+// byHand). Until the phone reaches Claude through the game's server, the
+// court's clerk sets it from the template, as on a Mac without a key.
+func (c *Core) Gazette() (string, error) {
+	now := time.Now()
+	g, err := campnews.WeekGazette(c.store, now)
+	if err != nil {
+		return "", err
+	}
+	if g == nil {
+		clerk, _, err := campnews.ClerkGazette(c.store, now)
+		if err != nil {
+			return "", err
+		}
+		if err := c.store.SaveGazette(clerk); err != nil {
+			return "", err
+		}
+		g = &clerk
+	}
+	data, err := json.Marshal(map[string]any{"week": g.Week, "text": g.Text, "english": g.English, "byHand": g.ByHand})
+	return string(data), err
+}
+
+// Diary is the travel diary's entries as JSON, newest first. Writing an
+// entry needs Claude to grade it, so on the phone it waits for the server.
+func (c *Core) Diary() (string, error) {
+	entries, err := c.store.Diary()
+	if err != nil {
+		return "", err
+	}
+	type entry struct {
+		Date     string `json:"date"`
+		Day      int    `json:"day"`
+		Text     string `json:"text"`
+		Score    int    `json:"score"`
+		Feedback string `json:"feedback,omitempty"`
+	}
+	out := []entry{}
+	for i := len(entries) - 1; i >= 0; i-- {
+		e := entries[i]
+		out = append(out, entry{e.Date, e.Day, e.Text, e.Score, e.Feedback})
+	}
+	data, err := json.Marshal(out)
+	return string(data), err
+}
+
+// Progress is My progress as JSON: the last seven days' reviews, the
+// reviews coming in the next seven, the hardest words, and the wiki's size.
+func (c *Core) Progress() (string, error) {
+	now := time.Now()
+	type day struct {
+		Date     string `json:"date"`
+		Reviewed int    `json:"reviewed"`
+		Correct  int    `json:"correct"`
+	}
+	type hard struct {
+		Chinese string `json:"chinese"`
+		Pinyin  string `json:"pinyin"`
+		English string `json:"english"`
+		Lapses  int    `json:"lapses"`
+	}
+	out := struct {
+		Week       []day  `json:"week"`
+		Ahead      []int  `json:"ahead"`
+		Hard       []hard `json:"hard"`
+		Streak     int    `json:"streak"`
+		Characters int    `json:"characters"`
+		Words      int    `json:"words"`
+		Grammar    int    `json:"grammar"`
+		Readings   int    `json:"readings"`
+	}{Week: []day{}, Hard: []hard{}, Streak: c.store.Streak()}
+	for _, d := range c.store.WeekStats() {
+		out.Week = append(out.Week, day{d.Date, d.CardsReviewed, d.Correct})
+	}
+	ahead, err := c.store.DueForecast(now, 7)
+	if err != nil {
+		return "", err
+	}
+	out.Ahead = ahead
+	hw, err := c.store.HardWords()
+	if err != nil {
+		return "", err
+	}
+	if len(hw) > 0 {
+		cards, err := c.store.DrillableCards()
+		if err != nil {
+			return "", err
+		}
+		byID := map[string]int{}
+		for i, cd := range cards {
+			byID[cd.ID] = i
+		}
+		for _, h := range hw {
+			if i, ok := byID[h.CardID]; ok && len(out.Hard) < 10 {
+				out.Hard = append(out.Hard, hard{cards[i].Chinese, cards[i].Pinyin, cards[i].English, h.Lapses})
+			}
+		}
+	}
+	st, err := c.store.Stats()
+	if err != nil {
+		return "", err
+	}
+	out.Characters, out.Words, out.Grammar, out.Readings = st.CharacterPages, st.VocabPages, st.GrammarPages, st.ReadingPages
+	data, err := json.Marshal(out)
+	return string(data), err
 }

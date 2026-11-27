@@ -113,6 +113,26 @@ final class StudyUITests: XCTestCase {
         }
     }
 
+    /// Every camp screen opens: the letter (none yet for a new pilgrim),
+    /// the gazette set by the clerk, the diary, and My progress.
+    func testCampsPapersOpen() throws {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-fresh-progress"]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["camp.due"].waitForExistence(timeout: 30))
+        let checks: [(String, String)] = [("letter", "Nothing yet"), ("gazette", "Week of"), ("diary", "Writing an entry"), ("progress", "The last seven days")]
+        for (paper, expect) in checks {
+            let link = app.buttons["paper.\(paper)"]
+            for _ in 0..<6 where !link.isHittable { app.swipeUp() }
+            link.tap()
+            let found = app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", expect)).firstMatch
+            XCTAssertTrue(found.waitForExistence(timeout: 10), "\(paper) should show \(expect)")
+            shot(app, paper)
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+        }
+    }
+
     private func shot(_ app: XCUIApplication, _ name: String) {
         let a = XCTAttachment(screenshot: app.screenshot())
         a.name = name
