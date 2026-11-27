@@ -62,11 +62,22 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.therealsiege.tuilaoshi.tests
         GENERATE_INFOPLIST_FILE: YES
+  TuiLaoShiUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: TuiLaoShi
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.therealsiege.tuilaoshi.uitests
+        GENERATE_INFOPLIST_FILE: YES
 schemes:
   TuiLaoShi:
     build:
       targets:
         TuiLaoShi: all
         TuiLaoShiTests: [test]
+        TuiLaoShiUITests: [test]
     test:
-      targets: [TuiLaoShiTests]
+      targets: [TuiLaoShiTests, TuiLaoShiUITests]

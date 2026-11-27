@@ -52,12 +52,20 @@ type card struct {
 	Examples []string `json:"examples,omitempty"`
 	Interval int      `json:"interval"`
 	Next     string   `json:"next,omitempty"`
+	Cloze    string   `json:"cloze,omitempty"` // an example with the word blanked, for sentence mode
+	Sentence string   `json:"sentence,omitempty"`
 }
 
 func toCard(c model.Card) card {
 	out := card{ID: c.ID, Chinese: c.Chinese, Pinyin: c.Pinyin, English: c.English, Examples: c.Examples, Interval: c.ReviewInterval}
 	if !c.NextReview.IsZero() {
 		out.Next = wiki.FormatDate(c.NextReview)
+	}
+	for _, ex := range c.Examples {
+		if cloze := wiki.Cloze(ex, c.Chinese); cloze != "" {
+			out.Cloze, out.Sentence = cloze, ex
+			break
+		}
 	}
 	return out
 }
@@ -102,6 +110,38 @@ func (c *Core) Review(cardID string, rating int) (string, error) {
 		}
 	}
 	return "", fmt.Errorf("no card %q", cardID)
+}
+
+// answer is one answer in a session, as the app reports it.
+type answer struct {
+	ID      string `json:"id"`
+	Correct bool   `json:"correct"`
+	Rating  int    `json:"rating"`
+}
+
+// FinishSession records a study session (kind "review" or "drill") from
+// its start time (Unix seconds) and its answers as JSON, so the streak,
+// the day's stats and copper count it. Each answer's review is already
+// saved by Review; this only writes the session. No answers, no session.
+func (c *Core) FinishSession(kind string, started int64, answersJSON string) error {
+	var answers []answer
+	if err := json.Unmarshal([]byte(answersJSON), &answers); err != nil {
+		return fmt.Errorf("answers: %w", err)
+	}
+	if len(answers) == 0 {
+		return nil
+	}
+	if kind != "review" && kind != "drill" {
+		return fmt.Errorf("session kind %q is not review or drill", kind)
+	}
+	sess := model.Session{Type: kind, StartedAt: time.Unix(started, 0), EndedAt: time.Now(), CardsTotal: len(answers)}
+	for _, a := range answers {
+		if a.Correct {
+			sess.CardsCorrect++
+		}
+		sess.Items = append(sess.Items, model.SessionItem{CardID: a.ID, Correct: a.Correct, Difficulty: model.DrillDifficulty(a.Rating)})
+	}
+	return c.store.WriteSession(sess)
 }
 
 // Today is a few things the journey's embedded content says about today,

@@ -29,7 +29,12 @@ struct CampView: View {
         }
         .navigationTitle("营地 Camp")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(for: Door.self) { DoorView(door: $0) }
+        .navigationDestination(for: Door.self) { door in
+            switch door {
+            case .study: StudyView()
+            default: DoorView(door: door)
+            }
+        }
     }
 
     private func header(_ camp: Camp) -> some View {
@@ -42,8 +47,8 @@ struct CampView: View {
     private func numbers(_ camp: Camp) -> some View {
         Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 12) {
             GridRow {
-                Number(value: "\(camp.due)", label: "Cards due", tint: Theme.cinnabar)
-                Number(value: "\(camp.streak)", label: "Day streak", tint: Theme.ochre)
+                Number(value: "\(camp.due)", label: "Cards due", tint: Theme.cinnabar, id: "camp.due")
+                Number(value: "\(camp.streak)", label: "Day streak", tint: Theme.ochre, id: "camp.streak")
             }
             GridRow {
                 Number(value: "\(camp.tongqian)", label: "铜钱 copper", tint: Theme.slate)
@@ -79,6 +84,7 @@ struct CampView: View {
                     .background(.background.secondary, in: .rect(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("door.\(door.rawValue)")
             }
         }
     }
@@ -130,10 +136,12 @@ private struct Number: View {
     let value: String
     let label: String
     let tint: Color
+    var id = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(value).font(.title.bold().monospacedDigit()).foregroundStyle(tint)
+                .accessibilityIdentifier(id)
             Text(label).font(.footnote).foregroundStyle(.secondary).lineLimit(2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

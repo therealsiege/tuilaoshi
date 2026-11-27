@@ -166,3 +166,27 @@ func TestProgressSyncsBetweenPhoneAndMac(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// A finished session counts toward the streak; an empty one writes nothing.
+func TestFinishSessionCountsTowardTheStreak(t *testing.T) {
+	c, err := Open(fixtureWiki(t), t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close() //nolint:errcheck // test
+	if err := c.FinishSession("review", time.Now().Add(-time.Minute).Unix(), "[]"); err != nil {
+		t.Fatal(err)
+	}
+	if c.store.Streak() != 0 {
+		t.Fatal("an empty session shouldn't count")
+	}
+	if err := c.FinishSession("review", time.Now().Add(-time.Minute).Unix(), `[{"id":"characters/shu1.md","correct":true,"rating":2}]`); err != nil {
+		t.Fatal(err)
+	}
+	if c.store.Streak() != 1 {
+		t.Errorf("streak = %d after a session today, want 1", c.store.Streak())
+	}
+	if err := c.FinishSession("battle", 0, `[{"id":"x","correct":true}]`); err == nil {
+		t.Error("an unknown session kind should be refused")
+	}
+}

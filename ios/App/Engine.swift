@@ -72,6 +72,10 @@ final class Engine {
             return
         }
         let progress = URL.applicationSupportDirectory
+        // UI tests start from a new pilgrim's progress.
+        if ProcessInfo.processInfo.arguments.contains("-fresh-progress") {
+            try? FileManager.default.removeItem(at: progress)
+        }
         do {
             handle = try await Self.open(wiki: wiki, progress: progress)
             await syncNow()
@@ -105,6 +109,43 @@ final class Engine {
         } catch {
             sync = .failed("Couldn't sync: \(error.localizedDescription)")
         }
+    }
+
+    /// Up to limit cards due now.
+    func dueCards(limit: Int) async throws -> [Card] {
+        guard let handle else { throw CocoaError(.fileNoSuchFile) }
+        return try await Self.dueCards(handle, limit: limit)
+    }
+
+    /// Saves an answer: rating 0 again, 1 hard, 2 good, 3 easy.
+    func review(_ id: String, rating: Int) async throws {
+        guard let handle else { throw CocoaError(.fileNoSuchFile) }
+        try await Self.review(handle, id: id, rating: rating)
+    }
+
+    /// Records a finished study session for the streak and the day's stats.
+    func finishSession(kind: String, started: Date, answers: [(id: String, correct: Bool, rating: Int)]) async throws {
+        guard let handle else { throw CocoaError(.fileNoSuchFile) }
+        let list = answers.map { ["id": $0.id, "correct": $0.correct, "rating": $0.rating] as [String: Any] }
+        let json = String(decoding: try JSONSerialization.data(withJSONObject: list), as: UTF8.self)
+        try await Self.finish(handle, kind: kind, started: Int64(started.timeIntervalSince1970), answers: json)
+    }
+
+    nonisolated static func dueCards(_ handle: CoreHandle, limit: Int) async throws -> [Card] {
+        var error: NSError?
+        let json = handle.core.dueCards(limit, error: &error)
+        if let error { throw error }
+        return try JSONDecoder().decode([Card].self, from: Data(json.utf8))
+    }
+
+    nonisolated static func review(_ handle: CoreHandle, id: String, rating: Int) async throws {
+        var error: NSError?
+        _ = handle.core.review(id, rating: rating, error: &error)
+        if let error { throw error }
+    }
+
+    nonisolated static func finish(_ handle: CoreHandle, kind: String, started: Int64, answers: String) async throws {
+        try handle.core.finishSession(kind, started: started, answersJSON: answers)
     }
 
     /// Writes the progress as readable files into the app's Documents
