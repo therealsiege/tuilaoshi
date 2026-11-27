@@ -78,6 +78,16 @@ kinds:
       each yellow square is a stone pailou archway across the road (a gate the pilgrims must
       pass); the red square is a small village of a few Tang houses; a blue square is
       {crossing}.
+  scene:
+    ratio: "16:9"
+    frame: >-
+      Picture: a wide cinematic battle cut scene, one still from an animated film of the
+      novel, at the moment of highest drama. Dynamic action composition: one clear focal clash
+      where the blows meet, set on a strong diagonal; every figure a readable silhouette
+      against the background, with clear space between them; motion in the poses, cloth,
+      hair, dust and debris; energy effects (sweeping arcs behind weapons, sparks, shockwaves,
+      and the magic fire, wind or light the scene names) that lead the eye to the clash.
+      Fierce but never gory: no blood, wounds or severed parts.
   town:
     ratio: "9:16"
     frame: >-
@@ -160,7 +170,8 @@ characters:
     eyes, and a shock of bristling red hair and beard. Around his neck hangs a string of nine
     small skulls from his years as a river ogre. He wears a plain monk's robe and carries
     the pilgrims' luggage on a shoulder pole, and his weapon, the precious demon-quelling
-    staff: a long staff of pale moon-tree wood wound with gold. Quiet and steady.
+    staff: a long, straight staff of pale moon-tree wood wound with gold, with no blade or spade
+    at either end. Quiet and steady.
   白龙马: >-
     Bai Longma, the White Dragon Horse: a dragon prince of the Western Sea turned into a
     horse, and it shows: a character, not an ordinary animal. A tall white horse with a proud,
@@ -188,16 +199,34 @@ characters:
   金角大王: >-
     The Gold Horn King: one of the two demon kings of Lotus Flower Cave on Flat-Top Mountain,
     really a furnace boy of Laozi come down to earth. A large demon with a single golden horn
-    on his brow, in a rich robe over light armour, holding the purple-gold gourd that sucks
-    in anyone who answers when their name is called, with a seven-star sword at his belt.
+    on his brow, in a rich robe over light armour, holding the seven-star sword. In the novel
+    the purple-gold gourd that sucks in anyone who answers when their name is called is
+    carried by his younger brother, the Silver Horn King.
+  银角大王: >-
+    The Silver Horn King: the younger of the two demon kings of Lotus Flower Cave on Flat-Top
+    Mountain, Laozi's other furnace boy. A large demon with a single silver horn on his brow
+    and a sly, clever face, in a rich robe over light armour. He carries the purple-gold red
+    gourd, a gourd of reddish gold about as long as a forearm with a stopper, which sucks in
+    anyone who answers when he calls their name, and keeps the mutton-fat jade vase and the
+    golden binding rope at his belt.
   红孩儿: >-
     Red Boy: a demon who looks like a boy of about seven with a red face and his hair in
     two small tufts, bare-chested in a red embroidered belly-cloth and trousers, holding the
-    fire-tipped spear. He breathes the Samadhi true fire from his mouth and nose. Son of the
+    fire-tipped spear. A human boy's body: no tail, horns or animal parts. He breathes the Samadhi true fire from his mouth and nose. Son of the
     Bull Demon King. Met among the burning peaks of Mount Hao.
+  铁扇公主: >-
+    Princess Iron Fan, the Rakshasi: the Bull Demon King's wife and Red Boy's mother, of
+    Palm-Leaf Cave on Emerald Cloud Mountain. A tall, handsome, fierce woman, fully clothed:
+    her hair wrapped in a flowered kerchief, an embroidered robe patterned with clouds, a
+    double sash of tiger sinew at her waist over an embroidered skirt, a pair of blue-steel
+    swords. Her treasure is the plantain fan: a huge fan shaped like one broad green-gold
+    plantain leaf on a short handle, taller than a man when full size; one wave of it
+    raises a hurricane or puts out the Flaming Mountain. Not a demon in looks, but proud
+    and angry.
   牛魔王: >-
     The Bull Demon King: a huge demon with the head of a black bull and great curved horns,
-    in black iron armour and a dark robe, wielding a mixed-iron cudgel. Once Sun Wukong's
+    in black iron armour and a dark robe, wielding a mixed-iron cudgel: a long, plain, straight
+    rod of iron, with no spikes, knobs or blade. Once Sun Wukong's
     sworn brother. Met near the Flaming Mountain.
   蜘蛛精: >-
     The Spider Spirits: seven sisters of Silk Cave, beautiful women in pale silk robes, fully
@@ -207,7 +236,111 @@ characters:
     The Golden-Winged Roc: a mighty bird demon with a hooked golden beak, fierce eyes and
     vast golden wings, in demon-king armour, holding a long painted halberd. One flap of his
     wings carries him ninety thousand li. Rules Lion Camel Ridge.
+  二郎神: >-
+    Erlang Shen, the Illustrious Sage True Lord Erlang, the Jade Emperor's nephew: a god, never
+    a demon. A handsome, upright young warrior with a calm, stern face, long ears, and a third
+    eye set upright in the middle of his forehead. He wears the three-mountain cap with
+    flying phoenix wings, a robe of pale goose-yellow over golden armour, a jade belt set with
+    treasures, gold-threaded boots, and a crescent-moon slingshot at his waist. His weapon is
+    the three-pointed, double-edged blade: a long polearm whose head has three prongs, the
+    middle one a long two-edged blade.
+  哮天犬: >-
+    The Howling Celestial Dog, Erlang Shen's hunting hound: a lean, deep-chested, long-legged
+    sighthound with a short dark grey-black coat, pricked ears and bared teeth, fast as a
+    thrown spear. An animal, not a demon: no armour, no clothes, no human posture.
   如来佛祖: >-
     The Buddha at Thunderclap Monastery on Vulture Peak: serene and enormous, seated in
     meditation on a lotus throne, robed in gold, with a halo of soft light, attended by
     disciples and bodhisattvas among clouds. Painted with reverence, never as a demon.
+
+# Battle cut scenes, from the novel: who strikes whom, with what, where, and
+# the moment of highest drama. Stage is the tribulation it plays at (its
+# region gives the place unless place says otherwise); cast are the
+# characters in it by Chinese name, each with a sheet above.
+scenes:
+  - id: baigu-strike
+    stage: 20
+    cast: [孙悟空, 白骨精, 唐僧]
+    text: >-
+      Chapter 27. On a lonely path over White Tiger Ridge, the White Bone Demon has come to the
+      pilgrims disguised as a lovely young village woman carrying a basket of food. Sun Wukong,
+      back from begging alms, sees through her with his fiery golden eyes and strikes: he
+      leaps in from the upper left with the Gold-Banded Staff raised high in both hands and
+      brings it down on her. At the instant of the blow the disguise splits like a shell and
+      her true form shows through it: a tall skeleton of pale white bone wreathed in cold grey
+      mist, tearing loose from the woman's body and fleeing upward, while the empty disguise
+      crumples and her basket spills on the path. Behind on the right, Tang Sanzang in his
+      crimson kasaya throws up his hands in horror, sure his disciple has killed an innocent
+      girl.
+  - id: erlang-havoc
+    stage: 8
+    cast: [孙悟空, 二郎神, 哮天犬]
+    place: >-
+      Flower-Fruit Mountain (花果山), Sun Wukong's home in the Eastern Continent: green peaks
+      above the sea, waterfalls and the Water-Curtain Cave, ringed by Heaven's armies
+      encamped on the clouds. This is a memory of the havoc in Heaven, before the pilgrimage.
+    text: >-
+      Chapter 6, the havoc in Heaven. When all of Heaven's armies have failed, the Illustrious
+      Sage Erlang comes to Flower-Fruit Mountain to fight the Monkey King. They clash in the
+      air above the peaks: Erlang, his third eye blazing, drives his three-pointed,
+      double-edged blade (a long polearm with a three-pronged head, never a sword) down at
+      Wukong, who parries with the Gold-Banded Staff. From the
+      clouds above, Laozi, an old Daoist sage in pale robes, drops his Diamond Snare, a solid
+      steel ring like a thick bracelet (not a rope or a loop of cord), which strikes Wukong on the crown of the head so he staggers, and at that
+      moment the Howling Celestial Dog leaps up and sinks its teeth into his calf. At this
+      point in the story Wukong has not yet joined the pilgrimage: no gold band on his head, no monk's
+      tunic, no tiger-skin kilt. He wears the phoenix-plumed cap of purple gold with two long
+      pheasant plumes, a coat of golden chain mail and cloud-walking boots, taken from the
+      Dragon Kings; his face, fur and staff are as always. Erlang's sworn brothers and
+      heavenly soldiers are small in the clouds behind.
+  - id: redboy-fire
+    stage: 31
+    cast: [红孩儿, 孙悟空]
+    text: >-
+      Chapter 41. Before the Fire Cloud Cave in Withered Pine Ravine on Mount Hao, little demons
+      have pushed out five small wooden carts and set them in the five-element pattern. Red
+      Boy stands among them, his fire-tipped spear in one hand; he has struck his own nose
+      twice with his fist, and the Samadhi true fire roars out of his mouth and nostrils in a
+      great red-gold torrent while flame and thick smoke pour from the five carts. The fire
+      engulfs Sun Wukong, who charges in from the left with the Gold-Banded Staff held before
+      his face and his other hand in the fire-warding sign, eyes streaming in the smoke.
+      Above, the Dragon Kings of the Four Seas pour rain from dark clouds, but ordinary water
+      only makes the Samadhi fire blaze higher, steam bursting where rain meets flame.
+  - id: bull-flaming
+    stage: 52
+    cast: [孙悟空, 牛魔王, 铁扇公主]
+    text: >-
+      Chapter 61. Near the Flaming Mountain, whose slopes burn for eight hundred li, Sun Wukong
+      and the Bull Demon King, once sworn brothers, fight in the air above the burning ridge:
+      Wukong's Gold-Banded Staff meets the Bull Demon King's mixed-iron cudgel in a burst of
+      sparks and a shockwave through the smoke, the huge bull-headed demon bearing down from
+      the right, Wukong driving up from the left. Below them at the mouth of Palm-Leaf Cave,
+      on a green cliff at the edge of the fire, Princess Iron Fan stands with the great
+      plantain fan raised in both hands, the treasure they are fighting over, the only thing
+      that can put out the mountain.
+  - id: gourd-pingding
+    stage: 25
+    cast: [银角大王, 金角大王, 孙悟空]
+    text: >-
+      Chapters 34-35, outside Lotus Flower Cave on Flat-Top Mountain. The demon kings know that
+      the purple-gold red gourd sucks in anyone who answers when their name is called. Sun
+      Wukong has come to challenge them under a false name, and in the novel it is the Silver
+      Horn King who holds the gourd: he stands on a rock with the gourd held mouth-down toward
+      Wukong and calls his name; Wukong answers, and a howling whirlwind bursts from the
+      gourd's mouth and drags him through the air toward it, his body stretching into a streak
+      of golden light, his staff flung out of his hands. The Gold Horn King, his elder
+      brother, stands at his shoulder with the seven-star sword raised, laughing. Small
+      demons with plain banners and spears crowd the cave mouth behind: a dark, rough cave
+      opening in the cliff, with no gate, archway, plaque or signboard.
+  - id: roc-lion-camel
+    stage: 64
+    cast: [金翅大鹏, 孙悟空, 猪八戒, 沙悟净, 白龙马, 唐僧]
+    text: >-
+      Chapters 75-77, before the demon city of Lion-Camel Ridge, its walls grim and piled with
+      bones. The Golden-Winged Roc swoops down out of the sky, his vast golden wings blotting
+      out the sun, his long painted halberd thrust forward. All four disciples meet him
+      together: Sun Wukong leaps up into the air to meet him, staff against halberd at the
+      centre of the picture; Zhu Bajie swings his rake (exactly nine long iron teeth in one row) up at the Roc from the
+      left; Sha Wujing thrusts his demon-quelling staff (a plain straight staff, no blade or spade) from the right; and behind them the
+      White Dragon Horse rears up to shield Tang Sanzang, who sits on his back clutching his
+      prayer beads. Wind from the Roc's wings tears at their robes and flattens the grass.

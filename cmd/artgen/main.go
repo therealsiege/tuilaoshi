@@ -5,6 +5,7 @@
 //	artgen -kind portrait -only 孙悟空 -print   show the prompt, paint nothing
 //	artgen -kind map -only baihu                paint White Tiger Ridge from its tile map
 //	artgen -kind vista                          paint every region's title card
+//	artgen -kind scene -only baigu-strike       paint one battle cut scene
 //
 // Pictures go to OUT/DIRECTION/KIND/NAME.png with the prompt beside them as
 // NAME.txt; existing pictures are kept unless -force. A character with an
@@ -30,12 +31,14 @@ const castNote = "The attached pictures, in order, are the approved designs of %
 
 const peerNote = "The other attached pictures are approved portraits of other characters, for style only: match their painting style, level of realism, adult proportions, lighting and framing, but do not copy their faces or costumes."
 
+const keepNote = "The attached pictures, in order, are the approved designs of %s. Keep each one's face, build, colours and weapon exactly the same, and their costume too unless the scene says what they wear at this point in the story; change only the pose, place and light."
+
 const refNote = "The attached picture is the approved design of this character. Keep their face, build, costume, colours and weapon exactly the same; change only the pose, place and light this prompt asks for."
 
 func main() {
 	home, err := os.UserHomeDir()
 	check(err)
-	kind := flag.String("kind", "", "portrait, vista, map or town")
+	kind := flag.String("kind", "", "portrait, vista, map, town or scene")
 	only := flag.String("only", "", "comma-separated names or ids (default: every one of the kind)")
 	direction := flag.String("direction", "", "real, clean or blend (default: the bible's)")
 	dry := flag.Bool("print", false, "print the prompts and paint nothing")
@@ -147,6 +150,16 @@ func main() {
 		}
 		if len(shown) > 0 {
 			prompt += "\n\n" + fmt.Sprintf(castNote, strings.Join(shown, ", "))
+		}
+		var kept []string
+		for _, f := range j.Keep {
+			if ref, err := os.ReadFile(filepath.Join(*out, "refs", f.Name+".png")); err == nil {
+				kept = append(kept, f.English)
+				refs = append(refs, ref)
+			}
+		}
+		if len(kept) > 0 {
+			prompt += "\n\n" + fmt.Sprintf(keepNote, strings.Join(kept, ", "))
 		}
 		start := time.Now()
 		img, err := pt.paint(prompt, j.Ratio, refs)

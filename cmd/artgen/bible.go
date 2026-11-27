@@ -27,6 +27,17 @@ type Bible struct {
 	Crossings  map[string]string `yaml:"crossings"`
 	Party      map[string]string `yaml:"party"`
 	Characters map[string]string `yaml:"characters"`
+	Scenes     []Scene           `yaml:"scenes"`
+}
+
+// Scene is one battle cut scene: the tribulation it plays at, who is in it
+// by Chinese name, and what happens, from the novel.
+type Scene struct {
+	ID    string   `yaml:"id"`
+	Stage int      `yaml:"stage"`
+	Cast  []string `yaml:"cast"`
+	Place string   `yaml:"place"` // only when it happens away from the stage's region, as a backstory does
+	Text  string   `yaml:"text"`
 }
 
 // Kind is one kind of picture: its aspect ratio and framing.
@@ -49,8 +60,12 @@ type Job struct {
 	Subject                   string              // the character a ref picture is kept for, if any
 	Cast                      []journey.Companion // companions shown small, whose approved pictures are attached
 	Peers                     []string            // characters whose approved pictures set the style for this one
+	Keep                      []figure            // characters in a scene, whose approved pictures are attached and kept exactly
 	Layout                    *journey.RegionMap
 }
+
+// figure is a character by Chinese and English name.
+type figure struct{ Name, English string }
 
 // composer builds prompts from the bible and the game's content.
 type composer struct {
@@ -227,6 +242,49 @@ func (p composer) town(id string) (Job, error) {
 	return Job{}, fmt.Errorf("no town %s", id)
 }
 
+// english is a character's English name from the game's content, else
+// their Chinese name.
+func (p composer) english(name string) string {
+	for _, c := range p.c.Companions {
+		if c.Name == name {
+			return c.English
+		}
+	}
+	for _, e := range p.c.Bestiary {
+		if e.Name == name {
+			return e.English
+		}
+	}
+	return name
+}
+
+func (p composer) scene(id string) (Job, error) {
+	for _, s := range p.b.Scenes {
+		if s.ID != id {
+			continue
+		}
+		k := p.b.Kinds["scene"]
+		place := p.place(p.regionAt(s.Stage))
+		if s.Place != "" {
+			place = "Place: " + strings.TrimSpace(s.Place)
+		}
+		var sheets []string
+		var keep []figure
+		for _, n := range s.Cast {
+			sheet, ok := p.b.Characters[n]
+			if !ok {
+				return Job{}, fmt.Errorf("scene %s: no character sheet for %s", id, n)
+			}
+			sheets = append(sheets, "- "+strings.TrimSpace(sheet))
+			keep = append(keep, figure{n, p.english(n)})
+		}
+		cast := "Who is in it, and how they look:\n" + strings.Join(sheets, "\n")
+		return Job{Kind: "scene", Name: s.ID, Ratio: k.Ratio, Keep: keep,
+			Prompt: p.join(k.Frame, "Scene: "+strings.TrimSpace(s.Text), cast, place, p.b.World, p.style(), p.b.Never)}, nil
+	}
+	return Job{}, fmt.Errorf("no scene %s", id)
+}
+
 // all lists every subject of a kind, in story order where there is one.
 func (p composer) all(kind string) []string {
 	var out []string
@@ -266,6 +324,10 @@ func (p composer) all(kind string) []string {
 		for _, t := range p.c.Towns {
 			out = append(out, t.ID)
 		}
+	case "scene":
+		for _, s := range p.b.Scenes {
+			out = append(out, s.ID)
+		}
 	}
 	return out
 }
@@ -280,6 +342,8 @@ func (p composer) job(kind, name string) (Job, error) {
 		return p.worldMap(name)
 	case "town":
 		return p.town(name)
+	case "scene":
+		return p.scene(name)
 	}
 	kinds := make([]string, 0, len(p.b.Kinds))
 	for k := range p.b.Kinds {

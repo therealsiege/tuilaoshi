@@ -108,3 +108,76 @@ func TestVistasPaintThePartyOfTheTime(t *testing.T) {
 		t.Errorf("White Tiger Ridge should show all the pilgrims:\n%s", late.Prompt)
 	}
 }
+
+// Every scene plays at a real tribulation, and everyone in it has a sheet,
+// so their design is fixed before they are painted in a fight.
+func TestEveryScenePlaysAtAStageWithItsCastDrawn(t *testing.T) {
+	p := testComposer(t)
+	if len(p.b.Scenes) == 0 {
+		t.Fatal("bible.yaml has no scenes")
+	}
+	stages := map[int]bool{}
+	for _, tr := range p.c.Tribulations {
+		stages[tr.Number] = true
+	}
+	ids := map[string]bool{}
+	for _, s := range p.b.Scenes {
+		if s.ID == "" || ids[s.ID] || strings.ContainsAny(s.ID, "/ ") {
+			t.Errorf("scene %q: ids must be unique and safe as file names", s.ID)
+		}
+		ids[s.ID] = true
+		if !stages[s.Stage] {
+			t.Errorf("scene %s: no tribulation %d", s.ID, s.Stage)
+		}
+		if len(s.Cast) == 0 || strings.TrimSpace(s.Text) == "" {
+			t.Errorf("scene %s: needs a cast and a description", s.ID)
+		}
+		for _, n := range s.Cast {
+			if p.b.Characters[n] == "" {
+				t.Errorf("scene %s: %s has no character sheet", s.ID, n)
+			}
+		}
+	}
+}
+
+// A scene's prompt carries its framing, story, cast sheets and place, and
+// keeps every one of its cast to their approved picture.
+func TestScenesComposeFromTheNovel(t *testing.T) {
+	p := testComposer(t)
+	j, err := p.job("scene", "baigu-strike")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if j.Ratio != "16:9" {
+		t.Errorf("scenes are 16:9, got %s", j.Ratio)
+	}
+	for _, must := range []string{p.b.Kinds["scene"].Frame, "skeleton", "White Tiger Ridge", "Tang Sanzang, the monk", "focal clash"} {
+		if !strings.Contains(j.Prompt, strings.TrimSpace(must)) {
+			t.Errorf("baigu-strike prompt is missing %q", must)
+		}
+	}
+	want := []figure{{"孙悟空", "Sun Wukong"}, {"白骨精", "White Bone Demon"}, {"唐僧", "Tang Sanzang"}}
+	if len(j.Keep) != len(want) {
+		t.Fatalf("keep %v, want %v", j.Keep, want)
+	}
+	for i := range want {
+		if j.Keep[i] != want[i] {
+			t.Errorf("keep[%d] = %v, want %v", i, j.Keep[i], want[i])
+		}
+	}
+	// A backstory names its own place instead of the stage's region.
+	e, err := p.job("scene", "erlang-havoc")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(e.Prompt, "Place: Flower-Fruit Mountain") || strings.Contains(e.Prompt, "Mountain of Two Frontiers") {
+		t.Errorf("erlang-havoc should be on Flower-Fruit Mountain:\n%s", e.Prompt)
+	}
+	if _, err := p.job("scene", "nowhere"); err == nil {
+		t.Error("an unknown scene should be an error")
+	}
+	p.b.Scenes = append(p.b.Scenes, Scene{ID: "stranger", Stage: 20, Cast: []string{"nobody"}, Text: "x"})
+	if _, err := p.job("scene", "stranger"); err == nil {
+		t.Error("a scene with someone who has no sheet should be an error")
+	}
+}
