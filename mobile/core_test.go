@@ -316,7 +316,10 @@ func TestSettingsKeepTheMacsOwnAndSync(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer c.Close() //nolint:errcheck // test
-	mac, _ := c.store.Settings()
+	mac, err := c.store.Settings()
+	if err != nil {
+		t.Fatal(err)
+	}
 	mac.Portraits = "small"
 	if err := c.store.SaveSettings(mac); err != nil {
 		t.Fatal(err)
@@ -324,7 +327,10 @@ func TestSettingsKeepTheMacsOwnAndSync(t *testing.T) {
 	if err := c.SaveSettings(`{"speech":false,"effects":true,"toneColours":true,"reviewChunk":30,"newWords":5,"difficulty":"gentler","scheduler":"fsrs"}`); err != nil {
 		t.Fatal(err)
 	}
-	got, _ := c.store.Settings()
+	got, err := c.store.Settings()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if got.Speech || got.ReviewChunk != 30 || got.Scheduler != "fsrs" || got.Portraits != "small" || c.store.Scheduler != "fsrs" {
 		t.Errorf("settings = %+v (store scheduler %q)", got, c.store.Scheduler)
 	}
