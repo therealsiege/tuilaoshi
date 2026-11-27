@@ -18,6 +18,53 @@ type Core struct {
 	store *wiki.Store
 }
 
+// Camp is the read model used by the iOS camp.  Keeping this payload in the
+// bridge means the Mac and iOS clients read the same progress store instead
+// of maintaining a second copy of the game rules in Swift.
+type Camp struct {
+	Today    json.RawMessage     `json:"today"`
+	Bounties []mobileBounty `json:"bounties"`
+	Coins    wiki.Wallet   `json:"coins"`
+	Letters  []wiki.Letter `json:"letters"`
+	Gazettes []wiki.Gazette `json:"gazettes"`
+	Diary    []wiki.DiaryEntry `json:"diary"`
+	Due      int `json:"due"`
+	Streak   int `json:"streak"`
+	XP       int `json:"xp"`
+}
+
+type mobileBounty struct {
+	Text string `json:"text"`
+	Target int `json:"target"`
+	Progress int `json:"progress"`
+	Done bool `json:"done"`
+}
+
+// Camp returns the shared camp/dashboard data and its linked screens' data.
+func (c *Core) Camp() (string, error) {
+	today, err := Today()
+	if err != nil { return "", err }
+	var b Camp
+	b.Today = json.RawMessage(today)
+	bounties, _, err := c.store.Bounties(time.Now()); if err != nil { return "", err }
+	for _, bounty := range bounties { b.Bounties = append(b.Bounties, mobileBounty{Text: bounty.Text, Target: bounty.Target, Progress: bounty.Have, Done: bounty.Done}) }
+	b.Coins, err = c.store.Wallet(); if err != nil { return "", err }
+	b.Letters, err = c.store.Letters(); if err != nil { return "", err }
+	b.Gazettes, err = c.store.Gazettes(); if err != nil { return "", err }
+	b.Diary, err = c.store.Diary(); if err != nil { return "", err }
+	b.Due, err = c.DueCount(); if err != nil { return "", err }
+	b.Streak = c.store.Streak()
+	b.XP = c.store.TotalXP()
+	data, err := json.Marshal(b)
+	return string(data), err
+}
+
+// Settings returns the preferences shared with the Mac progress store.
+func (c *Core) Settings() (string, error) {
+	set, err := c.store.Settings(); if err != nil { return "", err }
+	b, err := json.Marshal(set); return string(b), err
+}
+
 // Open opens the wiki in wikiDir (the app bundle's copy, read-only) with
 // its progress kept in progressDir (the app's own container).
 func Open(wikiDir, progressDir string) (*Core, error) {

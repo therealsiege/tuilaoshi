@@ -1,22 +1,21 @@
 import SwiftUI
 import TuiLaoShiCore
 
-/// The app's entry point. For now it shows that the Go engine runs on the
-/// phone: it opens the bundled wiki and counts the cards due.
 @main
 struct TuiLaoShiApp: App {
     var body: some Scene {
-        WindowGroup { CoreCheckView() }
+        WindowGroup { CampView() }
     }
 }
 
-struct CoreCheckView: View {
-    @State private var line = "Opening the wiki…"
+struct CampView: View {
+    @State private var line = "Opening camp…"
 
     var body: some View {
         VStack(spacing: 12) {
             Text("推老师").font(.largeTitle)
             Text(line).foregroundStyle(.secondary)
+            if line != "Opening camp…" { Text("Today · Bounties · Letter · Gazette · Diary · Progress · Settings").font(.footnote) }
         }
         .task { line = Self.check() }
     }
@@ -34,6 +33,9 @@ struct CoreCheckView: View {
         defer { try? core.close() }
         var due = 0
         do { try core.dueCount(&due) } catch { return "Couldn't count: \(error.localizedDescription)" }
-        return "\(due) cards due"
+        var campError: NSError?
+        let json = core.camp(&campError)
+        if let campError { return "Couldn't load camp: \(campError.localizedDescription)" }
+        return json
     }
 }
