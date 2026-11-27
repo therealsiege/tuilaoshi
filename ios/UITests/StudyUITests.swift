@@ -85,6 +85,30 @@ final class StudyUITests: XCTestCase {
         app.switches["Read Chinese aloud"].switches.firstMatch.tap()
     }
 
+    /// A reading opens, a tapped word shows its gloss, and it can become a
+    /// sentence card.
+    func testTappingAWordGlossesIt() throws {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-fresh-progress"]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["camp.due"].waitForExistence(timeout: 30))
+        app.buttons["door.read"].tap()
+        let first = app.cells.firstMatch
+        XCTAssertTrue(first.waitForExistence(timeout: 10), "there should be readings")
+        first.tap()
+        let word = app.buttons.matching(identifier: "word").element(boundBy: 2)
+        XCTAssertTrue(word.waitForExistence(timeout: 10))
+        word.tap()
+        XCTAssertTrue(app.buttons["I didn't know it"].waitForExistence(timeout: 5), "the gloss should open")
+        shot(app, "gloss")
+        let card = app.buttons["Sentence card"]
+        if card.isEnabled {
+            card.tap()
+            XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS 'sentence'")).firstMatch.waitForExistence(timeout: 5))
+        }
+    }
+
     private func shot(_ app: XCUIApplication, _ name: String) {
         let a = XCTAttachment(screenshot: app.screenshot())
         a.name = name

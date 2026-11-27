@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -208,5 +209,65 @@ func TestShadowScoresByCharacter(t *testing.T) {
 	}
 	if len(got.Chars) != 3 || got.Chars[0].Char != "我" || !got.Chars[1].Heard || got.Chars[2].Heard || got.Percent != 66 {
 		t.Errorf("shadow = %s; want 我 爱 heard, 你 missed, 66%%", data)
+	}
+}
+
+// A reading opens glossed word by word; marking a deck word sends it back
+// for review, and a sentence card joins the decks.
+func TestReadingGlossesMarksAndKeepsSentences(t *testing.T) {
+	dir := fixtureWiki(t)
+	reading := "---\ntype: reading\nlevel: HSK1\n---\n\n# 我的书\n\n## Text\n\n这是我的书。\n\n## Vocabulary\n\n| Word | Pinyin | Meaning |\n|------|--------|---------|\n| 这是 | zhè shì | this is |\n"
+	if err := os.MkdirAll(filepath.Join(dir, "readings"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "readings", "shu.md"), []byte(reading), 0644); err != nil {
+		t.Fatal(err)
+	}
+	c, err := Open(dir, t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close() //nolint:errcheck // test
+	list, err := c.Readings()
+	if err != nil || !strings.Contains(list, `"page:readings/shu.md"`) {
+		t.Fatalf("readings = %s, %v", list, err)
+	}
+	data, err := c.Reading("page:readings/shu.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got struct {
+		Title string `json:"title"`
+		Lines []struct {
+			Tokens []struct {
+				Text    string `json:"text"`
+				English string `json:"english"`
+				InDeck  bool   `json:"inDeck"`
+			} `json:"tokens"`
+		} `json:"lines"`
+	}
+	if err := json.Unmarshal([]byte(data), &got); err != nil {
+		t.Fatal(err)
+	}
+	glossed := map[string]string{}
+	inDeck := map[string]bool{}
+	for _, tok := range got.Lines[0].Tokens {
+		glossed[tok.Text], inDeck[tok.Text] = tok.English, tok.InDeck
+	}
+	if glossed["这是"] != "this is" || glossed["书"] != "book" || !inDeck["书"] {
+		t.Errorf("tokens = %+v; want 这是 from the reading's vocabulary and 书 from the decks", got.Lines[0].Tokens)
+	}
+	if ok, err := c.MarkUnknown("书"); err != nil || !ok {
+		t.Errorf("MarkUnknown(书) = %v, %v", ok, err)
+	}
+	if ok, err := c.MarkUnknown("这是"); err != nil || ok {
+		t.Errorf("MarkUnknown(这是) = %v, %v; it isn't in the decks", ok, err)
+	}
+	if ok, err := c.AddSentenceCard("这是", "zhè shì", "this is", "这是我的书。"); err != nil || !ok {
+		t.Errorf("AddSentenceCard = %v, %v", ok, err)
+	}
+	cards, err := c.DueCards(50)
+	if err != nil || !strings.Contains(cards, "这是") {
+		t.Errorf("the sentence card should be due: %s, %v", cards, err)
 	}
 }

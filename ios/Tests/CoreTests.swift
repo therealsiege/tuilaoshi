@@ -98,3 +98,17 @@ final class ShadowTests: XCTestCase {
         XCTAssertEqual(r.percent, 66)
     }
 }
+
+/// The App Store build carries the wiki's content only: none of the
+/// private material (cartoon episodes, the frequency list) the Mac keeps.
+final class BundleTests: XCTestCase {
+    func testTheAppCarriesNoPrivateMaterial() throws {
+        let wiki = try XCTUnwrap(Bundle.main.url(forResource: "wiki", withExtension: nil), "the app should carry the wiki")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: wiki.appending(path: "private").path), "wiki/private must not ship")
+        let files = FileManager.default.enumerator(at: wiki, includingPropertiesForKeys: nil)?.compactMap { $0 as? URL } ?? []
+        let media = files.filter { ["srt", "mp3", "mp4", "m4a", "wav"].contains($0.pathExtension.lowercased()) }
+        XCTAssertEqual(media.map(\.lastPathComponent), [], "no subtitles or audio may ship")
+        XCTAssertFalse(files.contains { $0.lastPathComponent == "frequency.yaml" }, "the frequency list must not ship")
+        XCTAssertFalse(files.contains { $0.lastPathComponent.hasPrefix("progress.db") }, "nobody's progress may ship")
+    }
+}

@@ -44,6 +44,7 @@ struct CampView: View {
         .navigationDestination(for: Door.self) { door in
             switch door {
             case .study: StudyView()
+            case .read: ReadingListView()
             default: DoorView(door: door)
             }
         }
@@ -190,13 +191,14 @@ private struct StageCard: View {
 /// The places camp leads to. Each becomes its own screen as the iOS work
 /// goes on (#57 study, #61 the road, #62 towns).
 enum Door: String, CaseIterable, Identifiable, Hashable {
-    case study, road, towns
+    case study, read, road, towns
 
     var id: Self { self }
 
     var title: String {
         switch self {
         case .study: "复习 Study"
+        case .read: "读 Read"
         case .road: "上路 The road"
         case .towns: "城镇 Towns"
         }
@@ -205,6 +207,7 @@ enum Door: String, CaseIterable, Identifiable, Hashable {
     var subtitle: String {
         switch self {
         case .study: "Today's reviews and new words"
+        case .read: "Readings and the journey's episodes, glossed word by word"
         case .road: "Walk the region to the next tribulation"
         case .towns: "Shops, alms and notices"
         }
@@ -213,6 +216,7 @@ enum Door: String, CaseIterable, Identifiable, Hashable {
     var symbol: String {
         switch self {
         case .study: "rectangle.stack"
+        case .read: "book"
         case .road: "map"
         case .towns: "building.columns"
         }

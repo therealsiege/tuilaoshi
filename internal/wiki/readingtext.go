@@ -1,10 +1,10 @@
-package reader
+package wiki
 
 import "strings"
 
-// textSection returns the lines under a page's "## Text" heading, without
-// blank lines.
-func textSection(body string) []string {
+// ReadingText returns the lines under a reading page's "## Text" heading,
+// without blank lines.
+func ReadingText(body string) []string {
 	var lines []string
 	in := false
 	for _, l := range strings.Split(body, "\n") {

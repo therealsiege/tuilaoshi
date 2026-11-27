@@ -155,7 +155,7 @@ func (m Model) Refresh() Model {
 
 // openReading opens a wiki reading's text.
 func (m Model) openReading(p model.Page) Model {
-	return m.OpenText(p.Title, textSection(p.Body), wiki.ReadingVocab(p))
+	return m.OpenText(p.Title, wiki.ReadingText(p.Body), wiki.ReadingVocab(p))
 }
 
 // OpenText opens lines of Chinese for word-by-word reading, glossed by vocab

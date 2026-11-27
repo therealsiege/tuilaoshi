@@ -98,6 +98,50 @@ final class Engine {
         sync = .off("Sync with the Mac comes with signing in, which isn't built yet. Progress is kept on this iPhone.")
     }
 
+    /// The readings and journey episodes reached so far.
+    func readings() async throws -> [ReadingItem] {
+        try await call { h in
+            var error: NSError?
+            let json = h.core.readings(&error)
+            if let error { throw error }
+            return try JSONDecoder().decode([ReadingItem].self, from: Data(json.utf8))
+        }
+    }
+
+    /// One reading, split into glossed words.
+    func reading(_ id: String) async throws -> Reading {
+        try await call { h in
+            var error: NSError?
+            let json = h.core.reading(id, error: &error)
+            if let error { throw error }
+            return try JSONDecoder().decode(Reading.self, from: Data(json.utf8))
+        }
+    }
+
+    /// Sends a word met in reading back for review; false when it isn't in the decks.
+    func markUnknown(_ word: String) async throws -> Bool {
+        try await call { h in
+            var ok: ObjCBool = false
+            try h.core.markUnknown(word, ret0_: &ok)
+            return ok.boolValue
+        }
+    }
+
+    /// Keeps a word with its sentence as a card; false when it already has one.
+    func addSentenceCard(_ word: String, pinyin: String, english: String, line: String) async throws -> Bool {
+        try await call { h in
+            var ok: ObjCBool = false
+            try h.core.addSentenceCard(word, pinyin: pinyin, english: english, line: line, ret0_: &ok)
+            return ok.boolValue
+        }
+    }
+
+    /// Runs work against the engine off the main thread.
+    private func call<T: Sendable>(_ work: @Sendable @escaping (CoreHandle) throws -> T) async throws -> T {
+        guard let handle else { throw CocoaError(.fileNoSuchFile) }
+        return try await Task.detached { try work(handle) }.value
+    }
+
     /// Up to limit cards due now.
     func dueCards(limit: Int) async throws -> [Card] {
         guard let handle else { throw CocoaError(.fileNoSuchFile) }
