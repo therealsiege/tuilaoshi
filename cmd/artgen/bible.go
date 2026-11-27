@@ -46,7 +46,8 @@ func loadBible() (Bible, error) {
 // aspect ratio. Layout is set for maps: the region drawn as colours.
 type Job struct {
 	Kind, Name, Ratio, Prompt string
-	Subject                   string // the character a ref picture is kept for, if any
+	Subject                   string              // the character a ref picture is kept for, if any
+	Cast                      []journey.Companion // companions shown small, whose approved pictures are attached
 	Layout                    *journey.RegionMap
 }
 
@@ -179,13 +180,15 @@ func (p composer) vista(id string) (Job, error) {
 	}
 	k := p.b.Kinds["vista"]
 	var party []string
+	var cast []journey.Companion
 	for _, c := range p.c.Companions {
 		if c.Stage <= r.To && p.b.Party[c.Name] != "" {
 			party = append(party, p.b.Party[c.Name])
+			cast = append(cast, c)
 		}
 	}
 	frame := strings.ReplaceAll(k.Frame, "{party}", strings.Join(party, "; "))
-	return Job{Kind: "vista", Name: r.ID, Ratio: k.Ratio,
+	return Job{Kind: "vista", Name: r.ID, Ratio: k.Ratio, Cast: cast,
 		Prompt: p.join(frame, p.place(r), p.events(r), p.b.World, p.style(), p.b.Never)}, nil
 }
 

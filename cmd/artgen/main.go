@@ -26,6 +26,8 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 )
 
+const castNote = "The attached pictures, in order, are the approved designs of %s. Paint them small but recognisable: the same costume, colours and weapon."
+
 const refNote = "The attached picture is the approved design of this character. Keep their face, build, costume, colours and weapon exactly the same; change only the pose, place and light this prompt asks for."
 
 func main() {
@@ -120,6 +122,16 @@ func main() {
 				prompt += "\n\n" + refNote
 				refs = append(refs, ref)
 			}
+		}
+		var shown []string
+		for _, c := range j.Cast {
+			if ref, err := os.ReadFile(filepath.Join(*out, "refs", c.Name+".png")); err == nil {
+				shown = append(shown, c.English)
+				refs = append(refs, ref)
+			}
+		}
+		if len(shown) > 0 {
+			prompt += "\n\n" + fmt.Sprintf(castNote, strings.Join(shown, ", "))
 		}
 		start := time.Now()
 		img, err := pt.paint(prompt, j.Ratio, refs)
