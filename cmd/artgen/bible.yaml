@@ -1,0 +1,201 @@
+# The art bible: every picture artgen paints is composed from these blocks,
+# in this order: what kind of picture (camera), who or what it shows (a
+# character sheet, or the game's own content for everyone else), where
+# (the world and the region's terrain), how it is painted (the direction),
+# and what must never appear. Characters keep one design: their sheet here,
+# plus the approved picture of them in the refs folder once there is one.
+# Designs follow the novel Journey to the West (public domain); the look is
+# our own.
+
+direction: clean # Clint picked B, clean painted (Pilgrim's Studio, 2026-11-27); -direction picks another
+
+directions:
+  real: >-
+    Rendering: photoreal cinematic concept art. Physically believable materials with fine
+    detail: weathered stone, wet moss, coarse fur, worn lacquer, rusted iron, frayed silk.
+    Volumetric light and drifting mist, deep atmospheric perspective, enormous scale.
+    Muted natural palette with warm highlights. Composed like a still from a film shot on a
+    35mm lens; shallow depth of field only on portraits.
+  clean: >-
+    Rendering: clean painterly game illustration with soft cel shading. Simple readable
+    silhouettes, broad flat colour areas with gentle gradients, thin dark outlines only on
+    the main forms, two-tone shadows. Bright airy daylight, watercolour-soft skies, distant
+    shapes fading into pale blue haze. Stylised, never photographic.
+  blend: >-
+    Rendering: painted realism. Realistic light, atmosphere and material texture, but
+    simplified clean shapes and soft cel-shaded forms with visible painterly brushwork.
+    Thin dark outlines on the main forms only. Wide vistas with atmospheric haze.
+
+# Rules every picture follows, whatever the direction, so the set reads as one world.
+world: >-
+  World: Tang-dynasty China in the 7th century and the lands west of it, as told in the
+  16th-century novel Journey to the West, where gods, dragons and demons are real.
+  Architecture is Tang: broad hipped and gabled roofs with deep eaves and only a gentle
+  upturn, bracket sets under the eaves, red-lacquered timber columns, whitewashed or
+  rammed-earth walls, grey or green glazed tiles. Gateways are Chinese pailou: two or four pillars carrying a small
+  tiled roof with upturned eaves on top; never a bare two-post gate with a curved lintel.
+  People wear Tang clothing: round-collared robes with belts, wrap skirts, soft futou caps
+  for officials, monks in kasaya over plain robes. Further west the land turns to Central
+  Asian oases, deserts and kingdoms, and near the end to Indian kingdoms.
+  Palette: jade green, ochre, slate blue and cinnabar red as the main colours, with gold only
+  for divine or royal things. Light: one clear sun or moon, key light from the upper left,
+  cool shadows. People and demons have believable adult proportions (no chibi, no big
+  anime eyes) unless their sheet says otherwise.
+
+never: >-
+  Never: text, letters, Chinese characters, calligraphy, signatures, red seal stamps,
+  watermarks, borders, frames, devices, user interface. No modern objects. No Japanese
+  torii gates (two posts with a curved crossbeam and no roof), Japanese-style pagodas or shrines,
+  samurai armour, kimono, split-toe tabi socks or sandals. No Western saddles with a horn. No Ming or Qing
+  costume (no queue hairstyles, no mandarin squares). No guns. No gore or nudity.
+
+# The picture kinds: framing and aspect ratio.
+kinds:
+  portrait:
+    ratio: "1:1"
+    frame: >-
+      Picture: a full-figure character portrait, head to feet, in a three-quarter view,
+      centred and filling about two thirds of the height, standing on ground that belongs
+      to the place they are met in the story. The background is that place, softly
+      out of focus and darker than the figure so the silhouette reads at thumbnail size.
+  vista:
+    ratio: "16:9"
+    frame: >-
+      Picture: a wide establishing view of the region from a high vantage point, used as the
+      region's title card. The road west winds through it from the right (east) toward the
+      left (west); on it, small for scale, the pilgrims as they are by this point in the
+      story: {party}.
+  map:
+    ratio: "21:9"
+    frame: >-
+      Picture: a walkable game overworld seen from above at a gentle three-quarter angle,
+      as if from a hill to the south looking north, the same angle everywhere. Paint the
+      attached colour-coded layout faithfully: every coloured area keeps its place, size and
+      shape, and nothing is added on the road or moved. No people or animals.
+    legend: >-
+      Layout colours: dark grey is ground that cannot be walked ({block});
+      light green is open ground beside the road that can be walked; tan is the dirt road;
+      each yellow square is a stone pailou archway across the road (a gate the pilgrims must
+      pass); the red square is a small village of a few Tang houses; a blue square is
+      {crossing}.
+  town:
+    ratio: "9:16"
+    frame: >-
+      Picture: a tall street-level view of the town, framed for a phone held upright, the
+      main gate or street leading the eye into the picture, townsfolk going about their
+      day. The lower third is calm (paving, a street, a courtyard) because buttons sit there.
+
+# How each terrain in content/regions.yaml looks. Used for vistas and maps.
+terrain:
+  mountain:
+    look: steep forested ridges and sheer cliffs, pines growing out of rock, clouds in the valleys, narrow switchback paths
+    block: steep cliffs, crags and dense pine forest
+  forest:
+    look: old mixed forest of pine, cypress and maple in deep valleys, streams, moss, shafts of light, a few woodcutters' clearings
+    block: dense old forest and rocky outcrops
+  river:
+    look: a broad river valley with reed banks, willow trees, ferry landings, wet fields and low hills either side
+    block: deep fast water and reed marsh
+  desert:
+    look: wind-carved yellow sandstone, dunes and gravel plains under a hazy sky, a dry riverbed, sparse tamarisk, a distant oasis
+    block: dunes, sandstone ridges and dry gullies
+  fire:
+    look: red and black volcanic rock, cracked ground glowing with embers, heat shimmer and smoke, dead trees, an orange sky
+    block: walls of volcanic rock and ground that burns
+  palace:
+    look: a walled kingdom with a great gate, tiled roofs and towers, avenues, gardens and canals, farmland outside the walls
+    block: city walls, palace halls and canals
+  cave:
+    look: limestone karst peaks riddled with caves, dark cave mouths, mist, twisted trees and bones near the demon's door
+    block: sheer karst rock and cave-riddled cliffs
+
+crossings:
+  river: a narrow timber bridge or ferry landing over the water
+  mountain: a rope bridge over a ravine
+  desert: a line of cairns marking the safe way across the sand
+  fire: a path of cooled black rock through the burning ground
+  default: a rope bridge over a ravine
+
+# How each companion looks when small on the road, for vistas. Only those
+# who have joined by the end of the region are painted.
+party:
+  唐僧: a monk in a crimson kasaya riding a horse
+  孙悟空: a small golden monkey with a black iron staff walking ahead
+  白龙马: his horse is pure white
+  猪八戒: a stout pig-faced man in a dark robe with a long rake on his shoulder
+  沙悟净: a tall blue-faced man with red hair carrying the luggage on a shoulder pole
+
+# Character sheets: one fixed design for each recurring character, from the
+# novel's own descriptions. Everyone else is drawn from their entry in the
+# bestiary, soldiers or spirits content.
+characters:
+  唐僧: >-
+    Tang Sanzang, the monk: a gentle, handsome man of about thirty with a shaven head and a calm,
+    kind face. He wears plain grey-brown monk's robes under the brocade kasaya given to him by
+    the Bodhisattva Guanyin: a crimson robe of patchwork panels edged in gold, set with small
+    jewels. He holds the nine-ringed monk's staff, a tall tin staff topped with nine loose
+    rings, and a string of wooden prayer beads. On formal occasions he wears the Vairocana
+    crown, a five-panelled monk's crown. He rides a white horse. He never fights.
+  孙悟空: >-
+    Sun Wukong, the Monkey King: a small, wiry monkey born from a stone, shorter than a man,
+    covered in golden-brown fur, with a hairless, sharp-beaked face like a thunder god and
+    fiery golden eyes rimmed with red from forty-nine days in Laozi's furnace. A plain gold
+    band, the tightening fillet, circles his head. He wears a short tiger-skin kilt over a
+    plain cotton monk's tunic tied with a cord, and soft cloth boots. His weapon is the
+    As-You-Will Gold-Banded Staff: a plain black iron pole with a gold band at each end.
+    Restless, cocky, always about to move.
+  猪八戒: >-
+    Zhu Bajie, Pigsy: a big, stout man with the head of a pig, a long snout, small eyes and
+    huge fan-like ears, bristly dark skin and a round belly. Once Marshal Tianpeng of Heaven's
+    navy. He wears a dark blue-black monk's robe with a cloth belt, sleeves rolled up. He
+    carries the nine-toothed iron rake on a long handle over his shoulder: exactly nine long
+    iron teeth in one row. He wears plain cloth shoes. Lazy, greedy,
+    good-natured.
+  沙悟净: >-
+    Sha Wujing, Sandy: a tall, gaunt, solemn man with an indigo-blue face, round staring
+    eyes, and a shock of bristling red hair and beard. Around his neck hangs a string of nine
+    small skulls from his years as a river ogre. He wears a plain monk's robe and carries
+    the pilgrims' luggage on a shoulder pole, and his weapon, the precious demon-quelling
+    staff: a long staff of pale moon-tree wood wound with gold. Quiet and steady.
+  白龙马: >-
+    Bai Longma, the White Dragon Horse: a dragon prince of the Western Sea turned into a
+    tall, pure white horse with a long silver-white mane, wearing a Tang-dynasty saddle (a
+    flat padded saddle over an embroidered saddle cloth, no horn) and a bridle of tooled
+    leather with gold fittings. In dragon form he is a long white dragon with silver
+    scales, a flowing mane and pale gold horns.
+  混世魔王: >-
+    The Havoc Demon King: a towering demon in a black-gold helmet, a black silk robe over
+    black iron armour bound with leather straps, and patterned boots, gripping a huge broad
+    blade. A brute who rules a cave of minor demons. Met at the Water Curtain Cave on Flower
+    Fruit Mountain.
+  白骨精: >-
+    The White Bone Demon: a corpse demon on White Tiger Ridge. Her true form is a skeleton of
+    pale bone; her disguise is a lovely young village woman in a plain Tang wrap skirt
+    carrying a basket of food. Paint the disguise, with the truth showing: her shadow on the
+    ground is a skeleton, her fingers too thin, a faint cold mist around her feet.
+  金角大王: >-
+    The Gold Horn King: one of the two demon kings of Lotus Flower Cave on Flat-Top Mountain,
+    really a furnace boy of Laozi come down to earth. A large demon with a single golden horn
+    on his brow, in a rich robe over light armour, holding the purple-gold gourd that sucks
+    in anyone who answers when their name is called, with a seven-star sword at his belt.
+  红孩儿: >-
+    Red Boy: a demon who looks like a boy of about seven with a red face and his hair in
+    two small tufts, bare-chested in a red embroidered belly-cloth and trousers, holding the
+    fire-tipped spear. He breathes the Samadhi true fire from his mouth and nose. Son of the
+    Bull Demon King. Met among the burning peaks of Mount Hao.
+  牛魔王: >-
+    The Bull Demon King: a huge demon with the head of a black bull and great curved horns,
+    in black iron armour and a dark robe, wielding a mixed-iron cudgel. Once Sun Wukong's
+    sworn brother. Met near the Flaming Mountain.
+  蜘蛛精: >-
+    The Spider Spirits: seven sisters of Silk Cave, beautiful women in pale silk robes, fully
+    clothed, who spin binding silk and can turn into spiders as big as a man. Webs of
+    shining silk across the cave mouth and the trees.
+  金翅大鹏: >-
+    The Golden-Winged Roc: a mighty bird demon with a hooked golden beak, fierce eyes and
+    vast golden wings, in demon-king armour, holding a long painted halberd. One flap of his
+    wings carries him ninety thousand li. Rules Lion Camel Ridge.
+  如来佛祖: >-
+    The Buddha at Thunderclap Monastery on Vulture Peak: serene and enormous, seated in
+    meditation on a lotus throne, robed in gold, with a halo of soft light, attended by
+    disciples and bodhisattvas among clouds. Painted with reverence, never as a demon.
