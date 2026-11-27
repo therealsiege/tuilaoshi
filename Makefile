@@ -1,4 +1,4 @@
-.PHONY: build run test fmt check lint golden recordings launcher demonart freqlist proofsheet sweep reminder reminder-off ios-core ios-test clean
+.PHONY: build run test fmt check lint golden recordings launcher demonart freqlist proofsheet sweep reminder reminder-off ios ios-core ios-test clean
 
 GOLANGCI_LINT = go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 
@@ -52,6 +52,14 @@ freqlist:
 # tests in the iPhone simulator (needs XcodeGen).
 ios-core:
 	PATH="$$HOME/go/bin:$$PATH" gomobile bind -target=ios,iossimulator -o ios/build/TuiLaoShiCore.xcframework ./mobile
+
+# Build the app and open it in the iPhone 17 Pro simulator.
+ios: ios-core
+	cd ios && xcodegen generate && xcodebuild build -project TuiLaoShi.xcodeproj -scheme TuiLaoShi \
+		-destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath DerivedData -quiet
+	xcrun simctl boot 'iPhone 17 Pro' 2>/dev/null || true
+	xcrun simctl install 'iPhone 17 Pro' ios/DerivedData/Build/Products/Debug-iphonesimulator/TuiLaoShi.app
+	xcrun simctl launch 'iPhone 17 Pro' com.therealsiege.tuilaoshi
 
 ios-test: ios-core
 	cd ios && xcodegen generate && xcodebuild test -project TuiLaoShi.xcodeproj -scheme TuiLaoShi \

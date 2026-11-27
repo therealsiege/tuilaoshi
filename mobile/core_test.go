@@ -42,3 +42,32 @@ func TestTheCoreReviewsACard(t *testing.T) {
 		t.Error("the wiki (read-only in the app bundle) got a progress file")
 	}
 }
+
+func TestCampGathersTheNumbers(t *testing.T) {
+	c, err := Open(t.TempDir(), t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close() //nolint:errcheck // test
+	data, err := c.Camp()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got struct {
+		Party []string `json:"party"`
+		Term  string   `json:"term"`
+		Stage *struct {
+			Number int    `json:"number"`
+			Region string `json:"region"`
+		} `json:"stage"`
+	}
+	if err := json.Unmarshal([]byte(data), &got); err != nil {
+		t.Fatal(err)
+	}
+	if got.Term == "" || got.Stage == nil || got.Stage.Number != 1 || got.Stage.Region == "" {
+		t.Errorf("camp = %s; want today's term and stage 1 with its region", data)
+	}
+	if len(got.Party) != 1 || got.Party[0] != "唐僧" {
+		t.Errorf("party = %v; a new pilgrim travels with Tang Sanzang alone", got.Party)
+	}
+}

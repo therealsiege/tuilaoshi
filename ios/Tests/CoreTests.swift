@@ -1,5 +1,6 @@
 import XCTest
 import TuiLaoShiCore
+@testable import TuiLaoShi
 
 /// The Go engine, called from Swift in the iOS simulator: open a wiki,
 /// list due cards, record a review, and see the progress kept.
@@ -42,5 +43,24 @@ final class ContentTests: XCTestCase {
         let t = try JSONDecoder().decode(Today.self, from: Data(today.utf8))
         XCTAssertEqual(t.tribulations, 81)
         XCTAssertFalse(t.term.isEmpty)
+    }
+}
+
+/// Camp's numbers come back from Go in the shape the app reads.
+final class CampTests: XCTestCase {
+    func testCampDecodesForANewPilgrim() async throws {
+        let bundle = Bundle(for: CampTests.self)
+        let wiki = try XCTUnwrap(bundle.url(forResource: "Fixture", withExtension: nil))
+        let progress = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: progress, withIntermediateDirectories: true)
+        var error: NSError?
+        let core = try XCTUnwrap(MobileOpen(wiki.path, progress.path, &error), "\(String(describing: error))")
+        defer { try? core.close() }
+
+        let camp = try await Engine.camp(CoreHandle(core))
+        XCTAssertEqual(camp.due, 1)
+        XCTAssertEqual(camp.party, ["唐僧"])
+        XCTAssertEqual(camp.stage?.number, 1)
+        XCTAssertFalse(camp.term.isEmpty)
     }
 }

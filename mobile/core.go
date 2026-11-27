@@ -104,3 +104,71 @@ func Today() (string, error) {
 	})
 	return string(data), err
 }
+
+// camp is the numbers camp shows, as the app reads them.
+type camp struct {
+	Due      int        `json:"due"`
+	Streak   int        `json:"streak"`
+	Tongqian int        `json:"tongqian"`
+	Yuanbao  int        `json:"yuanbao"`
+	Rank     string     `json:"rank"`
+	RankEN   string     `json:"rankEnglish"`
+	Level    int        `json:"level"`
+	Learned  int        `json:"learned"`
+	Mastered int        `json:"mastered"`
+	Stage    *campStage `json:"stage,omitempty"`
+	Party    []string   `json:"party"`
+	Term     string     `json:"term"`
+	TermEN   string     `json:"termEnglish"`
+}
+
+type campStage struct {
+	Number   int    `json:"number"`
+	Name     string `json:"name"`
+	English  string `json:"english"`
+	Location string `json:"location"`
+	Region   string `json:"region"`
+	Demon    string `json:"demon"`
+	DemonEN  string `json:"demonEnglish"`
+}
+
+// Camp gathers camp's numbers in one call, as JSON: cards due, the streak,
+// the purse, rank and level, the stage being worked on, who has joined the
+// party, and today's solar term.
+func (c *Core) Camp() (string, error) {
+	due, err := wiki.DueItems(c.store, time.Now())
+	if err != nil {
+		return "", err
+	}
+	state, err := journey.Calculate(c.store)
+	if err != nil {
+		return "", err
+	}
+	purse, err := c.store.Wallet()
+	if err != nil {
+		return "", err
+	}
+	cleared, err := c.store.ClearedStages()
+	if err != nil {
+		return "", err
+	}
+	term, _ := journey.TermOn(time.Now())
+	out := camp{
+		Due: len(due), Streak: c.store.Streak(), Tongqian: purse.Tongqian, Yuanbao: purse.Yuanbao,
+		Rank: state.Rank.Name, RankEN: state.Rank.English, Level: state.Level.N,
+		Learned: state.Counts.Learned, Mastered: state.Counts.Mastered,
+		Party: []string{}, Term: term.Name, TermEN: term.English,
+	}
+	for _, p := range journey.Party(cleared) {
+		if p.Unlocked {
+			out.Party = append(out.Party, p.Name)
+		}
+	}
+	if s := state.Stage; s != nil {
+		r := journey.Regions()[journey.RegionOf(s.Number)]
+		out.Stage = &campStage{Number: s.Number, Name: s.Name, English: s.English, Location: s.Location,
+			Region: r.Name, Demon: s.Opponent.Name, DemonEN: s.Opponent.English}
+	}
+	data, err := json.Marshal(out)
+	return string(data), err
+}
