@@ -271,3 +271,68 @@ func TestReadingGlossesMarksAndKeepsSentences(t *testing.T) {
 		t.Errorf("the sentence card should be due: %s, %v", cards, err)
 	}
 }
+
+// Camp's Today panel reports the day and the bounties without Mac keys.
+func TestCampToday(t *testing.T) {
+	c, err := Open(fixtureWiki(t), t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close() //nolint:errcheck // test
+	if _, err := c.Review("characters/shu1.md", 2); err != nil {
+		t.Fatal(err)
+	}
+	data, err := c.CampToday()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got struct {
+		DailyGoal int `json:"dailyGoal"`
+		Bounties  []struct {
+			Text string `json:"text"`
+		} `json:"bounties"`
+		Term struct {
+			Name string `json:"name"`
+		} `json:"term"`
+		DemonWakes int `json:"demonWakes"`
+	}
+	if err := json.Unmarshal([]byte(data), &got); err != nil {
+		t.Fatal(err)
+	}
+	if got.DailyGoal == 0 || len(got.Bounties) == 0 || got.Term.Name == "" || got.DemonWakes == 0 {
+		t.Errorf("today = %s", data)
+	}
+	for _, b := range got.Bounties {
+		if strings.HasSuffix(b.Text, ")") {
+			t.Errorf("bounty %q still carries a Mac key", b.Text)
+		}
+	}
+}
+
+// Settings saved on the phone keep the Mac's own and travel in the export.
+func TestSettingsKeepTheMacsOwnAndSync(t *testing.T) {
+	c, err := Open(fixtureWiki(t), t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close() //nolint:errcheck // test
+	mac, _ := c.store.Settings()
+	mac.Portraits = "small"
+	if err := c.store.SaveSettings(mac); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.SaveSettings(`{"speech":false,"effects":true,"toneColours":true,"reviewChunk":30,"newWords":5,"difficulty":"gentler","scheduler":"fsrs"}`); err != nil {
+		t.Fatal(err)
+	}
+	got, _ := c.store.Settings()
+	if got.Speech || got.ReviewChunk != 30 || got.Scheduler != "fsrs" || got.Portraits != "small" || c.store.Scheduler != "fsrs" {
+		t.Errorf("settings = %+v (store scheduler %q)", got, c.store.Scheduler)
+	}
+	dir := t.TempDir()
+	if err := c.Export(dir); err != nil {
+		t.Fatal(err)
+	}
+	if data, err := os.ReadFile(filepath.Join(dir, "settings.yaml")); err != nil || !strings.Contains(string(data), "review_chunk: 30") {
+		t.Errorf("exported settings = %q, %v; settings must travel with sync", data, err)
+	}
+}

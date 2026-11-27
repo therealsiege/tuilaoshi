@@ -25,12 +25,13 @@ enum Pinyin {
         syllable.lazy.compactMap { marks[$0] }.first ?? 0
     }
 
-    /// The pinyin as text, each syllable in its tone's colour.
-    static func coloured(_ pinyin: String) -> Text {
+    /// The pinyin as text, each syllable in its tone's colour (or plain,
+    /// when the learner turns tone colours off).
+    @MainActor static func coloured(_ pinyin: String) -> Text {
         var text = Text("")
         for (i, word) in pinyin.split(separator: " ", omittingEmptySubsequences: false).enumerated() {
             if i > 0 { text = text + Text(" ") }
-            text = text + Text(String(word)).foregroundStyle(colours[tone(of: word)])
+            text = text + Text(String(word)).foregroundStyle(SoundSettings.toneColours ? colours[tone(of: word)] : Theme.slate)
         }
         return text
     }

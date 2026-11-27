@@ -4,6 +4,7 @@ import SwiftUI
 /// doors to every other part of the game.
 struct CampView: View {
     @Environment(Engine.self) private var engine
+    @State private var today: Today?
 
     var body: some View {
         Group {
@@ -17,6 +18,7 @@ struct CampView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         header(camp)
                         numbers(camp)
+                        if let today { TodayPanel(today: today) }
                         if let stage = camp.stage { StageCard(stage: stage) }
                         party(camp)
                         doors
@@ -27,6 +29,7 @@ struct CampView: View {
                 .refreshable { await engine.refresh() }
             }
         }
+        .task(id: engine.status) { today = try? await engine.today() }
         .navigationTitle("营地 Camp")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -37,8 +40,8 @@ struct CampView: View {
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink { SoundSettingsView() } label: { Image(systemName: "gearshape") }
-                    .accessibilityLabel("Sound settings")
+                NavigationLink { SettingsView() } label: { Image(systemName: "gearshape") }
+                    .accessibilityLabel("Settings")
             }
         }
         .navigationDestination(for: Door.self) { door in
@@ -106,6 +109,61 @@ struct CampView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("door.\(door.rawValue)")
+            }
+        }
+    }
+}
+
+/// Camp's Today panel: the day against the goal, the bounties, the
+/// festival, the solar term and the Inner Demon, as on the Mac.
+private struct TodayPanel: View {
+    let today: Today
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("今天 Today").font(Theme.heading(20))
+            HStack {
+                ProgressView(value: Double(min(today.reviewed, today.dailyGoal)), total: Double(max(today.dailyGoal, 1)))
+                    .tint(Theme.jade)
+                Text("\(today.reviewed)/\(today.dailyGoal) reviewed").font(.footnote.monospacedDigit())
+            }
+            if today.reviewed > 0 {
+                Text("\(today.correct * 100 / today.reviewed)% right").font(.footnote).foregroundStyle(.secondary)
+            }
+            ForEach(today.bounties, id: \.text) { b in
+                HStack(alignment: .firstTextBaseline) {
+                    Image(systemName: b.done ? "checkmark.circle.fill" : "circle").foregroundStyle(b.done ? Theme.jade : .secondary)
+                    Text(b.text).font(.subheadline)
+                    Spacer()
+                    Text(b.done ? "+\(b.pay) 铜钱" : "\(b.have)/\(b.target)").font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                }
+            }
+            Text(today.shields > 0 ? "All three bounties earn a streak shield · \(today.shields) held" : "All three bounties earn a streak shield")
+                .font(.caption).foregroundStyle(.secondary)
+            line("节气", "\(today.term.starts ? "今日" : "")\(today.term.name) \(today.term.english)", today.term.text + weather)
+            if let f = today.festival {
+                line("节日", f.on ? "\(f.name)快乐！ \(f.english)" : "\(f.name) \(f.english)", f.on ? "Today" : "In \(f.days) day\(f.days == 1 ? "" : "s")")
+            }
+            line("心魔", today.missed >= today.demonWakes ? "The Inner Demon wakes" : "The Inner Demon sleeps",
+                 today.missed >= today.demonWakes ? "\(today.missed) words you missed this week" : "\(today.missed) of \(today.demonWakes) missed words this week wake it")
+        }
+    }
+
+    private var weather: String {
+        switch today.term.weather {
+        case "cold": " · cold: the party eats more"
+        case "heat": " · hot: the party drinks more"
+        case "rain": " · rain fills the gourds"
+        default: ""
+        }
+    }
+
+    private func line(_ label: String, _ title: String, _ detail: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Text(label).font(.caption.bold()).foregroundStyle(Theme.ochre)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.subheadline)
+                Text(detail).font(.caption).foregroundStyle(.secondary)
             }
         }
     }

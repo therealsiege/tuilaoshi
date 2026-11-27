@@ -4,13 +4,13 @@ import Speech
 import SwiftUI
 import TuiLaoShiCore
 
-/// The learner's sound settings, kept on the phone.
+/// The learner's settings that sound and display follow, as last read
+/// from the engine (they live in the progress file and sync with the Mac).
+@MainActor
 enum SoundSettings {
-    static let voicesKey = "voices"
-    static let cuesKey = "cues"
-
-    static var voices: Bool { UserDefaults.standard.object(forKey: voicesKey) as? Bool ?? true }
-    static var cues: Bool { UserDefaults.standard.object(forKey: cuesKey) as? Bool ?? true }
+    static var voices = true
+    static var cues = true
+    static var toneColours = true
 }
 
 /// Reads text aloud in the system's Mandarin or English voice, the phone's
@@ -208,16 +208,57 @@ struct ShadowView: View {
     }
 }
 
-/// Voices and cues, on or off.
-struct SoundSettingsView: View {
-    @AppStorage(SoundSettings.voicesKey) private var voices = true
-    @AppStorage(SoundSettings.cuesKey) private var cues = true
+/// The learner's settings, shared with the Mac: read aloud, sound cues,
+/// tone colours, how many words a sitting takes, new words a day, battle
+/// difficulty and how reviews are spaced.
+struct SettingsView: View {
+    @Environment(Engine.self) private var engine
+    @State private var s: AppSettings?
+    @State private var error: String?
 
     var body: some View {
         Form {
-            Toggle("Read Chinese aloud", isOn: $voices)
-            Toggle("Sound cues", isOn: $cues)
+            if let s {
+                let bind = { (kp: WritableKeyPath<AppSettings, Bool>) in
+                    Binding(get: { s[keyPath: kp] }, set: { var n = s; n[keyPath: kp] = $0; save(n) })
+                }
+                Section("Sound and display") {
+                    Toggle("Read Chinese aloud", isOn: bind(\.speech))
+                    Toggle("Sound cues", isOn: bind(\.effects))
+                    Toggle("Tone colours", isOn: bind(\.toneColours))
+                }
+                Section("Study") {
+                    Stepper("Words a sitting: \(s.reviewChunk)", value: Binding(get: { s.reviewChunk }, set: { var n = s; n.reviewChunk = $0; save(n) }), in: 5...100, step: 5)
+                    Stepper("New words a day: \(s.newWords)", value: Binding(get: { s.newWords }, set: { var n = s; n.newWords = $0; save(n) }), in: 0...50)
+                    Picker("Review spacing", selection: Binding(get: { s.scheduler }, set: { var n = s; n.scheduler = $0; save(n) })) {
+                        Text("Classic").tag("classic")
+                        Text("FSRS").tag("fsrs")
+                    }
+                }
+                Section("Battles") {
+                    Picker("Difficulty", selection: Binding(get: { s.difficulty }, set: { var n = s; n.difficulty = $0; save(n) })) {
+                        Text("Adaptive").tag("adaptive")
+                        Text("Gentler").tag("gentler")
+                        Text("Sterner").tag("sterner")
+                    }
+                }
+                Section { Text("Settings travel with your progress, so the Mac game uses them too.").font(.footnote).foregroundStyle(.secondary) }
+            } else if let error {
+                Text(error).foregroundStyle(Theme.cinnabar)
+            } else {
+                ProgressView()
+            }
         }
-        .navigationTitle("声音 Sound")
+        .navigationTitle("设置 Settings")
+        .task {
+            do { s = try await engine.settings() } catch { self.error = error.localizedDescription }
+        }
+    }
+
+    private func save(_ n: AppSettings) {
+        s = n
+        Task {
+            do { try await engine.saveSettings(n) } catch { self.error = error.localizedDescription }
+        }
     }
 }

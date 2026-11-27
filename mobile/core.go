@@ -27,9 +27,11 @@ func Open(wikiDir, progressDir string) (*Core, error) {
 	s := wiki.NewStore(wikiDir)
 	s.Progress = progressDir
 	s.Pages = filepath.Join(progressDir, "pages") // the bundled wiki is read-only
-	if _, err := s.Settings(); err != nil {
+	set, err := s.Settings()
+	if err != nil {
 		return nil, fmt.Errorf("open progress: %w", err)
 	}
+	s.Scheduler = set.Scheduler
 	return &Core{store: s}, nil
 }
 

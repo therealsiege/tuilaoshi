@@ -28,6 +28,41 @@ struct Camp: Decodable, Equatable {
     let termEnglish: String
 }
 
+/// The learner's settings as the engine's Settings() reports them.
+struct AppSettings: Codable, Equatable, Sendable {
+    var speech: Bool
+    var effects: Bool
+    var toneColours: Bool
+    var reviewChunk: Int
+    var newWords: Int
+    var difficulty: String
+    var scheduler: String
+
+    /// Makes sound, display and study follow these settings.
+    @MainActor func apply() {
+        SoundSettings.voices = speech
+        SoundSettings.cues = effects
+        SoundSettings.toneColours = toneColours
+        StudySession.size = reviewChunk
+    }
+}
+
+/// Camp's Today panel, as the engine's CampToday() reports it.
+struct Today: Decodable, Equatable, Sendable {
+    struct Bounty: Decodable, Equatable, Sendable { let text: String; let have: Int; let target: Int; let pay: Int; let done: Bool }
+    struct Festival: Decodable, Equatable, Sendable { let name: String; let english: String; let on: Bool; let days: Int }
+    struct Term: Decodable, Equatable, Sendable { let name: String; let english: String; let text: String; let starts: Bool; let weather: String }
+    let reviewed: Int
+    let correct: Int
+    let dailyGoal: Int
+    let bounties: [Bounty]
+    let shields: Int
+    let festival: Festival?
+    let term: Term
+    let missed: Int
+    let demonWakes: Int
+}
+
 /// The Go engine's handle. Go guards its own state, so the handle may be
 /// used from any thread.
 final class CoreHandle: @unchecked Sendable {
@@ -73,6 +108,7 @@ final class Engine {
         }
         do {
             handle = try await Self.open(wiki: wiki, progress: progress)
+            _ = try? await settings()
             await syncNow()
             await refresh()
         } catch {
@@ -96,6 +132,35 @@ final class Engine {
     func syncNow() async {
         guard handle != nil else { return }
         sync = .off("Sync with the Mac comes with signing in, which isn't built yet. Progress is kept on this iPhone.")
+    }
+
+    /// The learner's settings, shared with the Mac.
+    func settings() async throws -> AppSettings {
+        let s: AppSettings = try await call { h in
+            var error: NSError?
+            let json = h.core.settings(&error)
+            if let error { throw error }
+            return try JSONDecoder().decode(AppSettings.self, from: Data(json.utf8))
+        }
+        s.apply()
+        return s
+    }
+
+    /// Saves the learner's settings and applies them at once.
+    func saveSettings(_ s: AppSettings) async throws {
+        let json = String(decoding: try JSONEncoder().encode(s), as: UTF8.self)
+        try await call { h in try h.core.saveSettings(json) }
+        s.apply()
+    }
+
+    /// Camp's Today panel.
+    func today() async throws -> Today {
+        try await call { h in
+            var error: NSError?
+            let json = h.core.campToday(&error)
+            if let error { throw error }
+            return try JSONDecoder().decode(Today.self, from: Data(json.utf8))
+        }
     }
 
     /// The readings and journey episodes reached so far.

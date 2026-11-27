@@ -65,7 +65,8 @@ final class StudyUITests: XCTestCase {
         }
     }
 
-    /// Sound settings turn the voice off, and it stays off.
+    /// Settings turn the voice off, and it stays off: settings live in the
+    /// progress file, which also syncs them with the Mac.
     func testVoicesCanBeTurnedOff() throws {
         continueAfterFailure = false
         let app = XCUIApplication()
@@ -73,14 +74,17 @@ final class StudyUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.staticTexts["camp.due"].waitForExistence(timeout: 30))
         XCTAssertTrue(app.buttons["Read camp aloud"].exists)
-        app.buttons["Sound settings"].tap()
+        app.buttons["Settings"].tap()
         let voices = app.switches["Read Chinese aloud"]
         XCTAssertTrue(voices.waitForExistence(timeout: 5))
         if voices.value as? String == "1" { voices.switches.firstMatch.tap() }
         XCTAssertEqual(voices.value as? String, "0")
         app.terminate()
+        app.launchArguments = [] // keep the progress file, where settings live
         app.launch()
-        app.buttons["Sound settings"].tap()
+        XCTAssertTrue(app.staticTexts["camp.due"].waitForExistence(timeout: 30))
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.switches["Read Chinese aloud"].waitForExistence(timeout: 5))
         XCTAssertEqual(app.switches["Read Chinese aloud"].value as? String, "0", "the setting should be kept")
         app.switches["Read Chinese aloud"].switches.firstMatch.tap()
     }

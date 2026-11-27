@@ -59,8 +59,9 @@ final class StudySession {
     private let started = Date.now
     private var finished = false
 
-    /// Cards per session, so a big backlog comes in sittings.
-    static let size = 20
+    /// Cards per session, so a big backlog comes in sittings (the
+    /// learner's "words a sitting" setting).
+    static var size = 20
 
     init(mode: StudyMode, engine: Engine) {
         self.mode = mode
