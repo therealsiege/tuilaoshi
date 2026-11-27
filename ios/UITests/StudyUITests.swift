@@ -65,6 +65,26 @@ final class StudyUITests: XCTestCase {
         }
     }
 
+    /// Sound settings turn the voice off, and it stays off.
+    func testVoicesCanBeTurnedOff() throws {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-fresh-progress"]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["camp.due"].waitForExistence(timeout: 30))
+        XCTAssertTrue(app.buttons["Read camp aloud"].exists)
+        app.buttons["Sound settings"].tap()
+        let voices = app.switches["Read Chinese aloud"]
+        XCTAssertTrue(voices.waitForExistence(timeout: 5))
+        if voices.value as? String == "1" { voices.switches.firstMatch.tap() }
+        XCTAssertEqual(voices.value as? String, "0")
+        app.terminate()
+        app.launch()
+        app.buttons["Sound settings"].tap()
+        XCTAssertEqual(app.switches["Read Chinese aloud"].value as? String, "0", "the setting should be kept")
+        app.switches["Read Chinese aloud"].switches.firstMatch.tap()
+    }
+
     private func shot(_ app: XCUIApplication, _ name: String) {
         let a = XCTAttachment(screenshot: app.screenshot())
         a.name = name

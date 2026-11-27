@@ -6,6 +6,7 @@ struct SessionView: View {
     @State var session: StudySession
     @State private var drag = CGSize.zero
     @FocusState private var typing: Bool
+    @State private var shadowing: Card?
 
     var body: some View {
         VStack(spacing: 16) {
@@ -30,6 +31,9 @@ struct SessionView: View {
         .navigationBarTitleDisplayMode(.inline)
         .sensoryFeedback(.selection, trigger: session.index)
         .task { await session.load() }
+        .sheet(item: $shadowing) { card in
+            ShadowView(line: card.sentence ?? card.chinese, pinyin: card.sentence == nil ? card.pinyin : "")
+        }
         .onDisappear { Task { await session.finish() } }
     }
 
@@ -62,10 +66,10 @@ struct SessionView: View {
                     answer(card, showChinese: true)
                 }
             case .listening:
-                Button { Voice.say(card.chinese) } label: {
+                Button { Speaker.chinese(card.chinese) } label: {
                     Label("Play again", systemImage: "speaker.wave.2").font(.title2)
                 }
-                .onAppear { Voice.say(card.chinese) }
+                .onAppear { Speaker.chinese(card.chinese) }
                 if session.revealed { answer(card, showChinese: true) }
             case .sentence:
                 Text(card.cloze ?? "").font(.title2).multilineTextAlignment(.center)
@@ -92,6 +96,14 @@ struct SessionView: View {
             if let ex = card.examples?.first, session.mode != .sentence {
                 Text(ex.hasPrefix("- ") ? String(ex.dropFirst(2)) : ex).font(.callout).foregroundStyle(.secondary).multilineTextAlignment(.center)
             }
+            HStack(spacing: 20) {
+                Button { Speaker.chinese(card.sentence ?? card.chinese) } label: {
+                    Label("Read aloud", systemImage: "speaker.wave.2")
+                }
+                Button { shadowing = card } label: { Label("Shadow", systemImage: "mic") }
+            }
+            .font(.callout)
+            .padding(.top, 4)
         }
     }
 

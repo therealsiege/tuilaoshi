@@ -190,3 +190,23 @@ func TestFinishSessionCountsTowardTheStreak(t *testing.T) {
 		t.Error("an unknown session kind should be refused")
 	}
 }
+
+func TestShadowScoresByCharacter(t *testing.T) {
+	data, err := Shadow("我爱你。", "我爱")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got struct {
+		Chars []struct {
+			Char  string `json:"char"`
+			Heard bool   `json:"heard"`
+		} `json:"chars"`
+		Percent int `json:"percent"`
+	}
+	if err := json.Unmarshal([]byte(data), &got); err != nil {
+		t.Fatal(err)
+	}
+	if len(got.Chars) != 3 || got.Chars[0].Char != "我" || !got.Chars[1].Heard || got.Chars[2].Heard || got.Percent != 66 {
+		t.Errorf("shadow = %s; want 我 爱 heard, 你 missed, 66%%", data)
+	}
+}

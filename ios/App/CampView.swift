@@ -29,12 +29,32 @@ struct CampView: View {
         }
         .navigationTitle("营地 Camp")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if case .ready(let camp) = engine.status {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button { Speaker.chinese(readAloud(camp)) } label: { Image(systemName: "speaker.wave.2") }
+                        .accessibilityLabel("Read camp aloud")
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink { SoundSettingsView() } label: { Image(systemName: "gearshape") }
+                    .accessibilityLabel("Sound settings")
+            }
+        }
         .navigationDestination(for: Door.self) { door in
             switch door {
             case .study: StudyView()
             default: DoorView(door: door)
             }
         }
+    }
+
+    /// Camp's Chinese, as one passage to read aloud.
+    private func readAloud(_ camp: Camp) -> String {
+        var parts = ["今天是\(camp.term)。"]
+        if let s = camp.stage { parts.append("第\(s.number)难，\(s.name)，在\(s.location)。") }
+        parts.append("\(camp.party.joined(separator: "、"))在路上。")
+        return parts.joined()
     }
 
     private func header(_ camp: Camp) -> some View {
@@ -121,7 +141,7 @@ private struct ProgressSection: View {
         switch engine.sync {
         case .never: "Not synced with the Mac yet."
         case .off(let why): why
-        case .synced(let at): "Synced with the Mac through iCloud Drive \(at.formatted(.relative(presentation: .named)))."
+        case .synced(let at): "Synced with your other devices \(at.formatted(.relative(presentation: .named)))."
         case .failed(let why): why
         }
     }

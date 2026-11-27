@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/therealsiege/tuilaoshi/internal/episode"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
@@ -219,6 +220,25 @@ func (c *Core) Camp() (string, error) {
 		r := journey.Regions()[journey.RegionOf(s.Number)]
 		out.Stage = &campStage{Number: s.Number, Name: s.Name, English: s.English, Location: s.Location,
 			Region: r.Name, Demon: s.Opponent.Name, DemonEN: s.Opponent.English}
+	}
+	data, err := json.Marshal(out)
+	return string(data), err
+}
+
+// Shadow scores a line said back against the line, character by character,
+// as the Mac's shadowing does, and returns the result as JSON.
+func Shadow(line, heard string) (string, error) {
+	type char struct {
+		Char  string `json:"char"`
+		Heard bool   `json:"heard"`
+	}
+	sh := episode.CompareShadow(line, heard)
+	out := struct {
+		Chars   []char `json:"chars"`
+		Percent int    `json:"percent"`
+	}{Chars: []char{}, Percent: sh.Percent}
+	for _, c := range sh.Chars {
+		out.Chars = append(out.Chars, char{string(c.Char), c.Heard})
 	}
 	data, err := json.Marshal(out)
 	return string(data), err

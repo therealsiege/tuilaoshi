@@ -1,4 +1,3 @@
-import AVFoundation
 import SwiftUI
 
 /// A due card, as the Go engine's DueCards() reports it.
@@ -91,6 +90,7 @@ final class StudySession {
         guard let card else { return }
         do {
             try await engine.review(card.id, rating: rating)
+            (rating > 0 ? Cue.right : Cue.wrong).play()
             answers.append((card.id, rating > 0, rating))
             index += 1
             revealed = false
@@ -126,19 +126,5 @@ struct StudyView: View {
         }
         .navigationTitle("复习 Study")
         .navigationDestination(for: StudyMode.self) { SessionView(session: StudySession(mode: $0, engine: engine)) }
-    }
-}
-
-/// Speaks Chinese aloud with the system's Mandarin voice.
-@MainActor
-enum Voice {
-    private static let synth = AVSpeechSynthesizer()
-
-    static func say(_ text: String) {
-        let u = AVSpeechUtterance(string: text)
-        u.voice = AVSpeechSynthesisVoice(language: "zh-CN")
-        u.rate = AVSpeechUtteranceDefaultSpeechRate * 0.9
-        synth.stopSpeaking(at: .immediate)
-        synth.speak(u)
     }
 }

@@ -45,10 +45,10 @@ final class Engine {
         case failed(String)
     }
 
-    /// How progress last synced with the Mac through iCloud Drive.
+    /// How progress last synced with the other devices.
     enum SyncState: Equatable {
         case never
-        case off(String)  // iCloud Drive isn't available, and why
+        case off(String)  // sync isn't available, and why
         case synced(Date)
         case failed(String)
     }
@@ -57,12 +57,7 @@ final class Engine {
     private(set) var sync = SyncState.never
     private var handle: CoreHandle?
 
-    /// The iCloud container both the phone and the Mac use. On the Mac it
-    /// is ~/Library/Mobile Documents/iCloud~com~therealsiege~tuilaoshi/Documents,
-    /// the folder to give TUILAOSHI_SYNC_DIR.
-    nonisolated static let container = "iCloud.com.therealsiege.tuilaoshi"
-
-    /// This device's folder name in the shared one.
+    /// This device's name among the synced ones.
     nonisolated static let syncName = "iphone"
 
     /// Opens the wiki bundled in the app, keeping progress in Application Support.
@@ -95,20 +90,12 @@ final class Engine {
         }
     }
 
-    /// Merges the Mac's progress in and writes the phone's out, through
-    /// the iCloud Drive folder they share.
+    /// Merges the other devices' progress in and sends this one's out,
+    /// through the game's own server once signed in (#64). Until then
+    /// progress stays on this iPhone.
     func syncNow() async {
-        guard let handle else { return }
-        guard let root = await Self.syncRoot() else {
-            sync = .off("iCloud Drive is off or not signed in, so progress stays on this iPhone.")
-            return
-        }
-        do {
-            try await Self.sync(handle, root: root)
-            sync = .synced(.now)
-        } catch {
-            sync = .failed("Couldn't sync: \(error.localizedDescription)")
-        }
+        guard handle != nil else { return }
+        sync = .off("Sync with the Mac comes with signing in, which isn't built yet. Progress is kept on this iPhone.")
     }
 
     /// Up to limit cards due now.
@@ -158,13 +145,9 @@ final class Engine {
         return dir
     }
 
-    /// The Documents folder of the shared iCloud container, or nil when
-    /// iCloud Drive isn't available. Looking it up can block, so it runs
-    /// off the main thread.
-    nonisolated private static func syncRoot() async -> URL? {
-        FileManager.default.url(forUbiquityContainerIdentifier: container)?.appending(path: "Documents")
-    }
-
+    /// Merges every other device's exported progress under root into this
+    /// one, then writes this device's to root/syncName. The server fetches
+    /// and stores the folders; the merge is the engine's.
     nonisolated static func sync(_ handle: CoreHandle, root: URL) async throws {
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         try handle.core.sync(root.path, name: syncName)

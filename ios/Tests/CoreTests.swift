@@ -88,3 +88,13 @@ final class SyncTests: XCTestCase {
         XCTAssertFalse(try FileManager.default.contentsOfDirectory(atPath: export.path).isEmpty)
     }
 }
+
+/// Shadowing is scored by the Go engine, character by character.
+final class ShadowTests: XCTestCase {
+    func testALineSaidBackIsScoredByCharacter() throws {
+        let r = try Shadower.score(line: "我爱你。", heard: "我爱")
+        XCTAssertEqual(r.chars.map(\.char), ["我", "爱", "你"])
+        XCTAssertEqual(r.chars.map(\.heard), [true, true, false])
+        XCTAssertEqual(r.percent, 66)
+    }
+}
