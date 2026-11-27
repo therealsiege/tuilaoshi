@@ -4,7 +4,7 @@
   title_eng: Demon King of Confusion
   origin: A demon of the Water-Belly Cave (水脏洞) on Kanyuan Mountain who raided Flower-Fruit Mountain and carried off its monkeys while Sun Wukong was away training under Master Subhuti.
   powers: Commands a horde of minor demons and wields a massive iron blade
-  weakness: Sun Wukong flew to his cave, seized the demon's own blade and cut him down with it, his very first boss battle
+  weakness: Sun Wukong flew to his cave, seized the demon's own blade and cut him down with it, his very first battle
   chapter: Chapter 2
   art:
     - '    _/\_'
@@ -12,6 +12,20 @@
     - '  --\  /--'
     - '    |\/|'
     - '    /  \'
+- name: 斑斓虎
+  english: Striped Tiger
+  title: 斑斓猛虎
+  title_eng: The Striped Tiger of Two Boundary Mountain
+  origin: A great striped tiger that sprang out of the grass at the pilgrims below Two Boundary Mountain, just after Tang Sanzang freed Sun Wukong.
+  powers: Pounces from the long grass with a roar that sends horses bolting
+  weakness: Wukong drew his staff from his ear and killed it with one blow, then skinned it and wrapped the skin round his waist, the tiger-skin kilt he wears all the way west
+  chapter: Chapter 14
+  art:
+    - '   /\_/\'
+    - '  ( =o.o=)'
+    - '   ) ~~ ('
+    - '  /|||||\'
+    - ' (_|   |_)'
 - name: 白骨精
   english: White Bone Demon
   title: 尸魔
