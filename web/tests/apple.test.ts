@@ -55,7 +55,7 @@ describe("POST /api/auth/apple", () => {
   it("refuses someone not on the allow list", async () => {
     const res = await signIn(await appleToken({ sub: "555.stranger", email: "stranger@example.com", email_verified: true }));
     expect(res.status).toBe(403);
-    expect((await res.json()).error).toMatch(/allow list/);
+    expect((await res.json()).error).toMatch(/555\.stranger.*allow list/);
   });
 
   it("refuses an unverified email even if listed", async () => {

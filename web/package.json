@@ -12,7 +12,8 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "migrate": "node scripts/migrate.mjs"
+    "migrate": "node scripts/migrate.mjs",
+    "vercel-build": "node scripts/migrate.mjs && next build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.8.0",

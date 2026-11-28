@@ -41,7 +41,7 @@ To run the store tests against Postgres as well, give them a throwaway database 
 
 1. Create a Vercel project with root directory `web/`, and add a Neon Postgres database. It sets `DATABASE_URL`; use the pooled URL.
 2. Set the variables in `.env.example` in the project's environment settings. `SESSION_SECRET` should be 32+ random characters, for example from `openssl rand -base64 48`.
-3. Run the migrations against the database: `DATABASE_URL=... npm run migrate`. They are safe to repeat.
-4. Deploy.
+3. Migrations run on every Vercel build (`vercel-build`), so the database is ready when the server is; they are safe to repeat. To run them by hand: `DATABASE_URL=... npm run migrate`.
+4. Deploy: `vercel deploy --prod` from `web/` (the project is 1putt/tuilaoshi).
 
 Vercel caps request bodies at 4.5 MB, so `SYNC_MAX_BYTES` defaults to 4,000,000.
