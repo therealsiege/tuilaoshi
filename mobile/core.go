@@ -286,3 +286,11 @@ func PairingCode(server, token string) (string, error) {
 	code, _, err := remote.Client{Base: server, Token: token}.PairingCode(ctx)
 	return code, err
 }
+
+// DeleteAccount deletes the account on the game's server, with everything
+// it keeps for every device. The progress on this device stays.
+func DeleteAccount(server, token string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	return remote.Client{Base: server, Token: token}.DeleteAccount(ctx)
+}
