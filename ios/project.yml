@@ -27,6 +27,13 @@ targets:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: 推老师
+        # From the build settings: MARKETING_VERSION below, and the build
+        # number passed in by `make ios-archive` (git rev-list --count HEAD).
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # Only HTTPS to the game's server (Go's standard crypto/tls) plus
+        # Apple's Keychain and Sign in with Apple: exempt, no documentation.
+        ITSAppUsesNonExemptEncryption: false
         # The game's server (web/, Vercel project 1putt/tuilaoshi).
         TLSServer: https://tuilaoshi.vercel.app
         UILaunchScreen: {}
@@ -40,6 +47,11 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.therealsiege.tuilaoshi
         CODE_SIGN_STYLE: Automatic
+        # iPhone only: portrait-only on iPad would fail the upload's
+        # multitasking check, and iPad would need its own screenshots.
+        TARGETED_DEVICE_FAMILY: "1"
+        MARKETING_VERSION: 1.0.0
+        CURRENT_PROJECT_VERSION: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
   TuiLaoShiTests:
     type: bundle.unit-test

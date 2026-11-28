@@ -1,4 +1,4 @@
-.PHONY: build run test fmt check lint golden recordings launcher demonart freqlist proofsheet sweep reminder reminder-off ios ios-core ios-test clean
+.PHONY: build run test fmt check lint golden recordings launcher demonart freqlist proofsheet sweep reminder reminder-off ios ios-core ios-test ios-archive clean
 
 GOLANGCI_LINT = go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 
@@ -64,6 +64,20 @@ ios: ios-core
 ios-test: ios-core
 	cd ios && xcodegen generate && xcodebuild test -project TuiLaoShi.xcodeproj -scheme TuiLaoShi \
 		-destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath DerivedData -quiet
+
+# A Release archive for App Store Connect (ios/build/TuiLaoShi.xcarchive),
+# then the .ipa from it (ios/build/export) per ios/ExportOptions.plist. The
+# build number is the commit count. Signing needs the team's account in
+# Xcode; UNSIGNED=1 checks the archive builds without it and skips the export.
+IOS_BUILD_NUMBER = $(shell git rev-list --count HEAD)
+ios-archive: ios-core
+	cd ios && xcodegen generate && xcodebuild archive -project TuiLaoShi.xcodeproj -scheme TuiLaoShi \
+		-configuration Release -destination 'generic/platform=iOS' -archivePath build/TuiLaoShi.xcarchive \
+		-derivedDataPath DerivedData -quiet CURRENT_PROJECT_VERSION=$(IOS_BUILD_NUMBER) \
+		$(if $(UNSIGNED),CODE_SIGNING_ALLOWED=NO,-allowProvisioningUpdates)
+	$(if $(UNSIGNED),@echo "Unsigned archive: skipping the export.",cd ios && xcodebuild -exportArchive \
+		-archivePath build/TuiLaoShi.xcarchive -exportOptionsPlist ExportOptions.plist \
+		-exportPath build/export -allowProvisioningUpdates)
 
 # A daily study reminder at AT (a macOS notification), e.g. make reminder AT=19:00.
 reminder:
