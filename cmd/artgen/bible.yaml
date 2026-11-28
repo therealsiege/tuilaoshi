@@ -88,6 +88,22 @@ kinds:
       hair, dust and debris; energy effects (sweeping arcs behind weapons, sparks, shockwaves,
       and the magic fire, wind or light the scene names) that lead the eye to the clash.
       Fierce but never gory: no blood, wounds or severed parts.
+  sheet:
+    ratio: "16:9"
+    frame: >-
+      Picture: a character model sheet for animators, the one design every other picture of
+      this character copies. A plain, flat, very light warm-grey background with nothing on
+      it: no scenery, no ground, no props, no shadows but a soft one under the feet. Left to
+      right in a row, the same character exactly four times, full figure head to feet (or nose
+      to tail), at the same scale and standing in the same neutral pose, each from a different
+      side: from the front, in three-quarter view, from the side in full profile, and from the
+      back. Paint every part of them in every view, a tail included. Along the right-hand edge,
+      two close-ups: one of the face, head and shoulders, and one of the weapon, whole and
+      level, so every detail of it can be counted; it is the very same weapon the figures
+      hold, with the same count of teeth or rings, the same bands and the same ends (a
+      character with no weapon shows their saddle and bridle instead). Every view shows the
+      same face, build, costume, colours and weapon. No text, labels, arrows, numbers, rulers,
+      grids, colour swatches or panel borders.
   town:
     ratio: "9:16"
     frame: >-
@@ -143,44 +159,58 @@ characters:
     Tang Sanzang, the monk: a gentle, handsome man of about thirty with a shaven head and a calm,
     kind face. He wears plain grey-brown monk's robes under the brocade kasaya given to him by
     the Bodhisattva Guanyin: a crimson robe of patchwork panels edged in gold, set with small
-    jewels. He holds the nine-ringed monk's staff, a tall tin staff topped with nine loose
-    rings, and a string of wooden prayer beads. On formal occasions he wears the Vairocana
-    crown, a five-panelled monk's crown. He rides a white horse. He never fights.
+    jewels, a gold ring clasp at the left shoulder. He holds the nine-ringed monk's staff, a
+    tall plain pewter-grey staff taller than he is, its head an open, pointed, gourd-shaped
+    loop of metal with nine loose rings hung on it, and a string of dark wooden prayer beads.
+    His shaven head is bare: he wears the Vairocana crown, a five-panelled monk's crown, only
+    when a scene names it. Plain cloth shoes. He rides a white horse. He never fights.
   孙悟空: >-
     Sun Wukong, the Monkey King: a grown warrior, not a child or a cute cartoon monkey. Born
     from a stone; shorter than the other pilgrims (about shoulder height to Tang Sanzang) but
     adult, lean and hard-muscled, standing upright with a man's posture, a man's hands and a
     fighter's balance. Golden-brown fur, a hairless, sharp-beaked face like a thunder god with
     a mature, knowing, battle-worn expression, and
-    fiery golden eyes rimmed with red from forty-nine days in Laozi's furnace. A plain gold
-    band, the tightening fillet, circles his head. He wears a short tiger-skin kilt over a
-    plain cotton monk's tunic tied with a cord, and soft cloth boots. His weapon is the
-    As-You-Will Gold-Banded Staff: a plain black iron pole with a gold band at each end.
-    Restless, cocky, always about to move.
+    fiery golden eyes rimmed with red from forty-nine days in Laozi's furnace (a thin red rim
+    round each eye only, never a red mask or face paint). A plain gold band, the tightening
+    fillet, circles his head, with a small curl at the front. His costume, every piece always
+    there: a sleeveless off-white cotton monk's tunic worn over one shoulder and across his
+    chest like a sash, its skirt hanging to the knee; over it a short tiger-skin kilt, orange
+    with black stripes and a ragged fur edge; a knotted rope cord tied round the waist over
+    both; bare furred arms and legs below the kilt (no trousers, no sleeves, no armour); and
+    soft grey-beige cloth boots to mid-calf. A long monkey's tail. His weapon is the
+    As-You-Will Gold-Banded Staff: a plain black iron pole of even thickness, longer than he is
+    tall, with a short gold band capping each end. Restless, cocky, always about to move.
   猪八戒: >-
     Zhu Bajie, Pigsy: a big, stout man with a pig's head: a man's body, hands and bearing,
     and a face that is a pig's but with human expressions (a sly grin, lazy half-closed
     eyes). A long snout, huge fan-like ears, bristly dark skin and a round belly. Once Marshal
-    Tianpeng of Heaven's navy, and he still stands like an old soldier gone soft. He wears a dark blue-black monk's robe with a cloth belt, sleeves rolled up. He
-    carries the nine-toothed iron rake on a long handle over his shoulder: exactly nine long
-    iron teeth in one row. He wears plain cloth shoes. Lazy, greedy,
-    good-natured.
+    Tianpeng of Heaven's navy, and he still stands like an old soldier gone soft. Pink-brown
+    pig's skin with a few dark bristles. He wears a dark blue-black monk's robe to the shin
+    with a grey-beige cloth belt knotted at the front, sleeves rolled up to the elbow, white
+    leg wrappings and plain dark cloth shoes. He carries the nine-toothed iron rake on a long
+    wooden handle over his shoulder: the handle as long as he is tall, and on its end a dark
+    iron crossbar with exactly nine long, straight iron teeth in one row, never six, seven or
+    eight. Only one rake. Lazy, greedy, good-natured.
   沙悟净: >-
-    Sha Wujing, Sandy: a tall, gaunt, solemn man with an indigo-blue face, round staring
-    eyes, and a shock of bristling red hair and beard. Around his neck hangs a string of nine
-    small skulls from his years as a river ogre. He wears a plain monk's robe and carries
-    the pilgrims' luggage on a shoulder pole, and his weapon, the precious demon-quelling
-    staff: a long, straight staff of pale moon-tree wood wound with gold, with no blade or spade
-    at either end. Quiet and steady.
+    Sha Wujing, Sandy: a tall, gaunt, solemn man with indigo-blue skin on his face and hands,
+    round staring eyes, and a shock of bristling flame-red hair and a full red beard, always
+    showing, never covered by a cap, hood or headband. Around his neck hangs a string of nine
+    small skulls from his years as a river ogre. He wears a plain ochre-brown monk's robe with
+    a cloth belt and dark boots, and carries the pilgrims' luggage, cloth bundles and a rolled
+    mat tied to a shoulder pole (never a backpack). His weapon is the precious demon-quelling
+    staff: a long, perfectly straight staff of pale moon-tree wood, the same thickness from end
+    to end, with plain round-cut ends and gold bands wound round it near each end and at the
+    middle; no flared, knobbed or bone-shaped ends, no blade or spade. Quiet and steady.
   白龙马: >-
     Bai Longma, the White Dragon Horse: a dragon prince of the Western Sea turned into a
     horse, and it shows: a character, not an ordinary animal. A tall white horse with a proud,
     intelligent, almost human gaze and a prince's bearing; faint pearly dragon scales along
     his legs, neck and spine; a long silver-white mane and tail that flow like a dragon's,
-    with whisker-like tendrils at the muzzle and two small pale-gold horn buds on his brow; wearing a Tang-dynasty saddle (a
-    flat padded saddle over an embroidered saddle cloth, no horn) and a bridle of tooled
-    leather with gold fittings. In dragon form he is a long white dragon with silver
-    scales, a flowing mane and pale gold horns.
+    with whisker-like tendrils at the muzzle and two small pale-gold branching horns on his brow,
+    always showing; always saddled and bridled unless the scene says otherwise, with a
+    Tang-dynasty saddle (a flat padded brown leather saddle over an embroidered red and green
+    saddle cloth, no horn) and a bridle of tooled brown leather with gold fittings. In dragon
+    form he is a long white dragon with silver scales, a flowing mane and pale gold horns.
   混世魔王: >-
     The Havoc Demon King: a towering demon in a black-gold helmet, a black silk robe over
     black iron armour bound with leather straps, and patterned boots, gripping a huge broad
@@ -226,7 +256,8 @@ characters:
   牛魔王: >-
     The Bull Demon King: a huge demon with the head of a black bull and great curved horns,
     in black iron armour and a dark robe, wielding a mixed-iron cudgel: a long, plain, straight
-    rod of iron, with no spikes, knobs or blade. Once Sun Wukong's
+    rod of iron as long as he is tall, the same thickness from end to end like an iron pole,
+    with no spikes, knobs, pommel or blade; never a club, bat or mace. Once Sun Wukong's
     sworn brother. Met near the Flaming Mountain.
   蜘蛛精: >-
     The Spider Spirits: seven sisters of Silk Cave, beautiful women in pale silk robes, fully
@@ -313,9 +344,9 @@ characters:
   六耳猕猴: >-
     The Six-Eared Macaque, the false Sun Wukong: in every way the double of the Monkey King, a
     grown, lean, hard-muscled monkey warrior with golden-brown fur, a sharp hairless face,
-    fiery golden eyes, a plain gold band round his head, a short tiger-skin kilt over a plain
-    cotton monk's tunic tied with a cord, soft cloth boots and a black iron staff with a gold
-    band at each end. Only one thing gives him away, and only to a careful eye: six ears, two
+    fiery golden eyes, a plain gold band round his head, the same off-white monk's tunic worn
+    over one shoulder like a sash, a short tiger-skin kilt over it tied with a rope cord, bare
+    furred legs, soft cloth boots and a black iron staff with a gold band capping each end. Only one thing gives him away, and only to a careful eye: six ears, two
     small extra ears half hidden in the fur above the usual pair. A colder, crueller smile.
   九头虫: >-
     The Nine-Headed Prince Consort of the Jade-Waves Pond under Scattered Rock Mountain, son-in-law

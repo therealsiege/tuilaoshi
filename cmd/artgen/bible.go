@@ -178,6 +178,19 @@ func (p composer) portrait(name string) (Job, error) {
 		Prompt: p.join(k.Frame, desc, place, p.b.World, p.style(), p.b.Never)}, nil
 }
 
+// sheet is a character's model sheet: every side of them, their face and
+// their weapon, on a plain ground, painted from their sheet and kept to
+// their approved picture, so every later picture can copy one design.
+func (p composer) sheet(name string) (Job, error) {
+	desc, ok := p.b.Characters[name]
+	if !ok {
+		return Job{}, fmt.Errorf("no character sheet for %s", name)
+	}
+	k := p.b.Kinds["sheet"]
+	return Job{Kind: "sheet", Name: name, Ratio: k.Ratio, Subject: name,
+		Prompt: p.join(k.Frame, "Subject: "+desc, p.b.World, p.style(), p.b.Never)}, nil
+}
+
 func (p composer) region(id string) (journey.Region, int, error) {
 	for i, r := range p.c.Regions {
 		if r.ID == id || r.Name == id {
@@ -328,6 +341,10 @@ func (p composer) all(kind string) []string {
 				out = append(out, n)
 			}
 		}
+	case "sheet":
+		for _, c := range p.c.Companions {
+			out = append(out, c.Name)
+		}
 	case "vista", "map":
 		for _, r := range p.c.Regions {
 			out = append(out, r.ID)
@@ -356,6 +373,8 @@ func (p composer) job(kind, name string) (Job, error) {
 		return p.town(name)
 	case "scene":
 		return p.scene(name)
+	case "sheet":
+		return p.sheet(name)
 	}
 	kinds := make([]string, 0, len(p.b.Kinds))
 	for k := range p.b.Kinds {
