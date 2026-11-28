@@ -106,7 +106,7 @@ final class StudySession {
             index += 1
             revealed = false
             typed = ""
-            if card == nil { await finish() }
+            if self.card == nil { await finish() } // self.card: the local card is the one just rated
         } catch {
             self.error = "Couldn't save that answer: \(error.localizedDescription)"
         }
