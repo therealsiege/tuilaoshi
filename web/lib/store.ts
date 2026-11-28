@@ -23,7 +23,17 @@ export interface Store {
   // bump adds one to a counter unless it has reached cap; it returns the
   // new count, or null when the cap was already reached.
   bump(key: string, bucket: string, cap: number): Promise<number | null>;
+  // deleteAccount removes everything kept for user (exports, pairing codes,
+  // Claude counters) and moves its token version on, so every token issued
+  // before stops working. Deleting twice is harmless.
+  deleteAccount(user: string): Promise<void>;
+  // tokenVersion is the version a user's tokens must carry: 0 until the
+  // account is first deleted.
+  tokenVersion(user: string): Promise<number>;
 }
+
+// claudeKey names a user's Claude call counter (see app/api/claude).
+export const claudeKey = (user: string) => `claude:${user}`;
 
 interface Pairing {
   user: string;
@@ -36,6 +46,7 @@ export class MemoryStore implements Store {
   private pairings = new Map<string, Pairing>();
   private exports = new Map<string, Map<string, DeviceExport>>();
   private counters = new Map<string, number>();
+  private versions = new Map<string, number>();
 
   async createPairing(code: string, user: string, device: string, expiresAt: Date, now: Date) {
     const old = this.pairings.get(code);
@@ -72,5 +83,17 @@ export class MemoryStore implements Store {
     if (n >= cap) return null;
     this.counters.set(k, n + 1);
     return n + 1;
+  }
+
+  async deleteAccount(user: string) {
+    this.exports.delete(user);
+    for (const [code, p] of this.pairings) if (p.user === user) this.pairings.delete(code);
+    const prefix = `${claudeKey(user)}\u0000`;
+    for (const k of this.counters.keys()) if (k.startsWith(prefix)) this.counters.delete(k);
+    this.versions.set(user, (this.versions.get(user) ?? 0) + 1);
+  }
+
+  async tokenVersion(user: string) {
+    return this.versions.get(user) ?? 0;
   }
 }
