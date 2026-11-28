@@ -127,11 +127,24 @@ final class Engine {
     }
 
     /// Merges the other devices' progress in and sends this one's out,
-    /// through the game's own server once signed in (#64). Until then
-    /// progress stays on this iPhone.
+    /// through the game's own server once signed in. Until then progress
+    /// stays on this iPhone.
     func syncNow() async {
-        guard handle != nil else { return }
-        sync = .off("Sync with the Mac comes with signing in, which isn't built yet. Progress is kept on this iPhone.")
+        guard let handle else { return }
+        let server = Account.server
+        guard !server.isEmpty, let token = Keychain.read() else {
+            sync = .off(server.isEmpty
+                ? "Sync comes with the game's server, which isn't set up yet. Progress is kept on this iPhone."
+                : "Sign in (Settings) to sync with your other devices. Progress is kept on this iPhone.")
+            return
+        }
+        do {
+            try await Task.detached { try handle.core.sync(withServer: server, token: token, device: Self.syncName) }.value
+            sync = .synced(.now)
+            await refresh()
+        } catch {
+            sync = .failed("Couldn't sync: \(error.localizedDescription)")
+        }
     }
 
     /// The learner's settings, shared with the Mac.

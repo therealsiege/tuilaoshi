@@ -19,10 +19,16 @@ targets:
       - name: Copy the wiki (content only)
         script: ./copy-wiki.sh
         basedOnDependencyAnalysis: false
+    entitlements:
+      path: App/TuiLaoShi.entitlements
+      properties:
+        com.apple.developer.applesignin: [Default]
     info:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: 推老师
+        # The game's server (web/); empty until it is deployed.
+        TLSServer: ""
         UILaunchScreen: {}
         # Exports show in the Files app.
         UIFileSharingEnabled: true

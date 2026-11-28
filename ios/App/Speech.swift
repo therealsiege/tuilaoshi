@@ -242,6 +242,7 @@ struct SettingsView: View {
                         Text("Sterner").tag("sterner")
                     }
                 }
+                AccountSection()
                 Section { Text("Settings travel with your progress, so the Mac game uses them too.").font(.footnote).foregroundStyle(.secondary) }
             } else if let error {
                 Text(error).foregroundStyle(Theme.cinnabar)

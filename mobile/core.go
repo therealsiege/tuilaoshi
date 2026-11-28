@@ -4,6 +4,7 @@
 package mobile
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"path/filepath"
@@ -12,6 +13,7 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/episode"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/remote"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
@@ -244,4 +246,34 @@ func Shadow(line, heard string) (string, error) {
 	}
 	data, err := json.Marshal(out)
 	return string(data), err
+}
+
+// SignInWithApple trades the identity token from Sign in with Apple for
+// this device's session with the game's server, as JSON (token, device,
+// expiresAt).
+func SignInWithApple(server, identityToken, device string) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	s, err := remote.SignInWithApple(ctx, server, identityToken, device)
+	if err != nil {
+		return "", err
+	}
+	data, err := json.Marshal(s)
+	return string(data), err
+}
+
+// SyncWithServer merges the other devices' progress from the game's server
+// and uploads this device's.
+func (c *Core) SyncWithServer(server, token, device string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	return remote.Client{Base: server, Token: token}.Sync(ctx, c.store, device)
+}
+
+// PairingCode asks the server for a code the Mac claims with -pair.
+func PairingCode(server, token string) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	code, _, err := remote.Client{Base: server, Token: token}.PairingCode(ctx)
+	return code, err
 }

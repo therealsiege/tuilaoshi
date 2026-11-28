@@ -26,6 +26,8 @@
 	<string>Shadowing listens while you say a line back, to show which characters were heard.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Shadowing turns what you say into Chinese text, on this iPhone where it can, to score it by character.</string>
+	<key>TLSServer</key>
+	<string></string>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchScreen</key>

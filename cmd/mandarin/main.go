@@ -21,7 +21,18 @@ func main() {
 	deck := flag.String("deck", "", "write your studied and hard words to this CSV file for Anki or Pleco, then exit")
 	syncDir := flag.String("sync", os.Getenv(SyncDirEnv), "a shared folder (iCloud Drive, say) to sync progress through with your other Macs; alone, sync once and exit")
 	remindNow := flag.Bool("remind", false, "show today's study reminder as a notification, then exit (make reminder schedules it)")
+	pairCode := flag.String("pair", "", "pair this Mac with your account using the code the iPhone app shows, so progress syncs through the game's server; then exit")
+	server := flag.String("server", os.Getenv(ServerEnv), "the game's server, for -pair")
 	flag.Parse()
+
+	if *pairCode != "" {
+		if err := pair(*server, *pairCode); err != nil {
+			fmt.Fprintf(os.Stderr, "mandarin: pair: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Println("Paired: progress now syncs with your other devices when TuiLaoShi starts and quits.")
+		return
+	}
 
 	dir, err := filepath.Abs(*wikiDir)
 	if err != nil {
@@ -33,7 +44,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	if syncOnly := isFlagSet("sync"); syncOnly || *syncDir != "" {
+	paired, err := loadSession()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "mandarin: %v\n", err)
+	}
+	if syncOnly := isFlagSet("sync"); syncOnly || *syncDir != "" || paired != nil {
 		if err := syncProgress(dir, *syncDir); err != nil {
 			fmt.Fprintf(os.Stderr, "mandarin: sync: %v\n", err)
 			if syncOnly {

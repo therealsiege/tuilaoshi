@@ -5,6 +5,7 @@ import SwiftUI
 @main
 struct TuiLaoShiApp: App {
     @State private var engine = Engine()
+    @State private var account = Account()
     @Environment(\.scenePhase) private var phase
 
     var body: some Scene {
@@ -13,6 +14,7 @@ struct TuiLaoShiApp: App {
                 CampView()
             }
             .environment(engine)
+            .environment(account)
             .tint(Theme.cinnabar)
             .task { await engine.open() }
             .onChange(of: phase) { _, now in
