@@ -11,7 +11,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/therealsiege/tuilaoshi/internal/claude"
-	"github.com/therealsiege/tuilaoshi/internal/model"
 	"github.com/therealsiege/tuilaoshi/internal/ui/uitest"
 )
 
@@ -122,28 +121,6 @@ func TestStorytellerErrorIsShown(t *testing.T) {
 	m, _ = m.Update(cmd())
 	if m.telling || !strings.Contains(m.status, "overloaded") || len(m.chapters) != 0 {
 		t.Errorf("after an error: telling %v, status %q, chapters %d", m.telling, m.status, len(m.chapters))
-	}
-}
-
-func TestSentences(t *testing.T) {
-	got := sentences("他说：“走吧！”我们走了。真的？\n好。")
-	want := []string{"他说：“走吧！”", "我们走了。", "真的？", "好。"}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("sentences %q, want %q", got, want)
-	}
-}
-
-func TestKnownWordsPreferLearnedAndEasyWords(t *testing.T) {
-	pages := []model.Page{{Path: "vocabulary/easy.md", Level: "HSK2"}, {Path: "vocabulary/hard.md", Level: "HSK6"}}
-	cards := []model.Card{
-		{ID: "vocabulary/easy.md#吃饭", Chinese: "吃饭"},
-		{ID: "vocabulary/hard.md#踌躇", Chinese: "踌躇"},
-		{ID: "vocabulary/hard.md#斟酌", Chinese: "斟酌", ReviewInterval: 365},
-		{ID: "grammar/ba.md", Type: model.CardGrammar, Chinese: "把", ReviewInterval: 365},
-	}
-	got := knownWords(cards, pages)
-	if !reflect.DeepEqual(got, []string{"斟酌", "吃饭"}) {
-		t.Errorf("known words %q; want the learned word, then the HSK2 one", got)
 	}
 }
 

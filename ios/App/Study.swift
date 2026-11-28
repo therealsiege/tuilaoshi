@@ -54,6 +54,10 @@ final class StudySession {
     private(set) var error: String?
     var revealed = false
     var typed = ""
+    /// Claude's view of a typed answer that wasn't exact, once asked.
+    private(set) var claudeGrade: ClaudeGrade?
+    private(set) var askingClaude = false
+    private(set) var claudeNote: String?
 
     private let engine: Engine
     private let started = Date.now
@@ -78,6 +82,22 @@ final class StudySession {
 
     /// For production: the typed answer is exactly the word.
     var typedRight: Bool { typed.trimmingCharacters(in: .whitespaces) == card?.chinese }
+
+    /// Asks Claude about a typed answer that wasn't exact, as the Mac's
+    /// drill does; its suggested rating is the learner's to take or not.
+    func askClaude(via claude: ClaudeSession) async {
+        guard let card, !askingClaude else { return }
+        askingClaude = true
+        claudeNote = nil
+        defer { askingClaude = false }
+        do {
+            let answer = typed.trimmingCharacters(in: .whitespaces)
+            let grade = try await engine.gradeAnswer(card: card.id, answer: answer, mode: mode, via: claude)
+            if self.card?.id == card.id { claudeGrade = grade }
+        } catch {
+            claudeNote = ClaudeTrouble.explain(error)
+        }
+    }
 
     func load() async {
         if let preset {
@@ -106,6 +126,8 @@ final class StudySession {
             index += 1
             revealed = false
             typed = ""
+            claudeGrade = nil
+            claudeNote = nil
             if card == nil { await finish() }
         } catch {
             self.error = "Couldn't save that answer: \(error.localizedDescription)"

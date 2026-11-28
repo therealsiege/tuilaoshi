@@ -193,7 +193,7 @@ final class Engine {
     func progress() async throws -> ProgressReport { try await decode(ProgressReport.self) { h, e in h.core.progress(e) } }
 
     /// Calls a JSON-returning engine method off the main thread and decodes it.
-    private func decode<T: Decodable & Sendable>(_: T.Type, _ get: @Sendable @escaping (CoreHandle, NSErrorPointer) -> String) async throws -> T {
+    func decode<T: Decodable & Sendable>(_: T.Type, _ get: @Sendable @escaping (CoreHandle, NSErrorPointer) -> String) async throws -> T {
         try await call { h in
             var error: NSError?
             let json = get(h, &error)
@@ -251,7 +251,7 @@ final class Engine {
     }
 
     /// Runs work against the engine off the main thread.
-    private func call<T: Sendable>(_ work: @Sendable @escaping (CoreHandle) throws -> T) async throws -> T {
+    func call<T: Sendable>(_ work: @Sendable @escaping (CoreHandle) throws -> T) async throws -> T {
         guard let handle else { throw CocoaError(.fileNoSuchFile) }
         return try await Task.detached { try work(handle) }.value
     }

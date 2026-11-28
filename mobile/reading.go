@@ -70,7 +70,8 @@ func (c *Core) reachedEpisodes() ([]model.Episode, error) {
 	return journey.ReachedEpisodes(journey.Pilgrimage(pages, cleared).Tribulation), nil
 }
 
-// Reading opens one item from Readings as JSON: its title and its lines
+// Reading opens one item from Readings, or a told chapter ("story:N",
+// see Storyteller), as JSON: its title and its lines
 // split into words, each word glossed by the text's own vocabulary first
 // and then the learner's decks.
 func (c *Core) Reading(id string) (string, error) {
@@ -87,6 +88,11 @@ func (c *Core) Reading(id string) (string, error) {
 		title, vocab = p.Title, wiki.ReadingVocab(p)
 		for _, l := range wiki.ReadingText(p.Body) {
 			lines = append(lines, readingLine{Tokens: []token{{Text: l}}})
+		}
+	case "story":
+		var err error
+		if title, lines, vocab, err = c.storyReading(key); err != nil {
+			return "", err
 		}
 	case "episode":
 		eps, err := c.reachedEpisodes()

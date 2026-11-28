@@ -13,6 +13,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/therealsiege/tuilaoshi/internal/audio"
+	"github.com/therealsiege/tuilaoshi/internal/camp"
 	"github.com/therealsiege/tuilaoshi/internal/claude"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
@@ -129,7 +130,7 @@ func (m Model) Refresh() Model {
 	m.loadErr = errors.Join(readErr, cardsErr, privErr, pagesErr, clearedErr, toldErr)
 	// A chapter told while the learner was away was saved, though its reply
 	// never reached this screen, so stop waiting for it.
-	m.chapters, m.known, m.story, m.telling = told, knownWords(cards, pages), false, false
+	m.chapters, m.known, m.story, m.telling = told, camp.KnownWords(cards, pages), false, false
 	m.items = nil
 	for i := range readings {
 		m.items = append(m.items, item{title: readings[i].Title, tag: readings[i].Level, page: &readings[i]})

@@ -6,13 +6,13 @@ package diary
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/camp"
 	"github.com/therealsiege/tuilaoshi/internal/claude"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
@@ -20,17 +20,8 @@ import (
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
-// Morale an entry lifts, by its grade (1 or 2).
-var gradeMorale = map[int]int{1: 5, 2: 10}
-
-// The task and what an entry must do, for the grader.
-const (
-	task     = "写一篇简短的旅行日记：今天是取经路上的第%d天。写两三句话，说说今天走到了哪里、遇到了什么、心情怎么样。 (Write a short travel diary entry for day %d on the road west: two or three sentences on where you went, what happened and how you felt.)"
-	criteria = "Two to four sentences of Chinese, in the first person, about a day on the journey west. Score 2 for natural, mostly correct writing; 1 for understandable writing with clear errors; 0 for writing that is not Chinese, off the task, or under two sentences."
-)
-
 // Grader grades Chinese written for a task against criteria, 0-2, with feedback.
-type Grader func(ctx context.Context, task, criteria, answer string) (int, string, error)
+type Grader = camp.Grader
 
 type gradeMsg struct {
 	score    int
@@ -143,9 +134,9 @@ func (m Model) submit() (Model, tea.Cmd) {
 		return m, nil
 	}
 	m.grading, m.feedback, m.note = true, "", ""
-	grader, prompt := m.grader, fmt.Sprintf(task, m.day, m.day)
+	grader, prompt := m.grader, camp.DiaryTask(m.day)
 	return m, func() tea.Msg {
-		score, fb, err := grader(context.Background(), prompt, criteria, text)
+		score, fb, err := grader(context.Background(), prompt, camp.DiaryCriteria, text)
 		return gradeMsg{score, fb, err}
 	}
 }
@@ -163,20 +154,7 @@ func (m Model) onGrade(msg gradeMsg) Model {
 		return m
 	}
 	e := wiki.DiaryEntry{Date: m.now().Format("2006-01-02"), Day: m.day, Text: strings.TrimSpace(m.input.Value()), Score: msg.score, Feedback: msg.feedback}
-	if err := m.store.WriteDiary(e); err != nil {
-		m.loadErr = err
-		return m
-	}
-	cleared, err := m.store.ClearedStages()
-	if err == nil {
-		var t journey.Trail
-		var members []string
-		if t, members, err = journey.LoadTrail(m.store, cleared); err == nil {
-			t.Apply(journey.Outcome{Morale: gradeMorale[msg.score]}, members)
-			err = m.store.SaveTrail(t)
-		}
-	}
-	m.loadErr = err
+	m.loadErr = camp.KeepDiaryEntry(m.store, e)
 	m.entries = append(m.entries, e)
 	m.written, m.passed = true, msg.score
 	m.input.Blur()

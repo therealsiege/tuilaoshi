@@ -57,7 +57,7 @@ func TestEveryCallGoesThroughTheMeter(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if f != "usage.go" && !strings.HasSuffix(f, "_test.go") && strings.Contains(string(data), "Messages.New(") {
+		if f != "usage.go" && !strings.HasSuffix(f, "_test.go") && (strings.Contains(string(data), "Messages.New(") || strings.Contains(string(data), "Messages.NewStreaming(")) {
 			t.Errorf("%s calls Claude directly; use c.send", f)
 		}
 	}

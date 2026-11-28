@@ -44,6 +44,7 @@ FEEDBACK: Brief feedback in Chinese with English translation. If wrong, give the
 // Client wraps the Anthropic API for drill evaluation and chat.
 type Client struct {
 	client anthropic.Client
+	server bool // through the game's server (see server.go), not an API key
 
 	// Meter, when set, is asked before each call and told what each call
 	// used (see usage.go).
