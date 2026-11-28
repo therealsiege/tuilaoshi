@@ -23,6 +23,7 @@ import (
 	"flag"
 	"fmt"
 	"image"
+	_ "image/jpeg" // Gemini returns JPEG, whatever the file is named
 	"image/png"
 	"os"
 	"path/filepath"
@@ -221,11 +222,11 @@ func attach(j Job, out, direction string) (string, [][]byte) {
 	return prompt, refs
 }
 
-// shrink re-encodes a PNG at most width pixels wide, averaging each block
-// of pixels, so large pictures can be attached without overflowing the
-// request.
+// shrink re-encodes a PNG or JPEG as a PNG at most width pixels wide,
+// averaging each block of pixels, so large pictures can be attached without
+// overflowing the request.
 func shrink(data []byte, width int) ([]byte, error) {
-	src, err := png.Decode(bytes.NewReader(data))
+	src, _, err := image.Decode(bytes.NewReader(data))
 	if err != nil {
 		return nil, err
 	}

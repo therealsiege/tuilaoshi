@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/jpeg"
 	"image/png"
 	"os"
 	"path/filepath"
@@ -148,6 +149,18 @@ func TestShrinkAveragesAndKeepsColour(t *testing.T) {
 	}
 	if same, _ := shrink(big, 100); !bytes.Equal(same, big) {
 		t.Error("a picture already narrow enough should be kept as it is")
+	}
+	// Gemini's pictures are JPEG even when named .png: they shrink to a PNG.
+	var jpg bytes.Buffer
+	if err := jpeg.Encode(&jpg, image.NewRGBA(image.Rect(0, 0, 30, 30)), nil); err != nil {
+		t.Fatal(err)
+	}
+	fromJPEG, err := shrink(jpg.Bytes(), 15)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c, err := png.DecodeConfig(bytes.NewReader(fromJPEG)); err != nil || c.Width != 15 {
+		t.Errorf("a JPEG should shrink to a 15 px PNG, got %v, %v", c.Width, err)
 	}
 	if _, err := shrink([]byte("not a png"), 10); err == nil {
 		t.Error("a broken picture should be an error")
