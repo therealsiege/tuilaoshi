@@ -1,13 +1,14 @@
 // Package road holds the rules of walking a region's tile map, shared by
 // the Mac's map (internal/ui/roam) and the phone (mobile): what a step
 // meets, the doors between regions, the tribulations and crossings that
-// bar the way, towns, and the encounters of wild ground. Where the pilgrim
-// stands is saved with the journey.
+// bar the way, towns, and the encounters of wild ground; the trail's days
+// and supplies (trail.go), the day's events and crossings (events.go),
+// demons overheard plotting (plots.go) and the grammar gates before the
+// lairs (gate.go). Where the pilgrim stands is saved with the journey.
 //
 // A step is two halves: Move goes onto the next cell (or is stopped, or
-// travels through a door), and Arrive says what the cell holds. The Mac
-// passes the trail's day between them (see roam's trail.go); Step does
-// both at once.
+// travels through a door), and Arrive says what the cell holds. Walked
+// passes the trail's day between them; Step does Move and Arrive alone.
 package road
 
 import (
@@ -71,8 +72,9 @@ type Walk struct {
 	Cleared map[int]string // the stages won
 	Counts  journey.Counts
 	Stage   *journey.Stage // the stage being worked on; nil once all are cleared
-	Crossed []string       // regions whose obstacle is behind the party
 	Gates   []string       // regions whose grammar gate is passed
+	Trail   journey.Trail  // days, supplies and the party's health (see trail.go)
+	Members []string       // the party walking
 }
 
 // Load reads the journey and puts the pilgrim where they last stood, or
@@ -83,8 +85,8 @@ func Load(store *wiki.Store) (Walk, error) {
 	cleared, clearedErr := store.ClearedStages()
 	place, placeErr := store.Place()
 	gates, gatesErr := store.GrammarGates()
-	trail, _, trailErr := journey.LoadTrail(store, cleared)
-	w := Walk{Store: store, Cleared: cleared, Gates: gates, Crossed: trail.Crossed}
+	trail, members, trailErr := journey.LoadTrail(store, cleared)
+	w := Walk{Store: store, Cleared: cleared, Gates: gates, Trail: trail, Members: members}
 	err := errors.Join(pagesErr, clearedErr, placeErr, gatesErr, trailErr)
 	w.Counts = journey.CountProgress(pages)
 	w.Stage = journey.CurrentStage(journey.Stages(w.Counts, cleared))
@@ -198,7 +200,7 @@ func (w Walk) StageCleared(p journey.Point) bool {
 }
 
 // HasCrossed reports whether this region's obstacle is behind the party.
-func (w Walk) HasCrossed() bool { return slices.Contains(w.Crossed, w.Region.Region.ID) }
+func (w Walk) HasCrossed() bool { return slices.Contains(w.Trail.Crossed, w.Region.Region.ID) }
 
 // GatePassed reports whether this region's lair is free to fight: its
 // gate is passed, or it has none.

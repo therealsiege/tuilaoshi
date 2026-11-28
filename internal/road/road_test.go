@@ -143,7 +143,7 @@ func TestTheCrossingBarsTheRoadUntilCrossed(t *testing.T) {
 	if !strings.HasPrefix(o.Event.Text, w.Region.Crossing.Name+"：") || len(o.Event.Choices) == 0 {
 		t.Errorf("the crossing's event: %+v", o.Event)
 	}
-	w.Crossed = []string{w.Region.Region.ID}
+	w.Trail.Crossed = []string{w.Region.Region.ID}
 	if w, o = from(t, w, w.Region.CrossAt); o.Kind != Moved || w.Pos != w.Region.CrossAt {
 		t.Errorf("a crossed river: %+v at %v", o, w.Pos)
 	}

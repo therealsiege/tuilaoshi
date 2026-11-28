@@ -10,14 +10,16 @@ import (
 
 	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
+	"github.com/therealsiege/tuilaoshi/internal/road"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 )
 
 // Overheard demons (妖怪密谋): some nights two demons are heard plotting an
 // ambush, each in their own voice. The learner answers where or when they
 // will strike; answered rightly, the party is forewarned and the next
-// danger on the road does half its harm. With audio the Chinese stays
-// hidden until answered (listening); without, it is shown (reading).
+// danger on the road does half its harm (the road package's plots.go has
+// the rules). With audio the Chinese stays hidden until answered
+// (listening); without, it is shown (reading).
 
 // plotRoll draws 0-99 against journey.PlotChance; tests fix it.
 var plotRoll = func() int { return rand.Intn(100) }
@@ -31,21 +33,11 @@ type overheard struct {
 }
 
 // right reports whether the answer given was the right one.
-func (p *overheard) right() bool { return p.chose >= 0 && p.order[p.chose] == 0 }
-
-// maybePlot may bring demons plotting at the end of a day without an
-// event, unless the party is already forewarned.
-func (m Model) maybePlot() Model {
-	if m.event != nil || m.trail.Forewarned || len(journey.Plots()) == 0 || plotRoll() >= journey.PlotChance {
-		return m
-	}
-	rng := rand.New(rand.NewSource(rand.Int63()))
-	return m.overhear(journey.PickPlot(rng), rng)
-}
+func (p *overheard) right() bool { return road.Right(p.order, p.chose) }
 
 // overhear opens a plot, its choices shuffled by rng.
 func (m Model) overhear(p journey.Plot, rng *rand.Rand) Model {
-	m.plot = &overheard{Plot: p, order: rng.Perm(len(p.Choices)), chose: -1, heard: ui.Audible(m.tts)}
+	m.plot = &overheard{Plot: p, order: road.Shuffled(p, rng), chose: -1, heard: ui.Audible(m.tts)}
 	return m
 }
 
@@ -85,10 +77,11 @@ func (m Model) updatePlot(k tea.KeyMsg) (Model, tea.Cmd) {
 		return m, nil
 	}
 	p.chose = int(s[0] - '1')
-	if p.right() {
-		m.trail.Forewarned = true
-		m.saveTrail()
+	w := m.walk()
+	if _, err := w.Answer(p.order, p.chose); err != nil {
+		m.loadErr = err
 	}
+	m.trail = w.Trail
 	return m, nil
 }
 
@@ -153,13 +146,4 @@ func (m Model) plotView() string {
 	}
 	b.WriteString("\n" + ui.HelpStyle.Render("  enter walk on"))
 	return b.String()
-}
-
-// plotText is the demons' Chinese, line by line, for ctrl+r.
-func (p *overheard) plotText() string {
-	var lines []string
-	for _, l := range p.Lines {
-		lines = append(lines, l.Text)
-	}
-	return strings.Join(lines, "\n")
 }

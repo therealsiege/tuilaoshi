@@ -2,9 +2,7 @@ package roam
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
-	"slices"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -12,22 +10,23 @@ import (
 
 	"github.com/therealsiege/tuilaoshi/internal/claude"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
+	"github.com/therealsiege/tuilaoshi/internal/road"
 	"github.com/therealsiege/tuilaoshi/internal/ui/input"
 )
 
 // Grammar gates (语法关): before a region's demon's lair can be fought,
 // the learner passes the grammar pattern guarding it by building five
-// sentences with it. The first rounds lay word tiles in order (number keys
-// choose, backspace undoes); with Claude the last is a sentence of their
-// own, typed with the pinyin input, which passes when it keeps the
-// pattern's simple rules and Claude judges it right. Without a key the
-// five rounds are all tiles.
+// sentences with it (the road package's gate.go has the rules). The first
+// rounds lay word tiles in order (number keys choose, backspace undoes);
+// with Claude the last is a sentence of their own, typed with the pinyin
+// input, which passes when it keeps the pattern's simple rules and Claude
+// judges it right. Without a key the five rounds are all tiles.
 
 // Grader grades Chinese written for a task against criteria, 0-2, with feedback.
 type Grader func(ctx context.Context, task, criteria, answer string) (int, string, error)
 
 // gateRounds is how many sentences pass a gate.
-const gateRounds = 5
+const gateRounds = road.GateRounds
 
 // gateRand seeds a gate's choice of sentences and its shuffles; tests fix it.
 var gateRand = func() *rand.Rand { return rand.New(rand.NewSource(rand.Int63())) }
@@ -39,7 +38,8 @@ type gateGradeMsg struct {
 	err      error
 }
 
-// gateRun is a gate being taken.
+// gateRun is a gate being taken: the road's rules (road.Gate) with what
+// the screen adds.
 type gateRun struct {
 	journey.GrammarGate
 	rng      *rand.Rand
@@ -53,36 +53,35 @@ type gateRun struct {
 	grading  bool   // the typed sentence is with Claude
 }
 
+// rules is the gate as the road's rules see it.
+func (g *gateRun) rules() *road.Gate {
+	return &road.Gate{GrammarGate: g.GrammarGate, Rng: g.rng, Rounds: g.rounds, Round: g.round,
+		Tiles: g.tiles, Picked: g.picked, Misses: g.misses, Note: g.note}
+}
+
+// keep takes back what the rules changed.
+func (g *gateRun) keep(r *road.Gate) {
+	g.rounds, g.round, g.tiles, g.picked, g.misses, g.note = r.Rounds, r.Round, r.Tiles, r.Picked, r.Misses, r.Note
+}
+
 // passed reports whether every round is done.
-func (g *gateRun) passed() bool { return g.round >= gateRounds }
+func (g *gateRun) passed() bool { return g.rules().Passed() }
 
 // typed reports whether this round is the sentence of the learner's own.
-func (g *gateRun) typed() bool { return !g.passed() && g.round >= len(g.rounds) }
+func (g *gateRun) typed() bool { return g.rules().Typed() }
 
 // sentence is the tile round's sentence.
-func (g *gateRun) sentence() journey.TileSentence { return g.Sentences[g.rounds[g.round]] }
+func (g *gateRun) sentence() journey.TileSentence { return g.rules().Sentence() }
 
 // shuffle lays the round's tiles out afresh, never in the right order.
 func (g *gateRun) shuffle() {
-	s := g.sentence()
-	g.picked = nil
-	for {
-		g.tiles = g.rng.Perm(len(s.Words))
-		if len(s.Words) < 2 || !s.Fits(g.chosen(g.tiles)) {
-			return
-		}
-	}
+	r := g.rules()
+	r.Shuffle()
+	g.keep(r)
 }
 
 // chosen is the words of the shown tiles at positions, in that order.
-func (g *gateRun) chosen(positions []int) []string {
-	s := g.sentence()
-	words := make([]string, len(positions))
-	for i, p := range positions {
-		words[i] = s.Words[g.tiles[p]]
-	}
-	return words
-}
+func (g *gateRun) chosen(positions []int) []string { return g.rules().Chosen(positions) }
 
 // WithWriting lets the gate's last round be typed (dict for the pinyin
 // input) and judged by Claude; client nil keeps the gates to tiles.
@@ -110,14 +109,9 @@ func (m Model) gatePassed() bool { return m.walk().GatePassed() }
 
 // openGate starts the region's grammar gate from its first round.
 func (m Model) openGate() Model {
-	g, _ := journey.GrammarGateFor(m.region.Region.ID)
-	tiles := gateRounds
-	if m.grader != nil {
-		tiles-- // the last round is typed
-	}
-	rng := gateRand()
-	run := &gateRun{GrammarGate: g, rng: rng, rounds: rng.Perm(len(g.Sentences))[:min(tiles, len(g.Sentences))]}
-	run.shuffle()
+	r, _ := road.OpenGate(m.region.Region.ID, m.grader != nil, gateRand())
+	run := &gateRun{GrammarGate: r.GrammarGate, rng: r.Rng}
+	run.keep(&r)
 	m.gate, m.note = run, ""
 	return m
 }
@@ -138,65 +132,40 @@ func (m Model) updateGate(k tea.KeyMsg) (Model, tea.Cmd) {
 		m.gate, m.note = nil, "The grammar gate waits before the lair."
 		return m, nil
 	case k.Type == tea.KeyBackspace:
-		if len(g.picked) > 0 {
-			g.picked = g.picked[:len(g.picked)-1]
-		}
+		r := g.rules()
+		r.Undo()
+		g.keep(r)
 		return m, nil
 	}
 	s := k.String()
 	if len(s) != 1 || s[0] < '1' || s[0] > '9' {
 		return m, nil
 	}
-	p := int(s[0] - '1')
-	if p >= len(g.tiles) || slices.Contains(g.picked, p) {
+	r := g.rules()
+	laid := r.Lay(int(s[0] - '1'))
+	g.keep(r)
+	if laid != road.LaidRight {
 		return m, nil
 	}
-	g.picked = append(g.picked, p)
-	if len(g.picked) < len(g.tiles) {
-		return m, nil
-	}
-	sentence := g.sentence()
-	if sentence.Fits(g.chosen(g.picked)) {
-		g.note = "对！" + strings.Join(g.chosen(g.picked), "") + " " + sentence.English
-		return m.nextGateRound()
-	}
-	g.misses++
-	g.note = "不对. The tiles are shuffled again: try once more."
-	if g.misses >= 3 {
-		g.note += " It reads: " + sentence.Text()
-	}
-	g.shuffle()
-	return m, nil
-}
-
-// nextGateRound moves on a round: the next tiles, the typed round, or
-// through the gate.
-func (m Model) nextGateRound() (Model, tea.Cmd) {
-	g := m.gate
-	g.round++
-	g.misses = 0
 	switch {
 	case g.passed():
 		m.passGate()
 	case g.typed():
 		m.gateIn.Reset()
 		return m, m.gateIn.Focus()
-	default:
-		g.shuffle()
 	}
 	return m, nil
 }
 
 // passGate records the gate passed for this journey.
 func (m *Model) passGate() {
-	id := m.region.Region.ID
-	if err := m.store.PassGrammarGate(id); err != nil {
+	w := m.walk()
+	r := m.gate.rules()
+	if err := w.PassGate(r); err != nil {
 		m.loadErr = err
 	}
-	if !slices.Contains(m.gates, id) {
-		m.gates = append(m.gates, id)
-	}
-	m.gate.round = gateRounds
+	m.gates = w.Gates
+	m.gate.keep(r)
 	m.gateIn.Blur()
 }
 
@@ -226,14 +195,14 @@ func (m Model) submitGate() (Model, tea.Cmd) {
 	if text == "" || g.grading || m.grader == nil {
 		return m, nil
 	}
-	if !g.Uses(text) {
-		g.note, g.feedback = fmt.Sprintf("That doesn't use %s yet. %s", g.Pattern, g.Explain), ""
+	r := g.rules()
+	if note := r.Unused(text); note != "" {
+		g.note, g.feedback = note, ""
 		return m, nil
 	}
 	g.grading, g.note, g.feedback = true, "Claude is reading your sentence...", ""
 	grader := m.grader
-	task := fmt.Sprintf("Write one Chinese sentence of your own using the grammar pattern %s (%s): %s", g.Pattern, g.Pinyin, g.Explain)
-	criteria := fmt.Sprintf("A complete, grammatical sentence that uses %s correctly and naturally, at about HSK3-4; any topic. Score 0 if %s is missing or misused.", g.Pattern, g.Pattern)
+	task, criteria := r.Task(), r.Criteria()
 	return m, func() tea.Msg {
 		score, fb, err := grader(context.Background(), task, criteria, text)
 		return gateGradeMsg{score, fb, err}
