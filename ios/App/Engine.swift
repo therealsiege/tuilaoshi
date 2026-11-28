@@ -189,6 +189,36 @@ final class Engine {
     /// Walks one cell, by the Mac's rules, and says what came of it.
     func step(dx: Int, dy: Int) async throws -> StepOutcome { try await decode(StepOutcome.self) { h, e in h.core.step(dx, dy: dy, error: e) } }
 
+    /// The trail: the day, supplies, party and HP.
+    func trail() async throws -> Trail { try await decode(Trail.self) { h, e in h.core.trail(e) } }
+
+    /// Changes the pace, the rations, or rests a day; returns the trail.
+    func trail(_ change: TrailChange) async throws -> Trail {
+        try await decode(Trail.self) { h, e in
+            switch change {
+            case .pace: h.core.nextPace(e)
+            case .rations: h.core.nextRations(e)
+            case .rest: h.core.rest(e)
+            }
+        }
+    }
+
+    /// Meets the open event or crossing by a choice.
+    func choose(_ i: Int) async throws -> RoadEvent { try await decode(RoadEvent.self) { h, e in h.core.choose(i, error: e) } }
+
+    /// Answers the overheard demons.
+    func answer(_ i: Int) async throws -> RoadPlot { try await decode(RoadPlot.self) { h, e in h.core.answer(i, error: e) } }
+
+    /// Lays a gate's tile, by its position as shown, or takes the last back (nil).
+    func lay(_ tile: Int?) async throws -> RoadGate {
+        try await decode(RoadGate.self) { h, e in
+            if let tile { h.core.layTile(tile, error: e) } else { h.core.undoTile(e) }
+        }
+    }
+
+    /// Closes what the road brought (crossing once chosen) and says where the pilgrim stands.
+    func walkOn() async throws -> StepOutcome { try await decode(StepOutcome.self) { h, e in h.core.walk(on: e) } }
+
     /// My progress.
     func progress() async throws -> ProgressReport { try await decode(ProgressReport.self) { h, e in h.core.progress(e) } }
 

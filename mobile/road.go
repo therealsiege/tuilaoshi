@@ -59,7 +59,14 @@ type roadMap struct {
 	Towns    []roadTown    `json:"towns"`
 	Stages   []roadStage   `json:"stages"`
 	Crossing *roadCrossing `json:"crossing,omitempty"`
+	Gate     *roadGateSign `json:"gate,omitempty"` // the lair's grammar gate, while the lair stands
 	Pos      point         `json:"pos"`
+}
+
+type roadGateSign struct {
+	Pattern string `json:"pattern"`
+	Pinyin  string `json:"pinyin"`
+	Passed  bool   `json:"passed"`
 }
 
 // Road is the region the pilgrim walks, as JSON: its names and terrain,
@@ -107,6 +114,11 @@ func toRoadMap(w road.Walk) roadMap {
 	if cr := rm.Crossing; cr != nil {
 		out.Crossing = &roadCrossing{cr.Kind, cr.Name, cr.English, rm.CrossAt.X, rm.CrossAt.Y, w.HasCrossed()}
 	}
+	if g, ok := journey.GrammarGateFor(rm.Region.ID); ok {
+		if _, won := w.Cleared[rm.Region.To]; !won {
+			out.Gate = &roadGateSign{g.Pattern, g.Pinyin, w.GatePassed()}
+		}
+	}
 	return out
 }
 
@@ -117,21 +129,29 @@ type stepName struct {
 }
 
 type stepOutcome struct {
-	Kind    string    `json:"kind"`              // moved, blocked, town, tribulation, encounter or region
-	Text    string    `json:"text,omitempty"`    // what to say: why it's blocked, the tribulation, who leaps out…
-	Chinese string    `json:"chinese,omitempty"` // the Chinese of it, to read aloud
-	Stage   int       `json:"stage,omitempty"`   // tribulation: its number
-	Fight   bool      `json:"fight,omitempty"`   // tribulation: open, so its battle starts
-	Town    *roadTown `json:"town,omitempty"`
-	Soldier *stepName `json:"soldier,omitempty"`
-	Region  *stepName `json:"region,omitempty"` // region: the one come to; reload Road
-	Pos     point     `json:"pos"`
+	Kind      string     `json:"kind"`              // moved, blocked, town, tribulation, encounter, region, crossing, event or plot
+	Text      string     `json:"text,omitempty"`    // what to say: why it's blocked, the tribulation, who leaps out…
+	Chinese   string     `json:"chinese,omitempty"` // the Chinese of it, to read aloud
+	Stage     int        `json:"stage,omitempty"`   // tribulation: its number
+	Fight     bool       `json:"fight,omitempty"`   // tribulation: open, so its battle starts
+	Town      *roadTown  `json:"town,omitempty"`
+	Soldier   *stepName  `json:"soldier,omitempty"`
+	Region    *stepName  `json:"region,omitempty"`    // region: the one come to; reload Road
+	Day       string     `json:"day,omitempty"`       // a day ended on this step: "Day 4." and what it brought
+	Collapsed bool       `json:"collapsed,omitempty"` // the master collapsed and was carried back
+	Event     *roadEvent `json:"event,omitempty"`     // event or crossing: met with Choose, then WalkOn
+	Plot      *roadPlot  `json:"plot,omitempty"`      // plot: answered with Answer, then WalkOn
+	Gate      *roadGate  `json:"gate,omitempty"`      // tribulation: the lair's grammar gate, taken with LayTile
+	Pos       point      `json:"pos"`
 }
 
 // Step walks the pilgrim one cell (dx, dy: one of them ±1, the other 0)
 // by the Mac's rules and returns what came of it as JSON, with where the
-// pilgrim now stands. Battles, towns and crossings are the Mac's for now
-// (#62, #63, #61's second phase): they only say what is there.
+// pilgrim now stands. A step spends part of the trail's day; a day's end
+// may bring an event or demons plotting, which open (see trail.go), as do
+// the region's crossing and the grammar gate before its lair (gate.go).
+// Battles and towns are the Mac's for now (#62, #63): they only say what
+// is there.
 func (c *Core) Step(dx, dy int) (string, error) {
 	if dx*dx+dy*dy != 1 {
 		return "", fmt.Errorf("step (%d, %d) is not one cell", dx, dy)
@@ -142,26 +162,61 @@ func (c *Core) Step(dx, dy int) (string, error) {
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c.walk == nil {
-		w, err := road.Load(c.store)
-		if err != nil {
-			return "", err
-		}
-		c.walk = &w
+	if c.event != nil || c.plot != nil || c.gate != nil {
+		return "", errOpen
 	}
-	w := c.walk
-	o, err := w.Step(dx, dy, road.Rate(set.Encounters), nil)
+	w, err := c.loadedWalk()
 	if err != nil {
 		return "", err
 	}
-	data, err := json.Marshal(toStep(*w, o))
+	o, err := w.Move(dx, dy)
+	if err != nil {
+		return "", err
+	}
+	out := toStep(*w, o)
+	switch {
+	case o.Kind == road.Crossing:
+		c.event = &openEvent{Event: *o.Event, chose: -1, cross: true}
+		out.Event = c.toEvent()
+	case o.Kind == road.Tribulation && o.Gate:
+		out.Gate = c.openGate()
+	case o.Kind == road.Moved:
+		out, err = c.walked(w, road.Rate(set.Encounters))
+		if err != nil {
+			return "", err
+		}
+	}
+	data, err := json.Marshal(out)
 	return string(data), err
+}
+
+// walked passes the trail's step, then says what the cell holds: the
+// day's event or plot comes first, as on the Mac. The caller holds c.mu.
+func (c *Core) walked(w *road.Walk, rate int) (stepOutcome, error) {
+	to := w.Pos
+	d, err := w.Walked(termWeather(), eventRoll, plotRoll)
+	if err != nil {
+		return stepOutcome{}, err
+	}
+	var out stepOutcome
+	switch {
+	case d.Event != nil:
+		c.event = &openEvent{Event: *d.Event, chose: -1}
+		out = stepOutcome{Kind: "event", Event: c.toEvent(), Chinese: d.Event.Text}
+	case d.Plot != nil:
+		c.plot = &openPlot{Plot: *d.Plot, order: d.Order, chose: -1}
+		out = stepOutcome{Kind: "plot", Plot: c.toPlot(), Chinese: road.PlotText(*d.Plot)}
+	default:
+		out = toStep(*w, w.Arrive(to, rate, encounterRoll))
+	}
+	out.Day, out.Collapsed, out.Pos = d.Note, d.Collapsed, point{w.Pos.X, w.Pos.Y}
+	return out, nil
 }
 
 // forgetRoad drops the road loaded, for the next call to read afresh.
 func (c *Core) forgetRoad() {
 	c.mu.Lock()
-	c.walk = nil
+	c.walk, c.event, c.plot, c.gate = nil, nil, nil, nil
 	c.mu.Unlock()
 }
 
@@ -173,8 +228,8 @@ func toStep(w road.Walk, o road.Outcome) stepOutcome {
 	case road.Blocked:
 		out.Text = "The way is blocked."
 	case road.Crossing:
-		out.Kind = string(road.Blocked)
-		out.Text, out.Chinese = o.Event.English, o.Event.Text
+		cr := w.Region.Crossing
+		out.Text, out.Chinese = fmt.Sprintf("%s %s bars the road: choose a way across.", cr.Name, cr.English), o.Event.Text
 	case road.Tribulation:
 		t := journey.AllTribulations()[o.Stage-1]
 		out.Stage, out.Fight, out.Chinese = o.Stage, o.Fight, t.Name

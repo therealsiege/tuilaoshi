@@ -96,7 +96,7 @@ func (m Model) Refresh() Model {
 	states, questErr := m.store.Quests(time.Now())
 	m.states, m.loadErr = states, errors.Join(m.loadErr, questErr)
 	m.quests = m.questLog()
-	m.loadTrail()
+	m.trail, m.members = w.Trail, w.Members
 	hp, most, hpErr := rpgview.PilgrimHP(m.store)
 	m.hp, m.max = hp, most
 	m.loadErr = errors.Join(m.loadErr, hpErr)
@@ -107,7 +107,7 @@ func (m Model) Refresh() Model {
 // walk is the pilgrim on the map as the road's rules see them.
 func (m Model) walk() road.Walk {
 	return road.Walk{Store: m.store, Region: m.region, Pos: m.pos, Cleared: m.cleared, Counts: m.counts,
-		Stage: m.stage, Crossed: m.trail.Crossed, Gates: m.gates}
+		Stage: m.stage, Gates: m.gates, Trail: m.trail, Members: m.members}
 }
 
 // questLog lists the hunts under way: target, progress and where to report.

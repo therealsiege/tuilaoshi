@@ -25,7 +25,7 @@ struct RoadPoint: Decodable, Equatable, Sendable { let x: Int; let y: Int }
 /// What a step came to, as the engine's Step() reports it.
 struct StepOutcome: Decodable, Equatable, Sendable {
     struct Name: Decodable, Equatable, Sendable { let id: String?; let name: String; let english: String }
-    let kind: String // moved, blocked, town, tribulation, encounter or region
+    let kind: String // moved, blocked, town, tribulation, encounter, region, crossing, event or plot
     let text: String?
     let chinese: String?
     let stage: Int?
@@ -33,13 +33,37 @@ struct StepOutcome: Decodable, Equatable, Sendable {
     let town: RoadMap.Town?
     let soldier: Name?
     let region: Name?
+    let day: String?       // a day ended on this step, and what it brought
+    let collapsed: Bool?   // the master collapsed and was carried back
+    let event: RoadEvent?  // an event or the crossing, to choose
+    let plot: RoadPlot?    // demons overheard, to answer
+    let gate: RoadGate?    // the lair's grammar gate, to lay
     let pos: RoadPoint
+}
+
+extension StepOutcome {
+    /// A banner of the app's own, where the engine said nothing.
+    init(blocked text: String, at pos: RoadPoint) {
+        self.init(kind: "blocked", text: text, chinese: nil, stage: nil, fight: nil, town: nil, soldier: nil, region: nil,
+                  day: nil, collapsed: nil, event: nil, plot: nil, gate: nil, pos: pos)
+    }
+
+    /// What it brought that opens as a sheet, if anything.
+    var sheet: RoadSheet? {
+        if let event { return .event(event) }
+        if let plot { return .plot(plot) }
+        if let gate { return .gate(gate) }
+        return nil
+    }
 }
 
 /// The road: the region's tile map over its painting, where there is one,
 /// walked a cell at a time by tapping a neighbouring tile, swiping, or the
-/// direction pad. The camera keeps on the pilgrim. Battles and towns come
-/// to the phone later (#62, #63): meeting one only says so.
+/// direction pad. The camera keeps on the pilgrim. The trail's day and
+/// supplies run under the region's name; the day's events, demons
+/// overheard, the region's crossing and the grammar gate before its lair
+/// play as sheets (RoadSheets.swift). Battles and towns come to the phone
+/// later (#62, #63): meeting one only says so.
 struct RoadView: View {
     @Environment(Engine.self) private var engine
     @State private var map: RoadMap?
@@ -47,6 +71,9 @@ struct RoadView: View {
     @State private var banner: StepOutcome?
     @State private var walking = false
     @State private var queued: [RoadPoint] = [] // steps asked for while one is under way
+    @State private var trail: Trail?
+    @State private var note: String? // the last day's news, or the last change to the trail
+    @State private var sheet: RoadSheet?
     @State private var error: String?
 
     /// Columns across the screen; the rest of the region scrolls in.
@@ -56,9 +83,11 @@ struct RoadView: View {
         Group {
             if let map {
                 GeometryReader { geo in
-                    let cell = geo.size.width / across
-                    VStack(spacing: 12) {
+                    // As wide as across cells, and short enough on a small phone to leave the rest room.
+                    let cell = max(16, min(geo.size.width / across, (geo.size.height - reserved) / CGFloat(map.height)))
+                    VStack(spacing: 10) {
                         header(map)
+                        if let trail { TrailStrip(trail: trail, note: note) { c in Task { await change(c) } } }
                         board(map, cell: cell, width: geo.size.width)
                             .frame(height: cell * CGFloat(map.height))
                         bannerView
@@ -76,15 +105,59 @@ struct RoadView: View {
         .navigationTitle("上路 The road")
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
+        .sheet(item: $sheet) { s in
+            Group {
+                switch s {
+                case .event(let e):
+                    EventSheet(event: e, choose: { try await engine.choose($0) }, walkOn: walkOn)
+                case .plot(let p):
+                    PlotSheet(plot: p, answer: { try await engine.answer($0) }, walkOn: walkOn)
+                case .gate(let g):
+                    GateSheet(gate: g, lay: { try await engine.lay($0) }, walkOn: walkOn)
+                }
+            }
+            .environment(engine)
+        }
     }
+
+    /// Height kept for the header, the trail, the banner and the pad.
+    private let reserved: CGFloat = 330
 
     private func load() async {
         do {
             let m = try await engine.road()
             map = m
             pos = m.pos
+            trail = try await engine.trail()
         } catch {
             self.error = error.localizedDescription
+        }
+    }
+
+    private func change(_ c: TrailChange) async {
+        do {
+            let t = try await engine.trail(c)
+            (trail, note) = (t, t.note)
+        } catch { banner = StepOutcome(blocked: error.localizedDescription, at: pos) }
+    }
+
+    /// Closes the sheet met: across the river once a way is chosen, past
+    /// the gate, or on along the road.
+    private func walkOn() {
+        Task {
+            do {
+                let o = try await engine.walkOn()
+                sheet = nil
+                pos = o.pos
+                banner = (o.text ?? "").isEmpty ? nil : o
+                if map?.crossing.map({ !$0.crossed && $0.x == o.pos.x && $0.y == o.pos.y }) == true {
+                    await load() // across: the crossing shows crossed
+                } else {
+                    trail = try await engine.trail()
+                }
+            } catch {
+                banner = StepOutcome(blocked: error.localizedDescription, at: pos)
+            }
         }
     }
 
@@ -167,15 +240,22 @@ struct RoadView: View {
         do {
             let o = try await engine.step(dx: d.x, dy: d.y)
             pos = o.pos
-            banner = o.kind == "moved" ? nil : o
+            banner = ["moved", "event", "plot"].contains(o.kind) || o.gate != nil ? nil : o
             if o.kind == "region" {
                 queued.removeAll() // the new region's map comes first
                 await load()
+            } else if o.day != nil || o.sheet != nil {
+                trail = try? await engine.trail()
             }
-            if ["town", "encounter", "region"].contains(o.kind), let zh = o.chinese { Speaker.chinese(zh) }
+            if let day = o.day { note = day }
+            if let next = o.sheet {
+                queued.removeAll() // what the road brought comes first
+                sheet = next
+            }
+            if o.collapsed == true, let day = o.day { banner = StepOutcome(blocked: day, at: o.pos) }
+            if ["town", "encounter", "region", "crossing", "event"].contains(o.kind), let zh = o.chinese { Speaker.chinese(zh) }
         } catch {
-            banner = StepOutcome(kind: "blocked", text: error.localizedDescription, chinese: nil, stage: nil, fight: nil,
-                                 town: nil, soldier: nil, region: nil, pos: pos)
+            banner = StepOutcome(blocked: error.localizedDescription, at: pos)
         }
     }
 
@@ -209,6 +289,7 @@ struct RoadView: View {
         case "blocked": "hand.raised"
         case "tribulation": "flame"
         case "encounter": "exclamationmark.triangle"
+        case "crossing": "water.waves"
         case "town": "building.columns"
         default: "map"
         }
@@ -216,7 +297,7 @@ struct RoadView: View {
 
     private func tint(_ kind: String) -> Color {
         switch kind {
-        case "blocked": Theme.slate
+        case "blocked", "crossing": Theme.slate
         case "tribulation", "encounter": Theme.cinnabar
         case "town": Theme.ochre
         default: Theme.jade

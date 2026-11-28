@@ -10,12 +10,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
+	"github.com/therealsiege/tuilaoshi/internal/road"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
-	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 // A trail event takes over the map until met: its Chinese text and
-// choices; once chosen, the result, the English and what it changed.
+// choices; once chosen, the result, the English and what it changed (the
+// road package's events.go has the rules).
 
 // eventRoll draws 0-99 against journey.EventChance; tests fix it.
 var eventRoll = func() int { return rand.Intn(100) }
@@ -26,17 +27,6 @@ type trailEvent struct {
 	chose  int    // -1 until chosen
 	effect string // what the choice changed, in short
 	cross  bool   // the region's obstacle: crossing it once chosen
-}
-
-// maybeEvent may bring an event at the end of a day.
-func (m Model) maybeEvent() Model {
-	if eventRoll() >= journey.EventChance {
-		return m
-	}
-	if e, ok := journey.PickEvent(m.region.Region.Terrain, m.members, rand.New(rand.NewSource(rand.Int63()))); ok {
-		m.event = &trailEvent{Event: e, chose: -1}
-	}
-	return m
 }
 
 // updateEvent takes 1-3 for a choice, then enter to walk on.
@@ -56,29 +46,11 @@ func (m Model) updateEvent(k tea.KeyMsg) (Model, tea.Cmd) {
 		return m, nil
 	}
 	e.chose = int(s[0] - '1')
-	o := e.Choices[e.chose].Outcome
-	switch {
-	case o.Coins < 0:
-		if err := m.store.Spend(wiki.Wallet{Tongqian: -o.Coins}); err != nil {
-			e.effect = "Not enough 铜钱 to pay: nothing comes of it."
-			return m, nil
-		}
-	case o.Coins > 0:
-		if err := m.store.Earn(wiki.Wallet{Tongqian: o.Coins}); err != nil {
-			m.loadErr = err
-		}
-	}
-	spared := false
-	if m.trail.Forewarned {
-		if o, spared = journey.Forewarn(o); spared {
-			m.trail.Forewarned = false // the warning is spent on this danger
-		}
-	}
-	m.trail.Apply(o, m.members)
-	m.saveTrail()
-	e.effect = effectText(o)
-	if spared {
-		e.effect += " (forewarned: harm halved)"
+	w := m.walk()
+	effect, err := w.Choose(e.Event, e.chose) // see the road package for the rules
+	m.trail, e.effect = w.Trail, effect
+	if err != nil {
+		m.loadErr = err
 	}
 	return m.refreshPurse(), nil
 }
@@ -89,29 +61,6 @@ func (m Model) refreshPurse() Model {
 		m.wallet = w
 	}
 	return m
-}
-
-// effectText says what an outcome changed: "斋饭 +12 · health -4".
-func effectText(o journey.Outcome) string {
-	var parts []string
-	add := func(label string, v int) {
-		if v != 0 {
-			parts = append(parts, fmt.Sprintf("%s %+d", label, v))
-		}
-	}
-	add("斋饭", o.Food)
-	add("水", o.Water)
-	add("铜钱", o.Coins)
-	who := "party"
-	if o.Who != "" {
-		who = o.Who
-	}
-	add(who+" health", o.Health)
-	add(who+" morale", o.Morale)
-	if len(parts) == 0 {
-		return "Nothing changes."
-	}
-	return strings.Join(parts, " · ")
 }
 
 func (m Model) eventView() string {
@@ -153,10 +102,11 @@ func (m Model) eventView() string {
 
 // crossed puts the party on the far side of the obstacle, for good.
 func (m Model) crossed() Model {
-	m.trail.Crossed = append(m.trail.Crossed, m.region.Region.ID)
-	m.pos = m.region.CrossAt
-	m.save()
-	m.saveTrail()
+	w := m.walk()
+	if err := w.Cross(); err != nil {
+		m.loadErr = err
+	}
+	m.pos, m.trail = w.Pos, w.Trail
 	return m
 }
 
@@ -169,7 +119,7 @@ func (m Model) Hear() string {
 	e := m.event
 	if e == nil {
 		if m.plot != nil {
-			return m.plot.plotText()
+			return road.PlotText(m.plot.Plot)
 		}
 		return ""
 	}

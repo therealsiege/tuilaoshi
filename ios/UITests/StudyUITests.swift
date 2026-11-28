@@ -157,6 +157,7 @@ final class StudyUITests: XCTestCase {
         let back = NSPredicate(format: "label != %@", west)
         wait(for: [XCTNSPredicateExpectation(predicate: back, object: position)], timeout: 5)
         XCTAssertEqual(position.label, start, "three steps east should undo three steps west")
+        meet(app) // the sixth step ends the day, which may bring an event or demons
         let banner = app.descendants(matching: .any)["road.banner"]
         XCTAssertFalse(banner.exists, "plain steps show no banner")
         app.buttons["road.east"].tap()
@@ -164,6 +165,71 @@ final class StudyUITests: XCTestCase {
         XCTAssertTrue(banner.label.contains("blocked"), "banner: \(banner.label)")
         XCTAssertEqual(position.label, start, "a blocked step doesn't move the pilgrim")
         shot(app, "road")
+    }
+
+    /// From a fresh install, the first region's river is crossed: walk the
+    /// road west from the start to the crossing, meeting whatever the days
+    /// bring on the way, choose a way across in its sheet, and walk on to
+    /// stand on the far bank, then on along the road.
+    func testTheFirstRegionsRiverIsCrossed() throws {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-fresh-progress", "-quiet"]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["camp.due"].waitForExistence(timeout: 30))
+        let door = app.buttons["door.road"]
+        for _ in 0..<6 where !door.isHittable { app.swipeUp() }
+        door.tap()
+        let position = app.staticTexts["road.position"]
+        XCTAssertTrue(position.waitForExistence(timeout: 20), "the road should open")
+        XCTAssertEqual(position.label, "Position 44, 6", "a new journey starts at the first region's east end")
+        let trail = app.descendants(matching: .any)["road.trail"]
+        XCTAssertTrue(trail.waitForExistence(timeout: 5), "the trail should show")
+        XCTAssertTrue(trail.label.contains("Day 1"), "trail: \(trail.label)")
+
+        // West along the road to the river at 38, 4.
+        let route = ["west", "west", "west", "north", "west", "north", "west"]
+        for dir in route {
+            let before = position.label
+            app.buttons["road.\(dir)"].tap()
+            let moved = NSPredicate(format: "label != %@", before)
+            wait(for: [XCTNSPredicateExpectation(predicate: moved, object: position)], timeout: 5)
+            meet(app)
+        }
+        XCTAssertEqual(position.label, "Position 39, 4", "beside the river")
+        app.buttons["road.west"].tap()
+        let crossing = app.descendants(matching: .any)["event.crossing"]
+        XCTAssertTrue(app.buttons["event.choice.0"].waitForExistence(timeout: 5), "the river should open its crossing")
+        XCTAssertTrue(crossing.exists, "the sheet should be the crossing")
+        XCTAssertEqual(position.label, "Position 39, 4", "the river bars the way until crossed")
+        shot(app, "crossing")
+        app.buttons["event.choice.0"].tap()
+        let walkOn = app.buttons["event.walkOn"]
+        XCTAssertTrue(walkOn.waitForExistence(timeout: 5), "a choice made, walk on")
+        shot(app, "crossing-chosen")
+        walkOn.tap()
+        let across = NSPredicate(format: "label == %@", "Position 38, 4")
+        wait(for: [XCTNSPredicateExpectation(predicate: across, object: position)], timeout: 5)
+        let banner = app.descendants(matching: .any)["road.banner"]
+        XCTAssertTrue(banner.waitForExistence(timeout: 5) && banner.label.contains("across"), "banner: \(banner.label)")
+
+        app.buttons["road.west"].tap()
+        let on = NSPredicate(format: "label == %@", "Position 37, 4")
+        wait(for: [XCTNSPredicateExpectation(predicate: on, object: position)], timeout: 5)
+        meet(app)
+        shot(app, "across")
+    }
+
+    /// Meets whatever sheet a step brought, if any, by its first choice,
+    /// then walks on.
+    private func meet(_ app: XCUIApplication) {
+        for kind in ["event", "plot"] where app.buttons["\(kind).choice.0"].waitForExistence(timeout: 1) {
+            app.buttons["\(kind).choice.0"].tap()
+            let walkOn = app.buttons["\(kind).walkOn"]
+            XCTAssertTrue(walkOn.waitForExistence(timeout: 5), "\(kind): walk on after choosing")
+            walkOn.tap()
+            XCTAssertTrue(app.buttons["road.west"].waitForExistence(timeout: 5))
+        }
     }
 
     private func shot(_ app: XCUIApplication, _ name: String) {

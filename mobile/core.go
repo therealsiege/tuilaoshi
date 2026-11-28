@@ -23,8 +23,11 @@ import (
 type Core struct {
 	store *wiki.Store
 
-	mu   sync.Mutex
-	walk *road.Walk // the road as last loaded (see road.go); nil: load it
+	mu    sync.Mutex
+	walk  *road.Walk // the road as last loaded (see road.go); nil: load it
+	event *openEvent // an event or crossing being met (see trail.go)
+	plot  *openPlot  // demons overheard plotting
+	gate  *road.Gate // the grammar gate being taken (see gate.go)
 }
 
 // Open opens the wiki in wikiDir (the app bundle's copy, read-only) with

@@ -115,7 +115,7 @@ func TestAStepMeetsWhatBarsTheRoad(t *testing.T) {
 		t.Errorf("a later tribulation: %+v", o)
 	}
 	c.walk.Pos.X, c.walk.Pos.Y = rm.Crossing.X+1, rm.Crossing.Y
-	if o := step(t, c, -1, 0); o.Kind != "blocked" || o.Text == "" || !strings.Contains(o.Chinese, rm.Crossing.Name) {
+	if o := step(t, c, -1, 0); o.Kind != "crossing" || o.Event == nil || o.Text == "" || !strings.Contains(o.Chinese, rm.Crossing.Name) {
 		t.Errorf("the river: %+v", o)
 	}
 }

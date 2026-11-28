@@ -5,6 +5,7 @@ import (
 
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
+	"github.com/therealsiege/tuilaoshi/internal/road"
 	rpgengine "github.com/therealsiege/tuilaoshi/internal/rpg"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
@@ -94,34 +95,9 @@ func (m Model) fall() (Model, tea.Cmd) {
 }
 
 // PilgrimHP is the pilgrim's HP on the road and its most: level, gear and
-// companions' bond upgrades raise the most, wounds lower the HP.
-func PilgrimHP(store *wiki.Store) (hp, most int, err error) {
-	pages, err := store.ListPages()
-	if err != nil {
-		return 0, 0, err
-	}
-	cleared, err := store.ClearedStages()
-	if err != nil {
-		return 0, 0, err
-	}
-	kit, err := store.Kit()
-	if err != nil {
-		return 0, 0, err
-	}
-	bonds, err := store.BondPoints()
-	if err != nil {
-		return 0, 0, err
-	}
-	place, err := store.Place()
-	if err != nil {
-		return 0, 0, err
-	}
-	var e rpgengine.Effects
-	rpgengine.AddGear(&e, journey.Worn(kit.Worn))
-	rpgengine.AddUpgrades(&e, journey.Party(cleared), bonds)
-	most = rpgengine.PlayerHP(journey.CountProgress(pages).LevelPoints()) + e.BonusHP
-	return max(most-place.Wounds, 1), most, nil
-}
+// companions' bond upgrades raise the most, wounds lower the HP (the
+// road package's rule, shared with the phone).
+func PilgrimHP(store *wiki.Store) (hp, most int, err error) { return road.PilgrimHP(store) }
 
 // takeLoot gives the materials a won road battle earns: one when a shaky or
 // new word was recalled, and a demon core from a captain, demon or boss
