@@ -55,9 +55,15 @@ func (s *Server) Requests() []Request {
 }
 
 func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
-	data, _ := io.ReadAll(r.Body)
 	req := Request{Path: r.URL.Path, Auth: r.Header.Get("Authorization"), APIKey: r.Header.Get("X-Api-Key")}
-	_ = json.Unmarshal(data, &req.Body)
+	data, err := io.ReadAll(r.Body)
+	if err == nil {
+		err = json.Unmarshal(data, &req.Body)
+	}
+	if err != nil {
+		http.Error(w, `{"error":"body must be a JSON object"}`, http.StatusBadRequest)
+		return
+	}
 	s.mu.Lock()
 	n := len(s.requests)
 	s.requests = append(s.requests, req)
@@ -70,19 +76,19 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 	if status != 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		_ = json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("refused with %d", status)})
+		fmt.Fprintf(w, `{"error":"refused with %d"}`, status) //nolint:errcheck // a test server's reply
 		return
 	}
 	w.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
 	for _, ev := range Events(text) {
-		_, _ = fmt.Fprintf(w, "event: %s\ndata: %s\n\n", ev[0], ev[1])
+		fmt.Fprintf(w, "event: %s\ndata: %s\n\n", ev[0], ev[1]) //nolint:errcheck // a test server's reply
 	}
 }
 
 // Events are the stream events of a reply of text, as [type, json] pairs,
 // the way the server passes Claude's own along.
 func Events(text string) [][2]string {
-	delta, _ := json.Marshal(text)
+	delta, _ := json.Marshal(text) //nolint:errcheck // a string always marshals
 	return [][2]string{
 		{"message_start", `{"type":"message_start","message":{"id":"msg_fake","type":"message","role":"assistant","model":"claude-fake","content":[],"stop_reason":null,"usage":{"input_tokens":12,"output_tokens":1}}}`},
 		{"content_block_start", `{"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}`},

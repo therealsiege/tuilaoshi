@@ -28,7 +28,7 @@ import (
 // claudeVia is a Claude client through the game's server.
 func claudeVia(server, token string) (*claude.Client, error) {
 	if strings.TrimSpace(server) == "" || token == "" {
-		return nil, errors.New("Claude comes through the game's server: sign in (Settings) first")
+		return nil, errors.New("sign in (Settings) first: Claude comes through the game's server")
 	}
 	return claude.NewServer(server, token, nil), nil
 }

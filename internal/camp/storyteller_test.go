@@ -82,16 +82,16 @@ func TestADiaryEntryIsGradedKeptAndLiftsSpirits(t *testing.T) {
 	if err != nil || e.Score != 0 {
 		t.Fatalf("a failing entry %+v %v", e, err)
 	}
-	if entries, _ := store.Diary(); len(entries) != 0 {
-		t.Errorf("a failing entry was kept")
+	if entries, err := store.Diary(); err != nil || len(entries) != 0 {
+		t.Errorf("a failing entry was kept: %v", err)
 	}
 	score = 2
 	e, err = WriteDiary(t.Context(), store, grade, "今天我们走了很远。我很累。", day)
 	if err != nil || e.Score != 2 || e.Day != 1 || e.Feedback != "很好。" {
 		t.Fatalf("a passing entry %+v %v", e, err)
 	}
-	if entries, _ := store.Diary(); len(entries) != 1 {
-		t.Errorf("kept %d entries", len(entries))
+	if entries, err := store.Diary(); err != nil || len(entries) != 1 {
+		t.Errorf("kept %d entries, %v", len(entries), err)
 	}
 	tr, _, err = journey.LoadTrail(store, nil)
 	if err != nil || tr.Morale[journey.Master] != 50+DiaryMorale[2] {

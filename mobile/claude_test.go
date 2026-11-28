@@ -83,7 +83,7 @@ func TestWriteDiaryThroughTheServer(t *testing.T) {
 }
 
 func jsonOf(v any) string {
-	data, _ := json.Marshal(v)
+	data, _ := json.Marshal(v) //nolint:errcheck // decoded JSON marshals again
 	return string(data)
 }
 

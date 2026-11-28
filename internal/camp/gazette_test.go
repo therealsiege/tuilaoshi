@@ -31,7 +31,7 @@ func TestPrintGazetteByClaudeOrTheClerk(t *testing.T) {
 	if err != nil || missed != nil || g.ByHand || g.Text != "本报讯。" {
 		t.Fatalf("Claude's issue: %+v %v %v", g, missed, err)
 	}
-	if g, _, _ = PrintGazette(t.Context(), store, write, now); calls != 1 || g.Text != "本报讯。" {
-		t.Errorf("the week's issue should be kept, not written again: %d calls", calls)
+	if g, missed, err = PrintGazette(t.Context(), store, write, now); err != nil || missed != nil || calls != 1 || g.Text != "本报讯。" {
+		t.Errorf("the week's issue should be kept, not written again: %d calls, %v", calls, err)
 	}
 }

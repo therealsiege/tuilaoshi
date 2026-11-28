@@ -124,9 +124,9 @@ func TestAnErrorMidReplyIsAnError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
 		for _, e := range claudetest.Events("half")[:3] {
-			_, _ = fmt.Fprintf(w, "event: %s\ndata: %s\n\n", e[0], e[1])
+			fmt.Fprintf(w, "event: %s\ndata: %s\n\n", e[0], e[1]) //nolint:errcheck // a test server's reply
 		}
-		_, _ = fmt.Fprint(w, "event: error\ndata: {\"type\":\"error\",\"error\":{\"type\":\"api_error\",\"message\":\"Claude is overloaded\"}}\n\n")
+		fmt.Fprint(w, "event: error\ndata: {\"type\":\"error\",\"error\":{\"type\":\"api_error\",\"message\":\"Claude is overloaded\"}}\n\n") //nolint:errcheck // a test server's reply
 	}))
 	defer srv.Close()
 	_, err := NewServer(srv.URL, "tok", nil).Explain(t.Context(), "了")
