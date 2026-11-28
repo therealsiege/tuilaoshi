@@ -148,8 +148,9 @@ func (c *Core) Letter() (string, error) {
 }
 
 // Gazette is this week's court gazette as JSON (week, text, english,
-// byHand). Until the phone reaches Claude through the game's server, the
-// court's clerk sets it from the template, as on a Mac without a key.
+// byHand). If it hasn't come out the court's clerk sets it from the
+// template, as on a Mac without a key; signed in, ClaudeGazette has Claude
+// write it instead.
 func (c *Core) Gazette() (string, error) {
 	now := time.Now()
 	g, err := campnews.WeekGazette(c.store, now)
@@ -170,8 +171,8 @@ func (c *Core) Gazette() (string, error) {
 	return string(data), err
 }
 
-// Diary is the travel diary's entries as JSON, newest first. Writing an
-// entry needs Claude to grade it, so on the phone it waits for the server.
+// Diary is the travel diary's entries as JSON, newest first. Writing one
+// needs Claude to grade it (WriteDiary, signed in).
 func (c *Core) Diary() (string, error) {
 	entries, err := c.store.Diary()
 	if err != nil {
