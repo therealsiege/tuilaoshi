@@ -3,15 +3,14 @@ package reader
 import (
 	"context"
 	"fmt"
-	"math/rand/v2"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/therealsiege/tuilaoshi/internal/camp"
 	"github.com/therealsiege/tuilaoshi/internal/claude"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
-	"github.com/therealsiege/tuilaoshi/internal/model"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
@@ -22,82 +21,12 @@ import (
 // read again word by word like any other text.
 
 // Teller writes chapter n of the novel using mostly the known words.
-type Teller func(ctx context.Context, n int, known []string) (claude.Chapter, error)
-
-// knownSample is how many known words the storyteller is given.
-const knownSample = 300
+type Teller = camp.Teller
 
 // toldMsg carries a chapter the storyteller has told and saved, or why not.
 type toldMsg struct {
 	chapter wiki.StoryChapter
 	err     error
-}
-
-// knownWords picks the words to write the story in: words learned in
-// reviews first, then words from HSK1-3 pages, a sample of each shuffled
-// so the stories don't always lean on the same ones.
-func knownWords(cards []model.Card, pages []model.Page) []string {
-	easy := map[string]bool{}
-	for _, p := range pages {
-		switch p.Level {
-		case "HSK1", "HSK2", "HSK3":
-			easy[p.Path] = true
-		}
-	}
-	seen := map[string]bool{}
-	var learned, basic []string
-	for _, c := range cards {
-		if c.Type == model.CardGrammar || c.Chinese == "" || seen[c.Chinese] {
-			continue
-		}
-		page, _, _ := strings.Cut(c.ID, "#")
-		switch {
-		case c.ReviewInterval >= journey.LearnedInterval():
-			learned = append(learned, c.Chinese)
-		case easy[page]:
-			basic = append(basic, c.Chinese)
-		default:
-			continue
-		}
-		seen[c.Chinese] = true
-	}
-	rand.Shuffle(len(learned), func(i, j int) { learned[i], learned[j] = learned[j], learned[i] })
-	rand.Shuffle(len(basic), func(i, j int) { basic[i], basic[j] = basic[j], basic[i] })
-	words := append(learned, basic...)
-	return words[:min(len(words), knownSample)]
-}
-
-// sentences splits a chapter into one line per sentence, so the reader
-// moves through it a sentence at a time.
-func sentences(text string) []string {
-	var lines []string
-	var cur strings.Builder
-	flush := func() {
-		if s := strings.TrimSpace(cur.String()); s != "" {
-			lines = append(lines, s)
-		}
-		cur.Reset()
-	}
-	runes := []rune(text)
-	for i, r := range runes {
-		if r == '\n' {
-			flush()
-			continue
-		}
-		cur.WriteRune(r)
-		// End after 。！？, taking a closing quote with it.
-		next := rune(0)
-		if i+1 < len(runes) {
-			next = runes[i+1]
-		}
-		if strings.ContainsRune("。！？", r) && next != '”' && next != '」' {
-			flush()
-		} else if strings.ContainsRune("”」", r) && i > 0 && strings.ContainsRune("。！？", runes[i-1]) {
-			flush()
-		}
-	}
-	flush()
-	return lines
 }
 
 // nextChapter is the chapter the storyteller would tell now, and whether
@@ -155,17 +84,10 @@ func (m Model) tell() (Model, tea.Cmd) {
 		return m, nil
 	}
 	m.telling, m.status = true, ""
-	teller, store, known, today := m.teller, m.store, m.known, m.now().Format("2006-01-02")
+	teller, store, known, now := m.teller, m.store, m.known, m.now()
 	return m, func() tea.Msg {
-		ch, err := teller(context.Background(), n, known)
-		if err != nil {
-			return toldMsg{err: err}
-		}
-		told := wiki.StoryChapter{Number: n, Title: ch.Title, Text: ch.Text, English: ch.English, Date: today}
-		for _, q := range ch.Questions {
-			told.Questions = append(told.Questions, wiki.StoryQuestion{Ask: q.Ask, Choices: q.Choices})
-		}
-		return toldMsg{chapter: told, err: store.SaveStoryChapter(told)}
+		told, err := camp.TellStory(context.Background(), store, teller, n, known, now)
+		return toldMsg{chapter: told, err: err}
 	}
 }
 
@@ -188,7 +110,7 @@ func (m Model) onTold(msg toldMsg) Model {
 // openChapter opens a told chapter for word-by-word reading, its English
 // summary behind e.
 func (m Model) openChapter(c wiki.StoryChapter) Model {
-	lines := sentences(c.Text)
+	lines := camp.StorySentences(c.Text)
 	m = m.OpenText(fmt.Sprintf("说书人 第%d回 %s", c.Number, c.Title), lines, journey.StoryGlossary())
 	m.english = make([]string, len(lines))
 	for i := range m.english {

@@ -2,6 +2,7 @@ package camp
 
 import (
 	"cmp"
+	"context"
 	"fmt"
 	"slices"
 	"strings"
@@ -174,4 +175,31 @@ func plural(n int, one, many string) string {
 		return one
 	}
 	return many
+}
+
+// GazetteWriter writes an issue from the week's facts, returning its
+// Chinese and English (claude.Client.WriteGazette).
+type GazetteWriter func(ctx context.Context, facts string) (string, string, error)
+
+// PrintGazette returns this week's issue, printing and keeping it first if
+// it hasn't come out: written by Claude, or set by the clerk when Claude
+// fails, as the Mac's camp does. missed is why Claude didn't write it.
+func PrintGazette(ctx context.Context, store *wiki.Store, write GazetteWriter, now time.Time) (g wiki.Gazette, missed, err error) {
+	issue, err := WeekGazette(store, now)
+	if err != nil || issue != nil {
+		if issue != nil {
+			g = *issue
+		}
+		return g, nil, err
+	}
+	g, facts, err := ClerkGazette(store, now)
+	if err != nil {
+		return g, nil, err
+	}
+	if zh, en, werr := write(ctx, facts.Prompt(g.Week)); werr != nil {
+		missed = werr
+	} else {
+		g = wiki.Gazette{Week: g.Week, Text: zh, English: en}
+	}
+	return g, missed, store.SaveGazette(g)
 }

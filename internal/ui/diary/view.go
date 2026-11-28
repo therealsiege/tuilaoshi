@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/therealsiege/tuilaoshi/internal/camp"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 )
 
@@ -25,7 +26,7 @@ func (m Model) View() string {
 	case m.grading:
 		b.WriteString(ui.MutedStyle.Render("  The master reads your entry…") + "\n")
 	case m.passed > 0:
-		b.WriteString(ui.SuccessStyle.Render(fmt.Sprintf("  Kept in the diary. Reading it by the fire lifts everyone's spirits (+%d).", gradeMorale[m.passed])) + "\n")
+		b.WriteString(ui.SuccessStyle.Render(fmt.Sprintf("  Kept in the diary. Reading it by the fire lifts everyone's spirits (+%d).", camp.DiaryMorale[m.passed])) + "\n")
 	case m.written:
 		b.WriteString(ui.MutedStyle.Render("  Today's entry is written. Come back tomorrow for the next.") + "\n")
 	case m.feedback != "":
