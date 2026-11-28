@@ -137,6 +137,32 @@ func TestEveryScenePlaysAtAStageWithItsCastDrawn(t *testing.T) {
 				t.Errorf("scene %s: %s has no character sheet", s.ID, n)
 			}
 		}
+		if s.Frame != "" && p.b.SceneFrames[s.Frame] == "" {
+			t.Errorf("scene %s: no scene frame %q", s.ID, s.Frame)
+		}
+		if s.Frame == "move" && len(s.Cast) != 1 {
+			t.Errorf("scene %s: a battle move shows one character alone, not %v", s.ID, s.Cast)
+		}
+	}
+}
+
+// A scene that names a frame is framed by it instead of as a battle, and
+// one that names no such frame is an error.
+func TestScenesPickTheirFrame(t *testing.T) {
+	p := testComposer(t)
+	battle := strings.TrimSpace(p.b.Kinds["scene"].Frame)
+	for id, frame := range map[string]string{"tang-strike": "move", "buddha-entrance": "story", "tiger-entrance": "entrance"} {
+		j, err := p.job("scene", id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(j.Prompt, strings.TrimSpace(p.b.SceneFrames[frame])) || strings.Contains(j.Prompt, battle) {
+			t.Errorf("%s should be framed as %s, not as a battle", id, frame)
+		}
+	}
+	p.b.Scenes = append(p.b.Scenes, Scene{ID: "odd", Stage: 20, Frame: "nope", Cast: []string{"唐僧"}, Text: "x"})
+	if _, err := p.job("scene", "odd"); err == nil {
+		t.Error("a scene with an unknown frame should be an error")
 	}
 }
 

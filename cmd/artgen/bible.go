@@ -27,7 +27,10 @@ type Bible struct {
 	Crossings  map[string]string `yaml:"crossings"`
 	Party      map[string]string `yaml:"party"`
 	Characters map[string]string `yaml:"characters"`
-	Scenes     []Scene           `yaml:"scenes"`
+	// SceneFrames are framings a scene can pick instead of the scene
+	// kind's battle framing: an entrance, a story moment, a battle move.
+	SceneFrames map[string]string `yaml:"scene_frames"`
+	Scenes      []Scene           `yaml:"scenes"`
 }
 
 // Scene is one battle cut scene: the tribulation it plays at, who is in it
@@ -37,6 +40,7 @@ type Scene struct {
 	Stage int      `yaml:"stage"`
 	Cast  []string `yaml:"cast"`
 	Place string   `yaml:"place"` // only when it happens away from the stage's region, as a backstory does
+	Frame string   `yaml:"frame"` // a key in scene_frames; empty is the scene kind's battle framing
 	Text  string   `yaml:"text"`
 }
 
@@ -264,6 +268,14 @@ func (p composer) scene(id string) (Job, error) {
 			continue
 		}
 		k := p.b.Kinds["scene"]
+		frame := k.Frame
+		if s.Frame != "" {
+			f, ok := p.b.SceneFrames[s.Frame]
+			if !ok {
+				return Job{}, fmt.Errorf("scene %s: no scene frame %q", id, s.Frame)
+			}
+			frame = f
+		}
 		place := p.place(p.regionAt(s.Stage))
 		if s.Place != "" {
 			place = "Place: " + strings.TrimSpace(s.Place)
@@ -280,7 +292,7 @@ func (p composer) scene(id string) (Job, error) {
 		}
 		cast := "Who is in it, and how they look:\n" + strings.Join(sheets, "\n")
 		return Job{Kind: "scene", Name: s.ID, Ratio: k.Ratio, Keep: keep,
-			Prompt: p.join(k.Frame, "Scene: "+strings.TrimSpace(s.Text), cast, place, p.b.World, p.style(), p.b.Never)}, nil
+			Prompt: p.join(frame, "Scene: "+strings.TrimSpace(s.Text), cast, place, p.b.World, p.style(), p.b.Never)}, nil
 	}
 	return Job{}, fmt.Errorf("no scene %s", id)
 }
