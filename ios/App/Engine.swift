@@ -40,8 +40,10 @@ struct AppSettings: Codable, Equatable, Sendable {
 
     /// Makes sound, display and study follow these settings.
     @MainActor func apply() {
-        SoundSettings.voices = speech
-        SoundSettings.cues = effects
+        // Test runs launch with -quiet, so they never sound on the Mac.
+        let quiet = ProcessInfo.processInfo.arguments.contains("-quiet")
+        SoundSettings.voices = speech && !quiet
+        SoundSettings.cues = effects && !quiet
         SoundSettings.toneColours = toneColours
         StudySession.size = reviewChunk
     }
@@ -180,6 +182,12 @@ final class Engine {
 
     /// The cards a walk of the web from a word revives.
     func walkWeb(_ word: String) async throws -> [Card] { try await decode([Card].self) { h, e in h.core.walkWeb(word, error: e) } }
+
+    /// The region the pilgrim walks, and where they stand.
+    func road() async throws -> RoadMap { try await decode(RoadMap.self) { h, e in h.core.road(e) } }
+
+    /// Walks one cell, by the Mac's rules, and says what came of it.
+    func step(dx: Int, dy: Int) async throws -> StepOutcome { try await decode(StepOutcome.self) { h, e in h.core.step(dx, dy: dy, error: e) } }
 
     /// My progress.
     func progress() async throws -> ProgressReport { try await decode(ProgressReport.self) { h, e in h.core.progress(e) } }

@@ -7,7 +7,7 @@ final class StudyUITests: XCTestCase {
     func testAReviewLeftEarlyKeepsItsAnswer() throws {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = ["-fresh-progress"]
+        app.launchArguments = ["-fresh-progress", "-quiet"]
         app.launch()
 
         let due = app.staticTexts["camp.due"]
@@ -38,7 +38,7 @@ final class StudyUITests: XCTestCase {
     func testEveryFlashcardModeAnswersACard() throws {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = ["-fresh-progress"]
+        app.launchArguments = ["-fresh-progress", "-quiet"]
         app.launch()
         XCTAssertTrue(app.staticTexts["camp.due"].waitForExistence(timeout: 30))
         app.buttons["door.study"].tap()
@@ -70,7 +70,7 @@ final class StudyUITests: XCTestCase {
     func testVoicesCanBeTurnedOff() throws {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = ["-fresh-progress"]
+        app.launchArguments = ["-fresh-progress", "-quiet"]
         app.launch()
         XCTAssertTrue(app.staticTexts["camp.due"].waitForExistence(timeout: 30))
         XCTAssertTrue(app.buttons["Read camp aloud"].exists)
@@ -80,7 +80,7 @@ final class StudyUITests: XCTestCase {
         if voices.value as? String == "1" { voices.switches.firstMatch.tap() }
         XCTAssertEqual(voices.value as? String, "0")
         app.terminate()
-        app.launchArguments = [] // keep the progress file, where settings live
+        app.launchArguments = ["-quiet"] // keep the progress file, where settings live
         app.launch()
         XCTAssertTrue(app.staticTexts["camp.due"].waitForExistence(timeout: 30))
         app.buttons["Settings"].tap()
@@ -94,7 +94,7 @@ final class StudyUITests: XCTestCase {
     func testTappingAWordGlossesIt() throws {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = ["-fresh-progress"]
+        app.launchArguments = ["-fresh-progress", "-quiet"]
         app.launch()
         XCTAssertTrue(app.staticTexts["camp.due"].waitForExistence(timeout: 30))
         app.buttons["door.read"].tap()
@@ -118,7 +118,7 @@ final class StudyUITests: XCTestCase {
     func testCampsPapersOpen() throws {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = ["-fresh-progress"]
+        app.launchArguments = ["-fresh-progress", "-quiet"]
         app.launch()
         XCTAssertTrue(app.staticTexts["camp.due"].waitForExistence(timeout: 30))
         let checks: [(String, String)] = [("letter", "Nothing yet"), ("gazette", "Week of"), ("diary", "Writing an entry"), ("progress", "The last seven days"), ("web", "No web yet")]
@@ -131,6 +131,39 @@ final class StudyUITests: XCTestCase {
             shot(app, paper)
             app.navigationBars.buttons.element(boundBy: 0).tap()
         }
+    }
+
+    /// The road opens on a fresh journey and is walked by the direction
+    /// pad: west along the road and back east, which changes where the
+    /// pilgrim stands, then east once more into the first region's edge,
+    /// which is blocked and says so.
+    func testTheRoadIsWalkedAStepAtATime() throws {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-fresh-progress", "-quiet"]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["camp.due"].waitForExistence(timeout: 30))
+        let door = app.buttons["door.road"]
+        for _ in 0..<6 where !door.isHittable { app.swipeUp() }
+        door.tap()
+        let position = app.staticTexts["road.position"]
+        XCTAssertTrue(position.waitForExistence(timeout: 20), "the road should open")
+        let start = position.label
+        for _ in 0..<3 { app.buttons["road.west"].tap() }
+        let moved = NSPredicate(format: "label != %@", start)
+        wait(for: [XCTNSPredicateExpectation(predicate: moved, object: position)], timeout: 5)
+        let west = position.label
+        for _ in 0..<3 { app.buttons["road.east"].tap() }
+        let back = NSPredicate(format: "label != %@", west)
+        wait(for: [XCTNSPredicateExpectation(predicate: back, object: position)], timeout: 5)
+        XCTAssertEqual(position.label, start, "three steps east should undo three steps west")
+        let banner = app.descendants(matching: .any)["road.banner"]
+        XCTAssertFalse(banner.exists, "plain steps show no banner")
+        app.buttons["road.east"].tap()
+        XCTAssertTrue(banner.waitForExistence(timeout: 5), "a blocked step should say so")
+        XCTAssertTrue(banner.label.contains("blocked"), "banner: \(banner.label)")
+        XCTAssertEqual(position.label, start, "a blocked step doesn't move the pilgrim")
+        shot(app, "road")
     }
 
     private func shot(_ app: XCUIApplication, _ name: String) {

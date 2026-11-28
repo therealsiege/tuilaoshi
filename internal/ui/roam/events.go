@@ -3,7 +3,6 @@ package roam
 import (
 	"fmt"
 	"math/rand"
-	"slices"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -152,13 +151,6 @@ func (m Model) eventView() string {
 	return b.String()
 }
 
-// faceCrossing meets the region's obstacle: today's conditions and the choices.
-func (m Model) faceCrossing() Model {
-	e := m.region.Crossing.Event(rand.New(rand.NewSource(rand.Int63())))
-	m.event = &trailEvent{Event: e, chose: -1, cross: true}
-	return m
-}
-
 // crossed puts the party on the far side of the obstacle, for good.
 func (m Model) crossed() Model {
 	m.trail.Crossed = append(m.trail.Crossed, m.region.Region.ID)
@@ -169,7 +161,7 @@ func (m Model) crossed() Model {
 }
 
 // hasCrossed reports whether this region's obstacle is behind the party.
-func (m Model) hasCrossed() bool { return slices.Contains(m.trail.Crossed, m.region.Region.ID) }
+func (m Model) hasCrossed() bool { return m.walk().HasCrossed() }
 
 // Hear is the Chinese of the event or crossing open, to read aloud: its
 // text, and once chosen what came of it; or the overheard demons' lines.

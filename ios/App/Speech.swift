@@ -8,8 +8,8 @@ import TuiLaoShiCore
 /// from the engine (they live in the progress file and sync with the Mac).
 @MainActor
 enum SoundSettings {
-    static var voices = true
-    static var cues = true
+    static var voices = !ProcessInfo.processInfo.arguments.contains("-quiet")
+    static var cues = !ProcessInfo.processInfo.arguments.contains("-quiet")
     static var toneColours = true
 }
 

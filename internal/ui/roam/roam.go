@@ -18,6 +18,7 @@ import (
 
 	"github.com/therealsiege/tuilaoshi/internal/audio"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
+	"github.com/therealsiege/tuilaoshi/internal/road"
 	"github.com/therealsiege/tuilaoshi/internal/ui"
 	"github.com/therealsiege/tuilaoshi/internal/ui/input"
 	rpgview "github.com/therealsiege/tuilaoshi/internal/ui/rpg"
@@ -35,18 +36,10 @@ type EncounterMsg struct{ Soldier journey.Soldier }
 
 // encounterChance is the chance, in percent, that a step onto wild ground
 // meets one of the region's clans; the road itself is safe.
-const encounterChance = 12
+const encounterChance = road.EncounterChance
 
 // encounterRate is the chance in effect, by the learner's setting.
-func encounterRate() int {
-	switch ui.Prefs.Encounters {
-	case "fewer":
-		return encounterChance / 2
-	case "off":
-		return 0
-	}
-	return encounterChance
-}
+func encounterRate() int { return road.Rate(ui.Prefs.Encounters) }
 
 // encounterRoll draws 0-99 against encounterRate; tests fix it.
 var encounterRoll = func() int { return rand.Intn(100) }
@@ -95,13 +88,11 @@ func (m Model) SetSize(w, h int) Model {
 // Refresh reloads the journey and puts the pilgrim where they last stood,
 // or at the start of the region being worked on.
 func (m Model) Refresh() Model {
-	pages, pagesErr := m.store.ListPages()
-	cleared, clearedErr := m.store.ClearedStages()
-	place, placeErr := m.store.Place()
+	w, walkErr := road.Load(m.store)
 	wallet, walletErr := m.store.Wallet()
-	gates, gatesErr := m.store.GrammarGates()
-	m.loadErr = errors.Join(pagesErr, clearedErr, placeErr, walletErr, gatesErr)
-	m.cleared, m.wallet, m.gates, m.gate = cleared, wallet, gates, nil
+	m.loadErr = errors.Join(walkErr, walletErr)
+	m.region, m.pos, m.cleared, m.counts, m.stage, m.gates = w.Region, w.Pos, w.Cleared, w.Counts, w.Stage, w.Gates
+	m.wallet, m.gate = wallet, nil
 	states, questErr := m.store.Quests(time.Now())
 	m.states, m.loadErr = states, errors.Join(m.loadErr, questErr)
 	m.quests = m.questLog()
@@ -109,21 +100,14 @@ func (m Model) Refresh() Model {
 	hp, most, hpErr := rpgview.PilgrimHP(m.store)
 	m.hp, m.max = hp, most
 	m.loadErr = errors.Join(m.loadErr, hpErr)
-	m.counts = journey.CountProgress(pages)
-	m.stage = journey.CurrentStage(journey.Stages(m.counts, cleared))
-	if i := journey.RegionByID(place.Region); i >= 0 {
-		m.region, m.pos = journey.BuildMap(i), journey.Point{X: place.X, Y: place.Y}
-	} else {
-		n := 81 // the pilgrimage is complete: stand at its end
-		if m.stage != nil {
-			n = m.stage.Number
-		}
-		m.region = journey.BuildMap(journey.RegionOf(n))
-		m.pos = m.region.Start
-		m.save()
-	}
 	m.note = ""
 	return m
+}
+
+// walk is the pilgrim on the map as the road's rules see them.
+func (m Model) walk() road.Walk {
+	return road.Walk{Store: m.store, Region: m.region, Pos: m.pos, Cleared: m.cleared, Counts: m.counts,
+		Stage: m.stage, Crossed: m.trail.Crossed, Gates: m.gates}
 }
 
 // questLog lists the hunts under way: target, progress and where to report.
@@ -151,7 +135,7 @@ func (m Model) questLog() []string {
 
 // save records where the pilgrim stands.
 func (m *Model) save() {
-	if err := m.store.SetPlace(wiki.Place{Region: m.region.Region.ID, X: m.pos.X, Y: m.pos.Y}); err != nil {
+	if err := m.walk().Save(); err != nil {
 		m.loadErr = err
 	}
 }
@@ -198,58 +182,44 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	return m, nil
 }
 
-// step moves the pilgrim one cell, if the ground allows.
+// step moves the pilgrim one cell, if the ground allows (see the road
+// package for the rules), passing the trail's day before what the cell
+// holds.
 func (m Model) step(dx, dy int) (Model, tea.Cmd) {
-	to := journey.Point{X: m.pos.X + dx, Y: m.pos.Y + dy}
-	m.note = ""
-	switch m.region.At(to) {
-	case journey.TileBlock:
-		return m, nil
-	case journey.TileEast:
-		return m.travel(m.region.Index-1, false), nil
-	case journey.TileWest:
-		return m.travel(m.region.Index+1, true), nil
-	case journey.TileStage:
-		if !m.stageCleared(to) {
-			return m.face(to) // the tribulation bars the road: face it, don't pass
-		}
-	case journey.TileCrossing:
-		if !m.hasCrossed() {
-			return m.faceCrossing(), nil // the obstacle bars the road until crossed
-		}
+	w := m.walk()
+	o, err := w.Move(dx, dy)
+	m.region, m.pos, m.note = w.Region, w.Pos, o.Note
+	if err != nil {
+		m.loadErr = err
 	}
-	m.pos = to
-	m.save()
+	switch o.Kind {
+	case road.Tribulation:
+		return m.faced(o)
+	case road.Crossing:
+		m.event = &trailEvent{Event: *o.Event, chose: -1, cross: true}
+		return m, nil
+	case road.Moved:
+	default:
+		return m, nil
+	}
+	to := m.pos
 	if m = m.walked(); m.event != nil {
 		return m, nil // the day's event comes before anything else on this step
 	}
 	if m.plot != nil {
 		return m, m.speakPlot() // and so do the night's plotting demons
 	}
-	if t, ok := m.region.Towns[to]; ok {
-		id := t.ID
+	switch o := m.walk().Arrive(to, encounterRate(), encounterRoll); o.Kind {
+	case road.Town:
+		id := o.Town.ID
 		return m, func() tea.Msg { return EnterTownMsg{Town: id} }
-	}
-	if m.region.At(to) == journey.TileWild && encounterRoll() < encounterRate() {
-		if s, ok := m.region.Region.Encounter(rand.New(rand.NewSource(rand.Int63()))); ok {
-			m.note = s.Name + " " + s.English + " leaps out of the undergrowth!"
-			ui.Cue(audio.Encounter)
-			return m, func() tea.Msg { return EncounterMsg{Soldier: s} }
-		}
+	case road.Encounter:
+		s := *o.Soldier
+		m.note = o.Note
+		ui.Cue(audio.Encounter)
+		return m, func() tea.Msg { return EncounterMsg{Soldier: s} }
 	}
 	return m, nil
-}
-
-// travel walks through a door into the neighbouring region.
-func (m Model) travel(i int, west bool) Model {
-	m.region = journey.BuildMap(i)
-	m.pos = m.region.End
-	if west {
-		m.pos = m.region.Start
-	}
-	m.note = "You come to " + m.region.Region.Name + " " + m.region.Region.English + "."
-	m.save()
-	return m
 }
 
 // act enters the town the pilgrim stands in, or faces an uncleared
@@ -262,32 +232,23 @@ func (m Model) act() (Model, tea.Cmd) {
 	for _, d := range []journey.Point{{X: -1}, {X: 1}, {Y: -1}, {Y: 1}} {
 		p := journey.Point{X: m.pos.X + d.X, Y: m.pos.Y + d.Y}
 		if _, ok := m.region.Stages[p]; ok && !m.stageCleared(p) {
-			return m.face(p)
+			return m.faced(m.walk().Face(p))
 		}
 	}
 	return m, nil
 }
 
-// face meets the tribulation at p: its battle when it is the open stage
-// (for the demon's lair, once its grammar gate is passed), otherwise what
-// it still needs.
-func (m Model) face(p journey.Point) (Model, tea.Cmd) {
-	n := m.region.Stages[p]
-	s := m.stage
+// faced meets a tribulation the road reported: its battle, the grammar
+// gate before the lair, or what it still needs.
+func (m Model) faced(o road.Outcome) (Model, tea.Cmd) {
 	switch {
-	case s == nil || s.Number != n:
-		m.note = "An earlier tribulation still waits on the road behind you."
-	case s.Status != journey.StageOpen:
-		m.note = fmt.Sprintf("Tribulation %d is sealed: %s. %s", n, journey.NeedText(*s, m.counts), journey.HowToOpen(*s))
-	case n == m.region.Region.To && !m.gatePassed():
+	case o.Gate:
 		return m.openGate(), nil // the gate stands before the lair
-	default:
+	case o.Fight:
 		return m, func() tea.Msg { return FightMsg{} }
 	}
+	m.note = o.Note
 	return m, nil
 }
 
-func (m Model) stageCleared(p journey.Point) bool {
-	_, ok := m.cleared[m.region.Stages[p]]
-	return ok
-}
+func (m Model) stageCleared(p journey.Point) bool { return m.walk().StageCleared(p) }

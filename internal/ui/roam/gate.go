@@ -106,10 +106,7 @@ func (m Model) Typing() bool { return m.gate != nil && m.gate.typed() }
 
 // gatePassed reports whether this region's lair is free to fight: its
 // gate is passed, or it has none.
-func (m Model) gatePassed() bool {
-	_, ok := journey.GrammarGateFor(m.region.Region.ID)
-	return !ok || slices.Contains(m.gates, m.region.Region.ID)
-}
+func (m Model) gatePassed() bool { return m.walk().GatePassed() }
 
 // openGate starts the region's grammar gate from its first round.
 func (m Model) openGate() Model {

@@ -50,6 +50,7 @@ struct CampView: View {
             switch door {
             case .study: StudyView()
             case .read: ReadingListView()
+            case .road: RoadView()
             default: DoorView(door: door)
             }
         }

@@ -8,18 +8,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/therealsiege/tuilaoshi/internal/episode"
 	"github.com/therealsiege/tuilaoshi/internal/journey"
 	"github.com/therealsiege/tuilaoshi/internal/model"
 	"github.com/therealsiege/tuilaoshi/internal/remote"
+	"github.com/therealsiege/tuilaoshi/internal/road"
 	"github.com/therealsiege/tuilaoshi/internal/wiki"
 )
 
 // Core is an open wiki and its progress file.
 type Core struct {
 	store *wiki.Store
+
+	mu   sync.Mutex
+	walk *road.Walk // the road as last loaded (see road.go); nil: load it
 }
 
 // Open opens the wiki in wikiDir (the app bundle's copy, read-only) with
@@ -40,7 +45,10 @@ func Open(wikiDir, progressDir string) (*Core, error) {
 // Sync merges in every other device's folder under root (the shared
 // iCloud Drive folder), then writes this device's progress to root/name,
 // the same format the Mac's TUILAOSHI_SYNC_DIR uses.
-func (c *Core) Sync(root, name string) error { return c.store.Sync(root, name) }
+func (c *Core) Sync(root, name string) error {
+	defer c.forgetRoad() // the merge may move the pilgrim
+	return c.store.Sync(root, name)
+}
 
 // Export writes the progress as readable files into dir.
 func (c *Core) Export(dir string) error { return c.store.Export(dir) }
@@ -267,6 +275,7 @@ func SignInWithApple(server, identityToken, device string) (string, error) {
 func (c *Core) SyncWithServer(server, token, device string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
+	defer c.forgetRoad() // the merge may move the pilgrim
 	return remote.Client{Base: server, Token: token}.Sync(ctx, c.store, device)
 }
 
