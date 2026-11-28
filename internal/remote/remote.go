@@ -100,6 +100,13 @@ func (c Client) PairingCode(ctx context.Context) (code, expiresAt string, err er
 	return r.Code, r.ExpiresAt, err
 }
 
+// DeleteAccount deletes the account and everything the server keeps for it,
+// from every device. The server refuses this token, and every other the
+// account held, from then on; progress kept on the devices stays.
+func (c Client) DeleteAccount(ctx context.Context) error {
+	return c.call(ctx, "DELETE", "/api/account", nil, nil)
+}
+
 // ClaimCode trades a pairing code for this device's session.
 func ClaimCode(ctx context.Context, base, code, device string) (Session, error) {
 	var s Session

@@ -147,3 +147,39 @@ func TestOnlyExportFilesTravel(t *testing.T) {
 		}
 	}
 }
+
+// deleteServer answers DELETE /api/account the way web/app/api/account
+// does: 204 once, then 401 for the token that went with the account.
+type deleteServer struct {
+	mu      sync.Mutex
+	deleted map[string]bool
+}
+
+func (f *deleteServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+	switch {
+	case r.Method != "DELETE" || r.URL.Path != "/api/account":
+		w.WriteHeader(404)
+	case token == "" || f.deleted[token]:
+		w.WriteHeader(401)
+		_, _ = w.Write([]byte(`{"error":"this account was deleted; sign in again"}`)) //nolint:errcheck // test server
+	default:
+		f.deleted[token] = true
+		w.WriteHeader(204)
+	}
+}
+
+func TestDeleteAccount(t *testing.T) {
+	srv := httptest.NewServer(&deleteServer{deleted: map[string]bool{}})
+	defer srv.Close()
+	c := Client{Base: srv.URL + "/", Token: "token-iphone"}
+	if err := c.DeleteAccount(context.Background()); err != nil {
+		t.Fatalf("delete: %v", err)
+	}
+	err := c.DeleteAccount(context.Background())
+	if err == nil || !strings.Contains(err.Error(), "account was deleted") {
+		t.Fatalf("a second delete with the old token should say why it was refused, got %v", err)
+	}
+}

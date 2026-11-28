@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { PgStore } from "@/lib/pg-store";
-import { MemoryStore, type Store } from "@/lib/store";
+import { claudeKey, MemoryStore, type Store } from "@/lib/store";
 
 // The same contract for both stores. PgStore runs only when
 // TEST_DATABASE_URL names a throwaway database with db/*.sql applied.
@@ -53,5 +53,31 @@ describe.each(stores)("%s store", (_, make) => {
     expect(await s.bump(`k-${run}`, "2026-11-27", 2)).toBeNull();
     expect(await s.bump(`k-${run}`, "2026-11-28", 2)).toBe(1);
     expect(await s.bump(`z-${run}`, "2026-11-27", 0)).toBeNull();
+  });
+
+  it("deletes one account's data and moves its token version on", async () => {
+    const s = make();
+    const [gone, kept] = [`gone-${run}`, `kept-${run}`];
+    for (const [user, code] of [[gone, `g${run.slice(0, 5)}`], [kept, `k${run.slice(0, 5)}`]]) {
+      await s.putExport(user, "iphone", { "journey.yaml": "a" }, now);
+      await s.createPairing(code, user, "iphone", new Date(now.getTime() + 600_000), now);
+      await s.bump(claudeKey(user), "2026-11-27", 5);
+    }
+    expect(await s.tokenVersion(gone)).toBe(0);
+    await s.deleteAccount(gone);
+    expect(await s.tokenVersion(gone)).toBe(1);
+    expect(await s.listExports(gone)).toEqual([]);
+    expect(await s.claimPairing(`g${run.slice(0, 5)}`, "mac", now)).toEqual({ ok: false, reason: "missing" });
+    expect(await s.bump(claudeKey(gone), "2026-11-27", 5)).toBe(1);
+
+    expect(await s.tokenVersion(kept)).toBe(0);
+    expect(await s.listExports(kept)).toHaveLength(1);
+    expect(await s.claimPairing(`k${run.slice(0, 5)}`, "mac", now)).toEqual({ ok: true, user: kept });
+    expect(await s.bump(claudeKey(kept), "2026-11-27", 5)).toBe(2);
+
+    await s.deleteAccount(gone); // twice is fine
+    expect(await s.tokenVersion(gone)).toBe(2);
+    await s.deleteAccount(`never-${run}`); // so is an account with nothing kept
+    expect(await s.tokenVersion(`never-${run}`)).toBe(1);
   });
 });

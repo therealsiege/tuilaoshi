@@ -4,6 +4,7 @@ import { config } from "@/lib/config";
 import { getStore } from "@/lib/deps";
 import { jsonError, readJson, route } from "@/lib/http";
 import { authenticate } from "@/lib/session";
+import { claudeKey } from "@/lib/store";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -18,7 +19,7 @@ export const POST = route(async (req) => {
   const apiKey = config.anthropicKey();
   const cap = config.claudeDailyCap();
   const now = new Date();
-  const used = await getStore().bump(`claude:${user}`, utcDay(now), cap);
+  const used = await getStore().bump(claudeKey(user), utcDay(now), cap);
   if (used === null) {
     const midnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
     return jsonError(

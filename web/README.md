@@ -12,8 +12,11 @@ A Next.js app (App Router, route handlers under `app/api`) that signs people in,
 | `PUT /api/sync/:device` (Bearer) | `{files: {path: contents}}` | `{device, updated, files}` |
 | `GET /api/sync` (Bearer) | none | `{devices: [{device, updated, files}]}` |
 | `POST /api/claude` (Bearer) | `{system?, messages, max_tokens}` | `text/event-stream` |
+| `DELETE /api/account` (Bearer) | none | 204, no body |
 
 Errors are `{error}` with the status code. Tokens last a year.
+
+**Deleting an account.** `DELETE /api/account` removes the user's exports from every device, their pairing codes and their Claude counters. Each token carries the user's token version (`ver`, 0 until the first deletion); deletion moves the version on in `token_versions`, so every token issued before is refused with 401, while signing in again starts a fresh, empty account. The version row is kept so the old tokens stay refused. Progress on the devices themselves is untouched.
 
 **Sync payload.** `files` is one device's export folder as written by `Store.Export` (internal/wiki/backup.go): `schedules.yaml`, `updated.yaml`, `reviews.csv` and each doc under its own name (`journey.yaml`, `saves/<id>.yaml`, ...). Paths are relative, `.yaml` or the root `reviews.csv`, with no `..` or hidden parts. To sync, a device writes each other device's `files` to `<root>/<device>/<path>` and runs `Store.Sync(root, name)`, which merges them and exports its own folder to `<root>/<name>`. It then uploads that folder with `PUT /api/sync/<name>`.
 

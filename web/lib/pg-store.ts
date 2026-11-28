@@ -1,7 +1,7 @@
 import { Pool } from "pg";
-import type { ClaimResult, DeviceExport, ExportFiles, Store } from "./store";
+import { claudeKey, type ClaimResult, type DeviceExport, type ExportFiles, type Store } from "./store";
 
-// PgStore keeps everything in Postgres (schema: db/001_init.sql).
+// PgStore keeps everything in Postgres (schema: db/*.sql).
 export class PgStore implements Store {
   constructor(private pool: Pool) {}
 
@@ -69,5 +69,22 @@ export class PgStore implements Store {
       [key, bucket, cap],
     );
     return r.rows[0]?.count ?? null;
+  }
+
+  // One statement, so the deletes and the version bump land together.
+  async deleteAccount(user: string) {
+    await this.pool.query(
+      `WITH e AS (DELETE FROM device_exports WHERE user_id = $1),
+            p AS (DELETE FROM pair_codes WHERE user_id = $1),
+            c AS (DELETE FROM counters WHERE key = $2)
+       INSERT INTO token_versions (user_id, version) VALUES ($1, 1)
+       ON CONFLICT (user_id) DO UPDATE SET version = token_versions.version + 1`,
+      [user, claudeKey(user)],
+    );
+  }
+
+  async tokenVersion(user: string) {
+    const r = await this.pool.query<{ version: number }>(`SELECT version FROM token_versions WHERE user_id = $1`, [user]);
+    return r.rows[0]?.version ?? 0;
   }
 }
