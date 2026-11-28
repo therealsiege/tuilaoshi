@@ -27,8 +27,8 @@ targets:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: 推老师
-        # The game's server (web/); empty until it is deployed.
-        TLSServer: ""
+        # The game's server (web/, Vercel project 1putt/tuilaoshi).
+        TLSServer: https://tuilaoshi.vercel.app
         UILaunchScreen: {}
         # Exports show in the Files app.
         UIFileSharingEnabled: true

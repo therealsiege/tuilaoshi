@@ -31,8 +31,20 @@ func syncName() string {
 	return strings.TrimSuffix(strings.Split(name, ".")[0], ".local")
 }
 
-// ServerEnv names the game's server (web/), for pairing.
-const ServerEnv = "TUILAOSHI_SERVER"
+// ServerEnv names the game's server (web/), for pairing; DefaultServer is
+// the deployed one.
+const (
+	ServerEnv     = "TUILAOSHI_SERVER"
+	DefaultServer = "https://tuilaoshi.vercel.app"
+)
+
+// serverURL is the server to pair with: TUILAOSHI_SERVER, else the deployed one.
+func serverURL() string {
+	if s := os.Getenv(ServerEnv); s != "" {
+		return s
+	}
+	return DefaultServer
+}
 
 // session is this Mac's pairing with the game's server, kept in
 // ~/.config/tuilaoshi/session.json, readable only by the learner.

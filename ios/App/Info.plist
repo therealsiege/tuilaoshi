@@ -27,7 +27,7 @@
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Shadowing turns what you say into Chinese text, on this iPhone where it can, to score it by character.</string>
 	<key>TLSServer</key>
-	<string></string>
+	<string>https://tuilaoshi.vercel.app</string>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchScreen</key>

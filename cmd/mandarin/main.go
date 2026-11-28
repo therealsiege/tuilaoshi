@@ -22,7 +22,7 @@ func main() {
 	syncDir := flag.String("sync", os.Getenv(SyncDirEnv), "a shared folder (iCloud Drive, say) to sync progress through with your other Macs; alone, sync once and exit")
 	remindNow := flag.Bool("remind", false, "show today's study reminder as a notification, then exit (make reminder schedules it)")
 	pairCode := flag.String("pair", "", "pair this Mac with your account using the code the iPhone app shows, so progress syncs through the game's server; then exit")
-	server := flag.String("server", os.Getenv(ServerEnv), "the game's server, for -pair")
+	server := flag.String("server", serverURL(), "the game's server, for -pair")
 	flag.Parse()
 
 	if *pairCode != "" {
