@@ -7,6 +7,8 @@ struct Writing: Decodable, Equatable, Sendable {
     let text: String
     let english: String
     let byHand: Bool?
+    /// Why Claude didn't write it, when the clerk set it instead.
+    let missed: String?
 }
 
 struct DiaryEntry: Decodable, Identifiable, Equatable, Sendable {
@@ -61,12 +63,18 @@ enum Paper: String, CaseIterable, Identifiable, Hashable {
 
 struct PaperView: View {
     let paper: Paper
+    @Environment(Account.self) private var account
 
     var body: some View {
         switch paper {
         case .letter: WritingView(title: paper.title, load: { try await $0.letter() },
                                   empty: "Guanyin writes each Monday about the week before, once there's been a week with reviews.")
-        case .gazette: WritingView(title: paper.title, load: { try await $0.gazette() }, empty: "")
+        case .gazette:
+            // Signed in, Claude writes the week's issue; else the clerk sets it.
+            WritingView(title: paper.title, load: { [claude = account.claude] engine in
+                if let claude { return try await engine.claudeGazette(via: claude) }
+                return try await engine.gazette()
+            }, empty: "")
         case .diary: DiaryView()
         case .progress: ProgressScreen()
         case .web: WebScreen()
@@ -76,6 +84,15 @@ struct PaperView: View {
 
 /// A letter or gazette, with its English beneath and read-aloud.
 struct WritingView: View {
+    /// Why an issue was set by the clerk: Claude couldn't write it, or the
+    /// learner isn't signed in.
+    nonisolated static func byHandNote(missed: String?) -> String {
+        if let missed {
+            return "Set by the court's clerk from a template. \(ClaudeTrouble.explain(message: missed))"
+        }
+        return "Set by the court's clerk from a template. " + ClaudeTrouble.signedOut("An issue written by Claude")
+    }
+
     let title: String
     let load: @MainActor (Engine) async throws -> Writing?
     let empty: String
@@ -93,7 +110,7 @@ struct WritingView: View {
                     Text(w.text).font(.title3).lineSpacing(6).textSelection(.enabled)
                     if showEnglish { Text(w.english).foregroundStyle(.secondary) }
                     if w.byHand == true {
-                        Text("Set by the court's clerk from a template; Claude writes it once the game's server is up.")
+                        Text(Self.byHandNote(missed: w.missed))
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 } else if let error {
@@ -125,15 +142,60 @@ struct WritingView: View {
     }
 }
 
+/// The travel diary: once a day, two or three sentences in Chinese about
+/// the day on the road, graded by Claude as on the Mac. A passing entry is
+/// kept and lifts the party's spirits; one that doesn't can be revised.
 struct DiaryView: View {
     @Environment(Engine.self) private var engine
+    @Environment(Account.self) private var account
     @State private var entries: [DiaryEntry] = []
+    @State private var text = ""
+    @State private var sending = false
+    @State private var grade: DiaryGrade?
+    @State private var note: String?
+
+    /// Today's entry is in the diary.
+    private var written: Bool { entries.first?.date == DiaryView.today() }
+
+    nonisolated static func today(_ now: Date = .now) -> String {
+        let f = DateFormatter()
+        f.calendar = Calendar(identifier: .gregorian)
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: now)
+    }
 
     var body: some View {
         List {
             Section {
-                Text("Writing an entry needs Claude to grade it, so it comes with the game's server. Entries written on the Mac show here once progress syncs.")
-                    .font(.footnote).foregroundStyle(.secondary)
+                if let claude = account.claude, !written {
+                    TextField("今天走到了哪里？遇到了什么？心情怎么样？", text: $text, axis: .vertical)
+                        .lineLimit(3...8)
+                        .font(.title3)
+                        .disabled(sending)
+                        .accessibilityIdentifier("diary.text")
+                    Button {
+                        Task { await send(via: claude) }
+                    } label: {
+                        if sending { ProgressView() } else { Text("Give it to Claude to read") }
+                    }
+                    .disabled(sending || text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    if let grade, !grade.kept {
+                        Text("Not quite yet: \(grade.feedback) Revise it and send it again.").font(.footnote)
+                    }
+                } else if written {
+                    if let grade, grade.kept {
+                        Label("Kept. The party's spirits lift (+\(grade.score == 2 ? 10 : 5) morale).", systemImage: "checkmark.seal")
+                            .foregroundStyle(Theme.jade)
+                        if !grade.feedback.isEmpty { Text(grade.feedback).font(.footnote) }
+                    } else {
+                        Text("Today's entry is written. Write the next one tomorrow.").font(.footnote).foregroundStyle(.secondary)
+                    }
+                } else {
+                    Text("Writing an entry needs Claude to grade it. " + ClaudeTrouble.signedOut("Writing here") + " Entries written on the Mac show here once progress syncs.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+                if let note { Text(note).font(.footnote).foregroundStyle(Theme.cinnabar) }
             }
             ForEach(entries) { e in
                 VStack(alignment: .leading, spacing: 4) {
@@ -145,6 +207,22 @@ struct DiaryView: View {
         }
         .navigationTitle("日记 Travel diary")
         .task { entries = (try? await engine.diary()) ?? [] }
+    }
+
+    private func send(via claude: ClaudeSession) async {
+        sending = true
+        note = nil
+        defer { sending = false }
+        do {
+            let g = try await engine.writeDiary(text, via: claude)
+            grade = g
+            if g.kept {
+                text = ""
+                entries = (try? await engine.diary()) ?? entries
+            }
+        } catch {
+            note = ClaudeTrouble.explain(error)
+        }
     }
 }
 

@@ -4,6 +4,7 @@ import SwiftUI
 /// or use the buttons, which add hard and easy.
 struct SessionView: View {
     @State var session: StudySession
+    @Environment(Account.self) private var account
     @State private var drag = CGSize.zero
     @FocusState private var typing: Bool
     @State private var shadowing: Card?
@@ -63,6 +64,7 @@ struct SessionView: View {
                 if session.revealed {
                     Label(session.typedRight ? "Exactly right" : "Not quite", systemImage: session.typedRight ? "checkmark.circle" : "xmark.circle")
                         .foregroundStyle(session.typedRight ? Theme.jade : Theme.cinnabar)
+                    if !session.typedRight { askClaude }
                     answer(card, showChinese: true)
                 }
             case .listening:
@@ -87,6 +89,36 @@ struct SessionView: View {
         .onTapGesture { if session.mode != .production { session.revealed = true } }
         .id(card.id)
     }
+
+    /// For a typed answer that isn't exact: Claude's view, when signed in.
+    @ViewBuilder
+    private var askClaude: some View {
+        if let grade = session.claudeGrade {
+            VStack(spacing: 4) {
+                Label(grade.correct ? "Claude: that works" : "Claude: not quite", systemImage: "sparkles")
+                    .foregroundStyle(grade.correct ? Theme.jade : Theme.cinnabar)
+                Text(grade.feedback).font(.callout).multilineTextAlignment(.center)
+                Text("Claude suggests \(Self.ratings[min(max(grade.rating, 0), 3)]).").font(.caption).foregroundStyle(.secondary)
+            }
+        } else if session.typed.trimmingCharacters(in: .whitespaces).isEmpty {
+            EmptyView()
+        } else if let claude = account.claude {
+            Button {
+                Task { await session.askClaude(via: claude) }
+            } label: {
+                if session.askingClaude { ProgressView() } else { Label("Ask Claude", systemImage: "sparkles") }
+            }
+            .disabled(session.askingClaude)
+        } else {
+            Text(ClaudeTrouble.signedOut("Asking Claude about an answer that isn't exact"))
+                .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
+        }
+        if let note = session.claudeNote {
+            Text(note).font(.caption).foregroundStyle(Theme.cinnabar).multilineTextAlignment(.center)
+        }
+    }
+
+    static let ratings = ["Again", "Hard", "Good", "Easy"]
 
     private func answer(_ card: Card, showChinese: Bool) -> some View {
         VStack(spacing: 6) {

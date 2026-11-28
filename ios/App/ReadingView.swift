@@ -29,19 +29,31 @@ struct Reading: Decodable {
     let lines: [Line]
 }
 
-/// The readings and journey episodes reached so far.
+/// The readings and journey episodes reached so far, then the teahouse
+/// storyteller.
 struct ReadingListView: View {
     @Environment(Engine.self) private var engine
     @State private var items: [ReadingItem] = []
     @State private var error: String?
 
     var body: some View {
-        List(items) { item in
-            NavigationLink(value: item) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(item.title).font(.headline)
-                    Text(item.tag).font(.caption).foregroundStyle(.secondary)
+        List {
+            ForEach(items) { item in
+                NavigationLink(value: item) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(item.title).font(.headline)
+                        Text(item.tag).font(.caption).foregroundStyle(.secondary)
+                    }
                 }
+            }
+            Section {
+                NavigationLink { StorytellerView() } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("说书人 The Storyteller").font(.headline)
+                        Text("Journey to the West retold in words you know, a chapter a day").font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .accessibilityIdentifier("read.storyteller")
             }
         }
         .overlay {
