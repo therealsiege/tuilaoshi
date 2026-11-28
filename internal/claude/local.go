@@ -17,8 +17,9 @@ const NeedsKey = "needs ANTHROPIC_API_KEY (in ~/.config/tuilaoshi/env)"
 // KeyPresent reports whether an API key is set.
 func KeyPresent() bool { return os.Getenv("ANTHROPIC_API_KEY") != "" }
 
-// Ready reports whether Claude can be reached: there is a client and a key.
-func (c *Client) Ready() bool { return c != nil && KeyPresent() }
+// Ready reports whether Claude can be reached: there is a client, and it
+// goes through the game's server or has a key.
+func (c *Client) Ready() bool { return c != nil && (c.server || KeyPresent()) }
 
 // IfReady returns the client when it can reach Claude, else nil, for
 // screens that say what they need when given none.

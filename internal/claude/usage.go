@@ -27,8 +27,14 @@ func (c *Client) send(ctx context.Context, params anthropic.MessageNewParams) (*
 		return nil, ErrDailyCap
 	}
 	msg, err := c.client.Messages.New(ctx, params)
-	if err == nil && c.Meter != nil {
+	if err != nil {
+		if c.server {
+			err = serverError(err)
+		}
+		return nil, err
+	}
+	if c.Meter != nil {
 		c.Meter.Used(string(params.Model), msg.Usage.InputTokens, msg.Usage.OutputTokens)
 	}
-	return msg, err
+	return msg, nil
 }
